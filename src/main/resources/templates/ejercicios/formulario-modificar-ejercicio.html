@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Modificar Ejercicio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <link rel="stylesheet" th:href="@{/style.css}" />
+    <style>
+        #preview {
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Modificar Ejercicio</h2>
+        <form method="post" th:action="@{/ejercicios/modificar/{id}(id=${exercise.id})}" th:object="${exercise}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" name="name" th:field="*{name}" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label for="description">Descripción:</label>
+                <input type="text" id="description" name="description" th:field="*{description}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="image">Imagen:</label>
+                <input type="file" id="image" name="image" class="form-control" accept="image/*" onchange="previewImage(event)" />
+                <div id="imagePreview" th:if="${exercise.imagen}">
+                    <img id="preview" class="exercise-img" th:src="${exercise.imagen.url}" alt="Exercise Image">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="muscleGroups">Grupos Musculares:</label>
+                <div th:each="muscleGroup : ${muscleGroups}">
+                    <input type="checkbox" th:value="${muscleGroup.name()}" th:field="*{muscleGroups}" th:checked="${#lists.contains(exercise.muscleGroups, muscleGroup)}"/>
+                    <span th:text="${muscleGroup.name()}">MUSCLE_GROUP_NAME</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="type">Tipo:</label>
+                <input type="text" id="type" name="type" th:field="*{type}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="videoUrl">URL del video:</label>
+                <input type="text" id="videoUrl" name="videoUrl" th:field="*{videoUrl}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="instructions">Instrucciones:</label>
+                <input type="text" id="instructions" name="instructions" th:field="*{instructions}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="benefits">Beneficios:</label>
+                <input type="text" id="benefits" name="benefits" th:field="*{benefits}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="contraindications">Contraindicaciones:</label>
+                <input type="text" id="contraindications" name="contraindications" th:field="*{contraindications}" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Ejercicio</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+                output.style.display = 'block';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

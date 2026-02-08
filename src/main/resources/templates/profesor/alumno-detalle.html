@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha del Alumno - Panel del Profesor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+     <link href="/css/footer.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 30px;
+            max-width: 1400px;
+        }
+        
+        .hero-title {
+            color: #2c3e50;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+        
+        .hero-subtitle {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-volver {
+            background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-volver:hover {
+            background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .alumno-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        
+        .info-card .card-header {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+        
+        .info-card .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .info-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 200px;
+        }
+        
+        .info-value {
+            color: #7f8c8d;
+            text-align: right;
+            flex: 1;
+        }
+        
+        .rutina-card {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .rutina-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
+        }
+        
+        .rutina-card h6 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .rutina-card .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .btn-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-action:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-1px);
+            color: white;
+        }
+        
+        .btn-chat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-chat:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #7f8c8d;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+        
+                 .nav-tabs .nav-link:hover {
+             border: none;
+             color: #667eea;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar fragment estándar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <!-- Header con botón de volver -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a th:href="@{/profesor/{id}(id=${alumno.profesor.id})}" class="btn btn-volver">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                </a>
+            </div>
+        
+        <!-- Título principal -->
+        <h1 class="hero-title">
+            <i class="fas fa-user me-3"></i>Ficha del Alumno
+        </h1>
+        <p class="hero-subtitle">Información detallada y seguimiento del progreso</p>
+
+        <!-- Información del Alumno -->
+        <div class="alumno-info">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-user me-2"></i>
+                        <span th:text="${alumno.nombre}">Nombre del Alumno</span>
+                    </h4>
+                    <p class="mb-1">
+                        <strong>Edad:</strong> <span th:text="${alumno.edad}">Edad</span> años
+                    </p>
+                    <p class="mb-1">
+                        <strong>Sexo:</strong> <span th:text="${alumno.sexo}">Sexo</span>
+                    </p>
+                    <p class="mb-0">
+                        <strong>Email:</strong> <span th:text="${alumno.correo}">Email</span>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="text-center">
+                        <div class="h2 text-primary mb-0" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</div>
+                        <small class="text-muted">Rutinas Activas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</div>
+                <div class="stat-label">Rutinas en Proceso</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${rutinasTerminadas != null ? rutinasTerminadas.size() : 0}">0</div>
+                <div class="stat-label">Rutinas Completadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${historialAsistencia != null ? historialAsistencia.size() : 0}">0</div>
+                <div class="stat-label">Registros de Asistencia</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${medicionesFisicas != null ? medicionesFisicas.size() : 0}">0</div>
+                <div class="stat-label">Mediciones Físicas</div>
+        </div>
+        </div>
+
+        <!-- Información Personal -->
+        <div class="info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-id-card me-2"></i>Información Personal</h5>
+    </div>
+        <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Tipo de Asistencia:</span>
+                            <span class="info-value">
+                                <span th:if="${alumno.tipoAsistencia == 'PRESENCIAL'}" class="badge bg-success">Presencial</span>
+                                <span th:if="${alumno.tipoAsistencia == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
+                                <span th:if="${alumno.tipoAsistencia == null}">-</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Estado de Membresía:</span>
+                            <span class="info-value">
+                                <span th:if="${alumno.estadoMembresia == 'ACTIVA'}" class="badge bg-success">Activa</span>
+                                <span th:if="${alumno.estadoMembresia == 'VENCIDA'}" class="badge bg-danger">Vencida</span>
+                                <span th:if="${alumno.estadoMembresia == 'EN_PAUSA'}" class="badge bg-warning">En Pausa</span>
+                                <span th:if="${alumno.estadoMembresia == null}">-</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de Inicio:</span>
+                            <span class="info-value" th:text="${alumno.fechaInicio != null ? #temporals.format(alumno.fechaInicio, 'dd/MM/yyyy') : '-'}">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Contacto de Emergencia:</span>
+                            <span class="info-value" th:text="${alumno.contactoEmergenciaNombre != null ? alumno.contactoEmergenciaNombre + ' (' + alumno.contactoEmergenciaTelefono + ')' : '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Restricciones Médicas:</span>
+                            <span class="info-value" th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Objetivos Personales:</span>
+                            <span class="info-value" th:text="${alumno.objetivosPersonales != null && !alumno.objetivosPersonales.isEmpty() ? alumno.objetivosPersonales : '-'}">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Horarios de Asistencia -->
+                <div th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}" class="mt-3">
+                    <h6 class="text-primary mb-2"><i class="fas fa-clock me-2"></i>Horarios de Asistencia</h6>
+                    <div class="row">
+                        <div th:each="dh : ${alumno.diasHorariosAsistencia}" class="col-md-4 mb-2">
+                            <div class="badge bg-primary p-2">
+                                <i class="fas fa-calendar-day me-1"></i>
+                            <span th:text="${dh.dia}"></span>:
+                            <span th:text="${dh.horaEntrada}"></span> - <span th:text="${dh.horaSalida}"></span>
+            </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Historial de Asistencia -->
+        <div class="info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-check me-2"></i>Historial de Asistencia</h5>
+            </div>
+        <div class="card-body">
+                <!-- Formulario de registro de asistencia -->
+                <form th:action="@{'/profesor/alumnos/' + ${alumno.id} + '/asistencia'}" method="post" class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">¿Presente hoy?</label>
+                    <select class="form-select" name="presente">
+                        <option value="true">Presente</option>
+                        <option value="false">Ausente</option>
+                    </select>
+                </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Observaciones (opcional)</label>
+                        <input type="text" class="form-control" name="observaciones" placeholder="Observaciones...">
+                </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-plus me-2"></i>Registrar
+                        </button>
+                </div>
+            </form>
+
+                <!-- Tabla de historial -->
+            <div class="table-responsive">
+                    <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                                <th>Estado</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="asistencia : ${historialAsistencia}">
+                                <td th:text="${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')}">Fecha</td>
+                            <td>
+                                <span th:if="${asistencia.presente}" class="badge bg-success">Presente</span>
+                                <span th:if="${!asistencia.presente}" class="badge bg-danger">Ausente</span>
+                            </td>
+                                <td th:text="${asistencia.observaciones != null && !asistencia.observaciones.isEmpty() ? asistencia.observaciones : '-'}">-</td>
+                        </tr>
+                        <tr th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}">
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                    <p class="mb-0">Sin registros de asistencia</p>
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+        <!-- Rutinas del Alumno -->
+        <div class="info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-dumbbell me-2"></i>Rutinas del Alumno</h5>
+    </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="rutinasTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="en-proceso-tab" data-bs-toggle="tab" data-bs-target="#en-proceso" type="button" role="tab">
+                            <i class="fas fa-clock me-1"></i>En Proceso
+                            <span class="badge bg-warning ms-1" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="terminadas-tab" data-bs-toggle="tab" data-bs-target="#terminadas" type="button" role="tab">
+                    <i class="fas fa-check-circle me-1"></i>Terminadas
+                            <span class="badge bg-success ms-1" th:text="${rutinasTerminadas != null ? rutinasTerminadas.size() : 0}">0</span>
+                </button>
+            </li>
+        </ul>
+                
+                <div class="tab-content mt-3" id="rutinasTabContent">
+                <!-- Pestaña: Rutinas en proceso -->
+                <div class="tab-pane fade show active" id="en-proceso" role="tabpanel">
+                        <div th:if="${rutinasEnProceso == null || rutinasEnProceso.isEmpty()}" class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <h6>No hay rutinas en proceso</h6>
+                            <p class="text-muted">El alumno aún no tiene rutinas asignadas o todas han sido completadas.</p>
+                    </div>
+                        <div th:each="rutina : ${rutinasEnProceso}" class="rutina-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0"><i class="fas fa-dumbbell me-2"></i><span th:text="${rutina.nombre}">Nombre de la rutina</span></h6>
+                                <span class="badge bg-warning">En Proceso</span>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Descripción:</strong> <span th:text="${rutina.descripcion != null && !rutina.descripcion.isEmpty() ? rutina.descripcion : 'Sin descripción'}">Descripción</span></p>
+                                    <p class="mb-2"><strong>Categoría:</strong> <span th:text="${rutina.categoria != null ? rutina.categoria : 'N/A'}">Categoría</span></p>
+                        </div>
+                                <div class="col-md-6">
+                            <p class="mb-2"><strong>Fecha de creación:</strong> <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">Fecha</span></p>
+                                    <p class="mb-2"><strong>Series:</strong> <span th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span></p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-action">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalles
+                                </a>
+                                <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-action">
+                                    <i class="fas fa-edit me-1"></i>Editar
+                                </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pestaña: Rutinas terminadas -->
+                <div class="tab-pane fade" id="terminadas" role="tabpanel">
+                        <div th:if="${rutinasTerminadas == null || rutinasTerminadas.isEmpty()}" class="text-center text-muted py-5">
+                        <i class="fas fa-trophy fa-3x mb-3"></i>
+                            <h6>No hay rutinas terminadas</h6>
+                            <p class="text-muted">El alumno aún no ha completado ninguna rutina.</p>
+                </div>
+                        <div th:each="rutina : ${rutinasTerminadas}" class="rutina-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0"><i class="fas fa-dumbbell me-2"></i><span th:text="${rutina.nombre}">Nombre de la rutina</span></h6>
+                                <span class="badge bg-success">Terminada</span>
+                        </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Descripción:</strong> <span th:text="${rutina.descripcion != null && !rutina.descripcion.isEmpty() ? rutina.descripcion : 'Sin descripción'}">Descripción</span></p>
+                                    <p class="mb-2"><strong>Categoría:</strong> <span th:text="${rutina.categoria != null ? rutina.categoria : 'N/A'}">Categoría</span></p>
+                                </div>
+                                <div class="col-md-6">
+                            <p class="mb-2"><strong>Fecha de creación:</strong> <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">Fecha</span></p>
+                                    <p class="mb-2"><strong>Series:</strong> <span th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span></p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-action">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notas Privadas del Profesor -->
+        <div class="info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-sticky-note me-2"></i>Notas Privadas del Profesor</h5>
+            </div>
+            <div class="card-body">
+                <textarea class="form-control" rows="3" placeholder="Escribe notas privadas sobre el alumno... Solo visible para el profesor."></textarea>
+    </div>
+    </div>
+    
+        <!-- Botones de Acción -->
+        <div class="d-flex gap-3 justify-content-center mt-4">
+            <a th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-chat" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-plus me-2"></i>Asignar Nueva Rutina
+        </a>
+    </div>
+     </div>
+</div>
+ 
+ <!-- Footer Fragment -->
+ <div th:replace="fragments/footer :: footer"></div>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ 
+</body>
+</html> 

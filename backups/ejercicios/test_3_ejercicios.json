@@ -1,0 +1,35 @@
+[
+  {
+    "name": "PRUEBA 1 - Curl de Bíceps",
+    "description": "Ejercicio de prueba para testing de importación",
+    "type": "B",
+    "videoUrl": "https://www.youtube.com/watch?v=test1",
+    "instructions": "Instrucciones de prueba para el ejercicio 1",
+    "benefits": "Beneficios de prueba para el ejercicio 1",
+    "contraindications": "Contraindicaciones de prueba para el ejercicio 1",
+    "muscleGroups": ["BRAZOS"],
+    "imagenBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+  },
+  {
+    "name": "PRUEBA 2 - Sentadillas",
+    "description": "Ejercicio de prueba para testing de importación",
+    "type": "B",
+    "videoUrl": "https://www.youtube.com/watch?v=test2",
+    "instructions": "Instrucciones de prueba para el ejercicio 2",
+    "benefits": "Beneficios de prueba para el ejercicio 2",
+    "contraindications": "Contraindicaciones de prueba para el ejercicio 2",
+    "muscleGroups": ["PIERNAS"],
+    "imagenBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+  },
+  {
+    "name": "PRUEBA 3 - Press de Banca",
+    "description": "Ejercicio de prueba para testing de importación",
+    "type": "B",
+    "videoUrl": "https://www.youtube.com/watch?v=test3",
+    "instructions": "Instrucciones de prueba para el ejercicio 3",
+    "benefits": "Beneficios de prueba para el ejercicio 3",
+    "contraindications": "Contraindicaciones de prueba para el ejercicio 3",
+    "muscleGroups": ["PECHO"],
+    "imagenBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+  }
+]

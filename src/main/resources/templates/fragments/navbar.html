@@ -1,0 +1,37 @@
+<!-- fragments/navbar.html - Mattfuncional -->
+<nav th:fragment="navbar" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity"
+     class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+            <img th:src="@{/img/logo.png}" alt="Logo Mattfuncional" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" class="me-2" onerror="this.style.display='none'">
+            <span class="fw-bold h4 mb-0 text-white">Mattfuncional</span>
+        </a>
+
+        <a href="javascript:history.back()" class="btn btn-outline-light ms-3"><i class="fas fa-arrow-left"></i> Volver</a>
+
+        <div class="ms-auto">
+            <div sec:authorize="isAuthenticated()" class="d-flex align-items-center"
+                 th:with="currentUser=${#authentication.principal}">
+
+                <a th:if="${currentUser.rol == 'PROFESOR'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-light me-3">
+                    <i class="fas fa-tachometer-alt me-1"></i> Ir a mi Panel
+                </a>
+
+                <div class="text-end me-3">
+                    <div class="fw-bold text-white" th:text="${currentUser.nombre}">Nombre</div>
+                    <small class="text-white-50" th:text="${currentUser.correo}">usuario@correo.com</small>
+                </div>
+                <img th:src="${currentUser.avatar != null and !#strings.isEmpty(currentUser.avatar) and currentUser.avatar != 'null' and currentUser.avatar != '/img/not_imagen.png' ? currentUser.avatar : '/img/avatar1.png'}"
+                     alt="Avatar" style="width: 45px; height: 45px;" class="rounded-circle border border-light"
+                     onerror="this.src='/img/avatar1.png'">
+                <a th:href="@{/logout}" class="btn btn-danger ms-3">Salir</a>
+            </div>
+
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="btn btn-light fw-bold">
+                    <i class="fas fa-sign-in-alt me-1"></i> Iniciar sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>

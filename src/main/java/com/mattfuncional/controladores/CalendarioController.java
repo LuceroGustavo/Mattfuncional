@@ -1,0 +1,143 @@
+package com.mattfuncional.controladores;
+
+import com.mattfuncional.dto.CalendarioSemanalDTO;
+import com.mattfuncional.servicios.CalendarioService;
+import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.servicios.ProfesorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/calendario")
+public class CalendarioController {
+
+    @Autowired
+    private CalendarioService calendarioService;
+
+    @Autowired
+    private ProfesorService profesorService;
+
+    // @GetMapping("/semanal")
+    // public String calendarioSemanal(@RequestParam(required = false) String fecha,
+    // @AuthenticationPrincipal Usuario usuarioActual,
+    // Model model) {
+    //
+    // LocalDate fechaCalendario = fecha != null ? LocalDate.parse(fecha) :
+    // LocalDate.now();
+    //
+    // CalendarioSemanalDTO calendario =
+    // calendarioService.generarCalendarioSemanal(fechaCalendario, null);
+    // Map<String, Object> estadisticas =
+    // calendarioService.obtenerEstadisticasSemana(fechaCalendario, null);
+    //
+    // model.addAttribute("calendario", calendario);
+    // model.addAttribute("estadisticas", estadisticas);
+    // model.addAttribute("fechaActual", fechaCalendario);
+    // model.addAttribute("usuarioActual", usuarioActual);
+    //
+    // return "calendario/semanal";
+    // }
+
+    @GetMapping("/semanal/profesor/{profesorId}")
+    public String calendarioSemanalProfesor(@PathVariable Long profesorId,
+            @RequestParam(required = false) String fecha,
+            @AuthenticationPrincipal Usuario usuarioActual,
+            Model model) {
+
+        LocalDate fechaCalendario = fecha != null ? LocalDate.parse(fecha) : LocalDate.now();
+
+        CalendarioSemanalDTO calendario = calendarioService.generarCalendarioSemanal(fechaCalendario, profesorId);
+        Map<String, Object> estadisticas = calendarioService.obtenerEstadisticasSemana(fechaCalendario, profesorId);
+
+        Profesor profesor = profesorService.getProfesorById(profesorId);
+        model.addAttribute("profesor", profesor);
+        model.addAttribute("estadisticas", estadisticas);
+        model.addAttribute("calendario", calendario);
+
+        // Preparar lista de días de la semana (como Enum, para orden y acceso por
+        // índice)
+        java.util.List<com.mattfuncional.enums.DiaSemana> diasSemana = java.util.Arrays
+                .asList(com.mattfuncional.enums.DiaSemana.values());
+        model.addAttribute("diasSemana", diasSemana);
+
+        // Preparar lista de listas de slots por día (en el mismo orden que diasSemana)
+        java.util.List<java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO>> slotsPorDiaList = new java.util.ArrayList<>();
+        int totalFilas = 0;
+        for (com.mattfuncional.enums.DiaSemana dia : diasSemana) {
+            java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO> slotsList = calendario.getSlotsPorDia()
+                    .get(dia);
+            if (slotsList == null)
+                slotsList = new java.util.ArrayList<>();
+            slotsPorDiaList.add(slotsList);
+            if (slotsList.size() > totalFilas)
+                totalFilas = slotsList.size();
+        }
+        model.addAttribute("slotsPorDiaList", slotsPorDiaList);
+        model.addAttribute("totalFilas", totalFilas);
+
+        // Preparar lista de horas (por índice, tomando la hora de inicio del primer día
+        // que tenga slot en esa fila)
+        java.util.List<String> horas = new java.util.ArrayList<>();
+        for (int i = 0; i < totalFilas; i++) {
+            String hora = "";
+            for (java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO> slots : slotsPorDiaList) {
+                if (slots != null && slots.size() > i && slots.get(i) != null) {
+                    java.time.LocalTime horaInicio = slots.get(i).getHoraInicio();
+                    if (horaInicio != null) {
+                        hora = horaInicio.toString();
+                        break;
+                    }
+                }
+            }
+            horas.add(hora);
+        }
+        model.addAttribute("horas", horas);
+        model.addAttribute("profesorId", profesorId);
+
+        return "calendario/semanal-profesor";
+    }
+
+    @GetMapping("/api/usuarios-horario")
+    @ResponseBody
+    public java.util.List<Usuario> obtenerUsuariosEnHorario(@RequestParam String dia,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin) {
+        return calendarioService.obtenerUsuariosEnHorario(
+                com.mattfuncional.enums.DiaSemana.valueOf(dia),
+                java.time.LocalTime.parse(horaInicio),
+                java.time.LocalTime.parse(horaFin));
+    }
+
+    @GetMapping("/api/disponibilidad")
+    @ResponseBody
+    public Map<String, Boolean> verificarDisponibilidad(@RequestParam String dia,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin) {
+        boolean disponible = calendarioService.verificarDisponibilidad(
+                com.mattfuncional.enums.DiaSemana.valueOf(dia),
+                java.time.LocalTime.parse(horaInicio),
+                java.time.LocalTime.parse(horaFin));
+
+        return java.util.Map.of("disponible", disponible);
+    }
+
+    @PostMapping("/actualizar-capacidad-maxima")
+    public String actualizarCapacidadMaxima(@RequestParam int capacidadMaxima, @RequestParam Long profesorId) {
+        // Actualiza la capacidad máxima global para todos los slots existentes
+        for (com.mattfuncional.enums.DiaSemana dia : com.mattfuncional.enums.DiaSemana.values()) {
+            java.time.LocalTime hora = java.time.LocalTime.of(6, 0);
+            while (hora.isBefore(java.time.LocalTime.of(20, 0))) {
+                calendarioService.getSlotConfigService().setCapacidadMaxima(dia, hora, capacidadMaxima);
+                hora = hora.plusHours(1);
+            }
+        }
+        return "redirect:/calendario/semanal/profesor/" + profesorId;
+    }
+}

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Profesor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link href="/css/footer.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #1976d2 0%, #7e57c2 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .dashboard-cards {
+            gap: 2rem;
+        }
+        .card-module {
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            color: #333;
+            min-width: 180px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+        }
+        .card-module:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+        }
+        .card-alumnos { background: linear-gradient(135deg, #e8f5e9 60%, #b2dfdb 100%); }
+        .card-series { background: linear-gradient(135deg, #ede7f6 60%, #b39ddb 100%); }
+        .card-rutinas { background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%); }
+        .card-asignadas { background: linear-gradient(135deg, #e3f2fd 60%, #b3e5fc 100%); }
+        .card-module i {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            color: #1976d2;
+        }
+        .card-module .stat {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-module .label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #555;
+        }
+        .main-actions .btn {
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 1.5rem;
+            margin: 0 0.3rem 0.7rem 0.3rem;
+            padding: 0.7rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-alumnos { background: #43a047; color: #fff; }
+        .btn-alumnos:hover { background: #2e7d32; color: #fff; }
+        .btn-series { background: #7e57c2; color: #fff; }
+        .btn-series:hover { background: #512da8; color: #fff; }
+        .btn-rutinas { background: #ffd54f; color: #333; }
+        .btn-rutinas:hover { background: #ffb300; color: #333; }
+        .btn-calendario { background: #f06292; color: #fff; }
+        .btn-calendario:hover { background: #ad1457; color: #fff; }
+        .tabs-section {
+            background: #fff;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+            margin-top: 2.5rem;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+        .tab-content {
+            min-height: 120px;
+        }
+        @media (max-width: 991px) {
+            .dashboard-cards { flex-direction: column; gap: 1.2rem; }
+            .card-module { min-width: 100%; }
+        }
+        @media (max-width: 575px) {
+            .tabs-section { padding: 1rem 0.3rem; }
+            .main-actions .btn { width: 100%; margin-bottom: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar personalizado -->
+    <nav class="navbar navbar-expand-lg navbar-dark w-100">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo.png" alt="Logo" width="48" height="48" class="me-2 rounded-circle">
+                Mattfuncional
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="profile-badge d-flex align-items-center" style="background:#fff; border-radius:2rem; padding:0.25rem 1rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); font-weight:500;">
+                    <i class="fa-solid fa-user-circle fa-lg me-2" style="color:#7e57c2;"></i>
+                    <span th:text="${profesor != null ? (profesor.nombre + ' ' + (profesor.apellido != null ? profesor.apellido : '')).trim() : 'Profesor'}"></span>
+                </span>
+                <a href="/logout" class="btn logout-btn ms-2" style="background:#e57373; color:#fff; border-radius:1.5rem; font-weight:500;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%); min-height: 100vh;">
+        <!-- Título y bienvenida -->
+        <div class="text-center mb-4">
+            <div class="d-flex justify-content-center align-items-center mb-2">
+                <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#7e57c2;"></i>
+                <h1 class="fw-bold mb-0">Panel del Profesor</h1>
+            </div>
+            <div class="fs-5 text-secondary">
+                <span th:if="${profesor != null}" th:text="'Bienvenido, ' + ${profesor.nombre}"></span>
+                <span th:if="${profesor == null}">Bienvenido, Profesor</span>
+            </div>
+        </div>
+
+        <!-- Tarjetas de módulos -->
+        <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-4 mb-4" style="margin-top:2rem;">
+            <div class="card-module card-alumnos" style="min-width:260px; min-height:160px;">
+                <i class="fa-solid fa-users"></i>
+                <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
+                <div class="label">Alumnos</div>
+            </div>
+            <div class="card-module card-series" style="min-width:260px; min-height:160px;">
+                <i class="fa-solid fa-dumbbell"></i>
+                <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
+                <div class="label">Series</div>
+            </div>
+            <div class="card-module card-rutinas" style="min-width:260px; min-height:160px;">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
+                <div class="label">Rutinas</div>
+            </div>
+            <div class="card-module card-asignadas" style="min-width:260px; min-height:160px;">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
+                <div class="label">Asignadas</div>
+            </div>
+        </div>
+
+        <!-- Botones principales -->
+        <div class="main-actions d-flex flex-wrap justify-content-center mb-4">
+            <a href="/series/crear" class="btn btn-alumnos mx-1">
+                <i class="fa-solid fa-user-plus me-2"></i>Crear Serie
+            </a>
+            <a href="/rutinas/crear" class="btn btn-series mx-1">
+                <i class="fa-solid fa-plus me-2"></i>Crear Rutina
+            </a>
+            <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-rutinas mx-1">
+                <i class="fa-solid fa-dumbbell me-2"></i>Ver Ejercicios
+            </a>
+            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1">
+                <i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal
+            </a>
+        </div>
+
+        <!-- Tabs y contenido -->
+        <div class="tabs-section">
+            <ul class="nav nav-tabs mb-3" id="profTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="alumnos-tab" data-bs-toggle="tab" data-bs-target="#alumnos" type="button" role="tab">
+                        <i class="fa-solid fa-users me-2"></i>Mis Alumnos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="series-tab" data-bs-toggle="tab" data-bs-target="#series" type="button" role="tab">
+                        <i class="fa-solid fa-dumbbell me-2"></i>Mis Series
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rutinas-tab" data-bs-toggle="tab" data-bs-target="#rutinas" type="button" role="tab">
+                        <i class="fa-solid fa-list-check me-2"></i>Mis Rutinas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="asignaciones-tab" data-bs-toggle="tab" data-bs-target="#asignaciones" type="button" role="tab">
+                        <i class="fa-solid fa-clipboard-list me-2"></i>Asignaciones
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content" id="profTabsContent">
+                <!-- Pestaña Alumnos -->
+                <div class="tab-pane fade show active" id="alumnos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3><i class="fa-solid fa-users me-2"></i>Mis Alumnos</h3>
+                        <a th:href="@{/profesor/alumnos/nuevo}" class="btn btn-alumnos">
+                            <i class="fa-solid fa-user-plus me-1"></i>Nuevo Alumno
+                        </a>
+                    </div>
+                    
+                    <!-- Mensaje de éxito -->
+                    <div th:if="${param.success == 'rutina_asignada'}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>¡Rutina asignada exitosamente!</strong> 
+                        <span th:if="${param.alumno}">La rutina ha sido asignada al alumno <strong th:text="${param.alumno}">Alumno</strong></span>
+                        <span th:unless="${param.alumno}">La rutina ha sido asignada al alumno</span> 
+                        y ahora está disponible en su panel.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Peso</th>
+                                    <th>Rutinas</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="usuario : ${usuarios}" class="text-center">
+                                    <td th:text="${usuario.id}">1</td>
+                                    <td th:text="${usuario.nombre}">Nombre</td>
+                                    <td th:text="${usuario.edad}">Edad</td>
+                                    <td th:text="${usuario.sexo}">Sexo</td>
+                                    <td th:text="${usuario.peso} + ' kg'">Peso</td>
+                                    <td>
+                                        <span class="badge bg-success" th:text="${usuario.rutinas != null ? usuario.rutinas.size() : 0}">0</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="btn btn-primary btn-sm">
+                                            <i class="fa-solid fa-user me-1"></i>Ver Alumno
+                                        </a>
+                                        <a th:href="@{/profesor/alumnos/editar/{id}(id=${usuario.id})}" class="btn btn-warning btn-sm">
+                                            <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                        <a th:href="@{/profesor/alumnos/eliminar/{id}(id=${usuario.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
+                                            <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                        </a>
+                                        <a th:href="@{/profesor/asignar-rutina/{id}(id=${usuario.id})}" class="btn btn-success btn-sm">
+                                            <i class="fa-solid fa-dumbbell me-1"></i>Asignar Rutina
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Pestaña Series -->
+                <div class="tab-pane fade" id="series" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3><i class="fa-solid fa-dumbbell me-2"></i>Mis Series</h3>
+                        <a href="/series/crear" class="btn btn-series">
+                            <i class="fa-solid fa-plus me-1"></i>Nueva Serie
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-success text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>N° de Ejercicios</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="serie : ${series}" class="text-center">
+                                    <td th:text="${serie.id}">1</td>
+                                    <td th:text="${serie.nombre}">Nombre</td>
+                                    <td>
+                                        <span class="badge bg-info" th:text="${serie.serieEjercicios != null ? #lists.size(serie.serieEjercicios) : 0}">0</span>
+                                    </td>
+                                    <td th:text="${serie.descripcion}">Descripción</td>
+                                    <td>
+                                        <a th:href="@{/series/editar/{id}(id=${serie.id})}" class="btn btn-warning btn-sm">
+                                            <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                        <a th:href="@{/series/eliminar/{id}(id=${serie.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta serie?')">
+                                            <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Pestaña Rutinas -->
+                <div class="tab-pane fade" id="rutinas" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3><i class="fa-solid fa-list-check me-2"></i>Mis Rutinas</h3>
+                        <a href="/rutinas/crear" class="btn btn-rutinas">
+                            <i class="fa-solid fa-plus me-1"></i>Nueva Rutina
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-warning text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Series</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="rutina : ${rutinas}" class="text-center">
+                                    <td th:text="${rutina.id}">1</td>
+                                    <td th:text="${rutina.nombre}">Nombre</td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="${rutina.categoria}">Categoría</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
+                                    </td>
+                                    <td th:text="${rutina.descripcion}">Descripción</td>
+                                    <td>
+                                        <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-warning btn-sm">
+                                            <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                        <a th:href="@{/rutinas/eliminar/{id}(id=${rutina.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta rutina?')">
+                                            <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Pestaña Asignaciones -->
+                <div class="tab-pane fade" id="asignaciones" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3><i class="fa-solid fa-clipboard-list me-2"></i>Rutinas Asignadas</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary text-center">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Rutina</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Asignación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="rutinaAsignada : ${rutinasAsignadas}" class="text-center">
+                                    <td th:text="${rutinaAsignada.usuario.nombre}">Usuario</td>
+                                    <td th:text="${rutinaAsignada.nombre}">Rutina</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${rutinaAsignada.estado == 'ACTIVA' ? 'bg-success' : 'bg-secondary'}" th:text="${rutinaAsignada.estado}">Estado</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(rutinaAsignada.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
+                                    <td>
+                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm">
+                                            <i class="fa-solid fa-eye me-1"></i>Ver
+                                        </a>
+                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm">
+                                            <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        const profesorId = [[${profesor != null ? profesor.id : 0}]];
+    </script>
+</body>
+</html>

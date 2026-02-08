@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Profesor - MyGym</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #1976d2 0%, #7e57c2 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .profile-badge {
+            background: #fff;
+            border-radius: 2rem;
+            padding: 0.25rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .logout-btn {
+            background: #e57373;
+            color: #fff;
+            border: none;
+            border-radius: 1.5rem;
+            padding: 0.4rem 1.2rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #c62828;
+        }
+        .dashboard-cards {
+            gap: 2rem;
+        }
+        .card-module {
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            color: #333;
+            min-width: 180px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+        }
+        .card-module:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+        }
+        .card-alumnos { background: linear-gradient(135deg, #e8f5e9 60%, #b2dfdb 100%); }
+        .card-series { background: linear-gradient(135deg, #ede7f6 60%, #b39ddb 100%); }
+        .card-rutinas { background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%); }
+        .card-asignadas { background: linear-gradient(135deg, #e3f2fd 60%, #b3e5fc 100%); }
+        .card-module i {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            color: #1976d2;
+        }
+        .card-module .stat {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-module .label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #555;
+        }
+        .main-actions .btn {
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 1.5rem;
+            margin: 0 0.3rem 0.7rem 0.3rem;
+            padding: 0.7rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-alumnos { background: #43a047; color: #fff; }
+        .btn-alumnos:hover { background: #2e7d32; color: #fff; }
+        .btn-series { background: #7e57c2; color: #fff; }
+        .btn-series:hover { background: #512da8; color: #fff; }
+        .btn-rutinas { background: #ffd54f; color: #333; }
+        .btn-rutinas:hover { background: #ffb300; color: #333; }
+        .btn-calendario { background: #f06292; color: #fff; }
+        .btn-calendario:hover { background: #ad1457; color: #fff; }
+        .tabs-section {
+            background: #fff;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+            margin-top: 2.5rem;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+        .tab-content {
+            min-height: 120px;
+        }
+        @media (max-width: 991px) {
+            .dashboard-cards { flex-direction: column; gap: 1.2rem; }
+            .card-module { min-width: 100%; }
+        }
+        @media (max-width: 575px) {
+            .tabs-section { padding: 1rem 0.3rem; }
+            .main-actions .btn { width: 100%; margin-bottom: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="/img/logo.png" alt="Logo" width="48" height="48" class="me-2 rounded-circle">
+                MyGym
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="profile-badge">
+                    <i class="fa-solid fa-user-circle fa-lg"></i>
+                    GUSTAVO DANIEL GOMEZ LUCERO
+                </span>
+                <button class="logout-btn ms-2"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Título y bienvenida -->
+        <div class="text-center mb-4">
+            <div class="d-flex justify-content-center align-items-center mb-2">
+                <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#7e57c2;"></i>
+                <h1 class="fw-bold mb-0">Panel del Profesor</h1>
+            </div>
+            <div class="fs-5 text-secondary">Bienvenido, <span class="fw-semibold">GUSTAVO DANIEL</span></div>
+        </div>
+
+        <!-- Tarjetas de módulos -->
+        <div class="d-flex flex-wrap justify-content-center dashboard-cards mb-4">
+            <div class="card-module card-alumnos mx-2 my-2">
+                <i class="fa-solid fa-users"></i>
+                <div class="stat">0</div>
+                <div class="label">Alumnos</div>
+            </div>
+            <div class="card-module card-series mx-2 my-2">
+                <i class="fa-solid fa-dumbbell"></i>
+                <div class="stat">0</div>
+                <div class="label">Series</div>
+            </div>
+            <div class="card-module card-rutinas mx-2 my-2">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="stat">0</div>
+                <div class="label">Rutinas</div>
+            </div>
+            <div class="card-module card-asignadas mx-2 my-2">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <div class="stat">0</div>
+                <div class="label">Asignadas</div>
+            </div>
+        </div>
+
+        <!-- Botones principales -->
+        <div class="main-actions d-flex flex-wrap justify-content-center mb-4">
+            <button class="btn btn-alumnos"><i class="fa-solid fa-user-plus me-2"></i>Crear Serie</button>
+            <button class="btn btn-series"><i class="fa-solid fa-plus me-2"></i>Crear Rutina</button>
+            <button class="btn btn-rutinas"><i class="fa-solid fa-dumbbell me-2"></i>Ver Ejercicios</button>
+            <button class="btn btn-calendario"><i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal</button>
+        </div>
+
+        <!-- Tabs de ejemplo -->
+        <div class="tabs-section">
+            <ul class="nav nav-tabs mb-3" id="profTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="alumnos-tab" data-bs-toggle="tab" data-bs-target="#alumnos" type="button" role="tab">Mis Alumnos</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="series-tab" data-bs-toggle="tab" data-bs-target="#series" type="button" role="tab">Mis Series</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rutinas-tab" data-bs-toggle="tab" data-bs-target="#rutinas" type="button" role="tab">Mis Rutinas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="asignaciones-tab" data-bs-toggle="tab" data-bs-target="#asignaciones" type="button" role="tab">Asignaciones</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="profTabsContent">
+                <div class="tab-pane fade show active" id="alumnos" role="tabpanel">
+                    <div class="text-center text-secondary py-4">
+                        <i class="fa-solid fa-users fa-2x mb-2"></i>
+                        <div class="fs-5">Aquí aparecerán tus alumnos registrados.</div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="series" role="tabpanel">
+                    <div class="text-center text-secondary py-4">
+                        <i class="fa-solid fa-dumbbell fa-2x mb-2"></i>
+                        <div class="fs-5">Aquí aparecerán tus series creadas.</div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="rutinas" role="tabpanel">
+                    <div class="text-center text-secondary py-4">
+                        <i class="fa-solid fa-list-check fa-2x mb-2"></i>
+                        <div class="fs-5">Aquí aparecerán tus rutinas.</div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="asignaciones" role="tabpanel">
+                    <div class="text-center text-secondary py-4">
+                        <i class="fa-solid fa-clipboard-list fa-2x mb-2"></i>
+                        <div class="fs-5">Aquí aparecerán tus asignaciones.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

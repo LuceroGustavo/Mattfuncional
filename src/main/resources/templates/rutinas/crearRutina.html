@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Rutina - Mattfuncional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 30px;
+        }
+        .form-title {
+            color: #2c3e50;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+        }
+        .serie-card {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .serie-card:hover {
+            border-color: #fdcb6e;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(253, 203, 110, 0.2);
+        }
+        .serie-card.selected {
+            border-color: #fdcb6e;
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            color: white;
+        }
+        .repeticiones-input-wrapper {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .serie-card.selected .repeticiones-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+         .serie-card.selected .repeticiones-input-wrapper label {
+            color: white;
+            font-weight: bold;
+        }
+        .repeticiones-input {
+            width: 70px;
+        }
+        .selected-series {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .selected-serie-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #fdcb6e;
+        }
+        .exercise-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin: 2px;
+        }
+        .category-badge {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <h1 class="form-title">
+            <i class="fas fa-list me-3"></i>Crear Nueva Rutina
+        </h1>
+
+        <!-- Mensajes de éxito o error -->
+        <div th:if="${successMessage}" class="alert alert-success text-center" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger text-center" th:text="${errorMessage}"></div>
+
+        <form method="post" th:action="@{/rutinas/crear-plantilla}" id="rutinaForm">
+            <div class="row">
+                <!-- Información básica de la rutina -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información de la Rutina</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Input oculto para el ID del profesor -->
+                            <input type="hidden" name="profesorId" th:if="${usuario?.profesor}" th:value="${usuario.profesor.id}" />
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label fw-bold">Nombre de la Rutina:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="categoria" class="form-label fw-bold">Categoría:</label>
+                                <select class="form-select" id="categoria" name="categoria" required>
+                                    <option value="">Seleccionar categoría</option>
+                                    <!-- Opciones de categoría -->
+                                    <option value="FUERZA">Fuerza</option>
+                                    <option value="CARDIO">Cardio</option>
+                                    <option value="FLEXIBILIDAD">Flexibilidad</option>
+                                    <option value="FUNCIONAL">Funcional</option>
+                                    <option value="HIIT">HIIT</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label fw-bold">Descripción:</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="4"></textarea>
+                            </div>
+                            
+                            <button type="button" id="submitRutinaBtn" class="btn btn-primary w-100 mt-3">
+                                <i class="fas fa-save me-2"></i>Crear Rutina Plantilla
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selección de series -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-dumbbell me-2"></i>Seleccionar Series
+                                <span class="badge bg-light text-dark ms-2" id="selectedCount">0 seleccionadas</span>
+                            </h5>
+                        </div>
+                        <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                            <div th:if="${seriesPlantilla.isEmpty()}" class="alert alert-info">
+                                No has creado ninguna serie plantilla todavía. <a th:href="@{/series/crear}" class="alert-link">Crea una aquí</a>.
+                            </div>
+                            <div class="row">
+                                <!-- Corrección: iterar sobre 'seriesPlantilla' -->
+                                <div th:each="serie : ${seriesPlantilla}" class="col-md-6">
+                                    <div class="serie-card p-3" th:data-serie-id="${serie.id}">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title mb-0" th:text="${serie.nombre}">Nombre Serie</h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-dumbbell me-1"></i>
+                                                <!-- Corrección: contar desde 'serieEjercicios' -->
+                                                <span th:text="${#lists.size(serie.serieEjercicios)}">0</span> ejercicios
+                                                </small>
+                                            </div>
+                                        <p class="card-text small text-muted" th:text="${serie.descripcion}">Descripción de la serie...</p>
+                                        <div class="mt-2">
+                                            <!-- Corrección: iterar sobre 'serieEjercicios' para obtener los nombres -->
+                                            <span th:each="se : ${serie.serieEjercicios}" 
+                                                  class="badge bg-secondary me-1" 
+                                                  th:text="${se.exercise.name}"></span>
+                                            </div>
+                                        
+                                        <!-- Input de repeticiones movido al final de la tarjeta -->
+                                        <div class="repeticiones-input-wrapper">
+                                            <label class="form-label mb-0">Reps:</label>
+                                            <input type="number" 
+                                                   class="form-control form-control-sm repeticiones-input" 
+                                                   th:name="'repeticiones_' + ${serie.id}"
+                                                   th:value="${serie.repeticionesSerie}" 
+                                                   min="1" 
+                                                   max="10"
+                                                   title="Repeticiones de la serie">
+                                        </div>
+                                        
+                                        <input type="checkbox" name="selectedSeries" th:value="${serie.id}" class="d-none serie-checkbox">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.serie-card');
+    const countBadge = document.getElementById('selectedCount');
+    let selectedCount = 0;
+
+    cards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Evitar que el click en el input de repeticiones o su label active/desactive la selección
+            if (e.target.closest('.repeticiones-input-wrapper')) {
+                e.stopPropagation();
+                return;
+            }
+            
+            this.classList.toggle('selected');
+            const checkbox = this.querySelector('.serie-checkbox');
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                selectedCount++;
+            } else {
+                selectedCount--;
+            }
+            countBadge.textContent = `${selectedCount} seleccionada(s)`;
+        });
+    });
+
+    // Manejar el envío del formulario con el botón
+    const submitBtn = document.getElementById('submitRutinaBtn');
+    const rutinaForm = document.getElementById('rutinaForm');
+
+    submitBtn.addEventListener('click', function() {
+        // Validar que se haya ingresado un nombre
+        const nombreRutina = document.getElementById('nombre').value;
+        if (!nombreRutina.trim()) {
+            alert('Por favor, ingresa un nombre para la rutina.');
+            return;
+        }
+
+        // Validar que al menos una serie esté seleccionada
+        const seriesSeleccionadas = document.querySelectorAll('.serie-checkbox:checked').length;
+        if (seriesSeleccionadas === 0) {
+            alert('Debes seleccionar al menos una serie para agregar a la rutina.');
+            return;
+        }
+
+        // Si la validación es exitosa, se envía el formulario
+        rutinaForm.submit();
+        });
+    });
+</script>
+
+</body>
+</html> 

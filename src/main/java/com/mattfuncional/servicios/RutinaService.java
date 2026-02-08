@@ -1,0 +1,305 @@
+package com.mattfuncional.servicios;
+
+import com.mattfuncional.dto.EstadisticasRutinaDTO;
+import com.mattfuncional.entidades.Rutina;
+import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.entidades.Serie;
+import com.mattfuncional.entidades.SerieEjercicio;
+import com.mattfuncional.excepciones.ResourceNotFoundException;
+import com.mattfuncional.repositorios.RutinaRepository;
+import com.mattfuncional.repositorios.UsuarioRepository;
+import com.mattfuncional.repositorios.ProfesorRepository;
+import com.mattfuncional.repositorios.SerieRepository;
+import com.mattfuncional.repositorios.SerieEjercicioRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class RutinaService {
+
+    private final RutinaRepository rutinaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ProfesorRepository profesorRepository;
+    private final SerieRepository serieRepository;
+    private final SerieEjercicioRepository serieEjercicioRepository;
+    private final SerieService serieService;
+
+    public RutinaService(RutinaRepository rutinaRepository,
+            UsuarioRepository usuarioRepository,
+            ProfesorRepository profesorRepository,
+            SerieRepository serieRepository,
+            SerieEjercicioRepository serieEjercicioRepository,
+            SerieService serieService) {
+        this.rutinaRepository = rutinaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.profesorRepository = profesorRepository;
+        this.serieRepository = serieRepository;
+        this.serieEjercicioRepository = serieEjercicioRepository;
+        this.serieService = serieService;
+    }
+
+    // Crear rutina básica
+    public Rutina crearRutina(Long usuarioId, Long profesorId, String nombre, String descripcion) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
+
+        Profesor profesor = profesorRepository.findById(profesorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profesor no encontrado con id: " + profesorId));
+
+        Rutina rutina = new Rutina(nombre, descripcion, usuario, profesor);
+        return rutinaRepository.save(rutina);
+    }
+
+    // Obtener todas las rutinas
+    public List<Rutina> obtenerTodasLasRutinas() {
+        return rutinaRepository.findAll();
+    }
+
+    // Obtener rutina por ID
+    public Rutina obtenerRutinaPorId(Long id) {
+        return rutinaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
+    }
+
+    // Obtener rutinas por usuario
+    public List<Rutina> obtenerRutinasPorUsuario(Long usuarioId) {
+        return rutinaRepository.findByUsuarioId(usuarioId);
+    }
+
+    // Obtener rutinas asignadas por usuario (no plantillas)
+    public List<Rutina> obtenerRutinasAsignadasPorUsuario(Long usuarioId) {
+        return rutinaRepository.findByUsuarioIdAndEsPlantillaFalse(usuarioId);
+    }
+
+    // Obtener rutinas por profesor
+    public List<Rutina> obtenerRutinasPorProfesor(Long profesorId) {
+        return rutinaRepository.findByProfesorId(profesorId);
+    }
+
+    // Actualizar rutina
+    public Rutina actualizarRutina(Long id, Rutina rutinaActualizada) {
+        Rutina rutina = obtenerRutinaPorId(id);
+
+        rutina.setNombre(rutinaActualizada.getNombre());
+        rutina.setDescripcion(rutinaActualizada.getDescripcion());
+        rutina.setEstado(rutinaActualizada.getEstado());
+
+        return rutinaRepository.save(rutina);
+    }
+
+    // Eliminar rutina
+    public void eliminarRutina(Long id) {
+        Rutina rutina = obtenerRutinaPorId(id);
+        rutinaRepository.delete(rutina);
+    }
+
+    // Cambiar estado de rutina
+    public Rutina cambiarEstadoRutina(Long id, String nuevoEstado) {
+        Rutina rutina = obtenerRutinaPorId(id);
+        rutina.setEstado(nuevoEstado);
+        return rutinaRepository.save(rutina);
+    }
+
+    // Asignar rutina a usuario
+    public Rutina asignarRutinaAUsuario(Long rutinaId, Long usuarioId) {
+        Rutina rutina = obtenerRutinaPorId(rutinaId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
+
+        rutina.setUsuario(usuario);
+        return rutinaRepository.save(rutina);
+    }
+
+    // Obtener rutinas activas por usuario
+    public List<Rutina> obtenerRutinasActivasPorUsuario(Long usuarioId) {
+        return rutinaRepository.findByUsuarioIdAndEstado(usuarioId, "ACTIVA");
+    }
+
+    // Obtener rutinas completadas por usuario
+    public List<Rutina> obtenerRutinasCompletadasPorUsuario(Long usuarioId) {
+        return rutinaRepository.findByUsuarioIdAndEstado(usuarioId, "COMPLETADA");
+    }
+
+    // Marcar rutina como completada
+    public Rutina marcarRutinaComoCompletada(Long id) {
+        return cambiarEstadoRutina(id, "COMPLETADA");
+    }
+
+    // Obtener estadísticas de rutinas por usuario
+    public EstadisticasRutinaDTO obtenerEstadisticasRutinas(Long usuarioId) {
+        List<Rutina> todasLasRutinas = obtenerRutinasPorUsuario(usuarioId);
+        List<Rutina> rutinasActivas = obtenerRutinasActivasPorUsuario(usuarioId);
+        List<Rutina> rutinasCompletadas = obtenerRutinasCompletadasPorUsuario(usuarioId);
+
+        return new EstadisticasRutinaDTO(todasLasRutinas.size(), rutinasActivas.size(), rutinasCompletadas.size());
+    }
+
+    // Crear rutina plantilla
+    public Rutina crearRutinaPlantilla(Long profesorId, String nombre, String descripcion, String categoria) {
+        Profesor profesor = profesorRepository.findById(profesorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profesor no encontrado con id: " + profesorId));
+
+        Rutina rutina = new Rutina(nombre, descripcion, profesor);
+        rutina.setCategoria(categoria);
+        rutina.setCreador("PROFESOR");
+        return rutinaRepository.save(rutina);
+    }
+
+    // Obtener rutinas plantilla por profesor
+    public List<Rutina> obtenerRutinasPlantillaPorProfesor(Long profesorId) {
+        return rutinaRepository.findByProfesorIdAndEsPlantillaTrue(profesorId);
+    }
+
+    // Obtener todas las rutinas plantilla
+    public List<Rutina> obtenerTodasLasRutinasPlantilla() {
+        return rutinaRepository.findByEsPlantillaTrue();
+    }
+
+    // Buscar rutinas plantilla por categoría
+    public List<Rutina> buscarRutinasPlantillaPorCategoria(Long profesorId, String categoria) {
+        return rutinaRepository.findByProfesorIdAndEsPlantillaTrueAndCategoria(profesorId, categoria);
+    }
+
+    // Buscar rutinas plantilla por nombre
+    public List<Rutina> buscarRutinasPlantillaPorNombre(Long profesorId, String nombre) {
+        return rutinaRepository.findByProfesorIdAndEsPlantillaTrueAndNombreContainingIgnoreCase(profesorId, nombre);
+    }
+
+    // Asignar rutina plantilla a un usuario (crear copia)
+    public Rutina asignarRutinaPlantillaAUsuario(Long rutinaPlantillaId, Long usuarioId, Long profesorId) {
+        Rutina rutinaPlantilla = obtenerRutinaPorId(rutinaPlantillaId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
+        Profesor profesor = profesorRepository.findById(profesorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profesor no encontrado con id: " + profesorId));
+
+        // Crear una copia de la rutina plantilla
+        Rutina nuevaRutina = new Rutina();
+        nuevaRutina.setNombre(rutinaPlantilla.getNombre());
+        nuevaRutina.setDescripcion(rutinaPlantilla.getDescripcion());
+        nuevaRutina.setCategoria(rutinaPlantilla.getCategoria());
+        nuevaRutina.setUsuario(usuario);
+        nuevaRutina.setProfesor(profesor);
+        nuevaRutina.setEsPlantilla(false); // No es plantilla, es asignada
+        nuevaRutina.setEstado("ACTIVA");
+
+        Rutina rutinaGuardada = rutinaRepository.save(nuevaRutina);
+
+        // Copiar las series de la plantilla a la nueva rutina usando el nuevo método
+        // del servicio
+        if (rutinaPlantilla.getSeries() != null) {
+            for (Serie seriePlantilla : rutinaPlantilla.getSeries()) {
+                serieService.copiarSerieParaNuevaRutina(seriePlantilla, rutinaGuardada);
+            }
+        }
+
+        return rutinaGuardada;
+    }
+
+    // Duplicar rutina plantilla (crear nueva plantilla basada en otra)
+    public Rutina duplicarRutinaPlantilla(Long rutinaPlantillaId, String nuevoNombre) {
+        Rutina rutinaOriginal = obtenerRutinaPorId(rutinaPlantillaId);
+
+        Rutina nuevaRutina = new Rutina();
+        nuevaRutina.setNombre(nuevoNombre);
+        nuevaRutina.setDescripcion(rutinaOriginal.getDescripcion());
+        nuevaRutina.setCategoria(rutinaOriginal.getCategoria());
+        nuevaRutina.setProfesor(rutinaOriginal.getProfesor());
+        nuevaRutina.setEsPlantilla(true);
+        nuevaRutina.setCreador("PROFESOR");
+
+        return rutinaRepository.save(nuevaRutina);
+    }
+
+    // Obtener rutinas asignadas a usuarios por profesor
+    public List<Rutina> obtenerRutinasAsignadasPorProfesor(Long profesorId) {
+        return rutinaRepository.findByProfesorIdAndEsPlantillaFalse(profesorId);
+    }
+
+    // Método para actualizar solo la info básica de una rutina
+    public Rutina actualizarInformacionBasicaRutina(Long id, String nombre, String descripcion, String categoria) {
+        Rutina rutina = obtenerRutinaPorId(id);
+        rutina.setNombre(nombre);
+        rutina.setDescripcion(descripcion);
+        rutina.setCategoria(categoria);
+        return rutinaRepository.save(rutina);
+    }
+
+    // Método para actualizar el conjunto de series de una rutina
+    @Transactional
+    public void actualizarSeriesDeRutina(Long rutinaId, List<Long> seriesIds, List<Integer> repeticionesExistentes,
+            List<Long> nuevasSeriesIds, List<Integer> repeticionesNuevas) {
+        Rutina rutina = obtenerRutinaPorId(rutinaId);
+
+        // 1. Borrar las series antiguas de la rutina
+        // Primero, borramos las relaciones SerieEjercicio para evitar problemas de
+        // cascada
+        for (Serie serie : rutina.getSeries()) {
+            serieEjercicioRepository.deleteBySerieId(serie.getId());
+        }
+        // Luego borramos las series en sí
+        serieRepository.deleteByRutinaId(rutinaId);
+        rutina.getSeries().clear();
+
+        // 2. Re-añadir las series "existentes" que se mantuvieron, con sus repeticiones
+        // actualizadas
+        if (seriesIds != null) {
+            for (int i = 0; i < seriesIds.size(); i++) {
+                Long serieId = seriesIds.get(i);
+                Serie serieOriginal = serieRepository.findById(serieId).orElse(null);
+                if (serieOriginal != null && serieOriginal.getPlantillaId() != null) {
+                    agregarSerieARutina(rutinaId, serieOriginal.getPlantillaId(), repeticionesExistentes.get(i));
+                }
+            }
+        }
+
+        // 3. Añadir las nuevas series seleccionadas
+        if (nuevasSeriesIds != null) {
+            for (int i = 0; i < nuevasSeriesIds.size(); i++) {
+                Long plantillaId = nuevasSeriesIds.get(i);
+                int repeticiones = (repeticionesNuevas != null && i < repeticionesNuevas.size())
+                        ? repeticionesNuevas.get(i)
+                        : 1;
+                agregarSerieARutina(rutinaId, plantillaId, repeticiones);
+            }
+        }
+    }
+
+    // Agregar serie a una rutina con repeticiones específicas
+    public void agregarSerieARutina(Long rutinaId, Long seriePlantillaId, int repeticiones) {
+        Rutina rutina = obtenerRutinaPorId(rutinaId);
+        Serie seriePlantilla = serieService.obtenerSeriePorId(seriePlantillaId);
+
+        // Crear una copia de la serie plantilla para la rutina
+        Serie nuevaSerie = new Serie();
+        nuevaSerie.setNombre(seriePlantilla.getNombre());
+        nuevaSerie.setDescripcion(seriePlantilla.getDescripcion());
+        nuevaSerie.setProfesor(seriePlantilla.getProfesor());
+        nuevaSerie.setRutina(rutina);
+        nuevaSerie.setEsPlantilla(false); // No es plantilla, es asignada
+        nuevaSerie.setRepeticionesSerie(repeticiones);
+        nuevaSerie.setCreador(seriePlantilla.getCreador());
+        nuevaSerie.setPlantillaId(seriePlantilla.getId()); // Guardar referencia a la plantilla original
+
+        // Guardar la nueva serie
+        Serie serieGuardada = serieRepository.save(nuevaSerie);
+
+        // Copiar los ejercicios de la serie plantilla
+        if (seriePlantilla.getSerieEjercicios() != null) {
+            for (SerieEjercicio seOriginal : seriePlantilla.getSerieEjercicios()) {
+                SerieEjercicio nuevoSe = new SerieEjercicio();
+                nuevoSe.setSerie(serieGuardada);
+                nuevoSe.setExercise(seOriginal.getExercise());
+                nuevoSe.setValor(seOriginal.getValor());
+                nuevoSe.setUnidad(seOriginal.getUnidad());
+                serieEjercicioRepository.save(nuevoSe);
+            }
+        }
+    }
+}

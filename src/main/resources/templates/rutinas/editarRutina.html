@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Rutina - Mattfuncional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .form-title { color: #2c3e50; font-weight: 700; }
+        .card { border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        .serie-card { border: 2px solid #e9ecef; border-radius: 15px; transition: all 0.3s ease; cursor: pointer; background: white; margin-bottom: 15px; }
+        .serie-card:hover { border-color: #0d6efd; transform: translateY(-3px); }
+        .serie-card.selected { border-color: #0d6efd; background-color: #e7f1ff; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; }
+        .btn-danger { background-color: #e74c3c; border-color: #e74c3c; }
+        .list-group-item { border-radius: 10px !important; }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container my-4">
+    <h1 class="form-title mb-4"><i class="fas fa-edit me-3"></i>Editar Rutina</h1>
+
+    <form method="post" th:action="@{/rutinas/actualizar/{id}(id=${rutina.id})}" id="rutinaForm">
+        <div class="row g-4">
+            <!-- Columna Izquierda: Detalles y Series Actuales -->
+            <div class="col-lg-5">
+                <!-- Detalles de la Rutina -->
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Detalles de la Rutina</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class.mb-3>
+                            <label for="nombre" class="form-label fw-bold">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" th:value="${rutina.nombre}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label fw-bold">Categoría:</label>
+                            <select class="form-select" id="categoria" name="categoria" th:field="${rutina.categoria}" required>
+                                <option value="FUERZA">Fuerza</option>
+                                <option value="CARDIO">Cardio</option>
+                                <option value="FLEXIBILIDAD">Flexibilidad</option>
+                                <option value="FUNCIONAL">Funcional</option>
+                                <option value="HIIT">HIIT</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label fw-bold">Descripción:</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" th:text="${rutina.descripcion}"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Series en esta Rutina -->
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Series en esta Rutina</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group" id="series-actuales-list">
+                            <li th:each="serie : ${rutina.series}" class="list-group-item d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong th:text="${serie.nombre}">Nombre de Serie</strong>
+                                    <div class="input-group input-group-sm mt-2" style="width: 200px;">
+                                        <label class="input-group-text">Reps:</label>
+                                        <input type="number" class="form-control" name="repeticionesExistentes" th:data-serie-id="${serie.id}" th:value="${serie.repeticionesSerie}" min="1">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarSerie(this)"><i class="fas fa-trash"></i></button>
+                                <input type="hidden" name="seriesIds" th:value="${serie.id}">
+                            </li>
+                            <li id="no-series-msg" th:if="${#lists.isEmpty(rutina.series)}" class="list-group-item text-muted text-center">No hay series en esta rutina.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Añadir Nuevas Series -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Añadir más Series</h5>
+                    </div>
+                    <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                        <div class="row">
+                            <div th:each="plantilla : ${seriesDisponibles}" class="col-md-6">
+                                <div class="serie-card p-3" th:data-plantilla-id="${plantilla.id}">
+                                    <h6 th:text="${plantilla.nombre}"></h6>
+                                    <p class="small text-muted" th:text="${plantilla.descripcion}"></p>
+                                    <input type="hidden" name="nuevasSeriesIds" th:value="${plantilla.id}" class="serie-id-input" disabled>
+                                    <div class="repeticiones-input-wrapper mt-2">
+                                        <div class="input-group input-group-sm">
+                                            <label class="input-group-text">Reps:</label>
+                                            <input type="number" class="form-control repeticiones-input" name="repeticionesNuevas" value="1" min="1" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save me-2"></i>Guardar Todos los Cambios
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Lógica para seleccionar/deseleccionar nuevas series
+    document.querySelectorAll('.serie-card').forEach(card => {
+        card.addEventListener('click', function(event) {
+            // No hacer nada si se hace clic en el área de repeticiones
+            if (event.target.closest('.repeticiones-input-wrapper')) {
+                return;
+            }
+
+            this.classList.toggle('selected');
+            const isSelected = this.classList.contains('selected');
+            
+            // Habilitar/deshabilitar los inputs correspondientes dentro de esta tarjeta
+            const idInput = this.querySelector('.serie-id-input');
+            const repsInput = this.querySelector('.repeticiones-input');
+
+            if (idInput) idInput.disabled = !isSelected;
+            if (repsInput) repsInput.disabled = !isSelected;
+        });
+    });
+});
+
+function eliminarSerie(btn) {
+    const listItem = btn.closest('.list-group-item');
+    listItem.remove();
+    // Opcional: mostrar mensaje si la lista queda vacía
+    if (document.querySelectorAll('#series-actuales-list li').length === 1) { // 1 por el mensaje
+        document.getElementById('no-series-msg').style.display = 'block';
+    }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

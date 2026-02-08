@@ -1,0 +1,41 @@
+# Build
+build/
+out/
+target/
+*.class
+*.jar
+*.war
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle
+.gradle/
+!gradle/wrapper/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+
+# Logs y temporales
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+application-local.properties
+application-local.yml
+
+# No subir binarios pesados de uploads (opcional: quitar si querés versionar imágenes)
+# uploads/ejercicios/*.webp
+# uploads/ejercicios/*.gif

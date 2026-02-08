@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Lexend%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Mattfuncional - Gestión de Gimnasio</title>
+    <link rel="icon" type="image/x-icon" href="/img/logo.png" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/css/footer.css" rel="stylesheet">
+</head>
+<body>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#f8fcfb] group/design-root overflow-x-hidden" style='font-family: Lexend, "Noto Sans", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <!-- Header con navbar mejorado -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7f3f1] px-10 py-3 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+          <div class="flex items-center gap-4 text-white">
+            <div class="size-10">
+              <img src="/img/logo.png" alt="Logo Mattfuncional" class="w-10 h-10 rounded-full object-cover">
+            </div>
+            <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Mattfuncional</h2>
+          </div>
+          
+          <!-- Botones de navegación -->
+          <div class="flex items-center gap-4">
+            <!-- Usuario NO autenticado -->
+            <div th:if="${#authentication.principal == 'anonymousUser'}" class="flex items-center gap-4">
+              <a href="/login" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-white text-blue-600 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-100 transition-colors">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                <span class="truncate">Iniciar Sesión</span>
+              </a>
+              <a href="/registro" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-transparent border-2 border-white text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white hover:text-blue-600 transition-colors">
+                <i class="fas fa-user-plus mr-2"></i>
+                <span class="truncate">Registrarse</span>
+              </a>
+        </div>
+            
+            <!-- Usuario autenticado -->
+            <div th:if="${#authentication.principal != 'anonymousUser'}" class="flex items-center gap-4">
+              <span class="text-white text-sm font-medium">
+                <i class="fas fa-user me-2"></i>
+                <span th:if="${usuarioActual != null}" th:text="${usuarioActual.nombre}">Usuario</span>
+                <span th:if="${usuarioActual == null}" th:text="${#authentication.principal.username}">Usuario</span>
+              </span>
+              <a href="/logout" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-red-500 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-600 transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                <span class="truncate">Cerrar Sesión</span>
+              </a>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Contenido principal -->
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+            <div class="@container">
+              <div class="@[480px]:p-4">
+                <div
+                  class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4 relative overflow-hidden"
+                  style='background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url("/img/gym-background.png");'
+                >
+                  <!-- Contenido central -->
+                  <div class="flex flex-col gap-4 text-center z-10">
+                    <h1
+                      class="text-white text-5xl font-black leading-tight tracking-[-0.033em] @[480px]:text-6xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] drop-shadow-lg"
+                    >
+                      Mattfuncional
+                    </h1>
+                    <h2 class="text-white text-lg font-normal leading-normal @[480px]:text-xl @[480px]:font-normal @[480px]:leading-normal drop-shadow-md">
+                      Gestión del gimnasio Mat Funcional
+                    </h2>
+                    <p class="text-white/90 text-sm @[480px]:text-base max-w-md mx-auto drop-shadow-sm">
+                      Administra alumnos, rutinas, ejercicios y más con nuestra plataforma completa y fácil de usar
+                    </p>
+                  </div>
+                  
+                  <!-- Botones de acción -->
+                  <div class="flex flex-col sm:flex-row gap-4 z-10">
+                    <!-- Botón para usuarios no autenticados -->
+                    <a th:if="${#authentication.principal == 'anonymousUser'}" href="/login"
+                      class="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-base font-bold leading-normal tracking-[0.015em] @[480px]:text-lg @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      <i class="fas fa-rocket mr-2"></i>
+                      <span class="truncate">Comenzar Ahora</span>
+                    </a>
+                    <!-- Botón para usuarios autenticados -->
+                    <a th:if="${#authentication.principal != 'anonymousUser'}" 
+                       th:href="${usuarioActual != null && usuarioActual.rol == 'PROFESOR' ? '/profesor/dashboard' : '/'}"
+                       class="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-gradient-to-r from-green-500 to-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] @[480px]:text-lg @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:from-green-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      <i class="fas fa-tachometer-alt mr-2"></i>
+                      <span class="truncate">Ir al Panel</span>
+                    </a>
+                    <a href="/demo"
+                      class="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-transparent border-2 border-white text-white text-base font-bold leading-normal tracking-[0.015em] @[480px]:text-lg @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:bg-white hover:text-blue-600 transition-all duration-300"
+                    >
+                      <i class="fas fa-play mr-2"></i>
+                      <span class="truncate">Ver Demo</span>
+            </a>
+        </div>
+
+                  <!-- Características destacadas -->
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 z-10">
+                    <div class="text-center text-white">
+                      <div class="bg-white/20 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-users text-2xl"></i>
+                      </div>
+                      <h3 class="font-bold text-lg mb-2">Gestión de Alumnos</h3>
+                      <p class="text-sm text-white/80">Administra perfiles, rutinas y progreso de tus alumnos</p>
+                    </div>
+                    <div class="text-center text-white">
+                      <div class="bg-white/20 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-dumbbell text-2xl"></i>
+                      </div>
+                      <h3 class="font-bold text-lg mb-2">Ejercicios y Rutinas</h3>
+                      <p class="text-sm text-white/80">Crea y personaliza rutinas con ejercicios detallados</p>
+                    </div>
+                    <div class="text-center text-white">
+                      <div class="bg-white/20 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                        </div>
+                      <h3 class="font-bold text-lg mb-2">Seguimiento</h3>
+                      <p class="text-sm text-white/80">Monitorea el progreso y resultados de tus alumnos</p>
+                </div>
+            </div>
+        </div>
+            </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

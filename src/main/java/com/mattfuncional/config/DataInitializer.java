@@ -1,0 +1,152 @@
+package com.mattfuncional.config;
+
+import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.repositorios.UsuarioRepository;
+import com.mattfuncional.servicios.ProfesorService;
+import com.mattfuncional.servicios.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ProfesorService profesorService;
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(String... args) throws Exception {
+        long startTime = System.currentTimeMillis();
+            System.out.println("=== Iniciando DataInitializer ===");
+
+        try {
+            // Verificar si ya se ejecutó antes (optimización)
+            if (isDataAlreadyInitialized()) {
+                System.out.println("✅ Datos ya inicializados - Saltando inicialización");
+                System.out.println("=== DataInitializer completado en " + (System.currentTimeMillis() - startTime) + "ms ===");
+                return;
+            }
+
+            // Crear el único usuario que maneja el panel: el Profesor (rol PROFESOR, vinculado a entidad Profesor)
+            createProfesorUsuarioIfNeeded();
+            
+            // Asignar avatares solo si es necesario
+            assignAvatarsIfNeeded();
+            
+            // Marcar como inicializado
+            markAsInitialized();
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error en DataInitializer: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        long totalTime = System.currentTimeMillis() - startTime;
+        System.out.println("=== DataInitializer completado en " + totalTime + "ms ===");
+    }
+
+    private static final String CORREO_PROFESOR = "profesor@mattfuncional.com";
+
+    /**
+     * Verifica si los datos ya fueron inicializados previamente
+     */
+    private boolean isDataAlreadyInitialized() {
+        try {
+            return usuarioRepository.findByCorreo(CORREO_PROFESOR)
+                    .map(u -> u.getAvatar() != null && !u.getAvatar().isEmpty())
+                    .orElse(false);
+        } catch (Exception e) {
+            System.out.println("⚠️ Error verificando estado de inicialización: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Crea el único usuario que gestiona el panel: Profesor (rol PROFESOR) vinculado a la entidad Profesor.
+     * Este usuario crea alumnos, asigna rutinas y lleva el control.
+     */
+    private void createProfesorUsuarioIfNeeded() {
+        try {
+            if (usuarioRepository.findByCorreo(CORREO_PROFESOR).isPresent()) {
+                System.out.println("ℹ️ Usuario profesor ya existe");
+                return;
+            }
+            System.out.println("🔧 Creando usuario Profesor (único gestor del panel)...");
+
+            Profesor profesor = profesorService.getProfesorByCorreo(CORREO_PROFESOR);
+            if (profesor == null) {
+                profesor = new Profesor();
+                profesor.setNombre("Profesor");
+                profesor.setApellido("");
+                profesor.setEdad(30);
+                profesor.setSexo("No especificado");
+                profesor.setEstablecimiento("-");
+                profesor.setCorreo(CORREO_PROFESOR);
+                profesor.setTelefono("-");
+                profesorService.guardarProfesor(profesor);
+                System.out.println("✅ Entidad Profesor creada");
+            }
+
+            Usuario usuario = new Usuario();
+            usuario.setNombre("Profesor");
+            usuario.setApellido("");
+            usuario.setCorreo(CORREO_PROFESOR);
+            usuario.setPassword(passwordEncoder.encode("profesor"));
+            usuario.setRol("PROFESOR");
+            usuario.setEdad(30);
+            usuario.setSexo("No especificado");
+            usuario.setAvatar("/img/avatar1.png");
+            usuario.setProfesor(profesor);
+
+            usuarioRepository.save(usuario);
+            System.out.println("✅ Usuario Profesor creado y vinculado (correo: " + CORREO_PROFESOR + ")");
+        } catch (Exception e) {
+            System.err.println("❌ Error creando usuario profesor: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Asigna avatares solo si es necesario
+     */
+    private void assignAvatarsIfNeeded() {
+        try {
+            // Solo ejecutar si hay usuarios sin avatar
+            long usuariosSinAvatar = usuarioRepository.countByAvatarIsNullOrAvatar("");
+            if (usuariosSinAvatar > 0) {
+                System.out.println("🎨 Asignando avatares a " + usuariosSinAvatar + " usuarios...");
+                usuarioService.asignarAvataresAUsuariosExistentes();
+                System.out.println("✅ Avatares asignados correctamente");
+            } else {
+                System.out.println("ℹ️ Todos los usuarios ya tienen avatares asignados");
+            }
+            } catch (Exception e) {
+            System.err.println("❌ Error asignando avatares: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Marca el sistema como inicializado
+     */
+    private void markAsInitialized() {
+        try {
+            usuarioRepository.findByCorreo(CORREO_PROFESOR).ifPresent(u -> {
+                System.out.println("✅ Sistema inicializado correctamente:");
+                System.out.println("   Usuario: " + u.getNombre() + " (" + u.getCorreo() + ")");
+                System.out.println("   Rol: " + u.getRol());
+            });
+        } catch (Exception e) {
+            System.err.println("⚠️ Error verificando inicialización: " + e.getMessage());
+        }
+    }
+}

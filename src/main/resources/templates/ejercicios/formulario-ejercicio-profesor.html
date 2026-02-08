@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Ejercicio - Panel del Profesor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            padding: 2rem 0 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.2rem;
+        }
+        
+        .btn-profesor {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-profesor:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-volver {
+            background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-volver:hover {
+            background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
+            color: white;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container mt-4">
+    <div class="hero-section mb-4">
+        <div class="d-flex justify-content-between align-items-center px-3">
+            <a href="/profesor/ejercicios" class="btn btn-volver"><i class="fas fa-arrow-left me-2"></i>Volver a Ejercicios</a>
+            <span></span>
+        </div>
+        <h1 class="hero-title"><i class="fas fa-plus me-2"></i>Nuevo Ejercicio</h1>
+        <p class="hero-subtitle" th:if="${profesor != null}" th:text="'Crea un nuevo ejercicio, ' + ${profesor.nombre}"></p>
+        <p class="hero-subtitle" th:if="${profesor == null}">Crea un nuevo ejercicio</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-container">
+                <form th:action="@{/profesor/mis-ejercicios/nuevo}" th:object="${exercise}" method="post" enctype="multipart/form-data">
+                    
+                    <!-- Mensaje de error -->
+                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+
+                    <!-- Nombre del ejercicio -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-dumbbell me-2"></i>Nombre del Ejercicio
+                        </label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}" 
+                               placeholder="Ej: Press de banca, Sentadillas, etc." required>
+                        <div th:if="${#fields.hasErrors('name')}" class="text-danger mt-1">
+                            <small th:errors="*{name}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Tipo -->
+                    <div class="mb-3">
+                        <label for="type" class="form-label">
+                            <i class="fas fa-tag me-2"></i>Tipo
+                        </label>
+                        <input type="text" class="form-control" id="type" th:field="*{type}" 
+                               placeholder="Ej: Tríceps, Bíceps, Cuádriceps, etc.">
+                        <div class="form-text">Especifica el tipo o subcategoría del grupo muscular (ej: Tríceps, Bíceps para BRAZOS; Cuádriceps, Isquiotibiales para PIERNAS)</div>
+                        <div th:if="${#fields.hasErrors('type')}" class="text-danger mt-1">
+                            <small th:errors="*{type}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left me-2"></i>Descripción
+                        </label>
+                        <textarea class="form-control" id="description" th:field="*{description}" 
+                                  rows="4" placeholder="Describe cómo realizar el ejercicio, qué músculos trabaja, etc." required></textarea>
+                        <div th:if="${#fields.hasErrors('description')}" class="text-danger mt-1">
+                            <small th:errors="*{description}"></small>
+                        </div>
+                    </div>
+
+                    <!-- URL del video -->
+                    <div class="mb-3">
+                        <label for="videoUrl" class="form-label">
+                            <i class="fas fa-video me-2"></i>URL del Video (Opcional)
+                        </label>
+                        <input type="url" class="form-control" id="videoUrl" th:field="*{videoUrl}" 
+                               placeholder="https://www.youtube.com/watch?v=...">
+                        <div class="form-text">Puedes agregar un enlace a YouTube o cualquier plataforma de video</div>
+                        <div th:if="${#fields.hasErrors('videoUrl')}" class="text-danger mt-1">
+                            <small th:errors="*{videoUrl}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Grupos musculares -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-muscle me-2"></i>Grupos Musculares
+                        </label>
+                        <div class="row">
+                            <div th:each="muscleGroup : ${muscleGroups}" class="col-md-6 col-lg-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           th:value="${muscleGroup}" 
+                                           th:name="muscleGroups" 
+                                           th:id="${'muscleGroup-' + muscleGroup}">
+                                    <label class="form-check-label" th:for="${'muscleGroup-' + muscleGroup}" 
+                                           th:text="${muscleGroup}">
+                                        Grupo Muscular
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-text">Selecciona todos los grupos musculares que trabaja este ejercicio</div>
+                    </div>
+
+                    <!-- Imagen -->
+                    <div class="mb-3">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image me-2"></i>Imagen del Ejercicio
+                        </label>
+                        <input type="file" class="form-control" id="image" name="image" 
+                               accept="image/*" onchange="previewImage(this)">
+                        <div class="form-text">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</div>
+                        
+                        <!-- Vista previa de la imagen -->
+                        <div id="imagePreview" class="mt-3" style="display: none;">
+                            <img id="preview" class="image-preview" alt="Vista previa">
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-between">
+                        <a href="/profesor/ejercicios" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-profesor">
+                            <i class="fas fa-save me-2"></i>Guardar Ejercicio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function previewImage(input) {
+        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('imagePreview');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html> 

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrar Ejercicios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .table td {
+            vertical-align: middle;
+            padding: 1rem;
+            border-color: #e9ecef;
+        }
+        
+        .exercise-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .exercise-img:hover {
+            transform: scale(1.1);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .muscle-group-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 0.1rem;
+            display: inline-block;
+        }
+        
+        .image-upload-form {
+            margin-top: 0.5rem;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .actions-column {
+            min-width: 200px;
+        }
+        
+        .description-cell {
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .floating-action-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .floating-action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .floating-action-btn i {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-dumbbell me-3"></i>Administración de Ejercicios</h1>
+            <p class="mb-0 mt-2">Gestiona todos los ejercicios del sistema</p>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="stats-card">
+            <div class="stats-number" th:text="${#lists.size(exercises)}">0</div>
+            <div class="stats-label">Ejercicios Registrados</div>
+        </div>
+
+        <!-- Table -->
+        <div class="main-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                            <th><i class="fas fa-dumbbell me-1"></i>Nombre</th>
+                            <th><i class="fas fa-align-left me-1"></i>Descripción</th>
+                            <th><i class="fas fa-muscle me-1"></i>Grupos Musculares</th>
+                            <th><i class="fas fa-image me-1"></i>Imagen</th>
+                            <th class="actions-column"><i class="fas fa-cogs me-1"></i>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="exercise : ${exercises}">
+                            <td class="text-center">
+                                <span class="badge bg-secondary" th:text="${exercise.id}"></span>
+                            </td>
+                            <td>
+                                <strong th:text="${exercise.name}"></strong>
+                            </td>
+                            <td class="description-cell">
+                                <span th:text="${exercise.description}"></span>
+                            </td>
+                            <td>
+                                <div th:each="group : ${exercise.muscleGroups}">
+                                    <span class="muscle-group-badge" th:text="${group}"></span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <img class="exercise-img"
+                                     th:if="${exercise.imagen != null}"
+                                     th:src="${exercise.imagen.url}"
+                                     alt="Exercise Image">
+                                <img class="exercise-img"
+                                     th:if="${exercise.imagen == null}"
+                                     src="/img/not_imagen.png"
+                                     alt="Imagen por defecto">
+                                
+                                <form th:action="@{/ejercicios/cambiar-imagen/{id}(id=${exercise.id})}" 
+                                      method="post" 
+                                      enctype="multipart/form-data" 
+                                      onsubmit="saveScrollPosition()"
+                                      class="image-upload-form">
+                                    <div class="input-group input-group-sm">
+                                        <input type="file" name="image" accept="image/*" required class="form-control">
+                                        <button type="submit" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-upload me-1"></i>Cambiar
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/ejercicios/modificar/{id}(id=${exercise.id})}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Modificar
+                                    </a>
+                                    <a th:href="@{/ejercicios/eliminar/{id}(id=${exercise.id})}" 
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('¿Estás seguro de que quieres eliminar este ejercicio?')">
+                                        <i class="fas fa-trash me-1"></i>Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <a href="/ejercicios/nuevo" class="floating-action-btn">
+        <i class="fas fa-plus"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Save scroll position before form submission
+        function saveScrollPosition() {
+            localStorage.setItem('scrollY', window.scrollY);
+        }
+
+        // Restore scroll position on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const scrollY = localStorage.getItem('scrollY');
+            if (scrollY !== null) {
+                window.scrollTo(0, parseFloat(scrollY));
+                localStorage.removeItem('scrollY');
+            }
+        });
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

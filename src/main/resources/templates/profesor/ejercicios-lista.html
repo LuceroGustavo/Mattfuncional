@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Ejercicios - Panel del Profesor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-card .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .stats-card .stats-label {
+            font-size: 1rem;
+            font-weight: 600;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-nuevo {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-nuevo:hover {
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+        
+        .btn-volver {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-volver:hover {
+            background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        
+        .search-filter-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .search-input {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9ff;
+            transition: background-color 0.2s ease;
+        }
+        
+        .exercise-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .exercise-image:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container mt-4">
+    <!-- Mensajes de éxito/error -->
+    <div th:if="${param.success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:if="${param.success[0] == 'predeterminados_cargados'}">Ejercicios predeterminados cargados correctamente.<span th:if="${param.total != null}" th:text="' Total: ' + ${param.total[0]} + ' ejercicios.'"></span></span>
+        <span th:if="${param.success[0] == 'ejercicio_eliminado'}">Ejercicio eliminado exitosamente.</span>
+        <span th:if="${param.success[0] == 'ejercicio_creado'}">Ejercicio creado exitosamente.</span>
+        <span th:if="${param.success[0] == 'ejercicio_actualizado'}">Ejercicio actualizado exitosamente.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:if="${param.error[0] == 'carga_predeterminados'}">Error al cargar ejercicios predeterminados. Revisa los logs.</span>
+        <span th:if="${param.error[0] == 'no_autorizado'}">No tienes autorización para realizar esta acción.</span>
+        <span th:if="${param.error[0] == 'ejercicio_no_encontrado'}">El ejercicio no fue encontrado.</span>
+        <span th:if="${param.error[0] == 'no_se_puede_eliminar_predeterminado'}">No se pueden eliminar ejercicios predeterminados.</span>
+        <span th:if="${param.error[0] == 'sin_permisos'}">No tienes permisos para eliminar este ejercicio.</span>
+        <span th:if="${param.error[0] == 'error_eliminar'}">Error al eliminar el ejercicio. Por favor, intenta nuevamente.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    <!-- Header Section -->
+    <div class="hero-section mb-4">
+        <div class="d-flex justify-content-between align-items-center px-3">
+            <a th:href="@{/profesor/{id}(id=${profesor.id})}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
+            </a>
+            <span></span>
+        </div>
+        <h1 class="hero-title">
+            <i class="fas fa-dumbbell me-2"></i>Mis Ejercicios
+        </h1>
+        <p class="mb-0">Gestiona tu biblioteca de ejercicios personalizada</p>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-dumbbell fa-2x mb-2"></i>
+                    <h4 class="card-title" th:text="${totalEjercicios}">0</h4>
+                    <p class="card-text">Total Disponibles</p>
+                    <small class="text-white-50">Predeterminados + Propios</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card h-100" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4 class="card-title" th:text="${ejerciciosPredeterminados}">0</h4>
+                    <p class="card-text">Predeterminados</p>
+                    <small class="text-white-50">Solo lectura</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card h-100" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-edit fa-2x mb-2"></i>
+                    <h4 class="card-title" th:text="${totalEjerciciosPropios}">0</h4>
+                    <p class="card-text">Mis Ejercicios</p>
+                    <small class="text-white-50">Personalizados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="/profesor/mis-ejercicios/nuevo" class="text-decoration-none">
+                <div class="card stats-card h-100" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); cursor: pointer;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus fa-2x mb-2"></i>
+                        <h4 class="card-title">Crear</h4>
+                        <p class="card-text">Nuevo Ejercicio</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="searchExercise" class="form-label fw-bold">
+                    <i class="fas fa-search me-2 text-primary"></i>Buscar ejercicio
+                </label>
+                <input type="text" class="form-control search-input" id="searchExercise" 
+                       placeholder="Buscar por nombre o descripción...">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filterMuscleGroup" class="form-label fw-bold">
+                    <i class="fas fa-filter me-2 text-primary"></i>Filtrar por Grupo Muscular
+                </label>
+                <select class="form-select search-input" id="filterMuscleGroup">
+                    <option value="">Todos los grupos musculares</option>
+                    <option th:each="grupo : ${gruposMusculares}" 
+                            th:value="${grupo}" 
+                            th:text="${grupo}">
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de la tabla -->
+    <div class="table-responsive">
+        <div th:if="${ejercicios.empty}" class="text-center py-5">
+            <i class="fas fa-dumbbell fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hay ejercicios disponibles</h5>
+            <p class="text-muted">Crea tu primer ejercicio para comenzar</p>
+            <a th:href="@{/profesor/mis-ejercicios/nuevo}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Crear Ejercicio
+            </a>
+        </div>
+
+        <div th:unless="${ejercicios.empty}">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Nombre</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">Tipo</th>
+                        <th class="text-center">Grupos Musculares</th>
+                        <th class="text-center">Imagen</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="ejercicio, iterStat : ${ejercicios}" 
+                        th:classappend="${ejercicio.isPredeterminado()} ? 'table-info' : ''"
+                        class="text-center">
+                        <td th:text="${iterStat.index + 1}">#</td>
+                        <td>
+                            <span th:text="${ejercicio.name}">Nombre del Ejercicio</span>
+                            <span th:if="${ejercicio.isPredeterminado()}" 
+                                  class="badge bg-info ms-2" 
+                                  title="Ejercicio predeterminado - Solo lectura">
+                                <i class="fas fa-star"></i> Predeterminado
+                            </span>
+                        </td>
+                        <td th:text="${ejercicio.description}">Descripción del ejercicio</td>
+                        <td th:text="${ejercicio.type}">Tipo</td>
+                        <td>
+                            <span th:each="grupo : ${ejercicio.muscleGroups}" 
+                                  class="badge bg-primary me-1"
+                                  th:text="${grupo}">Grupo</span>
+                        </td>
+                        <td class="text-center">
+                            <img th:if="${ejercicio.imagen != null}" 
+                                 th:src="${ejercicio.imagen.url}"
+                                 th:alt="${'Imagen de ' + ejercicio.name}"
+                                 class="exercise-image"
+                                 onerror="this.src='/img/not_imagen.png'">
+                            <img th:unless="${ejercicio.imagen != null}" 
+                                 src="/img/not_imagen.png"
+                                 alt="Sin imagen"
+                                 class="exercise-image">
+                        </td>
+                        <td class="text-center">
+                            <!-- Solo mostrar botones de editar/eliminar si NO es predeterminado -->
+                            <span th:if="${!ejercicio.isPredeterminado()}">
+                                <a th:href="@{/profesor/mis-ejercicios/editar/{id}(id=${ejercicio.id})}" 
+                                   class="btn btn-success btn-sm me-1">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-danger btn-sm"
+                                        th:onclick="'confirmarEliminacion(' + ${ejercicio.id} + ')'">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </span>
+                            <span th:if="${ejercicio.isPredeterminado()}" class="text-muted">
+                                <i class="fas fa-lock me-1"></i>Solo lectura
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function initializeSearchAndFilter() {
+        const searchInput = document.getElementById('searchExercise');
+        const filterSelect = document.getElementById('filterMuscleGroup');
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            filterExercises();
+        });
+        
+        // Filter functionality
+        filterSelect.addEventListener('change', function() {
+            filterExercises();
+        });
+    }
+
+    function filterExercises() {
+        const searchTerm = document.getElementById('searchExercise').value.toLowerCase();
+        const selectedGroup = document.getElementById('filterMuscleGroup').value;
+        const exerciseRows = document.querySelectorAll('tbody tr');
+        
+        exerciseRows.forEach(row => {
+            const exerciseName = row.cells[1].textContent.toLowerCase();
+            const exerciseDescription = row.cells[2].textContent.toLowerCase();
+            const muscleGroups = Array.from(row.cells[4].querySelectorAll('.badge'))
+                .map(badge => badge.textContent);
+            
+            const matchesSearch = exerciseName.includes(searchTerm) || 
+                                exerciseDescription.includes(searchTerm);
+            const matchesGroup = !selectedGroup || muscleGroups.includes(selectedGroup);
+            
+            if (matchesSearch && matchesGroup) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    // Función para confirmar eliminación
+    function confirmarEliminacion(id) {
+        if (confirm('¿Estás seguro de que quieres eliminar este ejercicio?')) {
+            // Redirigir a la URL de eliminación
+            window.location.href = `/profesor/mis-ejercicios/eliminar/${id}`;
+        }
+    }
+    
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSearchAndFilter();
+        console.log('Lista de ejercicios inicializada correctamente');
+    });
+</script>
+
+</body>
+</html>

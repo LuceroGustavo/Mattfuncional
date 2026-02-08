@@ -1,0 +1,769 @@
+package com.mattfuncional.controladores;
+
+import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.entidades.Serie;
+import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.servicios.ProfesorService;
+import com.mattfuncional.servicios.UsuarioService;
+import com.mattfuncional.servicios.RutinaService;
+import com.mattfuncional.servicios.SerieService;
+import com.mattfuncional.servicios.AsistenciaService;
+import com.mattfuncional.entidades.Asistencia;
+import com.mattfuncional.entidades.MedicionFisica;
+import com.mattfuncional.servicios.MedicionFisicaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.time.LocalDate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.stream.Stream;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Controller
+@RequestMapping("/profesor")
+public class ProfesorController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProfesorController.class);
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private ProfesorService profesorService;
+
+    @Autowired
+    private RutinaService rutinaService;
+
+    @Autowired
+    private SerieService serieService;
+
+    @Autowired
+    private AsistenciaService asistenciaService;
+
+    @Autowired
+    private MedicionFisicaService medicionFisicaService;
+
+    @Autowired
+    private com.mattfuncional.servicios.ExerciseService exerciseService;
+
+    @Autowired
+    private com.mattfuncional.servicios.ExerciseCargaDefaultOptimizado exerciseCargaDefaultOptimizado;
+
+    /** Obtiene el Profesor asociado al usuario actual (el único rol del panel es PROFESOR). */
+    private Profesor getProfesorParaUsuarioActual(Usuario usuarioActual) {
+        if (usuarioActual == null) return null;
+        if (usuarioActual.getProfesor() != null) return usuarioActual.getProfesor();
+        return profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboardProfesor(Model model) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual();
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        return "redirect:/profesor/" + profesor.getId();
+    }
+
+    @GetMapping("/{id}")
+    public String dashboardProfesorPorId(@PathVariable Long id, Model model) {
+        Profesor profesor = profesorService.getProfesorById(id);
+        if (profesor == null) {
+            model.addAttribute("errorMessage", "Profesor no encontrado.");
+            return "redirect:/profesor/dashboard";
+        }
+
+        List<Usuario> usuarios = usuarioService.getAlumnosByProfesorId(profesor.getId());
+        List<com.mattfuncional.entidades.Rutina> rutinas = rutinaService.obtenerRutinasPlantillaPorProfesor(profesor.getId());
+        List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinaService
+                .obtenerRutinasAsignadasPorProfesor(profesor.getId());
+        List<Serie> series = serieService.obtenerSeriesPlantillaPorProfesor(profesor.getId());
+
+        model.addAttribute("usuarios", usuarios);
+        model.addAttribute("rutinas", rutinas);
+        model.addAttribute("rutinasAsignadas", rutinasAsignadas);
+        model.addAttribute("series", series);
+        model.addAttribute("profesor", profesor);
+
+        model.addAttribute("usuario", usuarioService.getUsuarioActual());
+
+        return "profesor/dashboard";
+    }
+
+    // --- GESTIÓN DE ALUMNOS (USUARIOS) ---
+
+    // FORMULARIO NUEVO ALUMNO
+    @GetMapping("/alumnos/nuevo")
+    public String nuevoAlumnoForm(Model model, @AuthenticationPrincipal Usuario profesorUsuario) {
+        Usuario nuevoUsuario = new Usuario();
+        // Inicializa la lista para evitar problemas de Thymeleaf
+        nuevoUsuario.setDiasHorariosAsistencia(new java.util.ArrayList<>());
+        model.addAttribute("usuario", nuevoUsuario);
+        model.addAttribute("usuarioActual", profesorUsuario);
+        return "profesor/nuevoalumno";
+    }
+
+    // GUARDAR NUEVO ALUMNO
+    @PostMapping("/alumnos/nuevo")
+    public String crearAlumno(@ModelAttribute Usuario alumno,
+            @RequestParam(value = "horariosJson", required = false) String horariosJson,
+            Model model,
+            @AuthenticationPrincipal Usuario profesorUsuario) {
+        model.addAttribute("usuarioActual", profesorUsuario);
+        try {
+            // Validar que no exista un usuario con el mismo correo
+            Optional<Usuario> usuarioExistente = usuarioService.getAllUsuarios().stream()
+                .filter(u -> u.getCorreo().equals(alumno.getCorreo()))
+                .findFirst();
+            
+            if (usuarioExistente.isPresent()) {
+                throw new IllegalArgumentException("Ya existe un usuario con el correo: " + alumno.getCorreo());
+            }
+            
+            // Validar que no exista un profesor con el mismo correo
+            Profesor profesorExistente = profesorService.getProfesorByCorreo(alumno.getCorreo());
+            if (profesorExistente != null) {
+                throw new IllegalArgumentException("Ya existe un profesor con el correo: " + alumno.getCorreo());
+            }
+
+            Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
+            if (profesor == null) return "redirect:/login";
+            alumno.setProfesor(profesor);
+
+            // Procesar horarios de asistencia si se proporcionan
+            if (horariosJson != null && !horariosJson.trim().isEmpty()) {
+                try {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    List<java.util.Map<String, Object>> horariosList = objectMapper.readValue(horariosJson,
+                            new TypeReference<List<java.util.Map<String, Object>>>() {
+                            });
+
+                    List<com.mattfuncional.entidades.DiaHorarioAsistencia> horariosAsistencia = new ArrayList<>();
+
+                    for (java.util.Map<String, Object> horario : horariosList) {
+                        String diaStr = (String) horario.get("dia");
+                        Object horaObj = horario.get("hora");
+
+                        com.mattfuncional.enums.DiaSemana dia = com.mattfuncional.enums.DiaSemana.valueOf(diaStr);
+
+                        // Manejar tanto Integer como Double
+                        int horaInt;
+                        if (horaObj instanceof Integer) {
+                            horaInt = (Integer) horaObj;
+                        } else if (horaObj instanceof Double) {
+                            horaInt = ((Double) horaObj).intValue();
+                        } else {
+                            throw new RuntimeException("Tipo de hora no válido: " + horaObj.getClass());
+                        }
+
+                        // Solo permitir horas completas (sin minutos)
+                        int minutos = 0;
+
+                        java.time.LocalTime horaInicio = java.time.LocalTime.of(horaInt, minutos);
+                        java.time.LocalTime horaFin = horaInicio.plusHours(1); // Duración de 1 hora
+
+                        com.mattfuncional.entidades.DiaHorarioAsistencia diaHorario = new com.mattfuncional.entidades.DiaHorarioAsistencia();
+                        diaHorario.setDia(dia);
+                        diaHorario.setHoraEntrada(horaInicio);
+                        diaHorario.setHoraSalida(horaFin);
+                        horariosAsistencia.add(diaHorario);
+                    }
+
+                    alumno.setDiasHorariosAsistencia(horariosAsistencia);
+
+                } catch (Exception e) {
+                    // Si hay error al procesar horarios, continuar sin ellos
+                    System.err.println("Error procesando horarios: " + e.getMessage());
+                }
+            }
+
+            usuarioService.crearAlumno(alumno);
+
+            return "redirect:/profesor/" + profesor.getId();
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error al crear el alumno: " + e.getMessage());
+            model.addAttribute("usuario", alumno);
+            return "profesor/nuevoalumno";
+        }
+    }
+
+    // ELIMINAR ALUMNO
+    @GetMapping("/alumnos/eliminar/{id}")
+    public String eliminarAlumno(@PathVariable Long id, @AuthenticationPrincipal Usuario profesorUsuario) {
+        if (profesorUsuario == null) {
+            return "redirect:/login";
+        }
+
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
+        if (profesor == null) return "redirect:/login";
+
+        boolean esPropietario = alumno != null && alumno.getProfesor() != null
+                && alumno.getProfesor().getId().equals(profesor.getId());
+
+        if (esPropietario) {
+            usuarioService.eliminarUsuario(id);
+            return "redirect:/profesor/" + profesor.getId();
+        }
+        return "redirect:/profesor/" + profesor.getId() + "?error=permiso";
+    }
+
+    // --- FORMULARIO EDITAR ALUMNO (GET) ---
+    @GetMapping("/alumnos/editar/{id}")
+    public String editarAlumnoForm(@PathVariable Long id, Model model,
+            @AuthenticationPrincipal Usuario profesorUsuario) {
+        if (profesorUsuario == null) return "redirect:/login";
+
+        Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
+        if (profesor == null) return "redirect:/login";
+
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        boolean esPropietario = alumno != null && alumno.getProfesor() != null
+                && alumno.getProfesor().getId().equals(profesor.getId());
+
+        if (esPropietario) {
+            model.addAttribute("usuario", alumno);
+            model.addAttribute("usuarioActual", profesorUsuario);
+            model.addAttribute("editMode", true);
+            return "profesor/nuevoalumno";
+        }
+        return "redirect:/profesor/" + profesor.getId() + "?error=permiso";
+    }
+
+    // --- PROCESAR EDICIÓN ALUMNO (POST) ---
+    @PostMapping("/alumnos/editar/{id}")
+    public String procesarEditarAlumno(@PathVariable Long id,
+            @ModelAttribute Usuario alumno,
+            @RequestParam(value = "horariosJson", required = false) String horariosJson,
+            Model model,
+            @AuthenticationPrincipal Usuario profesorUsuario) {
+        Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
+        if (profesor == null) return "redirect:/login";
+
+        Usuario alumnoAEditar = usuarioService.getUsuarioById(id);
+        boolean esPropietario = alumnoAEditar != null && alumnoAEditar.getProfesor() != null
+                && alumnoAEditar.getProfesor().getId().equals(profesor.getId());
+
+        if (esPropietario) {
+            try {
+                alumno.setId(id);
+                alumno.setProfesor(profesor);
+
+                // Procesar horarios del selector visual
+                if (horariosJson != null && !horariosJson.isEmpty()) {
+                    try {
+                        // Parsear el JSON de horarios
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        java.util.List<java.util.Map<String, Object>> horariosList = mapper.readValue(horariosJson,
+                                mapper.getTypeFactory().constructCollectionType(java.util.List.class,
+                                        java.util.Map.class));
+
+                        java.util.List<com.mattfuncional.entidades.DiaHorarioAsistencia> horariosAsistencia = new java.util.ArrayList<>();
+
+                        for (java.util.Map<String, Object> horario : horariosList) {
+                            String diaStr = (String) horario.get("dia");
+                            Object horaObj = horario.get("hora");
+
+                            com.mattfuncional.enums.DiaSemana dia = com.mattfuncional.enums.DiaSemana.valueOf(diaStr);
+
+                            // Manejar tanto Integer como Double
+                            int horaInt;
+                            if (horaObj instanceof Integer) {
+                                horaInt = (Integer) horaObj;
+                            } else if (horaObj instanceof Double) {
+                                horaInt = ((Double) horaObj).intValue();
+                            } else {
+                                throw new RuntimeException("Tipo de hora no válido: " + horaObj.getClass());
+                            }
+
+                            // Solo permitir horas completas (sin minutos)
+                            int minutos = 0;
+
+                            java.time.LocalTime horaInicio = java.time.LocalTime.of(horaInt, minutos);
+                            java.time.LocalTime horaFin = horaInicio.plusHours(1); // Duración de 1 hora
+
+                            com.mattfuncional.entidades.DiaHorarioAsistencia diaHorario = new com.mattfuncional.entidades.DiaHorarioAsistencia();
+                            diaHorario.setDia(dia);
+                            diaHorario.setHoraEntrada(horaInicio);
+                            diaHorario.setHoraSalida(horaFin);
+                            horariosAsistencia.add(diaHorario);
+                        }
+
+                        alumno.setDiasHorariosAsistencia(horariosAsistencia);
+
+                    } catch (Exception e) {
+                        // Si hay error al procesar horarios, continuar sin ellos
+                        System.err.println("Error procesando horarios: " + e.getMessage());
+                    }
+                }
+
+                usuarioService.actualizarUsuario(alumno);
+                return "redirect:/profesor/" + profesor.getId();
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Error al actualizar el alumno: " + e.getMessage());
+                model.addAttribute("usuario", alumno);
+                model.addAttribute("usuarioActual", profesorUsuario);
+                model.addAttribute("editMode", true);
+                return "profesor/nuevoalumno";
+            }
+        } else {
+            model.addAttribute("errorMessage", "No tiene permisos para editar este usuario.");
+            return "profesor/nuevoalumno";
+        }
+    }
+
+    // Mostrar ficha de alumno con historial físico
+    @GetMapping("/alumnos/{id}")
+    public String verAlumno(@PathVariable Long id, Model model) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        model.addAttribute("alumno", alumno);
+        // Cargar historial físico
+        model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
+        // --- NUEVO: historial de asistencia ---
+        java.util.List<Asistencia> historialAsistencia = asistenciaService.obtenerAsistenciasPorUsuario(alumno);
+        model.addAttribute("historialAsistencia", historialAsistencia);
+        // --- NUEVO: cargar rutinas desde el servicio para evitar LazyInitializationException ---
+        List<com.mattfuncional.entidades.Rutina> rutinasDelAlumno = rutinaService.obtenerRutinasAsignadasPorUsuario(id);
+        
+        List<com.mattfuncional.entidades.Rutina> rutinasEnProceso = rutinasDelAlumno.stream()
+                        .filter(r -> r.getEstado() == null || !"TERMINADA".equals(r.getEstado()))
+                        .sorted(java.util.Comparator
+                                .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
+                                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
+                                .reversed())
+                        .collect(java.util.stream.Collectors.toList());
+        List<com.mattfuncional.entidades.Rutina> rutinasTerminadas = rutinasDelAlumno.stream()
+                        .filter(r -> "TERMINADA".equals(r.getEstado()))
+                        .sorted(java.util.Comparator
+                                .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
+                                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
+                                .reversed())
+                        .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("rutinasEnProceso", rutinasEnProceso);
+        model.addAttribute("rutinasTerminadas", rutinasTerminadas);
+
+        return "profesor/alumno-detalle";
+    }
+
+    // POST: Registrar asistencia
+    @PostMapping("/alumnos/{id}/asistencia")
+    public String registrarAsistencia(@PathVariable Long id,
+            @RequestParam("presente") boolean presente,
+            @RequestParam(value = "observaciones", required = false) String observaciones,
+            @AuthenticationPrincipal Usuario profesorUsuario,
+            Model model) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
+        if (alumno == null || profesor == null) {
+            return profesor != null ? "redirect:/profesor/" + profesor.getId() : "redirect:/login";
+        }
+        var asistencia = asistenciaService.registrarAsistencia(alumno, java.time.LocalDate.now(), presente,
+                observaciones);
+        if (asistencia == null) {
+            // Ya existe asistencia hoy
+            model.addAttribute("errorAsistencia",
+                    "La asistencia de hoy ya fue registrada. Si fue un error, puedes deshacerla.");
+            return verAlumno(id, model); // Recarga la ficha con el mensaje de error
+        }
+        return "redirect:/profesor/alumnos/" + id;
+    }
+
+    @PostMapping("/alumnos/{id}/asistencia/deshacer")
+    public String deshacerAsistenciaDeHoy(@PathVariable Long id) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        if (alumno != null) {
+            asistenciaService.eliminarAsistenciaDeHoy(alumno);
+        }
+        return "redirect:/profesor/alumnos/" + id;
+    }
+
+    // Agregar nueva medición física
+    @PostMapping("/alumnos/{id}/medicion/nueva")
+    public String agregarMedicionFisica(@PathVariable Long id, @RequestParam(required = false) String fecha,
+            @RequestParam(required = false) Double peso,
+            @RequestParam(required = false) Double altura,
+            @RequestParam(required = false) Double cintura,
+            @RequestParam(required = false) Double pecho,
+            @RequestParam(required = false) Double cadera,
+            @RequestParam(required = false) Double biceps,
+            @RequestParam(required = false) Double muslo) {
+        MedicionFisica medicion = new MedicionFisica();
+        medicion.setUsuario(usuarioService.getUsuarioById(id));
+        if (fecha != null && !fecha.isEmpty()) {
+            medicion.setFecha(java.time.LocalDate.parse(fecha));
+        }
+        medicion.setPeso(peso);
+        medicion.setAltura(altura);
+        medicion.setCintura(cintura);
+        medicion.setPecho(pecho);
+        medicion.setCadera(cadera);
+        medicion.setBiceps(biceps);
+        medicion.setMuslo(muslo);
+        medicionFisicaService.guardarMedicion(medicion);
+        return "redirect:/profesor/alumnos/" + id;
+    }
+
+    // --- GESTIÓN DE EJERCICIOS DEL PROFESOR ---
+
+    @PostMapping("/mis-ejercicios/cargar-predeterminados")
+    public String cargarEjerciciosPredeterminados(@AuthenticationPrincipal Usuario usuarioActual) {
+        if (usuarioActual == null || getProfesorParaUsuarioActual(usuarioActual) == null) {
+            return "redirect:/login?error=true";
+        }
+        try {
+            int cargados = exerciseCargaDefaultOptimizado.saveDefaultExercisesOptimizado();
+            logger.info("Ejercicios predeterminados cargados: {} por usuario {}", cargados, usuarioActual.getCorreo());
+            return "redirect:/profesor/mis-ejercicios?success=predeterminados_cargados&total=" + cargados;
+        } catch (Exception e) {
+            logger.error("Error cargando ejercicios predeterminados: {}", e.getMessage());
+            return "redirect:/profesor/mis-ejercicios?error=carga_predeterminados";
+        }
+    }
+
+    @GetMapping("/mis-ejercicios")
+    public String listarEjerciciosProfesor(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        // Asegurar que existan los 60 ejercicios predeterminados (imágenes desde uploads/ejercicios/ 1.webp..60.webp)
+        exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
+
+        Long profesorId = profesor.getId();
+        // Usar nuevo método que incluye predeterminados + propios
+        List<com.mattfuncional.entidades.Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesor(profesorId);
+        
+        // Separar predeterminados y propios para estadísticas
+        List<com.mattfuncional.entidades.Exercise> ejerciciosPropios = exerciseService.findEjerciciosPropiosDelProfesor(profesorId);
+        long ejerciciosPredeterminados = exerciseService.countEjerciciosPredeterminados();
+        
+        // Calcular estadísticas
+        long totalEjercicios = ejercicios.size();
+        long totalEjerciciosPropios = ejerciciosPropios.size();
+        long ejerciciosConVideo = ejercicios.stream()
+            .filter(e -> e.getVideoUrl() != null && !e.getVideoUrl().isEmpty())
+            .count();
+        
+        // Obtener grupos musculares únicos
+        Set<com.mattfuncional.enums.MuscleGroup> gruposMusculares = ejercicios.stream()
+            .flatMap(e -> e.getMuscleGroups() != null ? e.getMuscleGroups().stream() : Stream.empty())
+            .collect(java.util.stream.Collectors.toSet());
+        
+        long totalGruposMusculares = gruposMusculares.size();
+
+        model.addAttribute("ejercicios", ejercicios);
+        model.addAttribute("ejerciciosPropios", ejerciciosPropios);
+        model.addAttribute("totalEjercicios", totalEjercicios);
+        model.addAttribute("totalEjerciciosPropios", totalEjerciciosPropios);
+        model.addAttribute("ejerciciosPredeterminados", ejerciciosPredeterminados);
+        model.addAttribute("ejerciciosConVideo", ejerciciosConVideo);
+        model.addAttribute("totalGruposMusculares", totalGruposMusculares);
+        model.addAttribute("gruposMusculares", gruposMusculares);
+        model.addAttribute("profesor", profesor);
+
+        return "profesor/ejercicios-lista";
+    }
+
+    @GetMapping("/mis-ejercicios/nuevo")
+    public String nuevoEjercicioForm(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        model.addAttribute("exercise", new com.mattfuncional.entidades.Exercise());
+        model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+        model.addAttribute("profesor", profesor);
+        
+        return "ejercicios/formulario-ejercicio-profesor";
+    }
+
+    @PostMapping("/mis-ejercicios/nuevo")
+    public String guardarEjercicioProfesor(@Valid @ModelAttribute("exercise") com.mattfuncional.entidades.Exercise exercise,
+                                         BindingResult bindingResult,
+                                         @RequestParam List<String> muscleGroups,
+                                         @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                                         @AuthenticationPrincipal Usuario usuarioActual,
+                                         Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("profesor", profesor);
+            return "ejercicios/formulario-ejercicio-profesor";
+        }
+
+        try {
+            // Asignar el profesor al ejercicio (ejercicios personalizados, no predeterminados)
+            exercise.setProfesor(profesor);
+            exercise.setEsPredeterminado(false); // Asegurar que no es predeterminado
+            
+            // Asignar los grupos musculares
+            Set<com.mattfuncional.enums.MuscleGroup> muscleGroupSet = new HashSet<>();
+            for (String muscleGroup : muscleGroups) {
+                muscleGroupSet.add(com.mattfuncional.enums.MuscleGroup.valueOf(muscleGroup));
+            }
+            exercise.setMuscleGroups(muscleGroupSet);
+
+            // Guardar el ejercicio con validación de permisos
+            exerciseService.saveExercise(exercise, imageFile, usuarioActual);
+            
+            return "redirect:/profesor/mis-ejercicios?success=ejercicio_creado";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error al crear el ejercicio: " + e.getMessage());
+            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("profesor", profesor);
+            return "ejercicios/formulario-ejercicio-profesor";
+        }
+    }
+
+    @GetMapping("/mis-ejercicios/editar/{id}")
+    public String editarEjercicioForm(@PathVariable Long id, 
+                                    @AuthenticationPrincipal Usuario usuarioActual, 
+                                    Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        com.mattfuncional.entidades.Exercise ejercicio = exerciseService.findById(id);
+        if (ejercicio == null) {
+            return "redirect:/profesor/mis-ejercicios?error=ejercicio_no_encontrado";
+        }
+        
+        // Validar permisos de edición usando el nuevo método
+        if (!ejercicio.puedeSerEditadoPor(usuarioActual)) {
+            return "redirect:/profesor/mis-ejercicios?error=sin_permisos_editar";
+        }
+
+        model.addAttribute("exercise", ejercicio);
+        model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+        model.addAttribute("profesor", profesor);
+        
+        return "ejercicios/formulario-modificar-ejercicio-profesor";
+    }
+
+    @PostMapping("/mis-ejercicios/editar/{id}")
+    public String actualizarEjercicioProfesor(@PathVariable Long id,
+                                            @Valid @ModelAttribute("exercise") com.mattfuncional.entidades.Exercise exercise,
+                                            BindingResult bindingResult,
+                                            @RequestParam List<String> muscleGroups,
+                                            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+                                            @AuthenticationPrincipal Usuario usuarioActual,
+                                            Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        com.mattfuncional.entidades.Exercise ejercicioExistente = exerciseService.findById(id);
+        if (ejercicioExistente == null) {
+            return "redirect:/profesor/ejercicios?error=ejercicio_no_encontrado";
+        }
+        
+        // Validar permisos de edición
+        if (!ejercicioExistente.puedeSerEditadoPor(usuarioActual)) {
+            return "redirect:/profesor/ejercicios?error=sin_permisos_editar";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("profesor", profesor);
+            return "ejercicios/formulario-modificar-ejercicio-profesor";
+        }
+
+        try {
+            // Mantener el profesor y la imagen existente
+            exercise.setProfesor(ejercicioExistente.getProfesor());
+            exercise.setEsPredeterminado(ejercicioExistente.getEsPredeterminado()); // Mantener el estado
+            exercise.setImagen(ejercicioExistente.getImagen());
+            
+            // Asignar los grupos musculares
+            Set<com.mattfuncional.enums.MuscleGroup> muscleGroupSet = new HashSet<>();
+            for (String muscleGroup : muscleGroups) {
+                muscleGroupSet.add(com.mattfuncional.enums.MuscleGroup.valueOf(muscleGroup));
+            }
+            exercise.setMuscleGroups(muscleGroupSet);
+
+            // Actualizar el ejercicio con validación de permisos
+            exerciseService.modifyExercise(id, exercise, imageFile, muscleGroupSet, usuarioActual);
+            
+            return "redirect:/profesor/mis-ejercicios?success=ejercicio_actualizado";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error al actualizar el ejercicio: " + e.getMessage());
+            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("profesor", profesor);
+            return "ejercicios/formulario-modificar-ejercicio-profesor";
+        }
+    }
+
+    @GetMapping("/mis-ejercicios/eliminar/{id}")
+    public String eliminarEjercicioProfesor(@PathVariable Long id,
+                                           @AuthenticationPrincipal Usuario usuarioActual) {
+        try {
+            Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+            if (usuarioActual == null || profesor == null) {
+                return "redirect:/profesor/mis-ejercicios?error=no_autorizado";
+            }
+
+            com.mattfuncional.entidades.Exercise ejercicio = exerciseService.findById(id);
+            if (ejercicio == null) {
+                return "redirect:/profesor/mis-ejercicios?error=ejercicio_no_encontrado";
+            }
+            
+            // Validar que el ejercicio pertenece al profesor o es predeterminado (solo admin puede eliminar predeterminados)
+            if (ejercicio.isPredeterminado()) {
+                return "redirect:/profesor/mis-ejercicios?error=no_se_puede_eliminar_predeterminado";
+            }
+            
+            if (ejercicio.getProfesor() == null || !ejercicio.getProfesor().getId().equals(profesor.getId())) {
+                return "redirect:/profesor/mis-ejercicios?error=sin_permisos";
+            }
+
+            exerciseService.deleteExercise(id);
+            return "redirect:/profesor/mis-ejercicios?success=ejercicio_eliminado";
+        } catch (Exception e) {
+            logger.error("Error al eliminar ejercicio {}: {}", id, e.getMessage(), e);
+            return "redirect:/profesor/mis-ejercicios?error=error_eliminar";
+        }
+    }
+
+    @GetMapping("/mis-ejercicios/debug")
+    public String debugEjercicios(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+
+        Long profesorId = profesor.getId();
+        System.out.println("=== DEBUG ENDPOINT: Profesor ID: " + profesorId + " ===");
+        
+        List<com.mattfuncional.entidades.Exercise> ejercicios = exerciseService.findExercisesByProfesorId(profesorId);
+        System.out.println("=== DEBUG ENDPOINT: Ejercicios encontrados: " + ejercicios.size() + " ===");
+        
+        // Debug: Imprimir TODOS los ejercicios
+        for (int i = 0; i < ejercicios.size(); i++) {
+            com.mattfuncional.entidades.Exercise e = ejercicios.get(i);
+            System.out.println("=== DEBUG ENDPOINT: Ejercicio " + i + ": ID=" + e.getId() + 
+                             ", Nombre=" + e.getName() + 
+                             ", Profesor=" + (e.getProfesor() != null ? e.getProfesor().getId() : "NULL") + " ===");
+        }
+        
+        // Debug: Verificar el modelo
+        System.out.println("=== DEBUG ENDPOINT: Agregando ejercicios al modelo: " + ejercicios.size() + " ===");
+        
+        model.addAttribute("ejercicios", ejercicios);
+        model.addAttribute("totalEjercicios", ejercicios.size());
+        model.addAttribute("profesor", profesor);
+        model.addAttribute("debugInfo", "Endpoint de debug - Ejercicios: " + ejercicios.size());
+
+        return "profesor/ejercicios-lista";
+    }
+
+    // ASIGNAR RUTINA A ALUMNO
+    @GetMapping("/asignar-rutina/{id}")
+    public String asignarRutinaAAlumno(@PathVariable Long id, Model model, @AuthenticationPrincipal Usuario usuarioActual) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null || profesor.getId() == null) {
+            return "redirect:/login?error=true";
+        }
+
+        try {
+            // Obtener el alumno
+            Usuario alumno = usuarioService.getUsuarioById(id);
+            if (alumno == null) {
+                model.addAttribute("errorMessage", "Alumno no encontrado.");
+                return "redirect:/profesor/" + profesor.getId();
+            }
+
+            // Verificar que el alumno pertenezca al profesor
+            if (!alumno.getProfesor().getId().equals(profesor.getId())) {
+                model.addAttribute("errorMessage", "No tienes permisos para asignar rutinas a este alumno.");
+                return "redirect:/profesor/" + profesor.getId();
+            }
+
+            // Obtener las rutinas plantilla del profesor
+            List<com.mattfuncional.entidades.Rutina> rutinasPlantilla = rutinaService.obtenerRutinasPlantillaPorProfesor(profesor.getId());
+            
+            // DEBUG: Imprimir información de las rutinas plantilla
+            System.out.println("=== DEBUG ASIGNAR RUTINA ===");
+            System.out.println("Profesor ID: " + profesor.getId());
+            System.out.println("Rutinas plantilla encontradas: " + rutinasPlantilla.size());
+            for (int i = 0; i < rutinasPlantilla.size(); i++) {
+                com.mattfuncional.entidades.Rutina r = rutinasPlantilla.get(i);
+                System.out.println("Rutina " + i + ": ID=" + r.getId() + 
+                                 ", Nombre=" + r.getNombre() + 
+                                 ", EsPlantilla=" + r.isEsPlantilla() + 
+                                 ", Profesor=" + (r.getProfesor() != null ? r.getProfesor().getId() : "NULL"));
+            }
+            
+            // Obtener las rutinas ya asignadas al alumno
+            List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinaService.obtenerRutinasAsignadasPorUsuario(id);
+            System.out.println("Rutinas asignadas al alumno: " + rutinasAsignadas.size());
+
+            model.addAttribute("alumno", alumno);
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("rutinasPlantilla", rutinasPlantilla);
+            model.addAttribute("rutinasAsignadas", rutinasAsignadas);
+            
+            System.out.println("=== FIN DEBUG ===");
+            
+            return "profesor/asignar-rutina";
+            
+        } catch (Exception e) {
+            System.out.println("=== ERROR EN ASIGNAR RUTINA ===");
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "Error al cargar la página de asignación: " + e.getMessage());
+            return "redirect:/profesor/" + profesor.getId();
+        }
+    }
+
+    // POST: ASIGNAR RUTINA A ALUMNO
+    @PostMapping("/asignar-rutina/{id}")
+    public String asignarRutinaAAlumnoPost(@PathVariable Long id, 
+                                          @RequestParam Long rutinaPlantillaId,
+                                          @AuthenticationPrincipal Usuario usuarioActual,
+                                          Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null || profesor.getId() == null) {
+            return "redirect:/login?error=true";
+        }
+
+        try {
+            // Verificar que el alumno pertenezca al profesor
+            Usuario alumno = usuarioService.getUsuarioById(id);
+            if (alumno == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
+                model.addAttribute("errorMessage", "No tienes permisos para asignar rutinas a este alumno.");
+                return "redirect:/profesor/" + profesor.getId();
+            }
+
+            // Asignar la rutina plantilla al alumno (crear copia)
+            rutinaService.asignarRutinaPlantillaAUsuario(rutinaPlantillaId, id, profesor.getId());
+            
+            return "redirect:/profesor/" + profesor.getId() + "?success=rutina_asignada&alumno=" + alumno.getNombre();
+            
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error al asignar la rutina: " + e.getMessage());
+            return "redirect:/profesor/asignar-rutina/" + id;
+        }
+    }
+}
