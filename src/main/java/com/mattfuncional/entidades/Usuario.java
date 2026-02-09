@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.time.LocalDate;
 
 import com.mattfuncional.enums.TipoAsistencia;
 
@@ -54,9 +55,14 @@ public class Usuario implements UserDetails {
     private String notasProfesor;
     private String objetivosPersonales;
     private String restriccionesMedicas;
+    private String celular;
+    private String estadoAlumno; // ACTIVO / INACTIVO
+    private LocalDate fechaAlta;
+    private LocalDate fechaBaja;
+    private String historialEstado;
     private String contactoEmergenciaNombre;
     private String contactoEmergenciaTelefono;
-    private java.time.LocalDate fechaInicio;
+    private LocalDate fechaInicio;
     private String estadoMembresia; // Ej: ACTIVA, VENCIDA, EN_PAUSA
     private String historialAsistencia; // (JSON o texto, para futuro)
     private String detalleAsistencia; // Detalle libre de asistencia (ej: "Martes y jueves de 18 a 19 hs", "Pase libre", etc)
@@ -142,6 +148,7 @@ public class Usuario implements UserDetails {
         this.rutinas = rutinas;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -255,6 +262,46 @@ public class Usuario implements UserDetails {
         this.restriccionesMedicas = restriccionesMedicas;
     }
 
+    public String getCelular() {
+        return celular;
+    }
+
+    public void setCelular(String celular) {
+        this.celular = celular;
+    }
+
+    public String getEstadoAlumno() {
+        return estadoAlumno;
+    }
+
+    public void setEstadoAlumno(String estadoAlumno) {
+        this.estadoAlumno = estadoAlumno;
+    }
+
+    public LocalDate getFechaAlta() {
+        return fechaAlta;
+    }
+
+    public void setFechaAlta(LocalDate fechaAlta) {
+        this.fechaAlta = fechaAlta;
+    }
+
+    public LocalDate getFechaBaja() {
+        return fechaBaja;
+    }
+
+    public void setFechaBaja(LocalDate fechaBaja) {
+        this.fechaBaja = fechaBaja;
+    }
+
+    public String getHistorialEstado() {
+        return historialEstado;
+    }
+
+    public void setHistorialEstado(String historialEstado) {
+        this.historialEstado = historialEstado;
+    }
+
     public String getContactoEmergenciaNombre() {
         return contactoEmergenciaNombre;
     }
@@ -271,11 +318,11 @@ public class Usuario implements UserDetails {
         this.contactoEmergenciaTelefono = contactoEmergenciaTelefono;
     }
 
-    public java.time.LocalDate getFechaInicio() {
+    public LocalDate getFechaInicio() {
         return fechaInicio;
     }
 
-    public void setFechaInicio(java.time.LocalDate fechaInicio) {
+    public void setFechaInicio(LocalDate fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
 

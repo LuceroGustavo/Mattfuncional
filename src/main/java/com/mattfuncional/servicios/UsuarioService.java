@@ -68,8 +68,25 @@ public class UsuarioService {
 
     @CacheEvict(value = "usuarios", allEntries = true)
     public Usuario crearAlumno(Usuario usuario) {
-        usuario.setRol("USER");
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setRol("ALUMNO");
+        String password = usuario.getPassword();
+        if (password == null || password.trim().isEmpty()) {
+            password = java.util.UUID.randomUUID().toString();
+        }
+        usuario.setPassword(passwordEncoder.encode(password));
+
+        if (usuario.getEstadoAlumno() == null || usuario.getEstadoAlumno().trim().isEmpty()) {
+            usuario.setEstadoAlumno("ACTIVO");
+        }
+        if (usuario.getFechaAlta() == null) {
+            usuario.setFechaAlta(java.time.LocalDate.now());
+        }
+        if ("INACTIVO".equalsIgnoreCase(usuario.getEstadoAlumno()) && usuario.getFechaBaja() == null) {
+            usuario.setFechaBaja(java.time.LocalDate.now());
+        } else if ("ACTIVO".equalsIgnoreCase(usuario.getEstadoAlumno())) {
+            usuario.setFechaBaja(null);
+        }
+        appendHistorialEstado(usuario, "ALTA");
         
         // Asignar avatar aleatorio si no tiene uno
         if (usuario.getAvatar() == null || usuario.getAvatar().trim().isEmpty()) {
@@ -94,6 +111,27 @@ public class UsuarioService {
         usuarioExistente.setCorreo(usuario.getCorreo());
         usuarioExistente.setTipoAsistencia(usuario.getTipoAsistencia());
         usuarioExistente.setDiasHorariosAsistencia(usuario.getDiasHorariosAsistencia());
+        usuarioExistente.setCelular(usuario.getCelular());
+        if (usuarioExistente.getFechaAlta() == null) {
+            usuarioExistente.setFechaAlta(java.time.LocalDate.now());
+        }
+
+        String estadoAnterior = usuarioExistente.getEstadoAlumno();
+        String nuevoEstado = usuario.getEstadoAlumno();
+        if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
+            nuevoEstado = estadoAnterior != null ? estadoAnterior : "ACTIVO";
+        }
+        usuarioExistente.setEstadoAlumno(nuevoEstado);
+
+        if (estadoAnterior == null || !estadoAnterior.equalsIgnoreCase(nuevoEstado)) {
+            if ("INACTIVO".equalsIgnoreCase(nuevoEstado)) {
+                usuarioExistente.setFechaBaja(java.time.LocalDate.now());
+                appendHistorialEstado(usuarioExistente, "BAJA");
+            } else if ("ACTIVO".equalsIgnoreCase(nuevoEstado)) {
+                usuarioExistente.setFechaBaja(null);
+                appendHistorialEstado(usuarioExistente, "REACTIVADO");
+            }
+        }
 
         // Actualizar relaciones
         if (usuario.getProfesor() != null) {
@@ -105,6 +143,17 @@ public class UsuarioService {
         // Solo se actualizan si explícitamente se proporcionan nuevas listas
 
         return usuarioRepository.save(usuarioExistente);
+    }
+
+    private void appendHistorialEstado(Usuario usuario, String evento) {
+        String fecha = java.time.LocalDate.now().toString();
+        String linea = fecha + " - " + evento;
+        String historial = usuario.getHistorialEstado();
+        if (historial == null || historial.trim().isEmpty()) {
+            usuario.setHistorialEstado(linea);
+        } else {
+            usuario.setHistorialEstado(historial + "\n" + linea);
+        }
     }
 
     @CacheEvict(value = "usuarios", allEntries = true)

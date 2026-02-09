@@ -32,15 +32,15 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // --- CONSULTAS OPTIMIZADAS PARA FASE 3 ---
 
     // Obtener usuarios con profesor cargado en una sola consulta
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'USER'")
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'ALUMNO'")
     List<Usuario> findAllAlumnosWithProfesor();
 
     // Obtener todos los alumnos incluyendo los que no tienen profesor asignado
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'USER' ORDER BY u.nombre, u.apellido")
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'ALUMNO' ORDER BY u.nombre, u.apellido")
     List<Usuario> findAllAlumnosIncludingOrphans();
 
     // Obtener usuarios por profesor con todas las relaciones cargadas
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor LEFT JOIN FETCH u.rutinas WHERE u.profesor.id = :profesorId AND u.rol = 'USER'")
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor LEFT JOIN FETCH u.rutinas WHERE u.profesor.id = :profesorId AND u.rol = 'ALUMNO'")
     List<Usuario> findAlumnosByProfesorIdWithRelations(@Param("profesorId") Long profesorId);
 
     // Obtener usuario específico con todas las relaciones para dashboard
@@ -54,7 +54,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByIdWithMediciones(@Param("id") Long id);
 
     // Obtener usuarios con conteo de rutinas (optimizado)
-    @Query("SELECT u, COUNT(r) as rutinaCount FROM Usuario u LEFT JOIN u.rutinas r WHERE u.rol = 'USER' GROUP BY u")
+    @Query("SELECT u, COUNT(r) as rutinaCount FROM Usuario u LEFT JOIN u.rutinas r WHERE u.rol = 'ALUMNO' GROUP BY u")
     List<Object[]> findAlumnosWithRutinaCount();
 
     // Método para verificar si hay usuarios sin avatar asignado

@@ -50,6 +50,12 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - Llamar a `asegurarEjerciciosPredeterminados()` al arranque (p. ej. en `DataInitializer` o un `ApplicationRunner`) para que los 60 existan desde el primer inicio.
 - Deprecar o eliminar el endpoint POST `/profesor/mis-ejercicios/cargar-predeterminados` si ya no se usa en ningún otro sitio.
 
+### 2.5 Cambios recientes (alumnos)
+
+- **Formulario de alumno**: se quitó contraseña y se agregó **celular**.
+- **Estado del alumno**: se agregó `ACTIVO/INACTIVO`, **fecha de alta/baja** y **historial de estado**.
+- **Vista de alumnos**: columna de estado y celular + **filtros** por nombre, estado, tipo (presencial/online), día y horario.
+
 ---
 
 ## 3. Estado del plan general (según PLAN_MODIFICACIONES_MATTFUNCIONAL.md)
@@ -62,12 +68,14 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 | ABM de ejercicios en panel profesor | Ya existía; se mantiene. |
 | Referencia “Cargar predeterminados” en plan | Actualizado conceptualmente: ya no es un botón manual, sino asegurar si no existen. |
 | Fase 1 – Limpieza | Hecho: un único rol ADMIN, sin panel alumno ni registro, sin panel admin separado, navbar y security ajustados. |
+| Fase 2 – Un solo profesor | Hecho: usuario único ADMIN creado en arranque y login redirigido al panel. |
+| Fase 3 – Ejercicios y series | Hecho: ABM ejercicios + ABM series en panel profesor, predeterminados auto‑asegurados. |
 
 ### 3.2 Por hacer (resumen del plan)
 
 - [x] **Fase 1 – Limpieza:** Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar.
-- [ ] **Fase 2 – Un solo profesor:** Profesor único en arranque. Redirigir login al panel profesor. Quitar referencias a admin y lista de profesores.
-- [ ] **Fase 3 – Ejercicios y series:** Ejercicios con “asegurar predeterminados” (hecho). Mantener ABM de ejercicios y ABM de series en panel profesor.
+- [x] **Fase 2 – Un solo profesor:** Profesor único en arranque. Redirigir login al panel profesor. Quitar referencias a admin y lista de profesores.
+- [x] **Fase 3 – Ejercicios y series:** Ejercicios con “asegurar predeterminados” (hecho). Mantener ABM de ejercicios y ABM de series en panel profesor.
 - [ ] **Fase 4 – Rutinas y asignación:** ABM de rutinas basadas en series. Asignación rutina → alumno. Enlace único por asignación.
 - [ ] **Fase 5 – Vista rutina por enlace:** Página pública (sin login) con token/enlace que muestre la rutina en HTML. Enlace para WhatsApp.
 - [ ] **Fase 6 – Alumnos sin login:** Alumno como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo.
@@ -79,7 +87,7 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
 - [x] Un único **panel: profesor** (no admin, no alumno).
 - [x] **Ejercicios:** Predeterminados asegurados automáticamente desde `uploads/ejercicios/` (1–60); ABM de ejercicios en panel profesor.
-- [ ] **Series y rutinas:** ABM y rutinas basadas en series.
+- [x] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
 - [ ] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** sin login.
 - [ ] **Calendario semanal** y presentismo.

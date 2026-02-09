@@ -253,6 +253,9 @@
                     <p class="mb-0">
                         <strong>Email:</strong> <span th:text="${alumno.correo}">Email</span>
                     </p>
+                    <p class="mb-0">
+                        <strong>Celular:</strong> <span th:text="${alumno.celular != null ? alumno.celular : '-'}">-</span>
+                    </p>
                 </div>
                 <div class="col-md-4 text-md-end">
                     <div class="text-center">
@@ -300,6 +303,22 @@
                             </span>
                         </div>
                         <div class="info-row">
+                            <span class="info-label">Estado del Alumno:</span>
+                            <span class="info-value">
+                                <span th:if="${alumno.estadoAlumno == 'ACTIVO'}" class="badge bg-success">Activo</span>
+                                <span th:if="${alumno.estadoAlumno == 'INACTIVO'}" class="badge bg-secondary">Inactivo</span>
+                                <span th:if="${alumno.estadoAlumno == null}">-</span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de Alta:</span>
+                            <span class="info-value" th:text="${alumno.fechaAlta != null ? #temporals.format(alumno.fechaAlta, 'dd/MM/yyyy') : '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de Baja:</span>
+                            <span class="info-value" th:text="${alumno.fechaBaja != null ? #temporals.format(alumno.fechaBaja, 'dd/MM/yyyy') : '-'}">-</span>
+                        </div>
+                        <div class="info-row">
                             <span class="info-label">Estado de Membresía:</span>
                             <span class="info-value">
                                 <span th:if="${alumno.estadoMembresia == 'ACTIVA'}" class="badge bg-success">Activa</span>
@@ -321,6 +340,12 @@
                         <div class="info-row">
                             <span class="info-label">Restricciones Médicas:</span>
                             <span class="info-value" th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Historial de Estado:</span>
+                            <span class="info-value">
+                                <pre class="mb-0" th:text="${alumno.historialEstado != null ? alumno.historialEstado : '-'}">-</pre>
+                            </span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Objetivos Personales:</span>

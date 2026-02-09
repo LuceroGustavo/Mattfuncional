@@ -53,7 +53,7 @@ public class CalendarioService {
         // Cargar usuarios y asignarlos a los slots correspondientes
         List<Usuario> usuarios;
         if (profesorId != null) {
-            usuarios = usuarioRepository.findByProfesor_IdAndRol(profesorId, "USER");
+            usuarios = usuarioRepository.findByProfesor_IdAndRol(profesorId, "ALUMNO");
         } else {
             usuarios = usuarioRepository.findByTipoAsistencia(com.mattfuncional.enums.TipoAsistencia.PRESENCIAL);
         }
@@ -146,7 +146,7 @@ public class CalendarioService {
 
         List<Usuario> usuariosPresenciales;
         if (profesorId != null) {
-            usuariosPresenciales = usuarioRepository.findByProfesor_IdAndRol(profesorId, "USER");
+            usuariosPresenciales = usuarioRepository.findByProfesor_IdAndRol(profesorId, "ALUMNO");
         } else {
             usuariosPresenciales = usuarioRepository.findByTipoAsistencia(com.mattfuncional.enums.TipoAsistencia.PRESENCIAL);
         }
