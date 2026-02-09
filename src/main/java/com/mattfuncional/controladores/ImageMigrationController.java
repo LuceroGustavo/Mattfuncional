@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/images")
-@PreAuthorize("hasRole('PROFESOR')")
+@PreAuthorize("hasRole('ADMIN')")
 public class ImageMigrationController {
     
     private static final Logger logger = LoggerFactory.getLogger(ImageMigrationController.class);

@@ -40,9 +40,9 @@
                 <i class="fas fa-sign-in-alt mr-2"></i>
                 <span class="truncate">Iniciar Sesión</span>
               </a>
-              <a href="/registro" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-transparent border-2 border-white text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white hover:text-blue-600 transition-colors">
-                <i class="fas fa-user-plus mr-2"></i>
-                <span class="truncate">Registrarse</span>
+              <a href="/login" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-transparent border-2 border-white text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white hover:text-blue-600 transition-colors">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                <span class="truncate">Iniciar Sesión</span>
               </a>
         </div>
             
@@ -96,7 +96,7 @@
                     </a>
                     <!-- Botón para usuarios autenticados -->
                     <a th:if="${#authentication.principal != 'anonymousUser'}" 
-                       th:href="${usuarioActual != null && usuarioActual.rol == 'PROFESOR' ? '/profesor/dashboard' : '/'}"
+                       th:href="${usuarioActual != null && usuarioActual.rol == 'ADMIN' ? '/profesor/dashboard' : '/'}"
                        class="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-gradient-to-r from-green-500 to-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] @[480px]:text-lg @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:from-green-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       <i class="fas fa-tachometer-alt mr-2"></i>

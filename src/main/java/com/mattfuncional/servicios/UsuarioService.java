@@ -150,7 +150,7 @@ public class UsuarioService {
             Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
             
             // Si es un profesor y no tiene la relación cargada, intentar cargarla
-            if (usuario != null && "PROFESOR".equals(usuario.getRol()) && usuario.getProfesor() == null) {
+            if (usuario != null && "ADMIN".equals(usuario.getRol()) && usuario.getProfesor() == null) {
                 try {
                     Profesor profesor = profesorRepository.findByCorreo(correo);
                     if (profesor != null) {
@@ -212,7 +212,7 @@ public class UsuarioService {
         usuario.setApellido(profesor.getApellido());
         usuario.setCorreo(profesor.getCorreo());
         usuario.setPassword(passwordEncoder.encode(password));
-        usuario.setRol("PROFESOR");
+        usuario.setRol("ADMIN");
         // Establecer la relación con el profesor para que pueda acceder a sus ejercicios
         usuario.setProfesor(profesor);
         

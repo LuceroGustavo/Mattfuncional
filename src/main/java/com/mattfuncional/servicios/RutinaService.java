@@ -147,7 +147,7 @@ public class RutinaService {
 
         Rutina rutina = new Rutina(nombre, descripcion, profesor);
         rutina.setCategoria(categoria);
-        rutina.setCreador("PROFESOR");
+        rutina.setCreador("ADMIN");
         return rutinaRepository.save(rutina);
     }
 
@@ -212,7 +212,7 @@ public class RutinaService {
         nuevaRutina.setCategoria(rutinaOriginal.getCategoria());
         nuevaRutina.setProfesor(rutinaOriginal.getProfesor());
         nuevaRutina.setEsPlantilla(true);
-        nuevaRutina.setCreador("PROFESOR");
+        nuevaRutina.setCreador("ADMIN");
 
         return rutinaRepository.save(nuevaRutina);
     }

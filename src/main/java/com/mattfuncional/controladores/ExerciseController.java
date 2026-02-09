@@ -50,7 +50,7 @@ public class ExerciseController {
         } else {
             muscleGroup = null;
         }
-        if (usuarioActual != null && "PROFESOR".equals(usuarioActual.getRol()) && usuarioActual.getProfesor() != null) {
+        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol()) && usuarioActual.getProfesor() != null) {
             // Profesor: ver ejercicios disponibles (predeterminados + propios)
             Long profesorId = usuarioActual.getProfesor().getId();
             if (muscleGroup != null) {
@@ -138,7 +138,7 @@ public class ExerciseController {
             return "redirect:/ejercicios/abm";
         }
         // Solo el admin o el profesor dueño puede editar
-        if (usuarioActual != null && "PROFESOR".equals(usuarioActual.getRol())) {
+        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
             if (exercise.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
@@ -163,7 +163,7 @@ public class ExerciseController {
         }
         Exercise original = exerciseService.findById(id);
         // Solo el admin o el profesor dueño puede editar
-        if (usuarioActual != null && "PROFESOR".equals(usuarioActual.getRol())) {
+        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
             if (original.getProfesor() == null
                     || !original.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
@@ -190,7 +190,7 @@ public class ExerciseController {
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
         Exercise exercise = exerciseService.findById(id);
         // Solo el admin o el profesor dueño puede eliminar
-        if (usuarioActual != null && "PROFESOR".equals(usuarioActual.getRol())) {
+        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
             if (exercise.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
@@ -260,7 +260,7 @@ public class ExerciseController {
             Model model,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
 
-        if (usuarioActual == null || !"PROFESOR".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
             return "redirect:/login";
         }
 
@@ -324,7 +324,7 @@ public class ExerciseController {
             Model model,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
 
-        if (usuarioActual == null || !"PROFESOR".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
             return "redirect:/login";
         }
 

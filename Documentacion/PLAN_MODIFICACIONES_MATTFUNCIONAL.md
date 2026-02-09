@@ -11,7 +11,7 @@
 | Aspecto | Definición |
 |--------|------------|
 | **Nombre** | Mattfuncional |
-| **Único rol con acceso** | Profesor (actúa como administrador del sistema) |
+| **Único rol con acceso** | Admin (el profesor administrador del sistema) |
 | **Alumnos** | Solo ficha física + online, **sin usuario ni contraseña**; no hay login de alumno |
 | **Acceso a rutinas** | Por enlace (ej. enviado por WhatsApp); el alumno abre el link y ve la rutina en HTML |
 
@@ -105,8 +105,8 @@
 ## 5. Ajustes de modelo y seguridad
 
 ### 5.1 Roles y acceso
-- **Un solo rol efectivo:** PROFESOR (único usuario que hace login).
-- Eliminar o ignorar rol ADMIN en la app (no hay panel admin).
+- **Un solo rol efectivo:** ADMIN (único usuario que hace login).
+- No hay panel admin separado: el ADMIN es el profesor que gestiona todo.
 - Alumnos: solo registros de ficha, sin rol de login.
 
 ### 5.2 Usuario / Alumno
@@ -114,7 +114,7 @@
 - Relación: Alumno → Rutinas asignadas; para “ver mi rutina” solo mediante el enlace (token).
 
 ### 5.3 Profesor único
-- En `DataInitializer` (o equivalente): crear un único usuario con rol PROFESOR y credenciales por defecto o configuradas (cambiar en primer uso).
+- En `DataInitializer` (o equivalente): crear un único usuario con rol ADMIN y credenciales por defecto o configuradas (cambiar en primer uso).
 - No hay pantallas de “crear profesor” ni “listar profesores”.
 
 ### 5.4 Seguridad (Spring Security)
@@ -128,7 +128,7 @@
 
 | Fase | Contenido |
 |------|-----------|
-| **Fase 1 – Limpieza** | Renombrar proyecto a Mattfuncional (nombre en pom, título en vistas). Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar. |
+| **Fase 1 – Limpieza** | Renombrar proyecto a Mattfuncional (nombre en pom, título en vistas). Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar. **Estado: completado** |
 | **Fase 2 – Un solo profesor** | Configurar profesor único en arranque. Redirigir login exitoso al panel del profesor. Quitar referencias a “admin” y a “lista de profesores”. |
 | **Fase 3 – Ejercicios y series** | Dejar un único flujo de ejercicios con botón “Cargar predeterminados”. Mantener ABM de ejercicios y ABM de series en el panel del profesor. |
 | **Fase 4 – Rutinas y asignación** | Asegurar ABM de rutinas basadas en series. Asignación rutina → alumno. Generación de enlace único por asignación. |
@@ -142,7 +142,7 @@
 ## 7. Checklist rápido
 
 - [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
-- [ ] Un único **panel: profesor** (no admin, no alumno).
+- [x] Un único **panel: profesor** (no admin, no alumno).
 - [ ] **Ejercicios:** botón “Cargar predeterminados” en panel de ejercicios + ABM.
 - [ ] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.

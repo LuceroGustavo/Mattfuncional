@@ -184,12 +184,12 @@ public class Exercise {
             return false;
         }
         
-        // El profesor (único gestor del panel) puede editar todo, incluidos predeterminados
-        if ("PROFESOR".equals(usuario.getRol())) {
+        // El admin (único gestor del panel) puede editar todo, incluidos predeterminados
+        if ("ADMIN".equals(usuario.getRol())) {
             return true;
         }
         
-        // Si es predeterminado, solo el profesor puede editar (ya cubierto arriba)
+        // Si es predeterminado, solo el admin puede editar (ya cubierto arriba)
         if (isPredeterminado()) {
             return false;
         }

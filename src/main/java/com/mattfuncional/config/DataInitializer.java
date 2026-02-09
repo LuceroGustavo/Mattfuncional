@@ -38,7 +38,7 @@ public class DataInitializer implements CommandLineRunner {
                 return;
             }
 
-            // Crear el único usuario que maneja el panel: el Profesor (rol PROFESOR, vinculado a entidad Profesor)
+            // Crear el único usuario que maneja el panel: el Profesor (rol ADMIN, vinculado a entidad Profesor)
             createProfesorUsuarioIfNeeded();
             
             // Asignar avatares solo si es necesario
@@ -73,16 +73,47 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     /**
-     * Crea el único usuario que gestiona el panel: Profesor (rol PROFESOR) vinculado a la entidad Profesor.
+     * Crea el único usuario que gestiona el panel: Profesor (rol ADMIN) vinculado a la entidad Profesor.
      * Este usuario crea alumnos, asigna rutinas y lleva el control.
      */
     private void createProfesorUsuarioIfNeeded() {
         try {
-            if (usuarioRepository.findByCorreo(CORREO_PROFESOR).isPresent()) {
-                System.out.println("ℹ️ Usuario profesor ya existe");
+            java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findByCorreo(CORREO_PROFESOR);
+            if (usuarioExistente.isPresent()) {
+                Usuario usuario = usuarioExistente.get();
+                boolean actualizado = false;
+                if (!"ADMIN".equals(usuario.getRol())) {
+                    usuario.setRol("ADMIN");
+                    actualizado = true;
+                }
+
+                if (usuario.getProfesor() == null) {
+                    Profesor profesor = profesorService.getProfesorByCorreo(CORREO_PROFESOR);
+                    if (profesor == null) {
+                        profesor = new Profesor();
+                        profesor.setNombre("Profesor");
+                        profesor.setApellido("");
+                        profesor.setEdad(30);
+                        profesor.setSexo("No especificado");
+                        profesor.setEstablecimiento("-");
+                        profesor.setCorreo(CORREO_PROFESOR);
+                        profesor.setTelefono("-");
+                        profesorService.guardarProfesor(profesor);
+                        System.out.println("✅ Entidad Profesor creada");
+                    }
+                    usuario.setProfesor(profesor);
+                    actualizado = true;
+                }
+
+                if (actualizado) {
+                    usuarioRepository.save(usuario);
+                    System.out.println("✅ Usuario administrador actualizado");
+                } else {
+                    System.out.println("ℹ️ Usuario administrador ya existe");
+                }
                 return;
             }
-            System.out.println("🔧 Creando usuario Profesor (único gestor del panel)...");
+            System.out.println("🔧 Creando usuario Administrador (único gestor del panel)...");
 
             Profesor profesor = profesorService.getProfesorByCorreo(CORREO_PROFESOR);
             if (profesor == null) {
@@ -99,18 +130,18 @@ public class DataInitializer implements CommandLineRunner {
             }
 
             Usuario usuario = new Usuario();
-            usuario.setNombre("Profesor");
+            usuario.setNombre("Administrador");
             usuario.setApellido("");
             usuario.setCorreo(CORREO_PROFESOR);
             usuario.setPassword(passwordEncoder.encode("profesor"));
-            usuario.setRol("PROFESOR");
+            usuario.setRol("ADMIN");
             usuario.setEdad(30);
             usuario.setSexo("No especificado");
             usuario.setAvatar("/img/avatar1.png");
             usuario.setProfesor(profesor);
 
             usuarioRepository.save(usuario);
-            System.out.println("✅ Usuario Profesor creado y vinculado (correo: " + CORREO_PROFESOR + ")");
+            System.out.println("✅ Usuario Administrador creado y vinculado (correo: " + CORREO_PROFESOR + ")");
         } catch (Exception e) {
             System.err.println("❌ Error creando usuario profesor: " + e.getMessage());
         }

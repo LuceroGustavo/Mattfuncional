@@ -1,8 +1,6 @@
 package com.mattfuncional.controladores;
 
-import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Exercise;
-import com.mattfuncional.enums.MuscleGroup;
 import com.mattfuncional.servicios.UsuarioService;
 import com.mattfuncional.servicios.ExerciseService;
 import com.mattfuncional.servicios.ProfesorService;
@@ -11,9 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -73,11 +68,6 @@ public class PortalControlador {
         return "login.html";
     }
 
-    @GetMapping("/registro")
-    public String registro() {
-        return "registro.html";
-    }
-
     @GetMapping("/demo")
     public String demo() {
         return "demo.html";
@@ -88,23 +78,11 @@ public class PortalControlador {
         return "home.html";
     }
 
-    @GetMapping("/usuario")
-    public String dashboardUsuario(Model model) {
-        // Agregar usuario actual para el navbar
-        model.addAttribute("usuario", usuarioService.getUsuarioActual());
-        return "usuario/dashboard";
-    }
-
-    @GetMapping("/usuario/dashboard/{id}")
-    public String redirigirDashboardSingular(@PathVariable Long id) {
-        return "redirect:/usuarios/dashboard/" + id;
-    }
-    
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         try {
             com.mattfuncional.entidades.Usuario usuarioActual = usuarioService.getUsuarioActual();
-            if (usuarioActual != null && "PROFESOR".equals(usuarioActual.getRol())) {
+            if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
                 com.mattfuncional.entidades.Profesor p = usuarioActual.getProfesor() != null ? usuarioActual.getProfesor() : profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
                 if (p != null) return "redirect:/profesor/" + p.getId();
                 return "redirect:/profesor/dashboard";

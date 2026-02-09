@@ -76,14 +76,14 @@ public class ExerciseService {
             if (!existente.puedeSerEditadoPor(usuarioActual)) {
                 logger.warn("Intento de editar ejercicio sin permisos. Usuario: {}, Ejercicio: {}", 
                            usuarioActual.getCorreo(), exercise.getName());
-                throw new SecurityException("No tiene permisos para editar este ejercicio. Solo el profesor puede editar ejercicios predeterminados.");
+                throw new SecurityException("No tiene permisos para editar este ejercicio. Solo el administrador puede editar ejercicios predeterminados.");
             }
         }
         
         // Validar que solo admin puede crear ejercicios predeterminados
-        if (exercise.isPredeterminado() && usuarioActual != null && !"PROFESOR".equals(usuarioActual.getRol())) {
-            logger.warn("Intento de crear ejercicio predeterminado por no-profesor: {}", usuarioActual.getCorreo());
-            throw new SecurityException("Solo el profesor puede crear ejercicios predeterminados.");
+        if (exercise.isPredeterminado() && usuarioActual != null && !"ADMIN".equals(usuarioActual.getRol())) {
+            logger.warn("Intento de crear ejercicio predeterminado por no-admin: {}", usuarioActual.getCorreo());
+            throw new SecurityException("Solo el administrador puede crear ejercicios predeterminados.");
         }
         
         // Validar duplicado por nombre + profesor (no global)
@@ -139,7 +139,7 @@ public class ExerciseService {
         if (usuarioActual != null && !exercise.puedeSerEditadoPor(usuarioActual)) {
             logger.warn("Intento de modificar ejercicio sin permisos. Usuario: {}, Ejercicio: {}", 
                        usuarioActual.getCorreo(), exercise.getName());
-            throw new SecurityException("No tiene permisos para editar este ejercicio. Solo el profesor puede editar ejercicios predeterminados.");
+            throw new SecurityException("No tiene permisos para editar este ejercicio. Solo el administrador puede editar ejercicios predeterminados.");
         }
 
         // Validar duplicado por nombre y profesor

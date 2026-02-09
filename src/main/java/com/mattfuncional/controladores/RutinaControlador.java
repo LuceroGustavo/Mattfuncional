@@ -1,18 +1,13 @@
 package com.mattfuncional.controladores;
 
-import com.mattfuncional.entidades.Exercise;
 import com.mattfuncional.entidades.Rutina;
 import com.mattfuncional.entidades.Usuario;
-import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Serie;
-import com.mattfuncional.servicios.ExerciseService;
 import com.mattfuncional.servicios.RutinaService;
 import com.mattfuncional.servicios.UsuarioService;
-import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.servicios.SerieService;
 import com.mattfuncional.excepciones.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Set;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Controller
 @RequestMapping("/rutinas")
@@ -29,12 +23,6 @@ public class RutinaControlador {
 
     @Autowired
     private UsuarioService usuarioService;
-
-    @Autowired
-    private ExerciseService exerciseService;
-
-    @Autowired
-    private ProfesorService profesorService;
 
     @Autowired
     private RutinaService rutinaService;
@@ -110,71 +98,6 @@ public class RutinaControlador {
 
 
 
-
-    // GET: Dashboard de usuario
-    @GetMapping("/usuario")
-    public String dashboardUsuario(Model model) {
-        return "usuario/dashboard";
-    }
-
-    // GET: Ver rutinas activas del usuario
-    @GetMapping("/usuario/activas")
-    public String verRutinasActivas(@RequestParam Long usuarioId, Model model) {
-        try {
-            Usuario usuario = usuarioService.getUsuarioById(usuarioId);
-            List<Rutina> rutinasActivas = rutinaService.obtenerRutinasActivasPorUsuario(usuarioId);
-
-            model.addAttribute("usuario", usuario);
-            model.addAttribute("rutinas", rutinasActivas);
-            model.addAttribute("usuarioActual", usuarioService.getUsuarioActual());
-            return "rutinas/rutinasActivas";
-        } catch (ResourceNotFoundException e) {
-            return "redirect:/profesores?error=Usuario no encontrado";
-        }
-    }
-
-    // GET: Ver rutinas completadas del usuario
-    @GetMapping("/usuario/completadas")
-    public String verRutinasCompletadas(@RequestParam Long usuarioId, Model model) {
-        try {
-            Usuario usuario = usuarioService.getUsuarioById(usuarioId);
-            List<Rutina> rutinasCompletadas = rutinaService.obtenerRutinasCompletadasPorUsuario(usuarioId);
-
-            model.addAttribute("usuario", usuario);
-            model.addAttribute("rutinas", rutinasCompletadas);
-            model.addAttribute("usuarioActual", usuarioService.getUsuarioActual());
-            return "rutinas/rutinasCompletadas";
-        } catch (ResourceNotFoundException e) {
-            return "redirect:/profesores?error=Usuario no encontrado";
-        }
-    }
-
-    // POST: Marcar rutina como completada
-    @PostMapping("/{rutinaId}/completar")
-    public String marcarRutinaCompletada(@PathVariable Long rutinaId) {
-        try {
-            rutinaService.marcarRutinaComoCompletada(rutinaId);
-            return "redirect:/usuario/dashboard";
-        } catch (ResourceNotFoundException e) {
-            return "redirect:/profesores?error=Rutina no encontrada";
-        }
-    }
-
-    // GET: Estadísticas de rutinas del usuario
-    @GetMapping("/usuario/estadisticas")
-    public String verEstadisticas(@RequestParam Long usuarioId, Model model) {
-        try {
-            Usuario usuario = usuarioService.getUsuarioById(usuarioId);
-            Object estadisticas = rutinaService.obtenerEstadisticasRutinas(usuarioId);
-
-            model.addAttribute("usuario", usuario);
-            model.addAttribute("estadisticas", estadisticas);
-            model.addAttribute("usuarioActual", usuarioService.getUsuarioActual());
-            return "rutinas/estadisticas";
-        } catch (ResourceNotFoundException e) {
-            return "redirect:/profesores?error=Usuario no encontrado";
-        }
-    }
 
     // GET: Editar rutina
     @GetMapping("/editar/{id}")

@@ -62,7 +62,7 @@ public class ProfesorController {
     @Autowired
     private com.mattfuncional.servicios.ExerciseCargaDefaultOptimizado exerciseCargaDefaultOptimizado;
 
-    /** Obtiene el Profesor asociado al usuario actual (el único rol del panel es PROFESOR). */
+    /** Obtiene el Profesor asociado al usuario actual (el único rol del panel es ADMIN). */
     private Profesor getProfesorParaUsuarioActual(Usuario usuarioActual) {
         if (usuarioActual == null) return null;
         if (usuarioActual.getProfesor() != null) return usuarioActual.getProfesor();

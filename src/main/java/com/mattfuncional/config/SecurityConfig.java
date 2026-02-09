@@ -1,8 +1,6 @@
 package com.mattfuncional.config;
 
-import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.repositorios.UsuarioRepository;
-import com.mattfuncional.servicios.UsuarioService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,16 +16,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UsuarioService usuarioService;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
 
-    public SecurityConfig(UsuarioService usuarioService, 
-                         CustomAuthenticationSuccessHandler successHandler,
+    public SecurityConfig(CustomAuthenticationSuccessHandler successHandler,
                          PasswordEncoder passwordEncoder,
                          UsuarioRepository usuarioRepository) {
-        this.usuarioService = usuarioService;
         this.successHandler = successHandler;
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
@@ -56,8 +51,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/", "/error", "/registro", "/demo").permitAll()
-                        .requestMatchers("/profesor/**", "/series/**", "/rutinas/**", "/exercise/**", "/ejercicios/**", "/calendario/**").hasRole("PROFESOR")
+                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/", "/error", "/demo").permitAll()
+                        .requestMatchers("/profesor/**", "/series/**", "/rutinas/**", "/exercise/**", "/ejercicios/**", "/calendario/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

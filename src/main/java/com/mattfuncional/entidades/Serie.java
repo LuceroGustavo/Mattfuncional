@@ -16,7 +16,7 @@ public class Serie {
     private int orden; // Para mantener el orden de las series en una rutina
     private String descripcion;
     private boolean esPlantilla; // true = serie plantilla, false = serie asignada
-    private String creador; // "PROFESOR" (único gestor del panel)
+    private String creador; // "ADMIN" (único gestor del panel)
     private int repeticionesSerie = 1; // Cantidad de veces que se repite la serie completa
     private Long plantillaId; // ID de la Serie plantilla original
 

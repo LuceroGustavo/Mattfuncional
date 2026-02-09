@@ -29,8 +29,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
-            // El único rol que gestiona el panel es PROFESOR (el profesor es el administrador)
-            if (role.equals("ROLE_PROFESOR")) {
+            // El único rol que gestiona el panel es ADMIN (el profesor es el administrador)
+            if (role.equals("ROLE_ADMIN")) {
                 if (authentication.getPrincipal() instanceof Usuario) {
                     Usuario usuario = (Usuario) authentication.getPrincipal();
                     Profesor profesor = usuario.getProfesor() != null ? usuario.getProfesor() : profesorService.getProfesorByCorreo(usuario.getCorreo());
@@ -40,10 +40,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     }
                 }
                 response.sendRedirect("/profesor/dashboard");
-                return;
-            }
-            if (role.equals("ROLE_USER")) {
-                response.sendRedirect("/");
                 return;
             }
         }

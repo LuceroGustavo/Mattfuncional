@@ -18,7 +18,7 @@ public class Rutina {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;
     private boolean esPlantilla; // true = rutina plantilla, false = rutina asignada
-    private String creador; // "PROFESOR" (único gestor del panel)
+    private String creador; // "ADMIN" (único gestor del panel)
     private String categoria; // "FUERZA", "CARDIO", "FLEXIBILIDAD", etc.
 
     @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

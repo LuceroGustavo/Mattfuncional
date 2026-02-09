@@ -13,7 +13,7 @@
             <div sec:authorize="isAuthenticated()" class="d-flex align-items-center"
                  th:with="currentUser=${#authentication.principal}">
 
-                <a th:if="${currentUser.rol == 'PROFESOR'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-light me-3">
+                <a th:if="${currentUser.rol == 'ADMIN'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-light me-3">
                     <i class="fas fa-tachometer-alt me-1"></i> Ir a mi Panel
                 </a>
 

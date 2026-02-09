@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/metrics")
-@PreAuthorize("hasRole('PROFESOR')")
+@PreAuthorize("hasRole('ADMIN')")
 public class MetricsController {
 
     @Autowired

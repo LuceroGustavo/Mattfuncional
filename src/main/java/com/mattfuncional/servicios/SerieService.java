@@ -46,7 +46,7 @@ public class SerieService {
         nuevaSerie.setDescripcion(serieDTO.getDescripcion());
         nuevaSerie.setProfesor(profesor);
         nuevaSerie.setEsPlantilla(true);
-        nuevaSerie.setCreador("PROFESOR");
+        nuevaSerie.setCreador("ADMIN");
         nuevaSerie.setRepeticionesSerie(serieDTO.getRepeticionesSerie());
 
         // 3. Crear y asociar las entidades SerieEjercicio

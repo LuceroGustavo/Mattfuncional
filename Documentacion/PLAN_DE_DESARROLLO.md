@@ -61,10 +61,11 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 | Optimización ejercicios predeterminados | Hecho: imágenes solo en `uploads/ejercicios/`, nombres 1–60, sin botón, auto-asegurar al abrir lista. |
 | ABM de ejercicios en panel profesor | Ya existía; se mantiene. |
 | Referencia “Cargar predeterminados” en plan | Actualizado conceptualmente: ya no es un botón manual, sino asegurar si no existen. |
+| Fase 1 – Limpieza | Hecho: un único rol ADMIN, sin panel alumno ni registro, sin panel admin separado, navbar y security ajustados. |
 
 ### 3.2 Por hacer (resumen del plan)
 
-- [ ] **Fase 1 – Limpieza:** Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar.
+- [x] **Fase 1 – Limpieza:** Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar.
 - [ ] **Fase 2 – Un solo profesor:** Profesor único en arranque. Redirigir login al panel profesor. Quitar referencias a admin y lista de profesores.
 - [ ] **Fase 3 – Ejercicios y series:** Ejercicios con “asegurar predeterminados” (hecho). Mantener ABM de ejercicios y ABM de series en panel profesor.
 - [ ] **Fase 4 – Rutinas y asignación:** ABM de rutinas basadas en series. Asignación rutina → alumno. Enlace único por asignación.
@@ -76,7 +77,7 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 ### 3.3 Checklist rápido (actualizado)
 
 - [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
-- [ ] Un único **panel: profesor** (no admin, no alumno).
+- [x] Un único **panel: profesor** (no admin, no alumno).
 - [x] **Ejercicios:** Predeterminados asegurados automáticamente desde `uploads/ejercicios/` (1–60); ABM de ejercicios en panel profesor.
 - [ ] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.

@@ -77,11 +77,11 @@ public class ProfesorService {
             Optional<Usuario> usuarioProfesor = usuarioRepository.findByCorreo(profesor.getCorreo());
             if (usuarioProfesor.isPresent()) {
                 Usuario usuario = usuarioProfesor.get();
-                // Verificar que el usuario tenga rol PROFESOR antes de eliminarlo
-                if ("PROFESOR".equals(usuario.getRol())) {
+                // Verificar que el usuario tenga rol ADMIN antes de eliminarlo
+                if ("ADMIN".equals(usuario.getRol())) {
                     usuarioRepository.delete(usuario);
                 } else {
-                    // Si el usuario no tiene rol PROFESOR, solo quitar la relación
+                    // Si el usuario no tiene rol ADMIN, solo quitar la relación
                     usuario.setProfesor(null);
                     usuarioRepository.save(usuario);
                 }
