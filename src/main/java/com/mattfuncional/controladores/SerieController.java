@@ -131,6 +131,21 @@ public class SerieController {
         return "series/crearSerie"; // Reutilizamos la vista de creación
     }
 
+    @GetMapping("/ver/{id}")
+    public String verSerie(@PathVariable Long id, Model model,
+            @AuthenticationPrincipal Usuario profesorUsuario) {
+        Serie serie = serieService.obtenerSeriePorId(id);
+        boolean esPropietario = profesorUsuario != null
+                && profesorUsuario.getProfesor() != null
+                && serie.getProfesor() != null
+                && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId());
+        if (!esPropietario) {
+            return "redirect:/profesor/dashboard?error=permiso_serie";
+        }
+        model.addAttribute("serie", serie);
+        return "series/verSerie";
+    }
+
     // PUT: Recibe los datos del formulario y actualiza la serie plantilla
     @PutMapping("/editar/{id}")
     @ResponseBody

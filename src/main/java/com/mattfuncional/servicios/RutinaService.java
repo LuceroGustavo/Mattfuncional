@@ -15,9 +15,8 @@ import com.mattfuncional.repositorios.SerieEjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.security.SecureRandom;
 
 @Service
 @Transactional
@@ -29,6 +28,8 @@ public class RutinaService {
     private final SerieRepository serieRepository;
     private final SerieEjercicioRepository serieEjercicioRepository;
     private final SerieService serieService;
+    private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
+    private static final char[] TOKEN_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     public RutinaService(RutinaRepository rutinaRepository,
             UsuarioRepository usuarioRepository,
@@ -53,6 +54,7 @@ public class RutinaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Profesor no encontrado con id: " + profesorId));
 
         Rutina rutina = new Rutina(nombre, descripcion, usuario, profesor);
+        rutina.setTokenPublico(generarTokenUnico());
         return rutinaRepository.save(rutina);
     }
 
@@ -63,8 +65,18 @@ public class RutinaService {
 
     // Obtener rutina por ID
     public Rutina obtenerRutinaPorId(Long id) {
-        return rutinaRepository.findById(id)
+        Rutina rutina = rutinaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
+        if (rutina.getTokenPublico() == null || rutina.getTokenPublico().isBlank()) {
+            rutina.setTokenPublico(generarTokenUnico());
+            rutina = rutinaRepository.save(rutina);
+        }
+        return rutina;
+    }
+
+    public Rutina obtenerRutinaPorToken(String tokenPublico) {
+        return rutinaRepository.findByTokenPublico(tokenPublico)
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con token: " + tokenPublico));
     }
 
     // Obtener rutinas por usuario
@@ -148,6 +160,7 @@ public class RutinaService {
         Rutina rutina = new Rutina(nombre, descripcion, profesor);
         rutina.setCategoria(categoria);
         rutina.setCreador("ADMIN");
+        rutina.setTokenPublico(generarTokenUnico());
         return rutinaRepository.save(rutina);
     }
 
@@ -188,6 +201,7 @@ public class RutinaService {
         nuevaRutina.setProfesor(profesor);
         nuevaRutina.setEsPlantilla(false); // No es plantilla, es asignada
         nuevaRutina.setEstado("ACTIVA");
+        nuevaRutina.setTokenPublico(generarTokenUnico());
 
         Rutina rutinaGuardada = rutinaRepository.save(nuevaRutina);
 
@@ -213,8 +227,25 @@ public class RutinaService {
         nuevaRutina.setProfesor(rutinaOriginal.getProfesor());
         nuevaRutina.setEsPlantilla(true);
         nuevaRutina.setCreador("ADMIN");
+        nuevaRutina.setTokenPublico(generarTokenUnico());
 
         return rutinaRepository.save(nuevaRutina);
+    }
+
+    private String generarTokenUnico() {
+        String token;
+        do {
+            token = generarToken(12);
+        } while (rutinaRepository.existsByTokenPublico(token));
+        return token;
+    }
+
+    private String generarToken(int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            builder.append(TOKEN_CHARS[TOKEN_RANDOM.nextInt(TOKEN_CHARS.length)]);
+        }
+        return builder.toString();
     }
 
     // Obtener rutinas asignadas a usuarios por profesor

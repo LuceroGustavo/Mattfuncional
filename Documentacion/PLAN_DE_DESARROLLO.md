@@ -56,6 +56,21 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - **Estado del alumno**: se agregó `ACTIVO/INACTIVO`, **fecha de alta/baja** y **historial de estado**.
 - **Vista de alumnos**: columna de estado y celular + **filtros** por nombre, estado, tipo (presencial/online), día y horario.
 
+### 2.6 Cambios recientes (rutinas, series y asignación)
+
+- **Enlace público con token**: la hoja de rutina ahora usa `/rutinas/hoja/{token}` para evitar URLs adivinables.  
+- **Botón “Copiar enlace”** en la hoja de rutina y en la ficha del alumno (tabla de rutinas asignadas).
+- **WhatsApp** en ficha de alumno: botón que abre chat con el **celular del alumno** y el enlace listo.
+- **Abrir en pestaña nueva**: botones “Ver” de rutinas abren en nueva pestaña.
+- **Ficha del alumno**:  
+  - **Historial de asistencia** solo registro.  
+  - **Dar presente** pasó a la tabla de alumnos (acciones).  
+  - **Rutinas asignadas** en formato tabla compacta + botón “Asignar rutina”.  
+  - **Sin estado “terminada/en proceso”** en la vista del alumno.
+- **Asignar rutina**: en las tarjetas de rutina se agregó botón **ver (ojo)**.
+- **Creación de rutinas**: botón **Crear serie** en el selector de series.
+- **Vista de series**: botón **Ver serie** y nueva vista `series/verSerie.html`.
+
 ---
 
 ## 3. Estado del plan general (según PLAN_MODIFICACIONES_MATTFUNCIONAL.md)
@@ -76,7 +91,7 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - [x] **Fase 1 – Limpieza:** Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar.
 - [x] **Fase 2 – Un solo profesor:** Profesor único en arranque. Redirigir login al panel profesor. Quitar referencias a admin y lista de profesores.
 - [x] **Fase 3 – Ejercicios y series:** Ejercicios con “asegurar predeterminados” (hecho). Mantener ABM de ejercicios y ABM de series en panel profesor.
-- [ ] **Fase 4 – Rutinas y asignación:** ABM de rutinas basadas en series. Asignación rutina → alumno. Enlace único por asignación.
+- [ ] **Fase 4 – Rutinas y asignación:** En progreso: enlaces con token, ver/copiar/WhatsApp, mejoras de asignación y vistas. Falta consolidar el flujo completo.
 - [ ] **Fase 5 – Vista rutina por enlace:** Página pública (sin login) con token/enlace que muestre la rutina en HTML. Enlace para WhatsApp.
 - [ ] **Fase 6 – Alumnos sin login:** Alumno como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo.
 - [ ] **Fase 7 – Pantalla de sala:** Modo sala para TV, ruta de solo lectura, control desde panel profesor.
@@ -89,7 +104,7 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - [x] **Ejercicios:** Predeterminados asegurados automáticamente desde `uploads/ejercicios/` (1–60); ABM de ejercicios en panel profesor.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
-- [ ] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** sin login.
+- [~] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** sin login (en progreso).
 - [ ] **Calendario semanal** y presentismo.
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.

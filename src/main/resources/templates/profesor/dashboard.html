@@ -293,15 +293,15 @@
                             </thead>
                             <tbody>
                                 <tr th:each="usuario : ${usuarios}" class="text-center"
-                                    th:attr="data-estado=${usuario.estadoAlumno},data-nombre=${usuario.nombre},data-tipo=${usuario.tipoAsistencia}">
+                                    th:attr="data-estado=${usuario.estadoAlumno},data-nombre=${usuario.nombre},data-tipo=${usuario.tipoAsistencia != null ? #strings.toString(usuario.tipoAsistencia) : ''}">
                                     <td th:text="${usuario.nombre}">Nombre</td>
                                     <td th:text="${usuario.edad}">Edad</td>
                                     <td th:text="${usuario.sexo}">Sexo</td>
                                     <td th:text="${usuario.peso} + ' kg'">Peso</td>
                                     <td th:text="${usuario.celular != null ? usuario.celular : '-'}">-</td>
                                     <td>
-                                        <span th:if="${usuario.tipoAsistencia == 'PRESENCIAL'}" class="badge bg-primary">Presencial</span>
-                                        <span th:if="${usuario.tipoAsistencia == 'ONLINE'}" class="badge bg-info">Online</span>
+                                        <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-primary">Presencial</span>
+                                        <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'ONLINE' or #strings.toString(usuario.tipoAsistencia) == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
                                         <span th:if="${usuario.tipoAsistencia == null}" class="badge bg-light text-dark">-</span>
                                     </td>
                                     <td>
@@ -325,6 +325,14 @@
                                         <a th:href="@{/profesor/asignar-rutina/{id}(id=${usuario.id})}" class="btn btn-success btn-sm">
                                             <i class="fa-solid fa-dumbbell me-1"></i>Asignar Rutina
                                         </a>
+                                        <form th:action="@{'/profesor/alumnos/' + ${usuario.id} + '/asistencia'}" method="post" class="d-inline">
+                                            <input type="hidden" name="presente" value="true">
+                                            <input type="hidden" name="observaciones" value="">
+                                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fa-solid fa-check me-1"></i>Dar presente
+                                            </button>
+                                        </form>
                                         <div class="horarios-data d-none">
                                             <span th:each="dh : ${usuario.diasHorariosAsistencia}"
                                                   th:attr="data-dia=${dh.dia},data-hora=${#temporals.format(dh.horaEntrada, 'H')}"></span>
@@ -407,6 +415,9 @@
                                     </td>
                                     <td th:text="${rutina.descripcion}">Descripción</td>
                                     <td>
+                                        <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                            <i class="fa-solid fa-eye me-1"></i>Ver
+                                        </a>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-warning btn-sm">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
@@ -444,7 +455,7 @@
                                     </td>
                                     <td th:text="${#temporals.format(rutinaAsignada.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
                                     <td>
-                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm">
+                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
                                             <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm">

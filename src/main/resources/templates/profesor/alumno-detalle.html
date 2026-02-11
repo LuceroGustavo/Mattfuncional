@@ -297,8 +297,8 @@
                         <div class="info-row">
                             <span class="info-label">Tipo de Asistencia:</span>
                             <span class="info-value">
-                                <span th:if="${alumno.tipoAsistencia == 'PRESENCIAL'}" class="badge bg-success">Presencial</span>
-                                <span th:if="${alumno.tipoAsistencia == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
+                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-success">Presencial</span>
+                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'ONLINE' or #strings.toString(alumno.tipoAsistencia) == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
                                 <span th:if="${alumno.tipoAsistencia == null}">-</span>
                             </span>
                         </div>
@@ -375,57 +375,36 @@
             <div class="card-header">
                 <h5><i class="fas fa-calendar-check me-2"></i>Historial de Asistencia</h5>
             </div>
-        <div class="card-body">
-                <!-- Formulario de registro de asistencia -->
-                <form th:action="@{'/profesor/alumnos/' + ${alumno.id} + '/asistencia'}" method="post" class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <label class="form-label">¿Presente hoy?</label>
-                    <select class="form-select" name="presente">
-                        <option value="true">Presente</option>
-                        <option value="false">Ausente</option>
-                    </select>
-                </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Observaciones (opcional)</label>
-                        <input type="text" class="form-control" name="observaciones" placeholder="Observaciones...">
-                </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-plus me-2"></i>Registrar
-                        </button>
-                </div>
-            </form>
-
-                <!-- Tabla de historial -->
-            <div class="table-responsive">
+            <div class="card-body">
+                <div class="table-responsive">
                     <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Fecha</th>
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
                                 <th>Estado</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="asistencia : ${historialAsistencia}">
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="asistencia : ${historialAsistencia}">
                                 <td th:text="${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')}">Fecha</td>
-                            <td>
-                                <span th:if="${asistencia.presente}" class="badge bg-success">Presente</span>
-                                <span th:if="${!asistencia.presente}" class="badge bg-danger">Ausente</span>
-                            </td>
+                                <td>
+                                    <span th:if="${asistencia.presente}" class="badge bg-success">Presente</span>
+                                    <span th:if="${!asistencia.presente}" class="badge bg-danger">Ausente</span>
+                                </td>
                                 <td th:text="${asistencia.observaciones != null && !asistencia.observaciones.isEmpty() ? asistencia.observaciones : '-'}">-</td>
-                        </tr>
-                        <tr th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}">
+                            </tr>
+                            <tr th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}">
                                 <td colspan="3" class="text-center text-muted py-4">
                                     <i class="fas fa-calendar-times fa-2x mb-2"></i>
                                     <p class="mb-0">Sin registros de asistencia</p>
                                 </td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
         <!-- Rutinas del Alumno -->
         <div class="info-card">
@@ -433,84 +412,56 @@
                 <h5><i class="fas fa-dumbbell me-2"></i>Rutinas del Alumno</h5>
     </div>
             <div class="card-body">
-                <ul class="nav nav-tabs" id="rutinasTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="en-proceso-tab" data-bs-toggle="tab" data-bs-target="#en-proceso" type="button" role="tab">
-                            <i class="fas fa-clock me-1"></i>En Proceso
-                            <span class="badge bg-warning ms-1" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="terminadas-tab" data-bs-toggle="tab" data-bs-target="#terminadas" type="button" role="tab">
-                    <i class="fas fa-check-circle me-1"></i>Terminadas
-                            <span class="badge bg-success ms-1" th:text="${rutinasTerminadas != null ? rutinasTerminadas.size() : 0}">0</span>
-                </button>
-            </li>
-        </ul>
-                
-                <div class="tab-content mt-3" id="rutinasTabContent">
-                <!-- Pestaña: Rutinas en proceso -->
-                <div class="tab-pane fade show active" id="en-proceso" role="tabpanel">
-                        <div th:if="${rutinasEnProceso == null || rutinasEnProceso.isEmpty()}" class="text-center text-muted py-5">
-                        <i class="fas fa-inbox fa-3x mb-3"></i>
-                            <h6>No hay rutinas en proceso</h6>
-                            <p class="text-muted">El alumno aún no tiene rutinas asignadas o todas han sido completadas.</p>
-                    </div>
-                        <div th:each="rutina : ${rutinasEnProceso}" class="rutina-card">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h6 class="mb-0"><i class="fas fa-dumbbell me-2"></i><span th:text="${rutina.nombre}">Nombre de la rutina</span></h6>
-                                <span class="badge bg-warning">En Proceso</span>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <p class="mb-2"><strong>Descripción:</strong> <span th:text="${rutina.descripcion != null && !rutina.descripcion.isEmpty() ? rutina.descripcion : 'Sin descripción'}">Descripción</span></p>
-                                    <p class="mb-2"><strong>Categoría:</strong> <span th:text="${rutina.categoria != null ? rutina.categoria : 'N/A'}">Categoría</span></p>
-                        </div>
-                                <div class="col-md-6">
-                            <p class="mb-2"><strong>Fecha de creación:</strong> <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">Fecha</span></p>
-                                    <p class="mb-2"><strong>Series:</strong> <span th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span></p>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-action">
-                                    <i class="fas fa-eye me-1"></i>Ver Detalles
-                                </a>
-                                <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-action">
-                                    <i class="fas fa-edit me-1"></i>Editar
-                                </a>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <span class="text-muted">Historial de rutinas asignadas</span>
+                    <a th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-success btn-sm">
+                        <i class="fas fa-dumbbell me-1"></i>Asignar rutina
+                    </a>
                 </div>
-                
-                <!-- Pestaña: Rutinas terminadas -->
-                <div class="tab-pane fade" id="terminadas" role="tabpanel">
-                        <div th:if="${rutinasTerminadas == null || rutinasTerminadas.isEmpty()}" class="text-center text-muted py-5">
-                        <i class="fas fa-trophy fa-3x mb-3"></i>
-                            <h6>No hay rutinas terminadas</h6>
-                            <p class="text-muted">El alumno aún no ha completado ninguna rutina.</p>
+
+                <div th:if="${rutinasAsignadas == null || rutinasAsignadas.isEmpty()}" class="text-center text-muted py-5">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h6>Sin rutinas asignadas</h6>
+                    <p class="text-muted">Todavía no hay rutinas asignadas a este alumno.</p>
                 </div>
-                        <div th:each="rutina : ${rutinasTerminadas}" class="rutina-card">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h6 class="mb-0"><i class="fas fa-dumbbell me-2"></i><span th:text="${rutina.nombre}">Nombre de la rutina</span></h6>
-                                <span class="badge bg-success">Terminada</span>
-                        </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <p class="mb-2"><strong>Descripción:</strong> <span th:text="${rutina.descripcion != null && !rutina.descripcion.isEmpty() ? rutina.descripcion : 'Sin descripción'}">Descripción</span></p>
-                                    <p class="mb-2"><strong>Categoría:</strong> <span th:text="${rutina.categoria != null ? rutina.categoria : 'N/A'}">Categoría</span></p>
-                                </div>
-                                <div class="col-md-6">
-                            <p class="mb-2"><strong>Fecha de creación:</strong> <span th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy')}">Fecha</span></p>
-                                    <p class="mb-2"><strong>Series:</strong> <span th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span></p>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-action">
-                                    <i class="fas fa-eye me-1"></i>Ver Detalles
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                <div th:if="${rutinasAsignadas != null && !rutinasAsignadas.isEmpty()}" class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Rutina</th>
+                                <th>Categoría</th>
+                                <th>Series</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rutina : ${rutinasAsignadas}">
+                                <td th:text="${rutina.fechaCreacion != null ? #temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy') : 'Sin fecha'}">Fecha</td>
+                                <td th:text="${rutina.nombre}">Nombre</td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${rutina.categoria != null ? rutina.categoria : 'N/A'}">Categoría</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
+                                </td>
+                                <td class="d-flex gap-2">
+                                    <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                        <i class="fas fa-eye me-1"></i>Ver
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-outline-dark btn-sm copiar-enlace-rutina"
+                                            th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})}">
+                                        <i class="fas fa-link me-1"></i>Copiar enlace
+                                    </button>
+                                    <a href="#" class="btn btn-success btn-sm compartir-whatsapp" target="_blank" rel="noopener"
+                                       th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-phone=${alumno.celular}">
+                                        <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -538,6 +489,35 @@
  <div th:replace="fragments/footer :: footer"></div>
  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.copiar-enlace-rutina').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const relativeUrl = btn.getAttribute('data-url') || '';
+                const fullUrl = new URL(relativeUrl, window.location.origin).toString();
+                try {
+                    await navigator.clipboard.writeText(fullUrl);
+                    alert('Enlace copiado.');
+                } catch (error) {
+                    const tempInput = document.createElement('input');
+                    tempInput.value = fullUrl;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    tempInput.remove();
+                    alert('Enlace copiado.');
+                }
+            });
+        });
+
+        document.querySelectorAll('.compartir-whatsapp').forEach(link => {
+            const relativeUrl = link.getAttribute('data-url') || '';
+            const fullUrl = new URL(relativeUrl, window.location.origin).toString();
+            const mensaje = encodeURIComponent('Rutina: ' + fullUrl);
+            const rawPhone = link.getAttribute('data-phone') || '';
+            const phone = rawPhone.replace(/[^\d]/g, '');
+            link.href = phone ? `https://wa.me/${phone}?text=${mensaje}` : `https://wa.me/?text=${mensaje}`;
+        });
+    </script>
  
 </body>
 </html> 

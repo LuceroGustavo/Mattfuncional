@@ -236,6 +236,26 @@
                     overlay.style.display = 'flex';
                 });
             });
+
+            const botonCopiar = document.getElementById('copiarEnlaceRutina');
+            if (botonCopiar) {
+                botonCopiar.addEventListener('click', async () => {
+                    const relativeUrl = botonCopiar.getAttribute('data-url') || window.location.pathname;
+                    const fullUrl = new URL(relativeUrl, window.location.origin).toString();
+                    try {
+                        await navigator.clipboard.writeText(fullUrl);
+                        alert('Enlace copiado.');
+                    } catch (error) {
+                        const tempInput = document.createElement('input');
+                        tempInput.value = fullUrl;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        tempInput.remove();
+                        alert('Enlace copiado.');
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -250,6 +270,14 @@
             <span class="badge bg-success ms-2" th:text="${rutina.categoria}">Categoría</span>
             <span th:if="${rutina.estado == 'TERMINADA'}" class="badge bg-success ms-2">Terminada</span>
             <span th:if="${rutina.estado != 'TERMINADA'}" class="badge bg-warning text-dark ms-2">En proceso</span>
+        </div>
+        <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <button id="copiarEnlaceRutina"
+                    type="button"
+                    class="btn btn-outline-dark btn-sm"
+                    th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})}">
+                <i class="fas fa-link me-1"></i>Copiar enlace
+            </button>
         </div>
     </div>
     <!-- Series -->

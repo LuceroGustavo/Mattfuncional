@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RutinaRepository extends JpaRepository<Rutina, Long> {
@@ -39,4 +40,8 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
     // Buscar rutinas asignadas a un usuario específico (no plantillas)
     List<Rutina> findByUsuarioIdAndEsPlantillaFalse(Long usuarioId);
+
+    Optional<Rutina> findByTokenPublico(String tokenPublico);
+
+    boolean existsByTokenPublico(String tokenPublico);
 }

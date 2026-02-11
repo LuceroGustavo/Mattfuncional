@@ -20,6 +20,8 @@ public class Rutina {
     private boolean esPlantilla; // true = rutina plantilla, false = rutina asignada
     private String creador; // "ADMIN" (único gestor del panel)
     private String categoria; // "FUERZA", "CARDIO", "FLEXIBILIDAD", etc.
+    @Column(unique = true, length = 32)
+    private String tokenPublico;
 
     @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Serie> series;
@@ -126,6 +128,14 @@ public class Rutina {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public String getTokenPublico() {
+        return tokenPublico;
+    }
+
+    public void setTokenPublico(String tokenPublico) {
+        this.tokenPublico = tokenPublico;
     }
 
     public List<Serie> getSeries() {

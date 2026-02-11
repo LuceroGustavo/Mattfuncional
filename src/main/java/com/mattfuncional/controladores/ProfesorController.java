@@ -18,7 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.time.LocalDate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.ArrayList;
@@ -339,23 +338,13 @@ public class ProfesorController {
         model.addAttribute("historialAsistencia", historialAsistencia);
         // --- NUEVO: cargar rutinas desde el servicio para evitar LazyInitializationException ---
         List<com.mattfuncional.entidades.Rutina> rutinasDelAlumno = rutinaService.obtenerRutinasAsignadasPorUsuario(id);
-        
-        List<com.mattfuncional.entidades.Rutina> rutinasEnProceso = rutinasDelAlumno.stream()
-                        .filter(r -> r.getEstado() == null || !"TERMINADA".equals(r.getEstado()))
-                        .sorted(java.util.Comparator
-                                .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
-                                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
-                                .reversed())
-                        .collect(java.util.stream.Collectors.toList());
-        List<com.mattfuncional.entidades.Rutina> rutinasTerminadas = rutinasDelAlumno.stream()
-                        .filter(r -> "TERMINADA".equals(r.getEstado()))
-                        .sorted(java.util.Comparator
-                                .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
-                                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
-                                .reversed())
-                        .collect(java.util.stream.Collectors.toList());
-        model.addAttribute("rutinasEnProceso", rutinasEnProceso);
-        model.addAttribute("rutinasTerminadas", rutinasTerminadas);
+        List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinasDelAlumno.stream()
+                .sorted(java.util.Comparator
+                        .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
+                                java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
+                        .reversed())
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("rutinasAsignadas", rutinasAsignadas);
 
         return "profesor/alumno-detalle";
     }

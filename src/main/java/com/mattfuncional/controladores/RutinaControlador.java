@@ -192,10 +192,10 @@ public class RutinaControlador {
         return "redirect:/profesor/alumnos/" + alumnoId;
     }
 
-    // HOJA DE RUTINA VISUAL
-    @GetMapping("/hoja/{rutinaId}")
-    public String verHojaRutina(@PathVariable Long rutinaId, Model model) {
-        Rutina rutina = rutinaService.obtenerRutinaPorId(rutinaId);
+    // HOJA DE RUTINA VISUAL (link público con token)
+    @GetMapping("/hoja/{tokenPublico}")
+    public String verHojaRutina(@PathVariable String tokenPublico, Model model) {
+        Rutina rutina = rutinaService.obtenerRutinaPorToken(tokenPublico);
         if (rutina == null) {
             return "redirect:/profesor/dashboard?error=Rutina no encontrada";
         }
@@ -210,6 +210,7 @@ public class RutinaControlador {
     // Redirección para evitar pantalla verde si acceden por /rutinas/ver/{rutinaId}
     @GetMapping("/ver/{rutinaId}")
     public String redirigirVerHojaRutina(@PathVariable Long rutinaId) {
-        return "redirect:/rutinas/hoja/" + rutinaId;
+        Rutina rutina = rutinaService.obtenerRutinaPorId(rutinaId);
+        return "redirect:/rutinas/hoja/" + rutina.getTokenPublico();
     }
 }
