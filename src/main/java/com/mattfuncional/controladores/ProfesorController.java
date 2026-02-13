@@ -88,12 +88,22 @@ public class ProfesorController {
         }
 
         List<Usuario> usuarios = usuarioService.getAlumnosByProfesorId(profesor.getId());
+        java.util.Map<Long, Boolean> asistenciaHoy = new java.util.HashMap<>();
+        java.time.LocalDate hoy = java.time.LocalDate.now();
+        for (Usuario usuario : usuarios) {
+            if (usuario != null && usuario.getTipoAsistencia() == com.mattfuncional.enums.TipoAsistencia.PRESENCIAL) {
+                java.util.List<Asistencia> asistencias = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(usuario, hoy);
+                boolean presenteHoy = asistencias != null && !asistencias.isEmpty();
+                asistenciaHoy.put(usuario.getId(), presenteHoy);
+            }
+        }
         List<com.mattfuncional.entidades.Rutina> rutinas = rutinaService.obtenerRutinasPlantillaPorProfesor(profesor.getId());
         List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinaService
                 .obtenerRutinasAsignadasPorProfesor(profesor.getId());
         List<Serie> series = serieService.obtenerSeriesPlantillaPorProfesor(profesor.getId());
 
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("asistenciaHoy", asistenciaHoy);
         model.addAttribute("rutinas", rutinas);
         model.addAttribute("rutinasAsignadas", rutinasAsignadas);
         model.addAttribute("series", series);
@@ -355,6 +365,7 @@ public class ProfesorController {
     public String registrarAsistencia(@PathVariable Long id,
             @RequestParam("presente") boolean presente,
             @RequestParam(value = "observaciones", required = false) String observaciones,
+            @RequestParam(value = "origen", required = false) String origen,
             @AuthenticationPrincipal Usuario profesorUsuario,
             Model model) {
         Usuario alumno = usuarioService.getUsuarioById(id);
@@ -362,13 +373,24 @@ public class ProfesorController {
         if (alumno == null || profesor == null) {
             return profesor != null ? "redirect:/profesor/" + profesor.getId() : "redirect:/login";
         }
+        if (alumno.getTipoAsistencia() != com.mattfuncional.enums.TipoAsistencia.PRESENCIAL) {
+            return "dashboard".equals(origen)
+                    ? "redirect:/profesor/" + profesor.getId()
+                    : "redirect:/profesor/alumnos/" + id;
+        }
         var asistencia = asistenciaService.registrarAsistencia(alumno, java.time.LocalDate.now(), presente,
                 observaciones);
         if (asistencia == null) {
             // Ya existe asistencia hoy
+            if ("dashboard".equals(origen)) {
+                return "redirect:/profesor/" + profesor.getId() + "?asistencia=ya_registrada";
+            }
             model.addAttribute("errorAsistencia",
                     "La asistencia de hoy ya fue registrada. Si fue un error, puedes deshacerla.");
             return verAlumno(id, model); // Recarga la ficha con el mensaje de error
+        }
+        if ("dashboard".equals(origen)) {
+            return "redirect:/profesor/" + profesor.getId() + "?asistencia=ok";
         }
         return "redirect:/profesor/alumnos/" + id;
     }

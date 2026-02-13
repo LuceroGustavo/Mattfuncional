@@ -2,5 +2,6 @@ package com.mattfuncional.enums;
  
 public enum TipoAsistencia {
     PRESENCIAL,
-    ONLINE
+    ONLINE,
+    SEMIPRESENCIAL
 } 

@@ -42,6 +42,19 @@
             border-color: #1976d2;
             box-shadow: 0 0 0 2px #1976d233;
         }
+        .estado-select {
+            font-weight: 600;
+        }
+        .estado-activo {
+            background: #d9f6e5;
+            border-color: #9bd9b5;
+            color: #1f5a3d;
+        }
+        .estado-inactivo {
+            background: #ffe0e0;
+            border-color: #f3a6a6;
+            color: #7a2d2d;
+        }
         .avatar-img {
             width: 60px;
             height: 60px;
@@ -95,6 +108,16 @@
             <form th:action="${editMode} ? @{'/profesor/alumnos/editar/' + ${usuario.id}} : @{/profesor/alumnos/nuevo}" th:object="${usuario}" method="post">
                 <input type="hidden" th:if="${editMode}" th:field="*{id}" />
                 <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4 mb-3">
+                        <label for="estadoAlumno" class="form-label">Estado del Alumno</label>
+                        <select class="form-select estado-select" id="estadoAlumno" th:field="*{estadoAlumno}">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-4 mb-3">
                         <label for="nombre" class="form-label">Nombre Completo</label>
                         <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
@@ -122,24 +145,7 @@
                             <option value="Otro">Otro</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="estadoAlumno" class="form-label">Estado del Alumno</label>
-                        <select class="form-select" id="estadoAlumno" th:field="*{estadoAlumno}">
-                            <option value="ACTIVO">Activo</option>
-                            <option value="INACTIVO">Inactivo</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row" th:if="${editMode}">
-                    <div class="col-md-4 mb-3">
-                        <label for="fechaAlta" class="form-label">Fecha de Alta</label>
-                        <input type="date" class="form-control" id="fechaAlta" th:field="*{fechaAlta}" readonly>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="fechaBaja" class="form-label">Fecha de Baja</label>
-                        <input type="date" class="form-control" id="fechaBaja" th:field="*{fechaBaja}" readonly>
-                    </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3" th:if="${editMode}">
                         <label for="historialEstado" class="form-label">Historial de Estado</label>
                         <textarea class="form-control" id="historialEstado" th:field="*{historialEstado}" rows="2" readonly></textarea>
                     </div>
@@ -150,7 +156,8 @@
                         <select class="form-select" id="tipoAsistencia" th:field="*{tipoAsistencia}" required onchange="mostrarSelectorHorarios()">
                             <option value="" disabled selected>Seleccionar...</option>
                             <option value="PRESENCIAL">Presencial</option>
-                            <option value="ONLINE">Online</option>
+                            <option value="ONLINE">Virtual</option>
+                            <option value="SEMIPRESENCIAL">Semipresencial</option>
                         </select>
                     </div>
                 </div>
@@ -532,7 +539,7 @@ function cargarHorariosExistentes() {
 // Días y horas para la grilla
 const DIAS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"];
 const HORAS = [];
-for (let h = 6; h < 20; h++) {
+for (let h = 6; h < 21; h++) {
     HORAS.push({label: `${h}:00`, value: h});
 }
 
@@ -573,7 +580,7 @@ generarGrillaHorarios();
 function mostrarSelectorHorarios() {
     var tipo = document.getElementById('tipoAsistencia').value;
     var row = document.getElementById('selectorHorariosRow');
-    if(tipo === 'PRESENCIAL') {
+    if(tipo === 'PRESENCIAL' || tipo === 'SEMIPRESENCIAL') {
         row.style.display = 'flex';
     } else {
         row.style.display = 'none';
@@ -581,6 +588,25 @@ function mostrarSelectorHorarios() {
         limpiarHorarios();
     }
 }
+
+function actualizarEstadoAlumnoEstilo() {
+    var select = document.getElementById('estadoAlumno');
+    if (!select) return;
+    select.classList.remove('estado-activo', 'estado-inactivo');
+    if (select.value === 'ACTIVO') {
+        select.classList.add('estado-activo');
+    } else if (select.value === 'INACTIVO') {
+        select.classList.add('estado-inactivo');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarEstadoAlumnoEstilo();
+    var estadoSelect = document.getElementById('estadoAlumno');
+    if (estadoSelect) {
+        estadoSelect.addEventListener('change', actualizarEstadoAlumnoEstilo);
+    }
+});
 </script>
 
 <script th:inline="javascript">

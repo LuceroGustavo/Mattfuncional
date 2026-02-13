@@ -86,3 +86,30 @@ fix(rutinas): corregir guardado al modificar rutina (conservar todas las series)
 ---
 
 *Documento generado para commit/push – Febrero 2026.*
+
+---
+
+## 5. Avances posteriores (Fase 4 – en progreso)
+
+- **Enlace público con token:** `/rutinas/hoja/{token}` para evitar URLs adivinables.
+- **Copiar enlace:** botón en hoja de rutina y en ficha del alumno.
+- **WhatsApp:** botón que abre chat con el **celular del alumno** y enlace listo.
+- **Asignar rutina:** tarjetas con botón **ver (ojo)**.
+- **Ficha del alumno:** rutinas asignadas en **tabla compacta**; sin estado “terminada/en proceso”.
+- **Asistencia:** acción “Dar presente” movida a la tabla de alumnos (acciones); historial queda solo registro.
+- **Creación de rutinas:** botón **Crear serie** en selector de series.
+- **Series:** botón **Ver serie** y nueva vista `series/verSerie.html`.
+
+---
+
+## 6. Avances de hoy (09/02/2026)
+
+- **Calendario semanal:** día + número en encabezados, mes en curso visible y franja 20–21.
+- **Presentismo rápido:** botón en tabla de alumnos, sin redirección y con estado visual.
+- **Acciones de alumnos:** botones compactos, columna “Presente” separada.
+- **Inactivos:** deshabilitar asignar rutina y dar presente con tooltip.
+- **Filtros persistentes:** se guardan y restauran al volver al panel.
+- **Editar alumno:** estado arriba (pastel), historial reubicado, sin fechas alta/baja.
+- **Tipos de asistencia:** Virtual + Semipresencial, con selector de horarios.
+- **WhatsApp rutinas:** botón con celular del alumno y enlace listo.
+- **Seed SQL:** script con 30 alumnos de prueba en `scripts/seed_alumnos_mattfuncional.sql`.

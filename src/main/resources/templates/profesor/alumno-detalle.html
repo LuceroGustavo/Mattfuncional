@@ -8,10 +8,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
      <link href="/css/footer.css" rel="stylesheet">
     <style>
+        html, body {
+            height: auto;
+        }
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-y: auto;
         }
         
         .main-container {
@@ -21,6 +25,7 @@
             margin: 20px auto;
             padding: 30px;
             max-width: 1400px;
+            padding-bottom: 60px;
         }
         
         .hero-title {
@@ -299,6 +304,7 @@
                             <span class="info-value">
                                 <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-success">Presencial</span>
                                 <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'ONLINE' or #strings.toString(alumno.tipoAsistencia) == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
+                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}" class="badge bg-warning text-dark">Semipresencial</span>
                                 <span th:if="${alumno.tipoAsistencia == null}">-</span>
                             </span>
                         </div>

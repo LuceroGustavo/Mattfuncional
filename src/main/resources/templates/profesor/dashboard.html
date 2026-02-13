@@ -222,7 +222,8 @@
                                     <select id="filtroTipoAsistencia" class="form-select">
                                         <option value="">Todos</option>
                                         <option value="PRESENCIAL">Presencial</option>
-                                        <option value="ONLINE">Online</option>
+                                        <option value="ONLINE">Virtual</option>
+                                        <option value="SEMIPRESENCIAL">Semipresencial</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -289,6 +290,7 @@
                                     <th>Estado</th>
                                     <th>Rutinas</th>
                                     <th>Acciones</th>
+                                    <th>Presente</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -302,6 +304,7 @@
                                     <td>
                                         <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-primary">Presencial</span>
                                         <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'ONLINE' or #strings.toString(usuario.tipoAsistencia) == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
+                                        <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'SEMIPRESENCIAL'}" class="badge bg-warning text-dark">Semipresencial</span>
                                         <span th:if="${usuario.tipoAsistencia == null}" class="badge bg-light text-dark">-</span>
                                     </td>
                                     <td>
@@ -312,31 +315,46 @@
                                     <td>
                                         <span class="badge bg-success" th:text="${usuario.rutinas != null ? usuario.rutinas.size() : 0}">0</span>
                                     </td>
-                                    <td>
-                                        <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="btn btn-primary btn-sm">
-                                            <i class="fa-solid fa-user me-1"></i>Ver Alumno
+                                    <td class="text-start">
+                                        <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="btn btn-primary btn-sm" title="Ver alumno">
+                                            <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
-                                        <a th:href="@{/profesor/alumnos/editar/{id}(id=${usuario.id})}" class="btn btn-warning btn-sm">
+                                        <a th:href="@{/profesor/alumnos/editar/{id}(id=${usuario.id})}" class="btn btn-warning btn-sm" title="Editar alumno">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
-                                        <a th:href="@{/profesor/alumnos/eliminar/{id}(id=${usuario.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
-                                            <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                        <a th:href="@{/profesor/alumnos/eliminar/{id}(id=${usuario.id})}" class="btn btn-danger btn-sm" title="Eliminar alumno" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
+                                            <i class="fa-solid fa-trash"></i>
                                         </a>
-                                        <a th:href="@{/profesor/asignar-rutina/{id}(id=${usuario.id})}" class="btn btn-success btn-sm">
-                                            <i class="fa-solid fa-dumbbell me-1"></i>Asignar Rutina
+                                        <a th:href="@{/profesor/asignar-rutina/{id}(id=${usuario.id})}"
+                                           class="btn btn-info btn-sm"
+                                           th:classappend="${usuario.estadoAlumno == 'INACTIVO'} ? 'disabled opacity-50'"
+                                           th:attr="aria-disabled=${usuario.estadoAlumno == 'INACTIVO'},tabindex=${usuario.estadoAlumno == 'INACTIVO'} ? -1 : 0"
+                                           th:title="${usuario.estadoAlumno == 'INACTIVO'} ? 'Alumno inactivo' : 'Asignar rutina'">
+                                            <i class="fa-solid fa-dumbbell"></i>
                                         </a>
-                                        <form th:action="@{'/profesor/alumnos/' + ${usuario.id} + '/asistencia'}" method="post" class="d-inline">
-                                            <input type="hidden" name="presente" value="true">
-                                            <input type="hidden" name="observaciones" value="">
-                                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                            <button type="submit" class="btn btn-success btn-sm">
-                                                <i class="fa-solid fa-check me-1"></i>Dar presente
-                                            </button>
-                                        </form>
                                         <div class="horarios-data d-none">
                                             <span th:each="dh : ${usuario.diasHorariosAsistencia}"
+                                                  th:if="${dh != null and dh.dia != null and dh.horaEntrada != null}"
                                                   th:attr="data-dia=${dh.dia},data-hora=${#temporals.format(dh.horaEntrada, 'H')}"></span>
                                         </div>
+                                    </td>
+                                    <td class="text-start">
+                                        <form th:if="${#strings.toString(usuario.tipoAsistencia) == 'PRESENCIAL'}"
+                                              th:action="@{'/profesor/alumnos/' + ${usuario.id} + '/asistencia'}" method="post" class="d-inline">
+                                            <input type="hidden" name="presente" value="true">
+                                            <input type="hidden" name="observaciones" value="">
+                                            <input type="hidden" name="origen" value="dashboard">
+                                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <button type="submit"
+                                                    class="btn btn-sm"
+                                                    th:classappend="${asistenciaHoy != null and asistenciaHoy[usuario.id]} ? 'btn-success' : 'btn-outline-success'"
+                                                    th:disabled="${usuario.estadoAlumno == 'INACTIVO'}"
+                                                    th:attr="aria-disabled=${usuario.estadoAlumno == 'INACTIVO'}"
+                                                    th:title="${usuario.estadoAlumno == 'INACTIVO'} ? 'Alumno inactivo' : 'Dar presente'">
+                                                <i class="fa-solid fa-check me-1"></i>
+                                                <span th:text="${asistenciaHoy != null and asistenciaHoy[usuario.id]} ? 'Presente' : 'Dar presente'">Dar presente</span>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             </tbody>
@@ -499,6 +517,33 @@
         const filtroTipo = document.getElementById('filtroTipoAsistencia');
         const filtroDia = document.getElementById('filtroDia');
         const filtroHora = document.getElementById('filtroHora');
+        const filtrosStorageKey = 'mattfuncional_filtros_alumnos';
+
+        function guardarFiltros() {
+            const payload = {
+                nombre: filtroNombre?.value || '',
+                estado: filtroEstado?.value || '',
+                tipo: filtroTipo?.value || '',
+                dia: filtroDia?.value || '',
+                hora: filtroHora?.value || ''
+            };
+            localStorage.setItem(filtrosStorageKey, JSON.stringify(payload));
+        }
+
+        function cargarFiltros() {
+            const raw = localStorage.getItem(filtrosStorageKey);
+            if (!raw) return;
+            try {
+                const data = JSON.parse(raw);
+                if (filtroNombre) filtroNombre.value = data.nombre || '';
+                if (filtroEstado) filtroEstado.value = data.estado || '';
+                if (filtroTipo) filtroTipo.value = data.tipo || '';
+                if (filtroDia) filtroDia.value = data.dia || '';
+                if (filtroHora) filtroHora.value = data.hora || '';
+            } catch (error) {
+                localStorage.removeItem(filtrosStorageKey);
+            }
+        }
 
         function obtenerHorariosFila(row) {
             const horarios = [];
@@ -542,6 +587,8 @@
             if (el) {
                 el.addEventListener('input', aplicarFiltrosAlumnos);
                 el.addEventListener('change', aplicarFiltrosAlumnos);
+                el.addEventListener('input', guardarFiltros);
+                el.addEventListener('change', guardarFiltros);
             }
         });
 
@@ -552,9 +599,12 @@
                 if (filtroTipo) filtroTipo.value = '';
                 if (filtroDia) filtroDia.value = '';
                 if (filtroHora) filtroHora.value = '';
+                localStorage.removeItem(filtrosStorageKey);
                 aplicarFiltrosAlumnos();
             });
         }
+        cargarFiltros();
+        aplicarFiltrosAlumnos();
     </script>
 </body>
 </html>

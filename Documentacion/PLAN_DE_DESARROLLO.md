@@ -75,6 +75,20 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - **Tabs del dashboard:** parámetro `?tab=series|rutinas|asignaciones` para volver al tab correcto tras guardar.
 - **Logo:** referencias unificadas a `logo matt.jpeg` en navbar y vistas profesor.
 
+### 2.7 Cambios recientes (09/02/2026)
+
+- **Calendario semanal:** encabezados con día + número (ej. Lunes 09), mes visible arriba a la derecha y horario extendido hasta 20–21.
+- **Asistencia rápida en tabla:** botón “Dar presente” en el panel, con estado visual (outline/verde) y sin redirección; solo para presenciales.
+- **Acciones en alumnos:** columna “Presente” separada; botones compactos (Ver/Editar/Borrar/Asignar).
+- **Inactivos:** “Asignar rutina” y “Dar presente” quedan deshabilitados con tooltip “Alumno inactivo”.
+- **Filtros persistentes:** se guardan en localStorage y se restauran al volver al panel.
+- **Ficha de alumno:** scroll asegurado para ver historial y rutinas completas.
+- **Tipo de asistencia:** agregado **Semipresencial**, “Online” renombrado a **Virtual**, horarios visibles en presencial/semipresencial.
+- **Editar alumno:** reorden de campos (estado arriba a la derecha), colores pastel según estado, sin fechas alta/baja.
+- **Asignar rutina:** tarjetas con botón “ver” (icono ojo) en nueva pestaña.
+- **WhatsApp rutinas:** botón en ficha con enlace al celular del alumno y link de rutina.
+- **Seeds:** script SQL con 30 alumnos variados en `scripts/seed_alumnos_mattfuncional.sql`.
+
 ---
 
 ## 3. Estado del plan general (según PLAN_MODIFICACIONES_MATTFUNCIONAL.md)

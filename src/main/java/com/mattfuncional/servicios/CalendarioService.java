@@ -26,7 +26,7 @@ public class CalendarioService {
 
     private static final int CAPACIDAD_MAXIMA_POR_SLOT = 10; // Configurable
     private static final LocalTime HORA_INICIO = LocalTime.of(6, 0);
-    private static final LocalTime HORA_FIN = LocalTime.of(20, 0);
+    private static final LocalTime HORA_FIN = LocalTime.of(21, 0);
     private static final int DURACION_SLOT_MINUTOS = 60;
 
     public CalendarioSemanalDTO generarCalendarioSemanal(LocalDate fecha, Long profesorId) {

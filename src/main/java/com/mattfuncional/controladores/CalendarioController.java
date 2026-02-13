@@ -133,7 +133,7 @@ public class CalendarioController {
         // Actualiza la capacidad máxima global para todos los slots existentes
         for (com.mattfuncional.enums.DiaSemana dia : com.mattfuncional.enums.DiaSemana.values()) {
             java.time.LocalTime hora = java.time.LocalTime.of(6, 0);
-            while (hora.isBefore(java.time.LocalTime.of(20, 0))) {
+            while (hora.isBefore(java.time.LocalTime.of(21, 0))) {
                 calendarioService.getSlotConfigService().setCapacidadMaxima(dia, hora, capacidadMaxima);
                 hora = hora.plusHours(1);
             }
