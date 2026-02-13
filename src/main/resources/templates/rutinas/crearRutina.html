@@ -194,9 +194,12 @@
                                                   class="badge bg-secondary me-1" 
                                                   th:text="${se.exercise.name}"></span>
                                             </div>
-                                        <div class="mt-2">
+                                        <div class="mt-2 d-flex gap-1 flex-wrap">
                                             <a th:href="@{/series/ver/{id}(id=${serie.id})}" class="btn btn-outline-dark btn-sm ver-serie-btn" target="_blank" rel="noopener">
                                                 <i class="fas fa-eye me-1"></i>Ver serie
+                                            </a>
+                                            <a th:href="@{/series/editar/{id}(id=${serie.id})}" class="btn btn-outline-primary btn-sm" title="Modificar serie">
+                                                <i class="fas fa-edit me-1"></i>Modificar
                                             </a>
                                         </div>
                                         

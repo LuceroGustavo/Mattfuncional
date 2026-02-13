@@ -87,6 +87,12 @@ public class SerieService {
                 .orElseThrow(() -> new ResourceNotFoundException("Serie no encontrada con id: " + id));
     }
 
+    /** Obtiene una serie con sus ejercicios cargados (para edición en formulario). */
+    public Serie obtenerSeriePorIdConEjercicios(Long id) {
+        return serieRepository.findByIdWithSerieEjercicios(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Serie no encontrada con id: " + id));
+    }
+
     // Buscar series por profesor
     public List<Serie> findByProfesorId(Long profesorId) {
         return serieRepository.findByProfesorId(profesorId);

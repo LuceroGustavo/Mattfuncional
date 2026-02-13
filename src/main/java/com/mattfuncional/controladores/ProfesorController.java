@@ -69,13 +69,14 @@ public class ProfesorController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboardProfesor(Model model) {
+    public String dashboardProfesor(Model model, jakarta.servlet.http.HttpServletRequest request) {
         Usuario usuarioActual = usuarioService.getUsuarioActual();
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
         }
-        return "redirect:/profesor/" + profesor.getId();
+        String query = request.getQueryString();
+        return "redirect:/profesor/" + profesor.getId() + (query != null && !query.isEmpty() ? "?" + query : "");
     }
 
     @GetMapping("/{id}")
@@ -748,7 +749,7 @@ public class ProfesorController {
             // Asignar la rutina plantilla al alumno (crear copia)
             rutinaService.asignarRutinaPlantillaAUsuario(rutinaPlantillaId, id, profesor.getId());
             
-            return "redirect:/profesor/" + profesor.getId() + "?success=rutina_asignada&alumno=" + alumno.getNombre();
+            return "redirect:/profesor/" + profesor.getId() + "?tab=asignaciones&success=rutina_asignada&alumno=" + alumno.getNombre();
             
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error al asignar la rutina: " + e.getMessage());

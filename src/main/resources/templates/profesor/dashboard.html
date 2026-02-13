@@ -100,7 +100,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark w-100">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="/img/logo.png" alt="Logo" width="48" height="48" class="me-2 rounded-circle">
+                <img th:src="@{/img/logo matt.jpeg}" src="/img/logo%20matt.jpeg" alt="Logo Mattfuncional" width="48" height="48" class="me-2 rounded-circle object-fit-cover" onerror="this.src='/img/not_imagen.png'">
                 Mattfuncional
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
@@ -355,7 +355,6 @@
                         <table class="table table-bordered table-hover">
                             <thead class="table-success text-center">
                                 <tr>
-                                    <th>ID</th>
                                     <th>Nombre</th>
                                     <th>N° de Ejercicios</th>
                                     <th>Descripción</th>
@@ -364,13 +363,15 @@
                             </thead>
                             <tbody>
                                 <tr th:each="serie : ${series}" class="text-center">
-                                    <td th:text="${serie.id}">1</td>
                                     <td th:text="${serie.nombre}">Nombre</td>
                                     <td>
                                         <span class="badge bg-info" th:text="${serie.serieEjercicios != null ? #lists.size(serie.serieEjercicios) : 0}">0</span>
                                     </td>
                                     <td th:text="${serie.descripcion}">Descripción</td>
                                     <td>
+                                        <a th:href="@{/series/ver/{id}(id=${serie.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener" title="Ver serie">
+                                            <i class="fa-solid fa-eye me-1"></i>Ver serie
+                                        </a>
                                         <a th:href="@{/series/editar/{id}(id=${serie.id})}" class="btn btn-warning btn-sm">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
@@ -481,6 +482,18 @@
         const profesorId = [[${profesor != null ? profesor.id : 0}]];
     </script>
     <script>
+        // Activar la pestaña indicada en la URL (?tab=series | rutinas | asignaciones)
+        (function activarTabDesdeUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            const tabIds = { series: 'series-tab', rutinas: 'rutinas-tab', asignaciones: 'asignaciones-tab' };
+            const tabEl = tab && tabIds[tab] ? document.getElementById(tabIds[tab]) : null;
+            if (tabEl) {
+                const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
+                bsTab.show();
+            }
+        })();
+
         const filtroNombre = document.getElementById('filtroNombreAlumno');
         const filtroEstado = document.getElementById('filtroEstadoAlumnos');
         const filtroTipo = document.getElementById('filtroTipoAsistencia');

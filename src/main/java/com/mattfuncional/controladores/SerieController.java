@@ -1,5 +1,7 @@
 package com.mattfuncional.controladores;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mattfuncional.dto.SerieDTO;
 import com.mattfuncional.entidades.Exercise;
 import com.mattfuncional.entidades.Usuario;
@@ -71,6 +73,8 @@ public class SerieController {
         model.addAttribute("serieDTO", new com.mattfuncional.dto.SerieDTO());
         model.addAttribute("usuario", usuarioActual);
         model.addAttribute("selectedMuscleGroup", muscleGroup);
+        model.addAttribute("editMode", false);
+        model.addAttribute("serieDTOJson", "null");
         return "series/crearSerie";
     }
 
@@ -103,19 +107,18 @@ public class SerieController {
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditarSerie(@PathVariable Long id, Model model,
             @AuthenticationPrincipal Usuario profesorUsuario) {
-        // 1. Obtener la serie y verificar permisos
-        Serie serie = serieService.obtenerSeriePorId(id);
+        // 1. Obtener la serie CON sus ejercicios cargados (evita LazyInitialization y muestra la tabla)
+        Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
 
         if (profesorUsuario.getProfesor() == null
                 || !serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId())) {
-            return "redirect:/profesor/dashboard?error=permiso_serie";
+            return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
 
-        // 2. Convertir la entidad a DTO para el formulario
+        // 2. Convertir la entidad a DTO para el formulario (ya con ejercicios cargados)
         SerieDTO serieDTO = serieService.convertirSerieADTO(serie);
 
         // 3. Preparar el modelo para la vista
-        // Obtener ejercicios disponibles: predeterminados + propios del profesor (con imágenes)
         Long profesorId = profesorUsuario.getProfesor() != null ? profesorUsuario.getProfesor().getId() : null;
         List<Exercise> ejercicios;
         if (profesorId != null) {
@@ -127,6 +130,13 @@ public class SerieController {
         model.addAttribute("serieDTO", serieDTO);
         model.addAttribute("editMode", true);
         model.addAttribute("usuario", profesorUsuario);
+
+        // Pasar el DTO como JSON para que el JS reciba correctamente ejercicios (nombre, valor, unidad, peso)
+        try {
+            model.addAttribute("serieDTOJson", new ObjectMapper().writeValueAsString(serieDTO));
+        } catch (JsonProcessingException e) {
+            model.addAttribute("serieDTOJson", "null");
+        }
 
         return "series/crearSerie"; // Reutilizamos la vista de creación
     }
@@ -140,7 +150,7 @@ public class SerieController {
                 && serie.getProfesor() != null
                 && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId());
         if (!esPropietario) {
-            return "redirect:/profesor/dashboard?error=permiso_serie";
+            return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
         model.addAttribute("serie", serie);
         return "series/verSerie";
@@ -177,9 +187,9 @@ public class SerieController {
 
         if (esPropietario) {
             serieService.eliminarSerie(id);
-            return "redirect:/profesor/" + profesorUsuario.getProfesor().getId();
+            return "redirect:/profesor/" + profesorUsuario.getProfesor().getId() + "?tab=series";
         } else {
-            return "redirect:/profesor/dashboard?error=permiso_serie";
+            return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
     }
 }

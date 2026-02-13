@@ -86,7 +86,7 @@ public class RutinaControlador {
                 }
             }
 
-            return "redirect:/profesor/dashboard?success=Rutina creada exitosamente";
+            return "redirect:/profesor/dashboard?tab=rutinas&success=Rutina creada exitosamente";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error al crear la rutina: " + e.getMessage());
             return "redirect:/rutinas/crear";
@@ -103,8 +103,8 @@ public class RutinaControlador {
     @GetMapping("/editar/{id}")
     public String editarRutina(@PathVariable Long id, Model model) {
         try {
-            // Obtener la rutina a editar
-            Rutina rutina = rutinaService.obtenerRutinaPorId(id);
+            // Obtener la rutina CON sus series cargadas para mostrar las ya asignadas
+            Rutina rutina = rutinaService.obtenerRutinaPorIdConSeries(id);
 
             // Obtener el profesor actual
             Usuario usuarioActual = usuarioService.getUsuarioActual();
@@ -115,18 +115,18 @@ public class RutinaControlador {
 
             // Verificar que el profesor sea el dueño de la rutina
             if (!rutina.getProfesor().getId().equals(profesorId)) {
-                return "redirect:/profesor/dashboard?error=No tiene permiso para editar esta rutina";
+                return "redirect:/profesor/dashboard?tab=rutinas&error=No tiene permiso para editar esta rutina";
             }
 
             // Obtener todas las series plantilla del profesor
             List<Serie> todasLasSeriesPlantilla = serieService.obtenerSeriesPlantillaPorProfesor(profesorId);
 
-            // Obtener los IDs de las plantillas de series que ya están en la rutina
+            // IDs a excluir: si la serie en la rutina es copia usamos plantillaId; si es la plantilla en la rutina usamos su id
             Set<Long> idsSeriesEnRutina = rutina.getSeries().stream()
-                    .map(Serie::getPlantillaId)
+                    .map(s -> s.getPlantillaId() != null ? s.getPlantillaId() : s.getId())
                     .collect(Collectors.toSet());
 
-            // Filtrar la lista de plantillas para excluir las que ya están en la rutina
+            // Filtrar plantillas que aún no están en la rutina
             List<Serie> seriesDisponibles = todasLasSeriesPlantilla.stream()
                     .filter(plantilla -> !idsSeriesEnRutina.contains(plantilla.getId()))
                     .collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class RutinaControlador {
 
             return "rutinas/editarRutina";
         } catch (ResourceNotFoundException e) {
-            return "redirect:/profesor/dashboard?error=Rutina no encontrada";
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina no encontrada";
         }
     }
 
@@ -160,7 +160,7 @@ public class RutinaControlador {
             rutinaService.actualizarSeriesDeRutina(id, seriesIds, repeticionesExistentes, nuevasSeriesIds,
                     repeticionesNuevas);
 
-            return "redirect:/profesor/dashboard?success=Rutina actualizada exitosamente";
+            return "redirect:/profesor/dashboard?tab=rutinas&success=Rutina actualizada exitosamente";
         } catch (Exception e) {
             return "redirect:/rutinas/editar/" + id + "?error=" + e.getMessage();
         }
@@ -172,9 +172,9 @@ public class RutinaControlador {
         try {
             rutinaService.eliminarRutina(id);
 
-            return "redirect:/profesor/dashboard?success=Rutina eliminada exitosamente";
+            return "redirect:/profesor/dashboard?tab=rutinas&success=Rutina eliminada exitosamente";
         } catch (ResourceNotFoundException e) {
-            return "redirect:/profesor/dashboard?error=Rutina no encontrada";
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina no encontrada";
         }
     }
 
@@ -197,7 +197,7 @@ public class RutinaControlador {
     public String verHojaRutina(@PathVariable String tokenPublico, Model model) {
         Rutina rutina = rutinaService.obtenerRutinaPorToken(tokenPublico);
         if (rutina == null) {
-            return "redirect:/profesor/dashboard?error=Rutina no encontrada";
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina no encontrada";
         }
         // Adaptar la estructura para la vista: cada serie tendrá una lista de
         // ejercicios enriquecidos

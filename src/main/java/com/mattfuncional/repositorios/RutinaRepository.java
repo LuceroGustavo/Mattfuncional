@@ -2,6 +2,8 @@ package com.mattfuncional.repositorios;
 
 import com.mattfuncional.entidades.Rutina;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,6 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface RutinaRepository extends JpaRepository<Rutina, Long> {
+
+    /** Carga la rutina con sus series para evitar LazyInitializationException al editar. */
+    @Query("SELECT DISTINCT r FROM Rutina r LEFT JOIN FETCH r.series WHERE r.id = :id")
+    Optional<Rutina> findByIdWithSeries(@Param("id") Long id);
 
     List<Rutina> findByUsuarioId(Long usuarioId); // ← ESTA ES LA CLAVE
 

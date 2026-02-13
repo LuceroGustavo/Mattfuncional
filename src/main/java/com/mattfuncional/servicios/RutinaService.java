@@ -15,6 +15,7 @@ import com.mattfuncional.repositorios.SerieEjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.security.SecureRandom;
 
@@ -66,6 +67,17 @@ public class RutinaService {
     // Obtener rutina por ID
     public Rutina obtenerRutinaPorId(Long id) {
         Rutina rutina = rutinaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
+        if (rutina.getTokenPublico() == null || rutina.getTokenPublico().isBlank()) {
+            rutina.setTokenPublico(generarTokenUnico());
+            rutina = rutinaRepository.save(rutina);
+        }
+        return rutina;
+    }
+
+    /** Obtiene una rutina con sus series cargadas (para el formulario de edición). */
+    public Rutina obtenerRutinaPorIdConSeries(Long id) {
+        Rutina rutina = rutinaRepository.findByIdWithSeries(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
         if (rutina.getTokenPublico() == null || rutina.getTokenPublico().isBlank()) {
             rutina.setTokenPublico(generarTokenUnico());
@@ -268,33 +280,41 @@ public class RutinaService {
             List<Long> nuevasSeriesIds, List<Integer> repeticionesNuevas) {
         Rutina rutina = obtenerRutinaPorId(rutinaId);
 
-        // 1. Borrar las series antiguas de la rutina
-        // Primero, borramos las relaciones SerieEjercicio para evitar problemas de
-        // cascada
-        for (Serie serie : rutina.getSeries()) {
-            serieEjercicioRepository.deleteBySerieId(serie.getId());
-        }
-        // Luego borramos las series en sí
-        serieRepository.deleteByRutinaId(rutinaId);
-        rutina.getSeries().clear();
-
-        // 2. Re-añadir las series "existentes" que se mantuvieron, con sus repeticiones
-        // actualizadas
-        if (seriesIds != null) {
+        // 1. ANTES de borrar: resolver plantillaId y repeticiones de cada serie existente
+        //    (una vez borradas, ya no podemos leerlas por ID)
+        List<Long> plantillaIdsAReañadir = new ArrayList<>();
+        List<Integer> repsAReañadir = new ArrayList<>();
+        if (seriesIds != null && repeticionesExistentes != null) {
             for (int i = 0; i < seriesIds.size(); i++) {
                 Long serieId = seriesIds.get(i);
-                Serie serieOriginal = serieRepository.findById(serieId).orElse(null);
-                if (serieOriginal != null && serieOriginal.getPlantillaId() != null) {
-                    agregarSerieARutina(rutinaId, serieOriginal.getPlantillaId(), repeticionesExistentes.get(i));
+                Serie s = serieRepository.findById(serieId).orElse(null);
+                if (s != null) {
+                    Long plantillaId = s.getPlantillaId() != null ? s.getPlantillaId() : s.getId();
+                    plantillaIdsAReañadir.add(plantillaId);
+                    repsAReañadir.add(i < repeticionesExistentes.size() && repeticionesExistentes.get(i) != null
+                            ? repeticionesExistentes.get(i) : 1);
                 }
             }
         }
 
-        // 3. Añadir las nuevas series seleccionadas
+        // 2. Borrar las series antiguas de la rutina
+        for (Serie serie : rutina.getSeries()) {
+            serieEjercicioRepository.deleteBySerieId(serie.getId());
+        }
+        serieRepository.deleteByRutinaId(rutinaId);
+        rutina.getSeries().clear();
+
+        // 3. Re-añadir las series existentes (mismo orden) con sus repeticiones actualizadas
+        for (int i = 0; i < plantillaIdsAReañadir.size(); i++) {
+            agregarSerieARutina(rutinaId, plantillaIdsAReañadir.get(i), repsAReañadir.get(i));
+        }
+
+        // 4. Añadir las nuevas series seleccionadas
         if (nuevasSeriesIds != null) {
             for (int i = 0; i < nuevasSeriesIds.size(); i++) {
                 Long plantillaId = nuevasSeriesIds.get(i);
-                int repeticiones = (repeticionesNuevas != null && i < repeticionesNuevas.size())
+                int repeticiones = (repeticionesNuevas != null && i < repeticionesNuevas.size()
+                        && repeticionesNuevas.get(i) != null)
                         ? repeticionesNuevas.get(i)
                         : 1;
                 agregarSerieARutina(rutinaId, plantillaId, repeticiones);

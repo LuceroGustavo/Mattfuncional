@@ -68,8 +68,12 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
   - **Rutinas asignadas** en formato tabla compacta + botón “Asignar rutina”.  
   - **Sin estado “terminada/en proceso”** en la vista del alumno.
 - **Asignar rutina**: en las tarjetas de rutina se agregó botón **ver (ojo)**.
-- **Creación de rutinas**: botón **Crear serie** en el selector de series.
-- **Vista de series**: botón **Ver serie** y nueva vista `series/verSerie.html`.
+- **Creación de rutinas**: botón **Crear serie** en el selector de series; botón **Modificar** en cada tarjeta de serie (carga ejercicios al editar).
+- **Vista de series**: botón **Ver serie** y nueva vista `series/verSerie.html`; eliminada columna ID en tabla del dashboard.
+- **Modificar rutina**: título "Modificar Rutina"; carga de series con `findByIdWithSeries`; layout en tres bloques (Detalles, Series en esta Rutina, Añadir más Series); selección por clic en tarjeta (resaltado amarillo); vista previa "Se agregarán al guardar"; reps desde plantilla.
+- **Fix guardado al modificar rutina (Feb 2026):** al guardar solo se conservaba una serie porque se borraban todas y luego se intentaba re-añadir por ID (ya eliminadas). Corregido en `RutinaService.actualizarSeriesDeRutina`: se resuelven `plantillaId` y repeticiones **antes** de borrar; después se re-añaden todas (existentes + nuevas). Ver [CHANGELOG_RUTINAS_SERIES_FEB2026.md](CHANGELOG_RUTINAS_SERIES_FEB2026.md).
+- **Tabs del dashboard:** parámetro `?tab=series|rutinas|asignaciones` para volver al tab correcto tras guardar.
+- **Logo:** referencias unificadas a `logo matt.jpeg` en navbar y vistas profesor.
 
 ---
 
