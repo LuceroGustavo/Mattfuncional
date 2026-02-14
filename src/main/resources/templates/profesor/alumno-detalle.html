@@ -350,7 +350,7 @@
                         <div class="info-row">
                             <span class="info-label">Historial de Estado:</span>
                             <span class="info-value">
-                                <pre class="mb-0" th:text="${alumno.historialEstado != null ? alumno.historialEstado : '-'}">-</pre>
+                                <pre class="mb-0" th:text="${historialEstadoFormateado != null && !historialEstadoFormateado.isEmpty() ? historialEstadoFormateado : (alumno.historialEstado != null ? alumno.historialEstado : '-')}">-</pre>
                             </span>
                         </div>
                         <div class="info-row">

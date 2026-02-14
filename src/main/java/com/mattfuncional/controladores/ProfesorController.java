@@ -18,6 +18,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.ArrayList;
@@ -345,6 +350,7 @@ public class ProfesorController {
             return "redirect:/profesor/dashboard";
         }
         model.addAttribute("alumno", alumno);
+        model.addAttribute("historialEstadoFormateado", formatearFechasEnHistorialEstado(alumno.getHistorialEstado()));
         // Cargar historial físico
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
         // --- NUEVO: historial de asistencia ---
@@ -790,5 +796,28 @@ public class ProfesorController {
             model.addAttribute("errorMessage", "Error al asignar la rutina: " + e.getMessage());
             return "redirect:/profesor/asignar-rutina/" + id;
         }
+    }
+
+    /**
+     * Convierte fechas en formato yyyy-mm-dd del historial de estado a dd/MM/yyyy.
+     */
+    private static String formatearFechasEnHistorialEstado(String historialEstado) {
+        if (historialEstado == null || historialEstado.isEmpty()) {
+            return historialEstado;
+        }
+        Pattern p = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
+        Matcher m = p.matcher(historialEstado);
+        StringBuffer sb = new StringBuffer();
+        DateTimeFormatter out = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        while (m.find()) {
+            try {
+                LocalDate d = LocalDate.parse(m.group());
+                m.appendReplacement(sb, Matcher.quoteReplacement(d.format(out)));
+            } catch (DateTimeParseException e) {
+                // dejar la fecha original
+            }
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 }
