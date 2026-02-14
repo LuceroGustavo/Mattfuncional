@@ -337,10 +337,13 @@ public class ProfesorController {
         }
     }
 
-    // Mostrar ficha de alumno con historial físico
+    // Mostrar ficha de alumno con historial físico (carga profesor, rutinas y horarios de asistencia)
     @GetMapping("/alumnos/{id}")
     public String verAlumno(@PathVariable Long id, Model model) {
-        Usuario alumno = usuarioService.getUsuarioById(id);
+        Usuario alumno = usuarioService.getUsuarioByIdParaFicha(id);
+        if (alumno == null) {
+            return "redirect:/profesor/dashboard";
+        }
         model.addAttribute("alumno", alumno);
         // Cargar historial físico
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));

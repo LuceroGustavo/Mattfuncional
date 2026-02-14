@@ -54,8 +54,8 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 ---
 
 ## 5. Pendientes grandes (segun plan)
-- Rutinas por enlace publico (WhatsApp).
-- Alumnos sin login (solo ficha).
+- **Hecho (Fase 4):** Rutinas por enlace publico (token, Copiar enlace, WhatsApp), asignacion rutina a alumno, hoja de rutina.
+- Alumnos sin login (solo ficha) – modelo en curso.
 - Pantalla de sala.
 - Pagina publica institucional.
 

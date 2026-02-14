@@ -89,7 +89,7 @@ fix(rutinas): corregir guardado al modificar rutina (conservar todas las series)
 
 ---
 
-## 5. Avances posteriores (Fase 4 – en progreso)
+## 5. Avances posteriores (Fase 4 – completada)
 
 - **Enlace público con token:** `/rutinas/hoja/{token}` para evitar URLs adivinables.
 - **Copiar enlace:** botón en hoja de rutina y en ficha del alumno.

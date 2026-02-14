@@ -12,6 +12,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,6 +53,12 @@ public class Usuario implements UserDetails {
 
     private TipoAsistencia tipoAsistencia;
     @ElementCollection
+    @CollectionTable(name = "usuario_dias_horarios_asistencia", joinColumns = @JoinColumn(name = "usuario_id"))
+    @AttributeOverrides({
+        @AttributeOverride(name = "dia", column = @Column(name = "dia")),
+        @AttributeOverride(name = "horaEntrada", column = @Column(name = "hora_entrada")),
+        @AttributeOverride(name = "horaSalida", column = @Column(name = "hora_salida"))
+    })
     private List<DiaHorarioAsistencia> diasHorariosAsistencia;
 
     private String notasProfesor;

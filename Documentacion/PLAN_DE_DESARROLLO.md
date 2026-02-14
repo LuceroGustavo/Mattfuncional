@@ -103,14 +103,15 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 | Fase 1 – Limpieza | Hecho: un único rol ADMIN, sin panel alumno ni registro, sin panel admin separado, navbar y security ajustados. |
 | Fase 2 – Un solo profesor | Hecho: usuario único ADMIN creado en arranque y login redirigido al panel. |
 | Fase 3 – Ejercicios y series | Hecho: ABM ejercicios + ABM series en panel profesor, predeterminados auto‑asegurados. |
+| Fase 4 – Rutinas y asignación | Hecho: ABM rutinas basadas en series (crear, editar, fix guardado), asignación rutina → alumno, token, hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp desde ficha alumno. |
 
 ### 3.2 Por hacer (resumen del plan)
 
 - [x] **Fase 1 – Limpieza:** Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar.
 - [x] **Fase 2 – Un solo profesor:** Profesor único en arranque. Redirigir login al panel profesor. Quitar referencias a admin y lista de profesores.
 - [x] **Fase 3 – Ejercicios y series:** Ejercicios con “asegurar predeterminados” (hecho). Mantener ABM de ejercicios y ABM de series en panel profesor.
-- [ ] **Fase 4 – Rutinas y asignación:** En progreso: enlaces con token, ver/copiar/WhatsApp, mejoras de asignación y vistas. Falta consolidar el flujo completo.
-- [ ] **Fase 5 – Vista rutina por enlace:** Página pública (sin login) con token/enlace que muestre la rutina en HTML. Enlace para WhatsApp.
+- [x] **Fase 4 – Rutinas y asignación:** Completado: ABM rutinas basadas en series, asignación rutina → alumno, enlace único (token), hoja de rutina, Copiar enlace, WhatsApp, modificar rutina con series, tabs dashboard, logo.
+- [ ] **Fase 5 – Vista rutina por enlace:** Página pública (sin login) con token/enlace que muestre la rutina en HTML. (Hoja en `/rutinas/hoja/{token}` implementada; opcional: permitAll en SecurityConfig para acceso anónimo.)
 - [ ] **Fase 6 – Alumnos sin login:** Alumno como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo.
 - [ ] **Fase 7 – Pantalla de sala:** Modo sala para TV, ruta de solo lectura, control desde panel profesor.
 - [ ] **Fase 8 – Página pública:** Sitio institucional (presentación, servicios, horarios, contacto, promociones, productos).
@@ -122,7 +123,7 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - [x] **Ejercicios:** Predeterminados asegurados automáticamente desde `uploads/ejercicios/` (1–60); ABM de ejercicios en panel profesor.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
-- [~] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** sin login (en progreso).
+- [x] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** (Fase 4 completada; hoja en `/rutinas/hoja/{token}`).
 - [ ] **Calendario semanal** y presentismo.
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.

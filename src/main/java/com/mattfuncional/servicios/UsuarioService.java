@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,19 @@ public class UsuarioService {
     @Cacheable(value = "usuarios", key = "'user-' + #id + '-with-relations'")
     public Optional<Usuario> getUsuarioByIdWithRelations(Long id) {
         return usuarioRepository.findByIdWithAllRelations(id);
+    }
+
+    /**
+     * Carga un alumno con todas las relaciones necesarias para la ficha de detalle
+     * (profesor, rutinas y horarios de asistencia). No usa caché para evitar entidades
+     * desconectadas con colecciones lazy sin inicializar.
+     */
+    public Usuario getUsuarioByIdParaFicha(Long id) {
+        Optional<Usuario> opt = usuarioRepository.findByIdWithAllRelations(id);
+        if (opt.isEmpty()) return null;
+        Usuario u = opt.get();
+        Hibernate.initialize(u.getDiasHorariosAsistencia());
+        return u;
     }
 
     // --- MÉTODOS CON EVICCIÓN DE CACHÉ ---

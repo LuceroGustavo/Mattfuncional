@@ -131,8 +131,8 @@
 | **Fase 1 – Limpieza** | Renombrar proyecto a Mattfuncional (nombre en pom, título en vistas). Eliminar panel admin, chat, WebSocket, ABM de profesores y lógica de múltiples profesores. Ajustar SecurityConfig y navbar. **Estado: completado** |
 | **Fase 2 – Un solo profesor** | Configurar profesor único en arranque. Redirigir login exitoso al panel del profesor. Quitar referencias a “admin” y a “lista de profesores”. **Estado: completado** |
 | **Fase 3 – Ejercicios y series** | Dejar un único flujo de ejercicios con botón “Cargar predeterminados”. Mantener ABM de ejercicios y ABM de series en el panel del profesor. **Estado: completado** |
-| **Fase 4 – Rutinas y asignación** | Asegurar ABM de rutinas basadas en series. Asignación rutina → alumno. Generación de enlace único por asignación. **Estado: en progreso** |
-| **Fase 5 – Vista rutina por enlace** | Página pública (sin login) que recibe token/enlace y muestra la rutina en HTML (ejercicios, series, imágenes). Preparar texto/enlace para compartir por WhatsApp. |
+| **Fase 4 – Rutinas y asignación** | Asegurar ABM de rutinas basadas en series. Asignación rutina → alumno. Generación de enlace único por asignación. **Estado: completado** |
+| **Fase 5 – Vista rutina por enlace** | Página pública (sin login) que recibe token/enlace y muestra la rutina en HTML (ejercicios, series, imágenes). Preparar texto/enlace para compartir por WhatsApp. (Hoja implementada en `/rutinas/hoja/{token}`; opcional: permitir acceso anónimo en SecurityConfig.) |
 | **Fase 6 – Alumnos sin login** | Ajustar modelo de alumno (ficha física + online, sin usuario/contraseña). Mantener calendario semanal y presentismo. |
 | **Fase 7 – Pantalla de sala** | Desarrollo del modo “sala”: ruta de solo lectura, control desde panel del profesor, vista fullscreen para TV. |
 | **Fase 8 – Página pública** | Desarrollo del sitio institucional: presentación, servicios, horarios, contacto, promociones, productos. |
@@ -146,7 +146,7 @@
 - [x] **Ejercicios:** botón “Cargar predeterminados” en panel de ejercicios + ABM.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series.
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
-- [~] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** sin login (**en progreso: token, copiar enlace, WhatsApp y vistas mejoradas**).
+- [x] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** (Fase 4 completada: token, copiar enlace, WhatsApp, hoja de rutina, modificar rutina con series).
 - [ ] **Calendario semanal** y presentismo.
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
