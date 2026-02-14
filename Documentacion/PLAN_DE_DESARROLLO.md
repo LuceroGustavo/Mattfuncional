@@ -89,6 +89,12 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - **WhatsApp rutinas:** botón en ficha con enlace al celular del alumno y link de rutina.
 - **Seeds:** script SQL con 30 alumnos variados en `scripts/seed_alumnos_mattfuncional.sql`.
 
+### 2.8 Cambios recientes (panel ejercicios y hoja pública)
+
+- **Panel Mis Ejercicios:** ejercicios predeterminados editables y eliminables; indicador “predeterminado” solo con estrellita azul + leyenda; botones Ver (modal)/Editar/Eliminar para todos; Ver abre modal/overlay en la misma página (fondo gris, clic fuera cierra).
+- **Hoja de rutina pública:** acceso sin login a `/rutinas/hoja/**` en SecurityConfig (`permitAll`), para que el enlace compartido (p. ej. desde celular con IP local) abra la rutina sin pedir logueo.
+- **Ficha alumno (seed):** carga con horarios de asistencia para que alumnos cargados por script muestren la ficha completa; ver [CHANGELOG_EJERCICIOS_Y_HOJA_PUBLICA_FEB2026.md](CHANGELOG_EJERCICIOS_Y_HOJA_PUBLICA_FEB2026.md).
+
 ---
 
 ## 3. Estado del plan general (según PLAN_MODIFICACIONES_MATTFUNCIONAL.md)

@@ -551,6 +551,21 @@ public class ProfesorController {
         }
     }
 
+    @GetMapping("/mis-ejercicios/ver/{id}")
+    public String verEjercicio(@PathVariable Long id,
+                              @AuthenticationPrincipal Usuario usuarioActual,
+                              Model model) {
+        if (usuarioActual == null) {
+            return "redirect:/login?error=true";
+        }
+        com.mattfuncional.entidades.Exercise ejercicio = exerciseService.findById(id);
+        if (ejercicio == null) {
+            return "redirect:/profesor/mis-ejercicios?error=ejercicio_no_encontrado";
+        }
+        model.addAttribute("ejercicio", ejercicio);
+        return "profesor/ver-ejercicio";
+    }
+
     @GetMapping("/mis-ejercicios/editar/{id}")
     public String editarEjercicioForm(@PathVariable Long id, 
                                     @AuthenticationPrincipal Usuario usuarioActual, 
@@ -644,13 +659,8 @@ public class ProfesorController {
             if (ejercicio == null) {
                 return "redirect:/profesor/mis-ejercicios?error=ejercicio_no_encontrado";
             }
-            
-            // Validar que el ejercicio pertenece al profesor o es predeterminado (solo admin puede eliminar predeterminados)
-            if (ejercicio.isPredeterminado()) {
-                return "redirect:/profesor/mis-ejercicios?error=no_se_puede_eliminar_predeterminado";
-            }
-            
-            if (ejercicio.getProfesor() == null || !ejercicio.getProfesor().getId().equals(profesor.getId())) {
+            // Permitir eliminar cualquier ejercicio (predeterminados y propios) al profesor
+            if (ejercicio.getProfesor() != null && !ejercicio.getProfesor().getId().equals(profesor.getId())) {
                 return "redirect:/profesor/mis-ejercicios?error=sin_permisos";
             }
 
