@@ -1,9 +1,9 @@
 package com.mattfuncional.servicios;
 
 import com.mattfuncional.entidades.Exercise;
+import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.entidades.Imagen;
 import com.mattfuncional.entidades.Usuario;
-import com.mattfuncional.enums.MuscleGroup;
 import com.mattfuncional.excepciones.ResourceNotFoundException;
 import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.ImagenRepository;
@@ -125,13 +125,13 @@ public class ExerciseService {
 
     @Transactional
     public void modifyExercise(Long exerciseId, Exercise exerciseDetails, MultipartFile imageFile,
-            Set<MuscleGroup> muscleGroups) {
-        modifyExercise(exerciseId, exerciseDetails, imageFile, muscleGroups, null);
+            Set<GrupoMuscular> grupos) {
+        modifyExercise(exerciseId, exerciseDetails, imageFile, grupos, null);
     }
     
     @Transactional
     public void modifyExercise(Long exerciseId, Exercise exerciseDetails, MultipartFile imageFile,
-            Set<MuscleGroup> muscleGroups, Usuario usuarioActual) {
+            Set<GrupoMuscular> grupos, Usuario usuarioActual) {
         Exercise exercise = exerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado con ID: " + exerciseId));
 
@@ -171,7 +171,7 @@ public class ExerciseService {
         exercise.setInstructions(exerciseDetails.getInstructions());
         exercise.setBenefits(exerciseDetails.getBenefits());
         exercise.setContraindications(exerciseDetails.getContraindications());
-        exercise.setMuscleGroups(muscleGroups);
+        exercise.setGrupos(grupos != null ? grupos : new java.util.HashSet<>());
 
         if (imageFile != null && !imageFile.isEmpty()) {
             Imagen newImagen = imagenServicio.guardar(imageFile);
@@ -214,8 +214,13 @@ public class ExerciseService {
 
     }
 
-    public List<Exercise> findExercisesByMuscleGroup(MuscleGroup muscleGroup) {
-        return exerciseRepository.findByMuscleGroups(muscleGroup);
+    public List<Exercise> findExercisesByGrupo(GrupoMuscular grupo) {
+        return exerciseRepository.findByGruposContaining(grupo);
+    }
+
+    public List<Exercise> findExercisesByGrupoId(Long grupoId) {
+        if (grupoId == null) return List.of();
+        return exerciseRepository.findByGrupoId(grupoId);
     }
 
     @Transactional

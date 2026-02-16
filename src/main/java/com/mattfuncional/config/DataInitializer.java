@@ -3,6 +3,7 @@ package com.mattfuncional.config;
 import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.repositorios.UsuarioRepository;
+import com.mattfuncional.servicios.GrupoMuscularService;
 import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.servicios.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class DataInitializer implements CommandLineRunner {
     private UsuarioService usuarioService;
 
     @Autowired
+    private GrupoMuscularService grupoMuscularService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -40,6 +44,9 @@ public class DataInitializer implements CommandLineRunner {
 
             // Crear el único usuario que maneja el panel: el Profesor (rol ADMIN, vinculado a entidad Profesor)
             createProfesorUsuarioIfNeeded();
+
+            // Asegurar los 6 grupos musculares del sistema (BRAZOS, PIERNAS, PECHO, ESPALDA, CARDIO, ELONGACION)
+            grupoMuscularService.asegurarGruposSistema();
             
             // Asignar avatares solo si es necesario
             assignAvatarsIfNeeded();

@@ -42,6 +42,7 @@ public class ExerciseExportImportService {
     
     private final ExerciseService exerciseService;
     private final ProfesorService profesorService;
+    private final GrupoMuscularService grupoMuscularService;
     private final ImagenRepository imagenRepository;
     private final ImagenServicio imagenServicio;
     private final ObjectMapper objectMapper;
@@ -53,10 +54,12 @@ public class ExerciseExportImportService {
     // Obtener directorio de trabajo actual para rutas absolutas
     private final Path workingDir = Paths.get("").toAbsolutePath();
 
-    public ExerciseExportImportService(ExerciseService exerciseService, ProfesorService profesorService, 
+    public ExerciseExportImportService(ExerciseService exerciseService, ProfesorService profesorService,
+                                        GrupoMuscularService grupoMuscularService,
                                      ImagenRepository imagenRepository, ImagenServicio imagenServicio) {
         this.exerciseService = exerciseService;
         this.profesorService = profesorService;
+        this.grupoMuscularService = grupoMuscularService;
         this.imagenRepository = imagenRepository;
         this.imagenServicio = imagenServicio;
         
@@ -189,10 +192,10 @@ public class ExerciseExportImportService {
             ejercicioData.put("benefits", ejercicio.getBenefits());
             ejercicioData.put("contraindications", ejercicio.getContraindications());
             
-            // Agregar grupos musculares
-            if (ejercicio.getMuscleGroups() != null) {
-                List<String> gruposMusculares = ejercicio.getMuscleGroups().stream()
-                    .map(Enum::name)
+            // Agregar grupos musculares (por nombre para compatibilidad export/import)
+            if (ejercicio.getGrupos() != null && !ejercicio.getGrupos().isEmpty()) {
+                List<String> gruposMusculares = ejercicio.getGrupos().stream()
+                    .map(com.mattfuncional.entidades.GrupoMuscular::getNombre)
                     .collect(Collectors.toList());
                 ejercicioData.put("muscleGroups", gruposMusculares);
             }
@@ -297,14 +300,11 @@ public class ExerciseExportImportService {
                     ejercicio.setProfesor(profesorDestino);
                     ejercicio.setEsPredeterminado(false);
                     
-                    // Configurar grupos musculares
+                    // Configurar grupos musculares (resolver por nombre: sistema o del profesor)
                     if (ejercicioData.get("muscleGroups") != null) {
                         @SuppressWarnings("unchecked")
-                        List<String> gruposMusculares = (List<String>) ejercicioData.get("muscleGroups");
-                        Set<com.mattfuncional.enums.MuscleGroup> muscleGroups = gruposMusculares.stream()
-                            .map(com.mattfuncional.enums.MuscleGroup::valueOf)
-                            .collect(Collectors.toSet());
-                        ejercicio.setMuscleGroups(muscleGroups);
+                        List<String> nombresGrupos = (List<String>) ejercicioData.get("muscleGroups");
+                        ejercicio.setGrupos(grupoMuscularService.resolveGruposByNames(nombresGrupos, profesorDestinoId));
                     }
                     
                     // Procesar imagen si existe ANTES de guardar el ejercicio

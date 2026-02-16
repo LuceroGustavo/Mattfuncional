@@ -171,11 +171,13 @@
     
     <!-- Header Section -->
     <div class="hero-section mb-4">
-        <div class="d-flex justify-content-between align-items-center px-3">
+        <div class="d-flex justify-content-between align-items-center px-3 flex-wrap gap-2">
             <a th:href="@{/profesor/{id}(id=${profesor.id})}" class="btn btn-outline-light">
                 <i class="fas fa-arrow-left me-2"></i>Volver al Panel
             </a>
-            <span></span>
+            <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-layer-group me-2"></i>Grupos Musculares
+            </a>
         </div>
         <h1 class="hero-title">
             <i class="fas fa-dumbbell me-2"></i>Mis Ejercicios
@@ -245,8 +247,8 @@
                 <select class="form-select search-input" id="filterMuscleGroup">
                     <option value="">Todos los grupos musculares</option>
                     <option th:each="grupo : ${gruposMusculares}" 
-                            th:value="${grupo}" 
-                            th:text="${grupo}">
+                            th:value="${grupo.nombre}" 
+                            th:text="${grupo.nombre}">
                     </option>
                 </select>
             </div>
@@ -290,7 +292,7 @@
                         th:data-name="${ejercicio.name}"
                         th:data-description="${ejercicio.description != null ? ejercicio.description : ''}"
                         th:data-img="${ejercicio.imagen != null ? ejercicio.imagen.url : '/img/not_imagen.png'}"
-                        th:data-groups="${#strings.listJoin(ejercicio.muscleGroups, ', ')}">
+                        th:data-groups="${ejercicio.grupos != null ? #strings.listJoin(ejercicio.grupos.![nombre], ', ') : ''}">
                         <td th:text="${iterStat.index + 1}">#</td>
                         <td>
                             <span th:text="${ejercicio.name}">Nombre del Ejercicio</span>
@@ -301,9 +303,9 @@
                         <td th:text="${ejercicio.description}">Descripción del ejercicio</td>
                         <td th:text="${ejercicio.type}">Tipo</td>
                         <td>
-                            <span th:each="grupo : ${ejercicio.muscleGroups}" 
+                            <span th:each="grupo : ${ejercicio.grupos}" 
                                   class="badge bg-primary me-1"
-                                  th:text="${grupo}">Grupo</span>
+                                  th:text="${grupo.nombre}">Grupo</span>
                         </td>
                         <td class="text-center">
                             <img th:if="${ejercicio.imagen != null}" 

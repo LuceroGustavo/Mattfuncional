@@ -6,7 +6,9 @@ import com.mattfuncional.dto.SerieDTO;
 import com.mattfuncional.entidades.Exercise;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Serie;
+import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.servicios.ExerciseService;
+import com.mattfuncional.servicios.GrupoMuscularService;
 import com.mattfuncional.servicios.SerieService;
 import com.mattfuncional.servicios.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,37 +33,26 @@ public class SerieController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private GrupoMuscularService grupoMuscularService;
+
     // GET: Mostrar el formulario para crear una nueva serie plantilla
     @GetMapping("/crear")
     public String mostrarFormularioCrearSerie(
             Model model,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual,
-            @RequestParam(name = "muscleGroup", required = false) String muscleGroupStr,
+            @RequestParam(name = "grupoId", required = false) Long grupoId,
             @RequestParam(name = "search", required = false) String search) {
         if (usuarioActual == null || usuarioActual.getProfesor() == null) {
-            // Si no es profesor, redirigir o mostrar error
             return "redirect:/login";
         }
         Long profesorId = usuarioActual.getProfesor().getId();
-        // Obtener ejercicios disponibles: predeterminados + propios del profesor (con imágenes)
         List<Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
-
-        // Filtrado por grupo muscular
-        com.mattfuncional.enums.MuscleGroup tempMuscleGroup = null;
-        if (muscleGroupStr != null && !muscleGroupStr.isEmpty()) {
-            try {
-                tempMuscleGroup = com.mattfuncional.enums.MuscleGroup.valueOf(muscleGroupStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                model.addAttribute("errorMessage", "Grupo muscular inválido.");
-            }
-        }
-        final com.mattfuncional.enums.MuscleGroup muscleGroup = tempMuscleGroup;
-        if (muscleGroup != null) {
+        if (grupoId != null) {
             ejercicios = ejercicios.stream()
-                    .filter(e -> e.getMuscleGroups() != null && e.getMuscleGroups().contains(muscleGroup))
+                    .filter(e -> e.getGrupos() != null && e.getGrupos().stream().anyMatch(g -> grupoId.equals(g.getId())))
                     .toList();
         }
-        // Filtrado por nombre
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             ejercicios = ejercicios.stream()
@@ -69,10 +60,12 @@ public class SerieController {
                             (e.getDescription() != null && e.getDescription().toLowerCase().contains(searchLower)))
                     .toList();
         }
+        List<GrupoMuscular> gruposMusculares = grupoMuscularService.findDisponiblesParaProfesor(profesorId);
         model.addAttribute("ejercicios", ejercicios);
         model.addAttribute("serieDTO", new com.mattfuncional.dto.SerieDTO());
         model.addAttribute("usuario", usuarioActual);
-        model.addAttribute("selectedMuscleGroup", muscleGroup);
+        model.addAttribute("gruposMusculares", gruposMusculares);
+        model.addAttribute("selectedGrupoId", grupoId);
         model.addAttribute("editMode", false);
         model.addAttribute("serieDTOJson", "null");
         return "series/crearSerie";

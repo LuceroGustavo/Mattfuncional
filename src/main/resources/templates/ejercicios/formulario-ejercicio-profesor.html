@@ -177,14 +177,14 @@
                             <i class="fas fa-muscle me-2"></i>Grupos Musculares
                         </label>
                         <div class="row">
-                            <div th:each="muscleGroup : ${muscleGroups}" class="col-md-6 col-lg-4 mb-2">
+                            <div th:each="grupo : ${gruposMusculares}" class="col-md-6 col-lg-4 mb-2">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" 
-                                           th:value="${muscleGroup}" 
-                                           th:name="muscleGroups" 
-                                           th:id="${'muscleGroup-' + muscleGroup}">
-                                    <label class="form-check-label" th:for="${'muscleGroup-' + muscleGroup}" 
-                                           th:text="${muscleGroup}">
+                                           th:value="${grupo.id}" 
+                                           th:name="grupoIds" 
+                                           th:id="${'grupo-' + grupo.id}">
+                                    <label class="form-check-label" th:for="${'grupo-' + grupo.id}" 
+                                           th:text="${grupo.nombre}">
                                         Grupo Muscular
                                     </label>
                                 </div>

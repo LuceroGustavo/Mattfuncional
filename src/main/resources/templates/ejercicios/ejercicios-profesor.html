@@ -182,7 +182,7 @@
         <div class="col-md-4">
             <div class="stats-card">
                 <i class="fas fa-layer-group"></i>
-                <div class="stats-number" th:text="${muscleGroups != null ? muscleGroups.length : 0}">0</div>
+                <div class="stats-number" th:text="${gruposMusculares != null ? gruposMusculares.size() : 0}">0</div>
                 <div class="stats-label">Grupos Musculares</div>
             </div>
         </div>
@@ -201,13 +201,13 @@
     <div class="filter-section">
         <form method="get" action="/profesor/ejercicios" class="row g-3 align-items-end">
             <div class="col-md-6">
-                <label for="muscleGroup" class="form-label fw-semibold">Filtrar por Grupo Muscular</label>
-                <select id="muscleGroup" name="muscleGroup" class="form-select" onchange="this.form.submit()">
+                <label for="grupoId" class="form-label fw-semibold">Filtrar por Grupo Muscular</label>
+                <select id="grupoId" name="grupoId" class="form-select" onchange="this.form.submit()">
                     <option value="">Todos los grupos musculares</option>
-                    <option th:each="muscleGroup : ${muscleGroups}" 
-                            th:value="${muscleGroup}" 
-                            th:text="${muscleGroup}" 
-                            th:selected="${selectedMuscleGroup == muscleGroup}"></option>
+                    <option th:each="grupo : ${gruposMusculares}" 
+                            th:value="${grupo.id}" 
+                            th:text="${grupo.nombre}" 
+                            th:selected="${selectedGrupoId != null && selectedGrupoId == grupo.id}"></option>
                 </select>
             </div>
             <div class="col-md-6">
@@ -246,7 +246,7 @@
                 <div class="card-body">
                     <div class="mb-2">
                         <span class="muscle-group-badge" 
-                              th:text="${#strings.arrayJoin(exercise.muscleGroups.toArray(), ', ')}">
+                              th:text="${exercise.grupos != null ? #strings.listJoin(exercise.grupos.![nombre], ', ') : ''}">
                             Grupo Muscular
                         </span>
                     </div>

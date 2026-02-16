@@ -64,6 +64,9 @@ public class ProfesorController {
     private com.mattfuncional.servicios.ExerciseService exerciseService;
 
     @Autowired
+    private com.mattfuncional.servicios.GrupoMuscularService grupoMuscularService;
+
+    @Autowired
     private com.mattfuncional.servicios.ExerciseCargaDefaultOptimizado exerciseCargaDefaultOptimizado;
 
     /** Obtiene el Profesor asociado al usuario actual (el único rol del panel es ADMIN). */
@@ -481,11 +484,8 @@ public class ProfesorController {
             .filter(e -> e.getVideoUrl() != null && !e.getVideoUrl().isEmpty())
             .count();
         
-        // Obtener grupos musculares únicos
-        Set<com.mattfuncional.enums.MuscleGroup> gruposMusculares = ejercicios.stream()
-            .flatMap(e -> e.getMuscleGroups() != null ? e.getMuscleGroups().stream() : Stream.empty())
-            .collect(java.util.stream.Collectors.toSet());
-        
+        // Grupos musculares disponibles para el profesor (sistema + propios)
+        List<com.mattfuncional.entidades.GrupoMuscular> gruposMusculares = grupoMuscularService.findDisponiblesParaProfesor(profesorId);
         long totalGruposMusculares = gruposMusculares.size();
 
         model.addAttribute("ejercicios", ejercicios);
@@ -509,16 +509,15 @@ public class ProfesorController {
         }
 
         model.addAttribute("exercise", new com.mattfuncional.entidades.Exercise());
-        model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+        model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         model.addAttribute("profesor", profesor);
-        
         return "ejercicios/formulario-ejercicio-profesor";
     }
 
     @PostMapping("/mis-ejercicios/nuevo")
     public String guardarEjercicioProfesor(@Valid @ModelAttribute("exercise") com.mattfuncional.entidades.Exercise exercise,
                                          BindingResult bindingResult,
-                                         @RequestParam List<String> muscleGroups,
+                                         @RequestParam(name = "grupoIds", required = false) List<Long> grupoIds,
                                          @RequestParam(value = "image", required = false) MultipartFile imageFile,
                                          @AuthenticationPrincipal Usuario usuarioActual,
                                          Model model) {
@@ -526,32 +525,20 @@ public class ProfesorController {
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
         }
-
         if (bindingResult.hasErrors()) {
-            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
             return "ejercicios/formulario-ejercicio-profesor";
         }
-
         try {
-            // Asignar el profesor al ejercicio (ejercicios personalizados, no predeterminados)
             exercise.setProfesor(profesor);
-            exercise.setEsPredeterminado(false); // Asegurar que no es predeterminado
-            
-            // Asignar los grupos musculares
-            Set<com.mattfuncional.enums.MuscleGroup> muscleGroupSet = new HashSet<>();
-            for (String muscleGroup : muscleGroups) {
-                muscleGroupSet.add(com.mattfuncional.enums.MuscleGroup.valueOf(muscleGroup));
-            }
-            exercise.setMuscleGroups(muscleGroupSet);
-
-            // Guardar el ejercicio con validación de permisos
+            exercise.setEsPredeterminado(false);
+            exercise.setGrupos(new HashSet<>(grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of())));
             exerciseService.saveExercise(exercise, imageFile, usuarioActual);
-            
             return "redirect:/profesor/mis-ejercicios?success=ejercicio_creado";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error al crear el ejercicio: " + e.getMessage());
-            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
             return "ejercicios/formulario-ejercicio-profesor";
         }
@@ -592,9 +579,8 @@ public class ProfesorController {
         }
 
         model.addAttribute("exercise", ejercicio);
-        model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+        model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         model.addAttribute("profesor", profesor);
-        
         return "ejercicios/formulario-modificar-ejercicio-profesor";
     }
 
@@ -602,7 +588,7 @@ public class ProfesorController {
     public String actualizarEjercicioProfesor(@PathVariable Long id,
                                             @Valid @ModelAttribute("exercise") com.mattfuncional.entidades.Exercise exercise,
                                             BindingResult bindingResult,
-                                            @RequestParam List<String> muscleGroups,
+                                            @RequestParam(name = "grupoIds", required = false) List<Long> grupoIds,
                                             @RequestParam(value = "image", required = false) MultipartFile imageFile,
                                             @AuthenticationPrincipal Usuario usuarioActual,
                                             Model model) {
@@ -610,43 +596,29 @@ public class ProfesorController {
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
         }
-
         com.mattfuncional.entidades.Exercise ejercicioExistente = exerciseService.findById(id);
         if (ejercicioExistente == null) {
             return "redirect:/profesor/ejercicios?error=ejercicio_no_encontrado";
         }
-        
-        // Validar permisos de edición
         if (!ejercicioExistente.puedeSerEditadoPor(usuarioActual)) {
             return "redirect:/profesor/ejercicios?error=sin_permisos_editar";
         }
-
         if (bindingResult.hasErrors()) {
-            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
             return "ejercicios/formulario-modificar-ejercicio-profesor";
         }
-
         try {
-            // Mantener el profesor y la imagen existente
             exercise.setProfesor(ejercicioExistente.getProfesor());
-            exercise.setEsPredeterminado(ejercicioExistente.getEsPredeterminado()); // Mantener el estado
+            exercise.setEsPredeterminado(ejercicioExistente.getEsPredeterminado());
             exercise.setImagen(ejercicioExistente.getImagen());
-            
-            // Asignar los grupos musculares
-            Set<com.mattfuncional.enums.MuscleGroup> muscleGroupSet = new HashSet<>();
-            for (String muscleGroup : muscleGroups) {
-                muscleGroupSet.add(com.mattfuncional.enums.MuscleGroup.valueOf(muscleGroup));
-            }
-            exercise.setMuscleGroups(muscleGroupSet);
-
-            // Actualizar el ejercicio con validación de permisos
-            exerciseService.modifyExercise(id, exercise, imageFile, muscleGroupSet, usuarioActual);
-            
+            java.util.Set<com.mattfuncional.entidades.GrupoMuscular> grupos = grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of());
+            exercise.setGrupos(grupos);
+            exerciseService.modifyExercise(id, exercise, imageFile, grupos, usuarioActual);
             return "redirect:/profesor/mis-ejercicios?success=ejercicio_actualizado";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error al actualizar el ejercicio: " + e.getMessage());
-            model.addAttribute("muscleGroups", com.mattfuncional.enums.MuscleGroup.values());
+            model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
             return "ejercicios/formulario-modificar-ejercicio-profesor";
         }
@@ -676,6 +648,137 @@ public class ProfesorController {
             logger.error("Error al eliminar ejercicio {}: {}", id, e.getMessage(), e);
             return "redirect:/profesor/mis-ejercicios?error=error_eliminar";
         }
+    }
+
+    // ========== MIS GRUPOS MUSCULARES (ABM) ==========
+
+    @GetMapping("/mis-grupos-musculares")
+    public String listarGruposMusculares(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        List<com.mattfuncional.entidades.GrupoMuscular> gruposSistema = grupoMuscularService.findGruposSistema();
+        List<com.mattfuncional.entidades.GrupoMuscular> misGrupos = grupoMuscularService.findByProfesorId(profesor.getId());
+        model.addAttribute("gruposSistema", gruposSistema);
+        model.addAttribute("misGrupos", misGrupos);
+        model.addAttribute("profesor", profesor);
+        return "profesor/grupos-musculares-lista";
+    }
+
+    @GetMapping("/mis-grupos-musculares/nuevo")
+    public String nuevoGrupoMuscularForm(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        model.addAttribute("grupo", new com.mattfuncional.entidades.GrupoMuscular());
+        model.addAttribute("profesor", profesor);
+        model.addAttribute("esEdicion", false);
+        return "profesor/grupo-muscular-form";
+    }
+
+    @PostMapping("/mis-grupos-musculares/nuevo")
+    public String crearGrupoMuscular(@Valid @ModelAttribute("grupo") com.mattfuncional.entidades.GrupoMuscular grupo,
+                                    BindingResult bindingResult,
+                                    @AuthenticationPrincipal Usuario usuarioActual,
+                                    Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", false);
+            return "profesor/grupo-muscular-form";
+        }
+        String nombre = grupo.getNombre() != null ? grupo.getNombre().trim().toUpperCase() : "";
+        if (grupoMuscularService.findByNombreSistema(nombre).isPresent()) {
+            model.addAttribute("errorMessage", "Ya existe un grupo del sistema con ese nombre. Elige otro.");
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", false);
+            return "profesor/grupo-muscular-form";
+        }
+        if (grupoMuscularService.existeNombreParaProfesor(nombre, profesor.getId())) {
+            model.addAttribute("errorMessage", "Ya tienes un grupo muscular con ese nombre.");
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", false);
+            return "profesor/grupo-muscular-form";
+        }
+        grupo.setNombre(nombre);
+        grupo.setProfesor(profesor);
+        grupoMuscularService.guardar(grupo);
+        return "redirect:/profesor/mis-grupos-musculares?success=grupo_creado";
+    }
+
+    @GetMapping("/mis-grupos-musculares/editar/{id}")
+    public String editarGrupoMuscularForm(@PathVariable Long id,
+                                          @AuthenticationPrincipal Usuario usuarioActual,
+                                          Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        if (!grupoMuscularService.puedeSerEditadoPorProfesor(id, profesor.getId())) {
+            return "redirect:/profesor/mis-grupos-musculares?error=sin_permisos";
+        }
+        com.mattfuncional.entidades.GrupoMuscular grupo = grupoMuscularService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
+        model.addAttribute("grupo", grupo);
+        model.addAttribute("profesor", profesor);
+        model.addAttribute("esEdicion", true);
+        return "profesor/grupo-muscular-form";
+    }
+
+    @PostMapping("/mis-grupos-musculares/editar/{id}")
+    public String actualizarGrupoMuscular(@PathVariable Long id,
+                                         @Valid @ModelAttribute("grupo") com.mattfuncional.entidades.GrupoMuscular grupo,
+                                         BindingResult bindingResult,
+                                         @AuthenticationPrincipal Usuario usuarioActual,
+                                         Model model) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        if (!grupoMuscularService.puedeSerEditadoPorProfesor(id, profesor.getId())) {
+            return "redirect:/profesor/mis-grupos-musculares?error=sin_permisos";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", true);
+            return "profesor/grupo-muscular-form";
+        }
+        com.mattfuncional.entidades.GrupoMuscular existente = grupoMuscularService.findById(id).orElseThrow();
+        String nombre = grupo.getNombre() != null ? grupo.getNombre().trim().toUpperCase() : "";
+        if (grupoMuscularService.findByNombreSistema(nombre).isPresent() && !nombre.equals(existente.getNombre())) {
+            model.addAttribute("errorMessage", "Ya existe un grupo del sistema con ese nombre. Elige otro.");
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", true);
+            return "profesor/grupo-muscular-form";
+        }
+        if (!nombre.equals(existente.getNombre()) && grupoMuscularService.existeNombreParaProfesor(nombre, profesor.getId())) {
+            model.addAttribute("errorMessage", "Ya tienes un grupo muscular con ese nombre.");
+            model.addAttribute("profesor", profesor);
+            model.addAttribute("esEdicion", true);
+            return "profesor/grupo-muscular-form";
+        }
+        existente.setNombre(nombre);
+        grupoMuscularService.guardar(existente);
+        return "redirect:/profesor/mis-grupos-musculares?success=grupo_actualizado";
+    }
+
+    @GetMapping("/mis-grupos-musculares/eliminar/{id}")
+    public String eliminarGrupoMuscular(@PathVariable Long id,
+                                       @AuthenticationPrincipal Usuario usuarioActual) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (usuarioActual == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        if (!grupoMuscularService.puedeSerEditadoPorProfesor(id, profesor.getId())) {
+            return "redirect:/profesor/mis-grupos-musculares?error=sin_permisos";
+        }
+        grupoMuscularService.eliminar(id);
+        return "redirect:/profesor/mis-grupos-musculares?success=grupo_eliminado";
     }
 
     @GetMapping("/mis-ejercicios/debug")

@@ -120,7 +120,7 @@
     </a>
 
     <div class="ejercicio-tarjeta-grande">
-        <div class="grupo-muscular-badge" th:text="${#strings.listJoin(ejercicio.muscleGroups, ', ')}">BRAZOS</div>
+        <div class="grupo-muscular-badge" th:text="${ejercicio.grupos != null ? #strings.listJoin(ejercicio.grupos.![nombre], ', ') : ''}">BRAZOS</div>
         <div class="img-wrapper">
             <a th:if="${ejercicio.videoUrl != null && !#strings.isEmpty(ejercicio.videoUrl)}" 
                th:href="${ejercicio.videoUrl}" target="_blank" rel="noopener" class="badge-video">

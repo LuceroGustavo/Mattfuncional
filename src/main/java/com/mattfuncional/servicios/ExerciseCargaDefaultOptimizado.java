@@ -26,8 +26,8 @@ import java.nio.file.Paths;
 import java.io.IOException;
 
 import com.mattfuncional.entidades.Exercise;
+import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.entidades.Imagen;
-import com.mattfuncional.enums.MuscleGroup;
 import com.mattfuncional.repositorios.ExerciseRepository;
 
 @Service
@@ -38,6 +38,7 @@ public class ExerciseCargaDefaultOptimizado {
     private final ExerciseService exerciseService;
     private final ExerciseRepository exerciseRepository;
     private final ProfesorService profesorService;
+    private final GrupoMuscularService grupoMuscularService;
     
     @Autowired
     private ImageOptimizationService imageOptimizationService;
@@ -71,10 +72,12 @@ public class ExerciseCargaDefaultOptimizado {
     public ExerciseCargaDefaultOptimizado(ExerciseRepository exerciseRepository, 
                                         ExerciseService exerciseService,
                                         ProfesorService profesorService,
+                                        GrupoMuscularService grupoMuscularService,
                                         com.mattfuncional.repositorios.SerieEjercicioRepository serieEjercicioRepository) {
         this.exerciseService = exerciseService;
         this.exerciseRepository = exerciseRepository;
         this.profesorService = profesorService;
+        this.grupoMuscularService = grupoMuscularService;
         this.serieEjercicioRepository = serieEjercicioRepository;
     }
 
@@ -556,72 +559,73 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosBrazos(com.mattfuncional.entidades.Profesor profesorAdmin, boolean skipImageOptimization, boolean soloMetadata) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("BRAZOS").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         Exercise ej1 = new Exercise("Curl de Bíceps con Barra", "Mejora la fuerza de los bíceps",
-                Set.of(MuscleGroup.BRAZOS), "BRAZOS", "http://example.com/video1", 
+                Set.of(grupo), "BRAZOS", "http://example.com/video1", 
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej1.setImagen(imagenOpcionalParaEjercicio("1.gif", "Curl de Bíceps con Barra", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej1, profesorAdmin);
         ejercicios.add(ej1);
         
         Exercise ej2 = new Exercise("Extensiones de Tríceps", "Desarrolla los tríceps",
-                Set.of(MuscleGroup.BRAZOS), "BRAZOS", "http://example.com/video2", 
+                Set.of(grupo), "BRAZOS", "http://example.com/video2", 
                 "Hacer 3 series de 15 repeticiones", "", "");
         ej2.setImagen(imagenOpcionalParaEjercicio("2.gif", "Extensiones de Tríceps", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej2, profesorAdmin);
         ejercicios.add(ej2);
         
         Exercise ej3 = new Exercise("Curl de Martillo", "Trabaja los bíceps y los antebrazos",
-                Set.of(MuscleGroup.BRAZOS), "BRAZOS", "http://example.com/video3", 
+                Set.of(grupo), "BRAZOS", "http://example.com/video3", 
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej3.setImagen(imagenOpcionalParaEjercicio("3.gif", "Curl de Martillo", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej3, profesorAdmin);
         ejercicios.add(ej3);
         
         Exercise ej4 = new Exercise("Fondos", "Desarrolla los tríceps y el pecho", 
-                Set.of(MuscleGroup.BRAZOS), "BRAZOS", "http://example.com/video4", 
+                Set.of(grupo), "BRAZOS", "http://example.com/video4", 
                 "Realizar 4 series de 10 repeticiones", "", "");
         ej4.setImagen(imagenOpcionalParaEjercicio("4.gif", "Fondos", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej4, profesorAdmin);
         ejercicios.add(ej4);
         
         Exercise ej5 = new Exercise("Curl de Bíceps con Mancuernas", "Aísla los bíceps",
-                Set.of(MuscleGroup.BRAZOS), "BRAZOS", "http://example.com/video5", 
+                Set.of(grupo), "BRAZOS", "http://example.com/video5", 
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej5.setImagen(imagenOpcionalParaEjercicio("5.gif", "Curl de Bíceps con Mancuernas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej5, profesorAdmin);
         ejercicios.add(ej5);
         
         Exercise ej6 = new Exercise("Press Francés", "Fortalece los tríceps", 
-                Set.of(MuscleGroup.BRAZOS), "Ejercicio para tríceps", "http://example.com/video6",
+                Set.of(grupo), "Ejercicio para tríceps", "http://example.com/video6",
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej6.setImagen(imagenOpcionalParaEjercicio("6.gif", "Press Francés", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej6, profesorAdmin);
         ejercicios.add(ej6);
         
         Exercise ej7 = new Exercise("Curl de Bíceps en Predicador", "Aísla los bíceps",
-                Set.of(MuscleGroup.BRAZOS), "Ejercicio para bíceps", "http://example.com/video7",
+                Set.of(grupo), "Ejercicio para bíceps", "http://example.com/video7",
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej7.setImagen(imagenOpcionalParaEjercicio("7.gif", "Curl de Bíceps en Predicador", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej7, profesorAdmin);
         ejercicios.add(ej7);
         
         Exercise ej8 = new Exercise("Patada de Tríceps", "Aísla los tríceps", 
-                Set.of(MuscleGroup.BRAZOS), "Ejercicio para tríceps", "http://example.com/video8",
+                Set.of(grupo), "Ejercicio para tríceps", "http://example.com/video8",
                 "Realizar 3 series de 15 repeticiones", "", "");
         ej8.setImagen(imagenOpcionalParaEjercicio("8.gif", "Patada de Tríceps", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej8, profesorAdmin);
         ejercicios.add(ej8);
         
         Exercise ej9 = new Exercise("Curl de Bíceps con Cable", "Aísla los bíceps", 
-                Set.of(MuscleGroup.BRAZOS), "Ejercicio para bíceps", "http://example.com/video9",
+                Set.of(grupo), "Ejercicio para bíceps", "http://example.com/video9",
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej9.setImagen(imagenOpcionalParaEjercicio("9.gif", "Curl de Bíceps con Cable", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej9, profesorAdmin);
         ejercicios.add(ej9);
         
         Exercise ej10 = new Exercise("Press de Tríceps en Máquina", "Fortalece los tríceps",
-                Set.of(MuscleGroup.BRAZOS), "Ejercicio para tríceps", "http://example.com/video10",
+                Set.of(grupo), "Ejercicio para tríceps", "http://example.com/video10",
                 "Realizar 3 series de 15 repeticiones", "", "");
         ej10.setImagen(imagenOpcionalParaEjercicio("10.gif", "Press de Tríceps en Máquina", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej10, profesorAdmin);
@@ -631,73 +635,74 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosPiernas(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("PIERNAS").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej11 = new Exercise("Sentadillas con Barra", "Fortalece los cuádriceps",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video11", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video11", 
                 "Realizar 4 series de 10 repeticiones", "", "");
         ej11.setImagen(imagenOpcionalParaEjercicio("11.gif", "Sentadillas con Barra", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej11, profesorAdmin);
         ejercicios.add(ej11);
         
         Exercise ej12 = new Exercise("Elevación de Caderas", "Desarrolla los glúteos",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video12", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video12", 
                 "Hacer 4 series de 12 repeticiones", "", "");
         ej12.setImagen(imagenOpcionalParaEjercicio("12.gif", "Elevación de Caderas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej12, profesorAdmin);
         ejercicios.add(ej12);
         
         Exercise ej13 = new Exercise("Peso Muerto", "Trabaja los isquiotibiales y glúteos",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video13", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video13", 
                 "Realizar 4 series de 10 repeticiones", "", "");
         ej13.setImagen(imagenOpcionalParaEjercicio("13.gif", "Peso Muerto", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej13, profesorAdmin);
         ejercicios.add(ej13);
         
         Exercise ej14 = new Exercise("Prensa de Piernas", "Fortalece los cuádriceps",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video14", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video14", 
                 "Hacer 4 series de 12 repeticiones", "", "");
         ej14.setImagen(imagenOpcionalParaEjercicio("14.gif", "Prensa de Piernas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej14, profesorAdmin);
         ejercicios.add(ej14);
         
         Exercise ej15 = new Exercise("Zancadas", "Trabaja cuádriceps y glúteos",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video15", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video15", 
                 "Realizar 3 series de 12 repeticiones por pierna", "", "");
         ej15.setImagen(imagenOpcionalParaEjercicio("15.gif", "Zancadas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej15, profesorAdmin);
         ejercicios.add(ej15);
         
         Exercise ej16 = new Exercise("Extensiones de Cuádriceps", "Aísla los cuádriceps",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video16", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video16", 
                 "Hacer 3 series de 15 repeticiones", "", "");
         ej16.setImagen(imagenOpcionalParaEjercicio("16.gif", "Extensiones de Cuádriceps", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej16, profesorAdmin);
         ejercicios.add(ej16);
         
         Exercise ej17 = new Exercise("Curl de Isquiotibiales", "Aísla los isquiotibiales",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video17", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video17", 
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej17.setImagen(imagenOpcionalParaEjercicio("17.gif", "Curl de Isquiotibiales", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej17, profesorAdmin);
         ejercicios.add(ej17);
         
         Exercise ej18 = new Exercise("Elevación de Gemelos", "Fortalece las pantorrillas",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video18", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video18", 
                 "Hacer 4 series de 20 repeticiones", "", "");
         ej18.setImagen(imagenOpcionalParaEjercicio("18.gif", "Elevación de Gemelos", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej18, profesorAdmin);
         ejercicios.add(ej18);
         
         Exercise ej19 = new Exercise("Sentadillas Búlgaras", "Trabaja cuádriceps y glúteos",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video19", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video19", 
                 "Realizar 3 series de 10 repeticiones por pierna", "", "");
         ej19.setImagen(imagenOpcionalParaEjercicio("19.gif", "Sentadillas Búlgaras", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej19, profesorAdmin);
         ejercicios.add(ej19);
         
         Exercise ej20 = new Exercise("Hip Thrust", "Desarrolla los glúteos",
-                Set.of(MuscleGroup.PIERNAS), "PIERNAS", "http://example.com/video20", 
+                Set.of(grupo), "PIERNAS", "http://example.com/video20", 
                 "Hacer 4 series de 12 repeticiones", "", "");
         ej20.setImagen(imagenOpcionalParaEjercicio("20.gif", "Hip Thrust", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej20, profesorAdmin);
@@ -707,38 +712,39 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosPecho(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("PECHO").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej21 = new Exercise("Press de Banca", "Desarrolla el pecho",
-                Set.of(MuscleGroup.PECHO), "PECHO", "http://example.com/video21", 
+                Set.of(grupo), "PECHO", "http://example.com/video21", 
                 "Realizar 4 series de 8-10 repeticiones", "", "");
         ej21.setImagen(imagenOpcionalParaEjercicio("21.gif", "Press de Banca", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej21, profesorAdmin);
         ejercicios.add(ej21);
         
         Exercise ej22 = new Exercise("Press de Banca Inclinado", "Trabaja la parte superior del pecho",
-                Set.of(MuscleGroup.PECHO), "PECHO", "http://example.com/video22", 
+                Set.of(grupo), "PECHO", "http://example.com/video22", 
                 "Hacer 3 series de 10 repeticiones", "", "");
         ej22.setImagen(imagenOpcionalParaEjercicio("22.gif", "Press de Banca Inclinado", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej22, profesorAdmin);
         ejercicios.add(ej22);
         
         Exercise ej23 = new Exercise("Aperturas con Mancuernas", "Aísla el pecho",
-                Set.of(MuscleGroup.PECHO), "PECHO", "http://example.com/video23", 
+                Set.of(grupo), "PECHO", "http://example.com/video23", 
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej23.setImagen(imagenOpcionalParaEjercicio("23.gif", "Aperturas con Mancuernas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej23, profesorAdmin);
         ejercicios.add(ej23);
         
         Exercise ej24 = new Exercise("Flexiones", "Fortalece el pecho",
-                Set.of(MuscleGroup.PECHO), "PECHO", "http://example.com/video24", 
+                Set.of(grupo), "PECHO", "http://example.com/video24", 
                 "Hacer 3 series de 15 repeticiones", "", "");
         ej24.setImagen(imagenOpcionalParaEjercicio("24.gif", "Flexiones", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej24, profesorAdmin);
         ejercicios.add(ej24);
         
         Exercise ej25 = new Exercise("Press de Banca Declinado", "Trabaja la parte inferior del pecho",
-                Set.of(MuscleGroup.PECHO), "PECHO", "http://example.com/video25", 
+                Set.of(grupo), "PECHO", "http://example.com/video25", 
                 "Realizar 3 series de 10 repeticiones", "", "");
         ej25.setImagen(imagenOpcionalParaEjercicio("25.gif", "Press de Banca Declinado", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej25, profesorAdmin);
@@ -748,38 +754,39 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosEspalda(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("ESPALDA").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej26 = new Exercise("Dominadas", "Desarrolla la espalda",
-                Set.of(MuscleGroup.ESPALDA), "ESPALDA", "http://example.com/video26", 
+                Set.of(grupo), "ESPALDA", "http://example.com/video26", 
                 "Realizar 3 series de 8-10 repeticiones", "", "");
         ej26.setImagen(imagenOpcionalParaEjercicio("26.gif", "Dominadas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej26, profesorAdmin);
         ejercicios.add(ej26);
         
         Exercise ej27 = new Exercise("Remo con Barra", "Fortalece la espalda",
-                Set.of(MuscleGroup.ESPALDA), "ESPALDA", "http://example.com/video27", 
+                Set.of(grupo), "ESPALDA", "http://example.com/video27", 
                 "Hacer 4 series de 10 repeticiones", "", "");
         ej27.setImagen(imagenOpcionalParaEjercicio("27.gif", "Remo con Barra", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej27, profesorAdmin);
         ejercicios.add(ej27);
         
         Exercise ej28 = new Exercise("Remo con Cable", "Aísla la espalda",
-                Set.of(MuscleGroup.ESPALDA), "ESPALDA", "http://example.com/video28", 
+                Set.of(grupo), "ESPALDA", "http://example.com/video28", 
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej28.setImagen(imagenOpcionalParaEjercicio("28.gif", "Remo con Cable", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej28, profesorAdmin);
         ejercicios.add(ej28);
         
         Exercise ej29 = new Exercise("Pull Down", "Desarrolla la espalda",
-                Set.of(MuscleGroup.ESPALDA), "ESPALDA", "http://example.com/video29", 
+                Set.of(grupo), "ESPALDA", "http://example.com/video29", 
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej29.setImagen(imagenOpcionalParaEjercicio("29.gif", "Pull Down", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej29, profesorAdmin);
         ejercicios.add(ej29);
         
         Exercise ej30 = new Exercise("Remo Invertido", "Fortalece la espalda",
-                Set.of(MuscleGroup.ESPALDA), "ESPALDA", "http://example.com/video30", 
+                Set.of(grupo), "ESPALDA", "http://example.com/video30", 
                 "Realizar 3 series de 15 repeticiones", "", "");
         ej30.setImagen(imagenOpcionalParaEjercicio("30.gif", "Remo Invertido", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej30, profesorAdmin);
@@ -789,38 +796,39 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosHombros(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("BRAZOS").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej31 = new Exercise("Press Militar", "Desarrolla los hombros",
-                Set.of(MuscleGroup.BRAZOS), "HOMBROS", "http://example.com/video31", 
+                Set.of(grupo), "HOMBROS", "http://example.com/video31", 
                 "Realizar 3 series de 10 repeticiones", "", "");
         ej31.setImagen(imagenOpcionalParaEjercicio("31.gif", "Press Militar", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej31, profesorAdmin);
         ejercicios.add(ej31);
         
         Exercise ej32 = new Exercise("Elevaciones Laterales", "Aísla los hombros",
-                Set.of(MuscleGroup.BRAZOS), "HOMBROS", "http://example.com/video32", 
+                Set.of(grupo), "HOMBROS", "http://example.com/video32", 
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej32.setImagen(imagenOpcionalParaEjercicio("32.gif", "Elevaciones Laterales", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej32, profesorAdmin);
         ejercicios.add(ej32);
         
         Exercise ej33 = new Exercise("Elevaciones Frontales", "Trabaja los hombros frontales",
-                Set.of(MuscleGroup.BRAZOS), "HOMBROS", "http://example.com/video33", 
+                Set.of(grupo), "HOMBROS", "http://example.com/video33", 
                 "Realizar 3 series de 12 repeticiones", "", "");
         ej33.setImagen(imagenOpcionalParaEjercicio("33.gif", "Elevaciones Frontales", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej33, profesorAdmin);
         ejercicios.add(ej33);
         
         Exercise ej34 = new Exercise("Elevaciones Posteriores", "Desarrolla los hombros posteriores",
-                Set.of(MuscleGroup.BRAZOS), "HOMBROS", "http://example.com/video34", 
+                Set.of(grupo), "HOMBROS", "http://example.com/video34", 
                 "Hacer 3 series de 12 repeticiones", "", "");
         ej34.setImagen(imagenOpcionalParaEjercicio("34.gif", "Elevaciones Posteriores", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej34, profesorAdmin);
         ejercicios.add(ej34);
         
         Exercise ej35 = new Exercise("Press Arnold", "Trabaja los hombros",
-                Set.of(MuscleGroup.BRAZOS), "HOMBROS", "http://example.com/video35", 
+                Set.of(grupo), "HOMBROS", "http://example.com/video35", 
                 "Realizar 3 series de 10 repeticiones", "", "");
         ej35.setImagen(imagenOpcionalParaEjercicio("35.gif", "Press Arnold", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej35, profesorAdmin);
@@ -830,38 +838,39 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosAbdomen(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("PIERNAS").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej36 = new Exercise("Crunches", "Fortalece el abdomen",
-                Set.of(MuscleGroup.PIERNAS), "ABDOMEN", "http://example.com/video36", 
+                Set.of(grupo), "ABDOMEN", "http://example.com/video36", 
                 "Realizar 3 series de 20 repeticiones", "", "");
         ej36.setImagen(imagenOpcionalParaEjercicio("36.gif", "Crunches", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej36, profesorAdmin);
         ejercicios.add(ej36);
         
         Exercise ej37 = new Exercise("Plancha", "Fortalece el core",
-                Set.of(MuscleGroup.PIERNAS), "ABDOMEN", "http://example.com/video37", 
+                Set.of(grupo), "ABDOMEN", "http://example.com/video37", 
                 "Mantener 3 series de 30 segundos", "", "");
         ej37.setImagen(imagenOpcionalParaEjercicio("37.gif", "Plancha", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej37, profesorAdmin);
         ejercicios.add(ej37);
         
         Exercise ej38 = new Exercise("Russian Twists", "Trabaja los oblicuos",
-                Set.of(MuscleGroup.PIERNAS), "ABDOMEN", "http://example.com/video38", 
+                Set.of(grupo), "ABDOMEN", "http://example.com/video38", 
                 "Hacer 3 series de 20 repeticiones", "", "");
         ej38.setImagen(imagenOpcionalParaEjercicio("38.gif", "Russian Twists", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej38, profesorAdmin);
         ejercicios.add(ej38);
         
         Exercise ej39 = new Exercise("Leg Raises", "Fortalece el abdomen inferior",
-                Set.of(MuscleGroup.PIERNAS), "ABDOMEN", "http://example.com/video39", 
+                Set.of(grupo), "ABDOMEN", "http://example.com/video39", 
                 "Realizar 3 series de 15 repeticiones", "", "");
         ej39.setImagen(imagenOpcionalParaEjercicio("39.gif", "Leg Raises", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej39, profesorAdmin);
         ejercicios.add(ej39);
         
         Exercise ej40 = new Exercise("Mountain Climbers Abdomen", "Trabaja todo el core",
-                Set.of(MuscleGroup.PIERNAS), "ABDOMEN", "http://example.com/video40", 
+                Set.of(grupo), "ABDOMEN", "http://example.com/video40", 
                 "Hacer 3 series de 30 segundos", "", "");
         ej40.setImagen(imagenOpcionalParaEjercicio("40.gif", "Mountain Climbers Abdomen", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej40, profesorAdmin);
@@ -871,73 +880,74 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosCardio(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("CARDIO").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej41 = new Exercise("Correr", "Mejora la resistencia cardiovascular",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video41", 
+                Set.of(grupo), "CARDIO", "http://example.com/video41", 
                 "Correr durante 30 minutos a ritmo moderado", "", "");
         ej41.setImagen(imagenOpcionalParaEjercicio("41.gif", "Correr", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej41, profesorAdmin);
         ejercicios.add(ej41);
         
         Exercise ej42 = new Exercise("Bicicleta", "Desarrolla la resistencia",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video42", 
+                Set.of(grupo), "CARDIO", "http://example.com/video42", 
                 "Pedalear durante 45 minutos", "", "");
         ej42.setImagen(imagenOpcionalParaEjercicio("42.gif", "Bicicleta", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej42, profesorAdmin);
         ejercicios.add(ej42);
         
         Exercise ej43 = new Exercise("Saltar Cuerda", "Mejora la coordinación",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video43", 
+                Set.of(grupo), "CARDIO", "http://example.com/video43", 
                 "Saltar durante 20 minutos", "", "");
         ej43.setImagen(imagenOpcionalParaEjercicio("43.gif", "Saltar Cuerda", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej43, profesorAdmin);
         ejercicios.add(ej43);
         
         Exercise ej44 = new Exercise("Burpees", "Ejercicio completo de cardio",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video44", 
+                Set.of(grupo), "CARDIO", "http://example.com/video44", 
                 "Realizar 3 series de 10 repeticiones", "", "");
         ej44.setImagen(imagenOpcionalParaEjercicio("44.gif", "Burpees", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej44, profesorAdmin);
         ejercicios.add(ej44);
         
         Exercise ej45 = new Exercise("Jumping Jacks", "Mejora la resistencia",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video45", 
+                Set.of(grupo), "CARDIO", "http://example.com/video45", 
                 "Hacer 3 series de 30 repeticiones", "", "");
         ej45.setImagen(imagenOpcionalParaEjercicio("45.gif", "Jumping Jacks", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej45, profesorAdmin);
         ejercicios.add(ej45);
         
         Exercise ej46 = new Exercise("High Knees", "Trabaja la resistencia",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video46", 
+                Set.of(grupo), "CARDIO", "http://example.com/video46", 
                 "Realizar 3 series de 30 segundos", "", "");
         ej46.setImagen(imagenOpcionalParaEjercicio("46.gif", "High Knees", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej46, profesorAdmin);
         ejercicios.add(ej46);
         
         Exercise ej47 = new Exercise("Mountain Climbers Cardio", "Ejercicio de cardio",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video47", 
+                Set.of(grupo), "CARDIO", "http://example.com/video47", 
                 "Hacer 3 series de 30 segundos", "", "");
         ej47.setImagen(imagenOpcionalParaEjercicio("47.gif", "Mountain Climbers Cardio", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej47, profesorAdmin);
         ejercicios.add(ej47);
         
         Exercise ej48 = new Exercise("Squat Jumps", "Combina fuerza y cardio",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video48", 
+                Set.of(grupo), "CARDIO", "http://example.com/video48", 
                 "Realizar 3 series de 15 repeticiones", "", "");
         ej48.setImagen(imagenOpcionalParaEjercicio("48.gif", "Squat Jumps", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej48, profesorAdmin);
         ejercicios.add(ej48);
         
         Exercise ej49 = new Exercise("Ciclismo", "Mejora la resistencia",
-                Set.of(MuscleGroup.CARDIO), "CARDIO", "http://example.com/video49", 
+                Set.of(grupo), "CARDIO", "http://example.com/video49", 
                 "Pedalear durante 60 minutos", "", "");
         ej49.setImagen(imagenOpcionalParaEjercicio("49.gif", "Ciclismo", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej49, profesorAdmin);
         ejercicios.add(ej49);
         
         Exercise ej50 = new Exercise("Subir Escaleras", "Fortalece el sistema cardiovascular y muscular",
-                Set.of(MuscleGroup.CARDIO), "Ejercicio para cardio", "http://example.com/video50",
+                Set.of(grupo), "Ejercicio para cardio", "http://example.com/video50",
                 "Subir y bajar escaleras durante 20 minutos", "", "");
         ej50.setImagen(imagenOpcionalParaEjercicio("50.gif", "Subir Escaleras", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej50, profesorAdmin);
@@ -947,73 +957,74 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     private List<Exercise> crearEjerciciosElongacion(com.mattfuncional.entidades.Profesor profesorAdmin, boolean soloMetadata, boolean skipImageOptimization) {
+        GrupoMuscular grupo = grupoMuscularService.findByNombreSistema("ELONGACION").orElseThrow();
         List<Exercise> ejercicios = new ArrayList<>();
         
         Exercise ej51 = new Exercise("Estiramiento de Cuádriceps", "Aumenta la flexibilidad en los cuádriceps", 
-                Set.of(MuscleGroup.ELONGACION), "ELONGACION", "http://example.com/video51",
+                Set.of(grupo), "ELONGACION", "http://example.com/video51",
                 "Realizar 3 series de 30 segundos por pierna", "", "");
         ej51.setImagen(imagenOpcionalParaEjercicio("51.gif", "Estiramiento de Cuádriceps", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej51, profesorAdmin);
         ejercicios.add(ej51);
         
         Exercise ej52 = new Exercise("Estiramiento de Isquiotibiales", "Desarrolla la flexibilidad en los isquiotibiales", 
-                Set.of(MuscleGroup.ELONGACION), "ELONGACION", "http://example.com/video52", 
+                Set.of(grupo), "ELONGACION", "http://example.com/video52", 
                 "Hacer 3 series de 30 segundos por pierna", "", "");
         ej52.setImagen(imagenOpcionalParaEjercicio("52.gif", "Estiramiento de Isquiotibiales", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej52, profesorAdmin);
         ejercicios.add(ej52);
         
         Exercise ej53 = new Exercise("Estiramiento de Cadera", "Aumenta la flexibilidad en la cadera",
-                Set.of(MuscleGroup.ELONGACION), "ELONGACION", "http://example.com/video53",
+                Set.of(grupo), "ELONGACION", "http://example.com/video53",
                 "Realizar 3 series de 30 segundos por pierna", "", "");
         ej53.setImagen(imagenOpcionalParaEjercicio("53.gif", "Estiramiento de Cadera", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej53, profesorAdmin);
         ejercicios.add(ej53);
         
         Exercise ej54 = new Exercise("Estiramiento de Hombros", "Desarrolla la flexibilidad en los hombros",
-                Set.of(MuscleGroup.ELONGACION), "ELONGACION", "http://example.com/video54",
+                Set.of(grupo), "ELONGACION", "http://example.com/video54",
                 "Hacer 3 series de 30 segundos por brazo", "", "");
         ej54.setImagen(imagenOpcionalParaEjercicio("54.gif", "Estiramiento de Hombros", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej54, profesorAdmin);
         ejercicios.add(ej54);
         
         Exercise ej55 = new Exercise("Estiramiento de Cuello", "Aumenta la flexibilidad en el cuello",
-                Set.of(MuscleGroup.ELONGACION), "ELONGACION", "http://example.com/video55", 
+                Set.of(grupo), "ELONGACION", "http://example.com/video55", 
                 "Realizar 3 series de 30 segundos", "", "");
         ej55.setImagen(imagenOpcionalParaEjercicio("55.gif", "Estiramiento de Cuello", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej55, profesorAdmin);
         ejercicios.add(ej55);
         
         Exercise ej56 = new Exercise("Estiramiento de Espalda Baja", "Desarrolla la flexibilidad en la espalda baja", 
-                Set.of(MuscleGroup.ELONGACION), "Ejercicio de elongación", "http://example.com/video56",
+                Set.of(grupo), "Ejercicio de elongación", "http://example.com/video56",
                 "Hacer 3 series de 30 segundos", "", "");
         ej56.setImagen(imagenOpcionalParaEjercicio("56.gif", "Estiramiento de Espalda Baja", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej56, profesorAdmin);
         ejercicios.add(ej56);
         
         Exercise ej57 = new Exercise("Estiramiento de Pecho", "Aumenta la flexibilidad en el pecho",
-                Set.of(MuscleGroup.ELONGACION), "Ejercicio de elongación", "http://example.com/video57",
+                Set.of(grupo), "Ejercicio de elongación", "http://example.com/video57",
                 "Realizar 3 series de 30 segundos", "", "");
         ej57.setImagen(imagenOpcionalParaEjercicio("57.gif", "Estiramiento de Pecho", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej57, profesorAdmin);
         ejercicios.add(ej57);
         
         Exercise ej58 = new Exercise("Estiramiento de Pantorrillas", "Desarrolla la flexibilidad en las pantorrillas",
-                Set.of(MuscleGroup.ELONGACION), "Ejercicio de elongación", "http://example.com/video58",
+                Set.of(grupo), "Ejercicio de elongación", "http://example.com/video58",
                 "Hacer 3 series de 30 segundos por pierna", "", "");
         ej58.setImagen(imagenOpcionalParaEjercicio("58.gif", "Estiramiento de Pantorrillas", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej58, profesorAdmin);
         ejercicios.add(ej58);
         
         Exercise ej59 = new Exercise("Estiramiento de Cuádriceps en Pareja", "Aumenta la flexibilidad en los cuádriceps", 
-                Set.of(MuscleGroup.ELONGACION), "Ejercicio de elongación", "http://example.com/video59", 
+                Set.of(grupo), "Ejercicio de elongación", "http://example.com/video59", 
                 "Realizar 3 series de 30 segundos por pierna", "", "");
         ej59.setImagen(imagenOpcionalParaEjercicio("59.gif", "Estiramiento de Cuádriceps en Pareja", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej59, profesorAdmin);
         ejercicios.add(ej59);
         
         Exercise ej60 = new Exercise("Estiramiento de Isquiotibiales en Pareja", "Desarrolla la flexibilidad en los isquiotibiales", 
-                Set.of(MuscleGroup.ELONGACION), "Ejercicio de elongación", "http://example.com/video60",
+                Set.of(grupo), "Ejercicio de elongación", "http://example.com/video60",
                 "Hacer 3 series de 30 segundos por pierna", "", "");
         ej60.setImagen(imagenOpcionalParaEjercicio("60.gif", "Estiramiento de Isquiotibiales en Pareja", soloMetadata, skipImageOptimization));
         configurarEjercicioComoPredeterminado(ej60, profesorAdmin);

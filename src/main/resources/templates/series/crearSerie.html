@@ -195,11 +195,11 @@
                 </div>
                 <div class="col-md-5 col-12 mt-2 mt-md-0 text-md-end">
                     <select id="filtro-musculo" class="form-select w-auto d-inline-block">
-                        <option value="" th:selected="${selectedMuscleGroup == null}">Todos los grupos musculares</option>
-                        <option th:each="muscleGroup : ${T(com.mattfuncional.enums.MuscleGroup).values()}"
-                                th:value="${muscleGroup}"
-                                th:text="${muscleGroup}"
-                                th:selected="${selectedMuscleGroup == muscleGroup}"></option>
+                        <option value="" th:selected="${selectedGrupoId == null}">Todos los grupos musculares</option>
+                        <option th:each="grupo : ${gruposMusculares}"
+                                th:value="${grupo.nombre}"
+                                th:text="${grupo.nombre}"
+                                th:selected="${selectedGrupoId != null && selectedGrupoId == grupo.id}"></option>
                     </select>
                 </div>
             </div>
@@ -209,9 +209,9 @@
                                         <li th:each="ejercicio : ${ejercicios}" class="splide__slide" 
                                             th:data-id="${ejercicio.id}"
                                             th:data-nombre="${ejercicio.name}"
-                                            th:data-musculos="${#strings.listJoin(ejercicio.muscleGroups, ',')}">
+                                            th:data-musculos="${ejercicio.grupos != null ? #strings.listJoin(ejercicio.grupos.![nombre], ',') : ''}">
                                             <div class="card ejercicio-card">
-                                <div class="grupo-muscular-badge" th:text="${#strings.listJoin(ejercicio.muscleGroups, ', ')}">Grupo Muscular</div>
+                                <div class="grupo-muscular-badge" th:text="${ejercicio.grupos != null ? #strings.listJoin(ejercicio.grupos.![nombre], ', ') : ''}">Grupo Muscular</div>
                                                 <img th:if="${ejercicio.imagen != null}" th:src="${ejercicio.imagen.url}" class="card-img-top" th:alt="${ejercicio.name}">
                                                 <img th:if="${ejercicio.imagen == null}" th:src="@{/img/not_imagen.png}" class="card-img-top" alt="Imagen no disponible">
                                                 <div class="card-body text-center">

@@ -1,7 +1,7 @@
 package com.mattfuncional.repositorios;
 
 import com.mattfuncional.entidades.Exercise;
-import com.mattfuncional.enums.MuscleGroup;
+import com.mattfuncional.entidades.GrupoMuscular;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +17,11 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
     /** Para saber si ya existe un ejercicio predeterminado con ese nombre (evitar duplicados al asegurar). */
     Optional<Exercise> findByNameAndProfesorIsNull(String name);
 
-    @Query("SELECT e FROM Exercise e JOIN e.muscleGroups mg WHERE mg = :muscleGroup")
-    List<Exercise> findByMuscleGroups(@Param("muscleGroup") MuscleGroup muscleGroup);
+    @Query("SELECT e FROM Exercise e JOIN e.grupos g WHERE g = :grupo")
+    List<Exercise> findByGruposContaining(@Param("grupo") GrupoMuscular grupo);
+
+    @Query("SELECT e FROM Exercise e JOIN e.grupos g WHERE g.id = :grupoId")
+    List<Exercise> findByGrupoId(@Param("grupoId") Long grupoId);
 
     List<Exercise> findByProfesorIsNull();
 

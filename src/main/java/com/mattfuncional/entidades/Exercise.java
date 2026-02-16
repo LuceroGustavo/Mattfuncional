@@ -1,12 +1,14 @@
 package com.mattfuncional.entidades;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -14,7 +16,6 @@ import jakarta.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
-import com.mattfuncional.enums.MuscleGroup;
 
 @Entity
 @Table(uniqueConstraints = { 
@@ -30,8 +31,11 @@ public class Exercise {
     private String name;
     private String description;
 
-    @ElementCollection
-    private Set<MuscleGroup> muscleGroups;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "exercise_grupos",
+               joinColumns = @JoinColumn(name = "exercise_id"),
+               inverseJoinColumns = @JoinColumn(name = "grupo_muscular_id"))
+    private Set<GrupoMuscular> grupos;
 
     private String type;
     private String videoUrl;
@@ -56,11 +60,11 @@ public class Exercise {
     }
 
     // Constructor con argumentos
-    public Exercise(String name, String description, Set<MuscleGroup> muscleGroups, String type,
+    public Exercise(String name, String description, Set<GrupoMuscular> grupos, String type,
             String videoUrl, String instructions, String benefits, String contraindications) {
         this.name = name;
         this.description = description;
-        this.muscleGroups = muscleGroups;
+        this.grupos = grupos;
         this.type = type;
         this.videoUrl = videoUrl;
         this.instructions = instructions;
@@ -93,12 +97,12 @@ public class Exercise {
         this.description = description;
     }
 
-    public Set<MuscleGroup> getMuscleGroups() {
-        return muscleGroups;
+    public Set<GrupoMuscular> getGrupos() {
+        return grupos;
     }
 
-    public void setMuscleGroups(Set<MuscleGroup> muscleGroups) {
-        this.muscleGroups = muscleGroups;
+    public void setGrupos(Set<GrupoMuscular> grupos) {
+        this.grupos = grupos;
     }
 
     public String getType() {

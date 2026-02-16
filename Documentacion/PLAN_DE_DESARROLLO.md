@@ -89,7 +89,12 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - **WhatsApp rutinas:** botón en ficha con enlace al celular del alumno y link de rutina.
 - **Seeds:** script SQL con 30 alumnos variados en `scripts/seed_alumnos_mattfuncional.sql`.
 
-### 2.8 Cambios recientes (panel ejercicios y hoja pública)
+### 2.8 Grupos musculares como entidad (implementado – Feb 2026)
+- **Objetivo:** Que el profesor pueda crear grupos musculares propios y usarlos en ejercicios/series/filtros.
+- **Implementado:** Sustitución del enum `MuscleGroup` por la **entidad `GrupoMuscular`** (id, nombre, profesor_id nullable). Los 6 grupos del sistema (BRAZOS, PIERNAS, PECHO, ESPALDA, CARDIO, ELONGACION) se crean al arranque en `DataInitializer`. Exercise usa `@ManyToMany Set<GrupoMuscular>` con tabla `exercise_grupos`. ABM en panel profesor: `/profesor/mis-grupos-musculares` (listar, crear, editar, eliminar solo grupos propios). Filtros y formularios de ejercicios/series usan `gruposMusculares` y `grupoIds`. Export/Import por nombre de grupo.
+- **Documentación:** [PLAN_GRUPOS_MUSCULARES_ENTIDAD.md](PLAN_GRUPOS_MUSCULARES_ENTIDAD.md) (estado IMPLEMENTADO y sección 9 con detalle). [CHANGELOG_GRUPOS_MUSCULARES_FEB2026.md](CHANGELOG_GRUPOS_MUSCULARES_FEB2026.md).
+
+### 2.9 Cambios recientes (panel ejercicios y hoja pública)
 
 - **Panel Mis Ejercicios:** ejercicios predeterminados editables y eliminables; indicador “predeterminado” solo con estrellita azul + leyenda; botones Ver (modal)/Editar/Eliminar para todos; Ver abre modal/overlay en la misma página (fondo gris, clic fuera cierra).
 - **Hoja de rutina pública:** acceso sin login a `/rutinas/hoja/**` en SecurityConfig (`permitAll`), para que el enlace compartido (p. ej. desde celular con IP local) abra la rutina sin pedir logueo.

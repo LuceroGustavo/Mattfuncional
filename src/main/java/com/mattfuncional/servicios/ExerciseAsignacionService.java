@@ -232,10 +232,10 @@ public class ExerciseAsignacionService {
             copia.setDescription(original.getDescription());
             copia.setType(original.getType());
             // Crear nueva colección para evitar referencias compartidas
-            if (original.getMuscleGroups() != null) {
-                copia.setMuscleGroups(new HashSet<>(original.getMuscleGroups()));
+            if (original.getGrupos() != null) {
+                copia.setGrupos(new HashSet<>(original.getGrupos()));
             } else {
-                copia.setMuscleGroups(new HashSet<>());
+                copia.setGrupos(new HashSet<>());
             }
             copia.setVideoUrl(original.getVideoUrl());
             copia.setInstructions(original.getInstructions());

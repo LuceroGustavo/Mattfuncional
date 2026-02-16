@@ -32,10 +32,11 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="muscleGroups">Grupos Musculares:</label>
-                <div th:each="muscleGroup : ${muscleGroups}">
-                    <input type="checkbox" th:value="${muscleGroup.name()}" th:field="*{muscleGroups}" th:checked="${#lists.contains(exercise.muscleGroups, muscleGroup)}"/>
-                    <span th:text="${muscleGroup.name()}">MUSCLE_GROUP_NAME</span>
+                <label for="grupoIds">Grupos Musculares:</label>
+                <div th:each="grupo : ${gruposMusculares}">
+                    <input type="checkbox" th:value="${grupo.id}" name="grupoIds" th:id="${'grupo-' + grupo.id}"
+                           th:checked="${exercise.grupos != null and #lists.contains(exercise.grupos.![id], grupo.id)}"/>
+                    <span th:text="${grupo.nombre}">Grupo</span>
                 </div>
             </div>
             <div class="form-group">
