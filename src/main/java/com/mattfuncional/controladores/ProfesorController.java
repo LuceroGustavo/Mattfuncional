@@ -116,6 +116,7 @@ public class ProfesorController {
         model.addAttribute("rutinasAsignadas", rutinasAsignadas);
         model.addAttribute("series", series);
         model.addAttribute("profesor", profesor);
+        model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
 
         model.addAttribute("usuario", usuarioService.getUsuarioActual());
 
@@ -347,19 +348,20 @@ public class ProfesorController {
 
     // Mostrar ficha de alumno con historial físico (carga profesor, rutinas y horarios de asistencia)
     @GetMapping("/alumnos/{id}")
-    public String verAlumno(@PathVariable Long id, Model model) {
+    public String verAlumno(@PathVariable Long id, Model model, @AuthenticationPrincipal Usuario usuarioActual) {
         Usuario alumno = usuarioService.getUsuarioByIdParaFicha(id);
         if (alumno == null) {
             return "redirect:/profesor/dashboard";
         }
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         model.addAttribute("alumno", alumno);
         model.addAttribute("historialEstadoFormateado", formatearFechasEnHistorialEstado(alumno.getHistorialEstado()));
-        // Cargar historial físico
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
-        // --- NUEVO: historial de asistencia ---
         java.util.List<Asistencia> historialAsistencia = asistenciaService.obtenerAsistenciasPorUsuario(alumno);
         model.addAttribute("historialAsistencia", historialAsistencia);
-        // --- NUEVO: cargar rutinas desde el servicio para evitar LazyInitializationException ---
+        // Asistencia de hoy (para pre-rellenar el modal Progreso si ya se dio presente desde el panel)
+        java.util.List<Asistencia> asistenciasHoy = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(alumno, java.time.LocalDate.now());
+        model.addAttribute("asistenciaHoy", (asistenciasHoy != null && !asistenciasHoy.isEmpty()) ? asistenciasHoy.get(0) : null);
         List<com.mattfuncional.entidades.Rutina> rutinasDelAlumno = rutinaService.obtenerRutinasAsignadasPorUsuario(id);
         List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinasDelAlumno.stream()
                 .sorted(java.util.Comparator
@@ -368,6 +370,14 @@ public class ProfesorController {
                         .reversed())
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("rutinasAsignadas", rutinasAsignadas);
+        if (profesor != null) {
+            model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
+        }
+        // Rutinas en proceso / terminadas para estadísticas
+        java.util.List<com.mattfuncional.entidades.Rutina> rutinasEnProceso = rutinaService.obtenerRutinasActivasPorUsuario(id);
+        java.util.List<com.mattfuncional.entidades.Rutina> rutinasTerminadas = rutinaService.obtenerRutinasCompletadasPorUsuario(id);
+        model.addAttribute("rutinasEnProceso", rutinasEnProceso != null ? rutinasEnProceso : java.util.Collections.emptyList());
+        model.addAttribute("rutinasTerminadas", rutinasTerminadas != null ? rutinasTerminadas : java.util.Collections.emptyList());
 
         return "profesor/alumno-detalle";
     }
@@ -399,7 +409,7 @@ public class ProfesorController {
             }
             model.addAttribute("errorAsistencia",
                     "La asistencia de hoy ya fue registrada. Si fue un error, puedes deshacerla.");
-            return verAlumno(id, model); // Recarga la ficha con el mensaje de error
+            return verAlumno(id, model, profesorUsuario); // Recarga la ficha con el mensaje de error
         }
         if ("dashboard".equals(origen)) {
             return "redirect:/profesor/" + profesor.getId() + "?asistencia=ok";
@@ -414,6 +424,33 @@ public class ProfesorController {
             asistenciaService.eliminarAsistenciaDeHoy(alumno);
         }
         return "redirect:/profesor/alumnos/" + id;
+    }
+
+    /** Guardar progreso del alumno (grupos trabajados + observaciones) para una fecha. Crea o actualiza el registro de asistencia. */
+    @PostMapping("/alumnos/{id}/progreso")
+    public String guardarProgreso(@PathVariable Long id,
+                                  @RequestParam("fecha") String fechaStr,
+                                  @RequestParam(value = "presente", defaultValue = "false") boolean presente,
+                                  @RequestParam(value = "grupoIds", required = false) List<Long> grupoIds,
+                                  @RequestParam(value = "observaciones", required = false) String observaciones,
+                                  @AuthenticationPrincipal Usuario usuarioActual) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (alumno == null || profesor == null) {
+            return "redirect:/login?error=true";
+        }
+        if (alumno.getProfesor() == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
+            return "redirect:/profesor/" + profesor.getId();
+        }
+        java.time.LocalDate fecha;
+        try {
+            fecha = java.time.LocalDate.parse(fechaStr);
+        } catch (Exception e) {
+            fecha = java.time.LocalDate.now();
+        }
+        java.util.Set<com.mattfuncional.entidades.GrupoMuscular> grupos = grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of());
+        asistenciaService.guardarOActualizarProgreso(alumno, fecha, presente, observaciones, grupos);
+        return "redirect:/profesor/alumnos/" + id + "?progreso=ok";
     }
 
     // Agregar nueva medición física

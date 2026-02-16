@@ -100,6 +100,13 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 - **Hoja de rutina pública:** acceso sin login a `/rutinas/hoja/**` en SecurityConfig (`permitAll`), para que el enlace compartido (p. ej. desde celular con IP local) abra la rutina sin pedir logueo.
 - **Ficha alumno (seed):** carga con horarios de asistencia para que alumnos cargados por script muestren la ficha completa; ver [CHANGELOG_EJERCICIOS_Y_HOJA_PUBLICA_FEB2026.md](CHANGELOG_EJERCICIOS_Y_HOJA_PUBLICA_FEB2026.md).
 
+### 2.10 Modal de progreso unificado (Feb 2026)
+
+- **Checkbox presente:** En el modal de progreso se usa `asistenciaHoy.isPresente()` para que quede tildado cuando ya hay registro de presente ese día.
+- **Grupos musculares:** Select múltiple reemplazado por checkboxes para elegir varios; en historial se muestran separados por coma.
+- **Observaciones:** Columna ampliada a 2000 caracteres (script `scripts/alter_asistencia_observaciones.sql`); formularios con `maxlength="2000"`.
+- **Un solo flujo:** El botón "Progreso" en la tabla del panel redirige a la ficha del alumno con `?openModal=progreso`; el modal se abre allí con todos los datos. Eliminado el modal duplicado del dashboard. Ver [CHANGELOG_MODAL_PROGRESO_FEB2026.md](CHANGELOG_MODAL_PROGRESO_FEB2026.md).
+
 ---
 
 ## 3. Estado del plan general (según PLAN_MODIFICACIONES_MATTFUNCIONAL.md)
@@ -146,6 +153,12 @@ Este archivo resume **los cambios ya hechos** y **lo que falta** según ese plan
 
 1. **Commit actual:** Incluir cambios de ejercicios predeterminados + este documento y la documentación relacionada (ver sección 2.2).
 2. **Siguiente fase:** Seguir con Fase 1 (limpieza) o Fase 3 (series) según prioridad; el plan detallado está en [PLAN_MODIFICACIONES_MATTFUNCIONAL.md](PLAN_MODIFICACIONES_MATTFUNCIONAL.md).
+
+---
+
+## 5. Pendiente inmediato (próxima sesión)
+
+- **Ficha del detalle de alumno:** Modificar y mejorar la vista de detalle del alumno; hay margen para mejorar bastante (organización, legibilidad, accesos rápidos, historial y progreso más claros, etc.).
 
 ---
 

@@ -286,8 +286,6 @@
                                 <tr>
                                     <th>Nombre</th>
                                     <th>Edad</th>
-                                    <th>Sexo</th>
-                                    <th>Peso</th>
                                     <th>Celular</th>
                                     <th>Tipo</th>
                                     <th>Estado</th>
@@ -301,8 +299,6 @@
                                     th:attr="data-estado=${usuario.estadoAlumno},data-nombre=${usuario.nombre},data-tipo=${usuario.tipoAsistencia != null ? #strings.toString(usuario.tipoAsistencia) : ''}">
                                     <td th:text="${usuario.nombre}">Nombre</td>
                                     <td th:text="${usuario.edad}">Edad</td>
-                                    <td th:text="${usuario.sexo}">Sexo</td>
-                                    <td th:text="${usuario.peso} + ' kg'">Peso</td>
                                     <td th:text="${usuario.celular != null ? usuario.celular : '-'}">-</td>
                                     <td>
                                         <span th:if="${#strings.toString(usuario.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-primary">Presencial</span>
@@ -322,11 +318,8 @@
                                         <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="btn btn-primary btn-sm" title="Ver alumno">
                                             <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
-                                        <a th:href="@{/profesor/alumnos/editar/{id}(id=${usuario.id})}" class="btn btn-warning btn-sm" title="Editar alumno">
-                                            <i class="fa-solid fa-edit me-1"></i>Editar
-                                        </a>
-                                        <a th:href="@{/profesor/alumnos/eliminar/{id}(id=${usuario.id})}" class="btn btn-danger btn-sm" title="Eliminar alumno" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
-                                            <i class="fa-solid fa-trash"></i>
+                                        <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id}, openModal='progreso')}" class="btn btn-success btn-sm" title="Registrar progreso">
+                                            <i class="fa-solid fa-chart-line me-1"></i>Progreso
                                         </a>
                                         <a th:href="@{/profesor/asignar-rutina/{id}(id=${usuario.id})}"
                                            class="btn btn-info btn-sm"
@@ -608,6 +601,7 @@
         }
         cargarFiltros();
         aplicarFiltrosAlumnos();
+
     </script>
 </body>
 </html>

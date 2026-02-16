@@ -2,8 +2,11 @@ package com.mattfuncional.entidades;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "asistencia")
 public class Asistencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,10 +14,18 @@ public class Asistencia {
 
     private LocalDate fecha;
     private boolean presente;
+    @Column(length = 2000)
     private String observaciones;
 
     @ManyToOne
     private Usuario usuario;
+
+    /** Grupos musculares que trabajó el alumno ese día (seleccionados por el profesor). */
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "asistencia_grupos_trabajados",
+               joinColumns = @JoinColumn(name = "asistencia_id"),
+               inverseJoinColumns = @JoinColumn(name = "grupo_muscular_id"))
+    private Set<GrupoMuscular> gruposTrabajados = new HashSet<>();
 
     public Asistencia() {}
 
@@ -35,4 +46,6 @@ public class Asistencia {
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public Set<GrupoMuscular> getGruposTrabajados() { return gruposTrabajados; }
+    public void setGruposTrabajados(Set<GrupoMuscular> gruposTrabajados) { this.gruposTrabajados = gruposTrabajados != null ? gruposTrabajados : new HashSet<>(); }
 } 
