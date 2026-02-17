@@ -20,6 +20,7 @@ public class SerieEjercicio {
     private Integer valor; // Cantidad de repeticiones o minutos
     private String unidad; // "reps" o "min"
     private Integer peso; // Peso en kilos, puede ser null si no requiere peso
+    private Integer orden = 0; // Posición del ejercicio dentro de la serie (para reordenar)
 
     // Constructores, Getters y Setters
 
@@ -72,5 +73,13 @@ public class SerieEjercicio {
 
     public void setPeso(Integer peso) {
         this.peso = peso;
+    }
+
+    public Integer getOrden() {
+        return orden != null ? orden : 0;
+    }
+
+    public void setOrden(Integer orden) {
+        this.orden = orden;
     }
 }

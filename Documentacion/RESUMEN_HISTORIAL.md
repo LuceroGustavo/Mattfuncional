@@ -40,6 +40,11 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 - Cuando el alumno está INACTIVO se desactivan: Progreso, tarjeta "Rutinas asignadas", botón "Asignar rutina", y en la tabla de rutinas los botones Ver, Copiar enlace y WhatsApp. Editar y Eliminar siguen activos.
 - Documento: `Documentacion/CHANGELOG_ALUMNO_INACTIVO_Y_BOTON_ASIGNAR_FEB2026.md`.
 
+### 2.6 Orden de series en rutinas y orden de ejercicios en series (Feb 2026)
+- **Rutinas:** En crear rutina, lista "Series seleccionadas" con Subir/Bajar para definir el orden; en editar rutina, Subir/Bajar en cada serie. El campo `Serie.orden` se persiste; la hoja de rutina y la edición muestran las series en ese orden.
+- **Series:** En crear/editar serie, tabla de ejercicios con Subir/Bajar por fila. Nuevo campo `SerieEjercicio.orden`; al guardar se asigna 0, 1, 2… según la posición. Ver serie y hoja de rutina muestran los ejercicios ordenados.
+- Documento: `Documentacion/CHANGELOG_ORDEN_SERIES_Y_EJERCICIOS_FEB2026.md`.
+
 ---
 
 ## 3. Decisiones de arquitectura que siguen vigentes

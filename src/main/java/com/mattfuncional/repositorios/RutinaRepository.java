@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
-    /** Carga la rutina con sus series para evitar LazyInitializationException al editar. */
+    /** Carga la rutina con sus series para evitar LazyInitializationException al editar. (El orden se aplica en el servicio.) */
     @Query("SELECT DISTINCT r FROM Rutina r LEFT JOIN FETCH r.series WHERE r.id = :id")
     Optional<Rutina> findByIdWithSeries(@Param("id") Long id);
 

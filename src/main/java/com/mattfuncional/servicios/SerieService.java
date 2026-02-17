@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,25 +50,22 @@ public class SerieService {
         nuevaSerie.setCreador("ADMIN");
         nuevaSerie.setRepeticionesSerie(serieDTO.getRepeticionesSerie());
 
-        // 3. Crear y asociar las entidades SerieEjercicio
+        // 3. Crear y asociar las entidades SerieEjercicio (con orden según posición en la lista)
         if (serieDTO.getEjercicios() != null) {
-            for (SerieDTO.EjercicioSerieDTO ejercicioDTO : serieDTO.getEjercicios()) {
-                // Buscar el ejercicio en la base de datos
+            for (int i = 0; i < serieDTO.getEjercicios().size(); i++) {
+                SerieDTO.EjercicioSerieDTO ejercicioDTO = serieDTO.getEjercicios().get(i);
                 Exercise ejercicio = exerciseRepository.findById(ejercicioDTO.getEjercicioId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "Ejercicio no encontrado con id: " + ejercicioDTO.getEjercicioId()));
 
-                // Crear el "renglón" que une Serie, Ejercicio y Repeticiones
                 SerieEjercicio serieEjercicio = new SerieEjercicio();
                 serieEjercicio.setSerie(nuevaSerie);
                 serieEjercicio.setExercise(ejercicio);
-                // Asignar valor y unidad por defecto si vienen nulos
                 serieEjercicio.setValor(ejercicioDTO.getValor() != null ? ejercicioDTO.getValor() : 1);
                 serieEjercicio.setUnidad(ejercicioDTO.getUnidad() != null ? ejercicioDTO.getUnidad() : "reps");
-                // Asignar peso si viene, sino null
                 serieEjercicio.setPeso(ejercicioDTO.getPeso());
+                serieEjercicio.setOrden(i);
 
-                // Añadir el renglón a la lista de la serie
                 nuevaSerie.getSerieEjercicios().add(serieEjercicio);
             }
         }
@@ -87,10 +85,14 @@ public class SerieService {
                 .orElseThrow(() -> new ResourceNotFoundException("Serie no encontrada con id: " + id));
     }
 
-    /** Obtiene una serie con sus ejercicios cargados (para edición en formulario). */
+    /** Obtiene una serie con sus ejercicios cargados y ordenados por orden (para edición en formulario). */
     public Serie obtenerSeriePorIdConEjercicios(Long id) {
-        return serieRepository.findByIdWithSerieEjercicios(id)
+        Serie serie = serieRepository.findByIdWithSerieEjercicios(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Serie no encontrada con id: " + id));
+        if (serie.getSerieEjercicios() != null) {
+            serie.getSerieEjercicios().sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+        }
+        return serie;
     }
 
     // Buscar series por profesor
@@ -114,7 +116,7 @@ public class SerieService {
     }
 
     @Transactional
-    public Serie copiarSerieParaNuevaRutina(Serie serieOriginal, Rutina nuevaRutina) {
+    public Serie copiarSerieParaNuevaRutina(Serie serieOriginal, Rutina nuevaRutina, int orden) {
         Serie nuevaSerie = new Serie();
         nuevaSerie.setNombre(serieOriginal.getNombre());
         nuevaSerie.setDescripcion(serieOriginal.getDescripcion());
@@ -124,19 +126,24 @@ public class SerieService {
         nuevaSerie.setCreador(serieOriginal.getCreador());
         nuevaSerie.setRepeticionesSerie(serieOriginal.getRepeticionesSerie()); // Copiar repeticiones
         nuevaSerie.setPlantillaId(serieOriginal.getId()); // Guardar referencia a la plantilla original
+        nuevaSerie.setOrden(orden);
 
         // Guardamos la nueva serie para obtener un ID
         Serie serieGuardada = serieRepository.save(nuevaSerie);
 
-        // Copiamos las relaciones SerieEjercicio
+        // Copiamos las relaciones SerieEjercicio (conservando orden)
         List<SerieEjercicio> nuevosSerieEjercicios = new ArrayList<>();
-        for (SerieEjercicio seOriginal : serieOriginal.getSerieEjercicios()) {
+        List<SerieEjercicio> originalOrdenados = new ArrayList<>(serieOriginal.getSerieEjercicios());
+        originalOrdenados.sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+        for (int i = 0; i < originalOrdenados.size(); i++) {
+            SerieEjercicio seOriginal = originalOrdenados.get(i);
             SerieEjercicio nuevoSe = new SerieEjercicio();
             nuevoSe.setSerie(serieGuardada);
             nuevoSe.setExercise(seOriginal.getExercise());
             nuevoSe.setValor(seOriginal.getValor());
             nuevoSe.setUnidad(seOriginal.getUnidad());
             nuevoSe.setPeso(seOriginal.getPeso());
+            nuevoSe.setOrden(i);
             nuevosSerieEjercicios.add(serieEjercicioRepository.save(nuevoSe));
         }
 
@@ -156,7 +163,9 @@ public class SerieService {
             dto.setProfesorId(serie.getProfesor().getId());
         }
 
-        List<SerieDTO.EjercicioSerieDTO> ejerciciosDTO = serie.getSerieEjercicios().stream()
+        List<SerieEjercicio> ordenados = new ArrayList<>(serie.getSerieEjercicios());
+        ordenados.sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+        List<SerieDTO.EjercicioSerieDTO> ejerciciosDTO = ordenados.stream()
                 .map(se -> {
                     SerieDTO.EjercicioSerieDTO ejDTO = new SerieDTO.EjercicioSerieDTO();
                     ejDTO.setEjercicioId(se.getExercise().getId());
@@ -186,9 +195,10 @@ public class SerieService {
         serieEjercicioRepository.deleteBySerieId(serieId);
         serie.getSerieEjercicios().clear(); // Limpiar la colección en la entidad
 
-        // 4. Crear y asociar las nuevas entidades SerieEjercicio
+        // 4. Crear y asociar las nuevas entidades SerieEjercicio (con orden según posición)
         if (serieDTO.getEjercicios() != null) {
-            for (SerieDTO.EjercicioSerieDTO ejercicioDTO : serieDTO.getEjercicios()) {
+            for (int i = 0; i < serieDTO.getEjercicios().size(); i++) {
+                SerieDTO.EjercicioSerieDTO ejercicioDTO = serieDTO.getEjercicios().get(i);
                 Exercise ejercicio = exerciseRepository.findById(ejercicioDTO.getEjercicioId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "Ejercicio no encontrado con id: " + ejercicioDTO.getEjercicioId()));
@@ -196,10 +206,10 @@ public class SerieService {
                 SerieEjercicio serieEjercicio = new SerieEjercicio();
                 serieEjercicio.setSerie(serie);
                 serieEjercicio.setExercise(ejercicio);
-                // Asignar valor y unidad por defecto si vienen nulos
                 serieEjercicio.setValor(ejercicioDTO.getValor() != null ? ejercicioDTO.getValor() : 1);
                 serieEjercicio.setUnidad(ejercicioDTO.getUnidad() != null ? ejercicioDTO.getUnidad() : "reps");
                 serieEjercicio.setPeso(ejercicioDTO.getPeso());
+                serieEjercicio.setOrden(i);
 
                 serie.getSerieEjercicios().add(serieEjercicio);
             }

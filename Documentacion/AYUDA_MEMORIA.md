@@ -9,7 +9,7 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
 ### Creación de rutina – Orden de las series
 
 - **Qué falta:** En la creación/edición de rutina, poder **cambiar el orden** de las series (reordenar). Es decir, que el usuario pueda definir en qué posición aparece cada serie dentro de la rutina (subir/bajar, arrastrar y soltar, etc.) y que ese orden se guarde y se refleje al ver la rutina.
-- **Estado:** Por implementar.
+- **Estado:** **Implementado.** En crear rutina: lista "Series seleccionadas" con botones Subir/Bajar para reordenar antes de guardar. En editar rutina: botones Subir/Bajar en cada serie. El campo `orden` en `Serie` se persiste; la hoja de rutina y la vista al editar muestran las series en ese orden.
 
 ### Calendario semanal – Dar presente / falta desde el calendario
 

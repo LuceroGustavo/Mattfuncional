@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.security.SecureRandom;
 
@@ -75,7 +76,7 @@ public class RutinaService {
         return rutina;
     }
 
-    /** Obtiene una rutina con sus series cargadas (para el formulario de edición). */
+    /** Obtiene una rutina con sus series cargadas y ordenadas por orden (para el formulario de edición). */
     public Rutina obtenerRutinaPorIdConSeries(Long id) {
         Rutina rutina = rutinaRepository.findByIdWithSeries(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
@@ -83,12 +84,24 @@ public class RutinaService {
             rutina.setTokenPublico(generarTokenUnico());
             rutina = rutinaRepository.save(rutina);
         }
+        if (rutina.getSeries() != null) {
+            rutina.getSeries().sort(Comparator.comparingInt(Serie::getOrden));
+        }
         return rutina;
     }
 
     public Rutina obtenerRutinaPorToken(String tokenPublico) {
-        return rutinaRepository.findByTokenPublico(tokenPublico)
+        Rutina rutina = rutinaRepository.findByTokenPublico(tokenPublico)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con token: " + tokenPublico));
+        if (rutina.getSeries() != null) {
+            rutina.getSeries().sort(Comparator.comparingInt(Serie::getOrden));
+            for (Serie s : rutina.getSeries()) {
+                if (s.getSerieEjercicios() != null) {
+                    s.getSerieEjercicios().sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+                }
+            }
+        }
+        return rutina;
     }
 
     // Obtener rutinas por usuario
@@ -217,11 +230,11 @@ public class RutinaService {
 
         Rutina rutinaGuardada = rutinaRepository.save(nuevaRutina);
 
-        // Copiar las series de la plantilla a la nueva rutina usando el nuevo método
-        // del servicio
+        // Copiar las series de la plantilla a la nueva rutina en orden
         if (rutinaPlantilla.getSeries() != null) {
-            for (Serie seriePlantilla : rutinaPlantilla.getSeries()) {
-                serieService.copiarSerieParaNuevaRutina(seriePlantilla, rutinaGuardada);
+            List<Serie> seriesOrdenadas = serieRepository.findByRutinaIdOrderByOrdenAsc(rutinaPlantilla.getId());
+            for (int i = 0; i < seriesOrdenadas.size(); i++) {
+                serieService.copiarSerieParaNuevaRutina(seriesOrdenadas.get(i), rutinaGuardada, i);
             }
         }
 
@@ -328,6 +341,7 @@ public class RutinaService {
         Serie seriePlantilla = serieService.obtenerSeriePorId(seriePlantillaId);
 
         // Crear una copia de la serie plantilla para la rutina
+        int orden = (int) serieRepository.countByRutinaId(rutinaId);
         Serie nuevaSerie = new Serie();
         nuevaSerie.setNombre(seriePlantilla.getNombre());
         nuevaSerie.setDescripcion(seriePlantilla.getDescripcion());
@@ -337,6 +351,7 @@ public class RutinaService {
         nuevaSerie.setRepeticionesSerie(repeticiones);
         nuevaSerie.setCreador(seriePlantilla.getCreador());
         nuevaSerie.setPlantillaId(seriePlantilla.getId()); // Guardar referencia a la plantilla original
+        nuevaSerie.setOrden(orden);
 
         // Guardar la nueva serie
         Serie serieGuardada = serieRepository.save(nuevaSerie);

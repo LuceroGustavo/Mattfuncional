@@ -137,7 +137,7 @@ public class SerieController {
     @GetMapping("/ver/{id}")
     public String verSerie(@PathVariable Long id, Model model,
             @AuthenticationPrincipal Usuario profesorUsuario) {
-        Serie serie = serieService.obtenerSeriePorId(id);
+        Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
         boolean esPropietario = profesorUsuario != null
                 && profesorUsuario.getProfesor() != null
                 && serie.getProfesor() != null

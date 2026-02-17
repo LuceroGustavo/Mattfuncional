@@ -261,6 +261,7 @@
                     </div>
                     <div class="col-md-6">
                         <h6 class="fw-bold">Ejercicios en esta Serie</h6>
+                        <p class="small text-muted mb-2">Usá las flechas para cambiar el orden de los ejercicios.</p>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -268,7 +269,7 @@
                                         <th style="width: 120px;">Cantidad</th>
                                         <th style="width: 150px;">Unidad</th>
                                         <th style="width: 120px;">Peso (kg)</th>
-                                        <th style="width: 80px;">Acción</th>
+                                        <th style="width: 140px;">Orden / Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-ejercicios-serie">
@@ -370,8 +371,14 @@
                                 <label class="form-check-label">No requiere peso</label>
                             </div>
                         </td>
-                        <td><button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button></td>
-                    `;
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
+                                                <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
+                                                <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
+                                            </div>
+                                        </td>
+                                    `;
                     actualizarVistaTabla();
                 });
             });
@@ -451,7 +458,13 @@
                                     <label class="form-check-label">No requiere peso</label>
                                 </div>
                             </td>
-                            <td><button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
+                                    <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
                         `;
                     }
                 });
@@ -494,13 +507,39 @@
                         <label class="form-check-label">No requiere peso</label>
                     </div>
                 </td>
-                <td><button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button></td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
+                        <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
+                        <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
             `;
 
             actualizarVistaTabla();
         });
 
         tablaEjerciciosSerie.addEventListener('click', function(e) {
+            const subirBtn = e.target.closest('.btn-subir-ejercicio');
+            const bajarBtn = e.target.closest('.btn-bajar-ejercicio');
+            if (subirBtn) {
+                e.preventDefault();
+                const fila = subirBtn.closest('tr');
+                const prev = fila.previousElementSibling;
+                if (prev && prev.tagName === 'TR') {
+                    tablaEjerciciosSerie.insertBefore(fila, prev);
+                }
+                return;
+            }
+            if (bajarBtn) {
+                e.preventDefault();
+                const fila = bajarBtn.closest('tr');
+                const next = fila.nextElementSibling;
+                if (next && next.tagName === 'TR') {
+                    tablaEjerciciosSerie.insertBefore(next, fila);
+                }
+                return;
+            }
             const eliminarBtn = e.target.closest('.eliminar-btn');
             if (eliminarBtn) {
                 const fila = eliminarBtn.closest('tr');
