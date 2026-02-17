@@ -4,6 +4,7 @@ import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.enums.DiaSemana;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,8 @@ public class CalendarioSemanalDTO {
         private int capacidadActual;
         private int capacidadMaxima;
         private boolean disponible;
+        /** Presente por usuario (id -> true/false). null = pendiente. Se rellena en el controlador según la fecha del día. */
+        private Map<Long, Boolean> presentePorUsuarioId = new HashMap<>();
 
         public SlotHorarioDTO() {
         }
@@ -82,6 +85,11 @@ public class CalendarioSemanalDTO {
             this.usuariosAsignados = new java.util.ArrayList<>();
             this.capacidadActual = 0;
             this.disponible = true;
+        }
+
+        public Map<Long, Boolean> getPresentePorUsuarioId() { return presentePorUsuarioId; }
+        public void setPresentePorUsuarioId(Map<Long, Boolean> presentePorUsuarioId) {
+            this.presentePorUsuarioId = presentePorUsuarioId != null ? presentePorUsuarioId : new HashMap<>();
         }
 
         public LocalTime getHoraInicio() {

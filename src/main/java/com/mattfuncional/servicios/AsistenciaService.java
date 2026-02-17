@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -60,5 +62,37 @@ public class AsistenciaService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Registra ausente para (usuario, fecha) solo si aún no existe ningún registro.
+     * No sobrescribe registros existentes (presente o ausente).
+     */
+    @Transactional
+    public void registrarAusenteSiNoExiste(Usuario usuario, LocalDate fecha) {
+        List<Asistencia> existentes = asistenciaRepository.findByUsuarioAndFecha(usuario, fecha);
+        if (existentes == null || existentes.isEmpty()) {
+            Asistencia a = new Asistencia(fecha, false, null, usuario);
+            asistenciaRepository.save(a);
+        }
+    }
+
+    /**
+     * Devuelve un mapa clave "usuarioId_fecha" (ej. "5_2026-02-17") -> presente (true/false)
+     * para todas las asistencias en el rango [inicio, fin]. Útil para pintar el calendario.
+     * Usa query con JOIN FETCH de usuario para que el mapa se construya correctamente al volver a entrar.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Boolean> getMapaPresentePorUsuarioYFecha(LocalDate inicio, LocalDate fin) {
+        List<Asistencia> list = asistenciaRepository.findByFechaBetweenWithUsuario(inicio, fin);
+        Map<String, Boolean> out = new HashMap<>();
+        if (list != null) {
+            for (Asistencia a : list) {
+                if (a.getUsuario() != null && a.getUsuario().getId() != null && a.getFecha() != null) {
+                    out.put(String.valueOf(a.getUsuario().getId()) + "_" + a.getFecha().toString(), a.isPresente());
+                }
+            }
+        }
+        return out;
     }
 } 

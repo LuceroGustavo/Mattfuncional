@@ -2,10 +2,13 @@ package com.mattfuncional.controladores;
 
 import com.mattfuncional.dto.CalendarioSemanalDTO;
 import com.mattfuncional.servicios.CalendarioService;
+import com.mattfuncional.servicios.AsistenciaService;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.servicios.ProfesorService;
+import com.mattfuncional.servicios.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +26,12 @@ public class CalendarioController {
 
     @Autowired
     private ProfesorService profesorService;
+
+    @Autowired
+    private AsistenciaService asistenciaService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     // @GetMapping("/semanal")
     // public String calendarioSemanal(@RequestParam(required = false) String fecha,
@@ -54,6 +63,9 @@ public class CalendarioController {
         LocalDate fechaCalendario = fecha != null ? LocalDate.parse(fecha) : LocalDate.now();
 
         CalendarioSemanalDTO calendario = calendarioService.generarCalendarioSemanal(fechaCalendario, profesorId);
+        calendarioService.registrarAusentesParaSlotsPasados(calendario);
+        Map<String, Boolean> asistenciaMap = asistenciaService.getMapaPresentePorUsuarioYFecha(
+                calendario.getFechaInicioSemana(), calendario.getFechaFinSemana());
         Map<String, Object> estadisticas = calendarioService.obtenerEstadisticasSemana(fechaCalendario, profesorId);
 
         Profesor profesor = profesorService.getProfesorById(profesorId);
@@ -79,6 +91,24 @@ public class CalendarioController {
             if (slotsList.size() > totalFilas)
                 totalFilas = slotsList.size();
         }
+        // Rellenar presente/ausente por slot (para que la vista muestre verde/rojo/gris sin depender del mapa)
+        LocalDate inicioSemana = calendario.getFechaInicioSemana();
+        for (int diaIdx = 0; diaIdx < slotsPorDiaList.size(); diaIdx++) {
+            java.time.LocalDate fechaDia = inicioSemana.plusDays(diaIdx);
+            java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO> slotsDelDia = slotsPorDiaList.get(diaIdx);
+            if (slotsDelDia == null) continue;
+            for (com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO slot : slotsDelDia) {
+                if (slot == null || slot.getUsuariosAsignados() == null) continue;
+                for (Usuario u : slot.getUsuariosAsignados()) {
+                    if (u != null && u.getId() != null) {
+                        String clave = String.valueOf(u.getId()) + "_" + fechaDia.toString();
+                        Boolean presente = asistenciaMap != null ? asistenciaMap.get(clave) : null;
+                        slot.getPresentePorUsuarioId().put(u.getId(), presente);
+                    }
+                }
+            }
+        }
+
         model.addAttribute("slotsPorDiaList", slotsPorDiaList);
         model.addAttribute("totalFilas", totalFilas);
 
@@ -126,6 +156,21 @@ public class CalendarioController {
                 java.time.LocalTime.parse(horaFin));
 
         return java.util.Map.of("disponible", disponible);
+    }
+
+    @PostMapping("/api/marcar-asistencia")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> marcarAsistencia(
+            @RequestParam Long usuarioId,
+            @RequestParam String fecha,
+            @RequestParam boolean presente) {
+        Usuario alumno = usuarioService.getUsuarioById(usuarioId);
+        if (alumno == null) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("ok", false, "error", "Usuario no encontrado"));
+        }
+        LocalDate fechaDate = LocalDate.parse(fecha);
+        asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presente, null, null);
+        return ResponseEntity.ok(java.util.Map.of("ok", true, "presente", presente));
     }
 
     @PostMapping("/actualizar-capacidad-maxima")

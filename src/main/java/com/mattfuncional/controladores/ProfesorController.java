@@ -99,22 +99,32 @@ public class ProfesorController {
         }
 
         List<Usuario> usuarios = usuarioService.getAlumnosByProfesorId(profesor.getId());
-        java.util.Map<Long, Boolean> asistenciaHoy = new java.util.HashMap<>();
         java.time.LocalDate hoy = java.time.LocalDate.now();
+        java.time.DayOfWeek dayOfWeekHoy = hoy.getDayOfWeek();
+        com.mattfuncional.enums.DiaSemana diaHoy = com.mattfuncional.enums.DiaSemana.values()[dayOfWeekHoy.getValue() - 1];
+        java.util.Map<Long, String> estadoAsistenciaHoy = new java.util.HashMap<>();
         for (Usuario usuario : usuarios) {
-            if (usuario != null && usuario.getTipoAsistencia() == com.mattfuncional.enums.TipoAsistencia.PRESENCIAL) {
-                java.util.List<Asistencia> asistencias = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(usuario, hoy);
-                boolean presenteHoy = asistencias != null && !asistencias.isEmpty();
-                asistenciaHoy.put(usuario.getId(), presenteHoy);
+            if (usuario == null || usuario.getTipoAsistencia() != com.mattfuncional.enums.TipoAsistencia.PRESENCIAL) continue;
+            if (usuario.getDiasHorariosAsistencia() == null || usuario.getDiasHorariosAsistencia().stream()
+                    .noneMatch(dh -> dh != null && dh.getDia() == diaHoy)) continue;
+            java.util.List<Asistencia> asistencias = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(usuario, hoy);
+            String estado;
+            if (asistencias == null || asistencias.isEmpty()) {
+                estado = "PENDIENTE";
+            } else {
+                estado = asistencias.get(0).isPresente() ? "PRESENTE" : "AUSENTE";
             }
+            estadoAsistenciaHoy.put(usuario.getId(), estado);
         }
+        String fechaHoyFormateada = hoy.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         List<com.mattfuncional.entidades.Rutina> rutinas = rutinaService.obtenerRutinasPlantillaPorProfesor(profesor.getId());
         List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinaService
                 .obtenerRutinasAsignadasPorProfesor(profesor.getId());
         List<Serie> series = serieService.obtenerSeriesPlantillaPorProfesor(profesor.getId());
 
         model.addAttribute("usuarios", usuarios);
-        model.addAttribute("asistenciaHoy", asistenciaHoy);
+        model.addAttribute("estadoAsistenciaHoy", estadoAsistenciaHoy);
+        model.addAttribute("fechaHoyFormateada", fechaHoyFormateada);
         model.addAttribute("rutinas", rutinas);
         model.addAttribute("rutinasAsignadas", rutinasAsignadas);
         model.addAttribute("series", series);

@@ -24,6 +24,9 @@ public class CalendarioService {
     @Autowired
     private SlotConfigService slotConfigService;
 
+    @Autowired
+    private AsistenciaService asistenciaService;
+
     private static final int CAPACIDAD_MAXIMA_POR_SLOT = 10; // Configurable
     private static final LocalTime HORA_INICIO = LocalTime.of(6, 0);
     private static final LocalTime HORA_FIN = LocalTime.of(21, 0);
@@ -225,5 +228,40 @@ public class CalendarioService {
 
     public SlotConfigService getSlotConfigService() {
         return slotConfigService;
+    }
+
+    /**
+     * Para la semana del calendario, marca como ausentes a los alumnos que tenían slot
+     * en un (día, hora) ya pasado y aún no tienen registro de asistencia. Solo crea
+     * registros cuando no existe ninguno (no sobrescribe presente/ausente ya guardado).
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public void registrarAusentesParaSlotsPasados(CalendarioSemanalDTO calendario) {
+        if (calendario == null || calendario.getSlotsPorDia() == null) return;
+        LocalDate hoy = LocalDate.now();
+        LocalTime ahora = LocalTime.now();
+        LocalDate inicio = calendario.getFechaInicioSemana();
+        LocalDate fin = calendario.getFechaFinSemana();
+
+        for (Map.Entry<DiaSemana, List<CalendarioSemanalDTO.SlotHorarioDTO>> entry : calendario.getSlotsPorDia().entrySet()) {
+            DiaSemana dia = entry.getKey();
+            List<CalendarioSemanalDTO.SlotHorarioDTO> slots = entry.getValue();
+            if (slots == null) continue;
+            LocalDate fechaDia = inicio.plusDays(dia.ordinal());
+            if (fechaDia.isAfter(fin)) continue;
+
+            for (CalendarioSemanalDTO.SlotHorarioDTO slot : slots) {
+                if (slot == null || slot.getUsuariosAsignados() == null) continue;
+                boolean slotYaPasado = fechaDia.isBefore(hoy)
+                        || (fechaDia.equals(hoy) && slot.getHoraInicio() != null && !slot.getHoraInicio().isAfter(ahora));
+                if (!slotYaPasado) continue;
+
+                for (Usuario usuario : slot.getUsuariosAsignados()) {
+                    if (usuario != null && usuario.getId() != null) {
+                        asistenciaService.registrarAusenteSiNoExiste(usuario, fechaDia);
+                    }
+                }
+            }
+        }
     }
 }

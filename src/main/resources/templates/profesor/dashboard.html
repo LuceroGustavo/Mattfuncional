@@ -340,7 +340,7 @@
                                     <th>Estado</th>
                                     <th>Rutinas</th>
                                     <th>Acciones</th>
-                                    <th>Presente</th>
+                                    <th>Presente <span th:if="${fechaHoyFormateada != null}" th:text="'(' + ${fechaHoyFormateada} + ')'" class="fw-normal text-muted small">(fecha)</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -384,22 +384,18 @@
                                         </div>
                                     </td>
                                     <td class="text-start">
-                                        <form th:if="${#strings.toString(usuario.tipoAsistencia) == 'PRESENCIAL'}"
-                                              th:action="@{'/profesor/alumnos/' + ${usuario.id} + '/asistencia'}" method="post" class="d-inline">
-                                            <input type="hidden" name="presente" value="true">
-                                            <input type="hidden" name="observaciones" value="">
-                                            <input type="hidden" name="origen" value="dashboard">
-                                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                            <button type="submit"
-                                                    class="btn btn-sm"
-                                                    th:classappend="${asistenciaHoy != null and asistenciaHoy[usuario.id]} ? 'btn-success' : 'btn-outline-success'"
-                                                    th:disabled="${usuario.estadoAlumno == 'INACTIVO'}"
-                                                    th:attr="aria-disabled=${usuario.estadoAlumno == 'INACTIVO'}"
-                                                    th:title="${usuario.estadoAlumno == 'INACTIVO'} ? 'Alumno inactivo' : 'Dar presente'">
-                                                <i class="fa-solid fa-check me-1"></i>
-                                                <span th:text="${asistenciaHoy != null and asistenciaHoy[usuario.id]} ? 'Presente' : 'Dar presente'">Dar presente</span>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                th:if="${estadoAsistenciaHoy != null and estadoAsistenciaHoy[usuario.id] != null}"
+                                                class="btn btn-sm btn-toggle-asistencia"
+                                                th:classappend="${estadoAsistenciaHoy[usuario.id] == 'PRESENTE' ? 'btn-success' : (estadoAsistenciaHoy[usuario.id] == 'AUSENTE' ? 'btn-outline-danger' : 'btn-secondary')}"
+                                                th:disabled="${usuario.estadoAlumno == 'INACTIVO'}"
+                                                th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(#temporals.createNow().toLocalDate(), 'yyyy-MM-dd')}, data-presente=${estadoAsistenciaHoy[usuario.id] == 'PRESENTE'}, data-estado=${estadoAsistenciaHoy[usuario.id]}, aria-disabled=${usuario.estadoAlumno == 'INACTIVO'}, title=${usuario.estadoAlumno == 'INACTIVO' ? 'Alumno inactivo' : 'Clic para cambiar presente/ausente'}"
+                                                aria-label="Cambiar estado de asistencia">
+                                            <i class="fa-solid fa-check me-1" th:if="${estadoAsistenciaHoy[usuario.id] == 'PRESENTE'}"></i>
+                                            <i class="fa-solid fa-times me-1" th:if="${estadoAsistenciaHoy[usuario.id] == 'AUSENTE'}"></i>
+                                            <i class="fa-solid fa-minus me-1" th:if="${estadoAsistenciaHoy[usuario.id] == 'PENDIENTE'}"></i>
+                                            <span th:text="${estadoAsistenciaHoy[usuario.id] == 'PRESENTE' ? 'Presente' : (estadoAsistenciaHoy[usuario.id] == 'AUSENTE' ? 'Ausente' : 'Pendiente')}">Pendiente</span>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -543,6 +539,7 @@
     
     <script th:inline="javascript">
         const profesorId = [[${profesor != null ? profesor.id : 0}]];
+        const urlMarcarAsistencia = /*[[@{/calendario/api/marcar-asistencia}]]*/ '/calendario/api/marcar-asistencia';
     </script>
     <script>
         // Activar la pestaña indicada en la URL (?tab=series | rutinas | asignaciones)
@@ -651,6 +648,39 @@
         cargarFiltros();
         aplicarFiltrosAlumnos();
 
+        // Toggle presente/ausente (mismo API que el calendario: se refleja en calendario y viceversa)
+        document.addEventListener('click', function(e) {
+            var btn = e.target && e.target.closest && e.target.closest('.btn-toggle-asistencia');
+            if (!btn || btn.disabled) return;
+            e.preventDefault();
+            var usuarioId = btn.getAttribute('data-usuario-id');
+            var fecha = btn.getAttribute('data-fecha');
+            if (!usuarioId || !fecha) return;
+            var presenteActual = btn.getAttribute('data-presente') === 'true';
+            var nuevoPresente = !presenteActual;
+            var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&presente=' + nuevoPresente;
+            fetch(typeof urlMarcarAsistencia !== 'undefined' ? urlMarcarAsistencia : '/calendario/api/marcar-asistencia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: params
+            }).then(function(r) {
+                if (!r.ok) throw new Error('Error ' + r.status);
+                return r.json();
+            }).then(function(data) {
+                if (data && data.ok === true) {
+                    var presente = !!data.presente;
+                    var estado = presente ? 'PRESENTE' : 'AUSENTE';
+                    btn.setAttribute('data-presente', presente);
+                    btn.setAttribute('data-estado', estado);
+                    btn.classList.remove('btn-success', 'btn-outline-success', 'btn-outline-danger', 'btn-danger', 'btn-secondary');
+                    btn.classList.add(presente ? 'btn-success' : 'btn-outline-danger');
+                    var icon = btn.querySelector('i.fa-solid');
+                    var span = btn.querySelector('span');
+                    if (icon) { icon.className = 'fa-solid me-1 ' + (presente ? 'fa-check' : 'fa-times'); }
+                    if (span) { span.textContent = presente ? 'Presente' : 'Ausente'; }
+                }
+            }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
+        });
     </script>
 </body>
 </html>
