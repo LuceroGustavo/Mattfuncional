@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
 <head>
     <meta charset="UTF-8">
-    <title>Ficha del Alumno - Panel del Profesor</title>
+    <title th:text="'Ficha de ' + ${alumno.nombre} + ' - Panel del Profesor'">Ficha del Alumno - Panel del Profesor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -185,9 +185,15 @@
             background: white;
             border-radius: 12px;
             padding: 1.5rem;
-            text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             border: 1px solid #f0f0f0;
+            min-height: 120px;
+        }
+        .stat-item:not(.stat-item-link) {
+            text-align: left;
+        }
+        .stat-item.stat-item-link {
+            text-align: center;
         }
         
         .stat-number {
@@ -201,6 +207,43 @@
             color: #7f8c8d;
             font-size: 0.9rem;
         }
+
+        .stat-item .stat-card-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .stat-item .stat-card-content {
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            min-height: 2.8rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .stat-item.stat-item-link {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .stat-item.stat-item-link:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        /* Estado debajo del título: botón un poco más grande */
+        .btn-estado-ficha {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        /* Patrón de colores igual que panel: alumnos=verde pastel, series=violeta, rutinas=amarillo, asignaciones=celeste */
+        .stat-item.stat-card-alumno { background: linear-gradient(135deg, #e8f5e9 60%, #b2dfdb 100%); border-color: #a5d6a7; }
+        .stat-item.stat-card-asistencia { background: linear-gradient(135deg, #e3f2fd 60%, #b3e5fc 100%); border-color: #81d4fa; }
+        .stat-item.stat-card-trabajo { background: linear-gradient(135deg, #ede7f6 60%, #b39ddb 100%); border-color: #b39ddb; }
+        .stat-item.stat-card-rutinas { background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%); border-color: #ffd54f; }
         
         .nav-tabs .nav-link {
             border: none;
@@ -231,6 +274,12 @@
              z-index: 1;
              box-shadow: 0 1px 0 #dee2e6;
         }
+        /* Acciones deshabilitadas cuando alumno inactivo */
+        .btn-disabled-inactivo, .stat-item-link-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -238,7 +287,7 @@
 <!-- Navbar fragment estándar -->
 <div th:replace="fragments/navbar :: navbar"></div>
 
-<div class="container-fluid">
+<div class="container-fluid" th:with="alumnoInactivo=${alumno.estadoAlumno == 'INACTIVO'}">
     <div class="main-container">
         <div th:if="${param.progreso != null && param.progreso[0] == 'ok'}" class="alert alert-success alert-dismissible fade show" role="alert">
             Progreso guardado correctamente.
@@ -250,7 +299,10 @@
                 <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
             </a>
             <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProgreso" title="Registrar qué trabajó este alumno (grupos musculares y observaciones)">
+                <button th:if="${!alumnoInactivo}" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProgreso" title="Registrar qué trabajó este alumno (grupos musculares y observaciones)">
+                    <i class="fas fa-chart-line me-2"></i>Progreso
+                </button>
+                <button th:if="${alumnoInactivo}" type="button" class="btn btn-success btn-disabled-inactivo" disabled title="Activa el alumno para registrar progreso">
                     <i class="fas fa-chart-line me-2"></i>Progreso
                 </button>
                 <a th:href="@{/profesor/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-warning" title="Editar alumno">
@@ -263,146 +315,94 @@
             </div>
         </div>
         
-        <!-- Título principal -->
-        <h1 class="hero-title">
-            <i class="fas fa-user me-3"></i>Ficha del Alumno
-        </h1>
-        <p class="hero-subtitle">Información detallada y seguimiento del progreso</p>
+        <!-- Título principal y estado centrados -->
+        <div class="text-center">
+            <h1 class="hero-title">
+                <i class="fas fa-user me-3"></i>Ficha de <span th:text="${alumno.nombre}">Nombre</span>
+            </h1>
+            <!-- Estado del alumno justo debajo del título, centrado -->
+            <p class="mb-2">
+                <span th:if="${alumno.estadoAlumno == 'ACTIVO'}" class="btn btn-success btn-estado-ficha px-4 py-2 rounded-pill shadow-sm"><i class="fas fa-check-circle me-2"></i>Activo/a</span>
+                <span th:if="${alumno.estadoAlumno == 'INACTIVO'}" class="btn btn-secondary btn-estado-ficha px-4 py-2 rounded-pill shadow-sm"><i class="fas fa-pause-circle me-2"></i>Inactivo/a</span>
+                <span th:if="${alumno.estadoAlumno == null}" class="btn btn-light btn-estado-ficha px-4 py-2 rounded-pill shadow-sm text-dark">-</span>
+            </p>
+        </div>
+        <p class="hero-subtitle mb-3 text-center">Información detallada y seguimiento del progreso</p>
 
-        <!-- Información del Alumno -->
+        <!-- Tarjetas de vista rápida (colores: alumno=verde, asistencia=celeste, trabajo=violeta, rutinas=amarillo) -->
+        <div class="stats-grid">
+            <!-- 1) Restricciones médicas (alumnos / salud → verde pastel) -->
+            <div class="stat-item stat-card-alumno">
+                <div class="stat-card-title"><i class="fas fa-heartbeat me-1"></i>Restricciones médicas</div>
+                <div class="stat-card-content" th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : 'Ninguna'}">Ninguna</div>
+            </div>
+            <!-- 2) Asistencia (horarios → celeste) -->
+            <div class="stat-item stat-card-asistencia">
+                <div class="stat-card-title"><i class="fas fa-calendar-alt me-1"></i>Asistencia</div>
+                <div class="stat-card-content">
+                    <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL' || #strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}">
+                        <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL'}">Presencial</span>
+                        <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}">Semipresencial</span>
+                        <span th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}">
+                            <br><span th:text="${#strings.listJoin(alumno.diasHorariosAsistencia.![dia], ', ')}">Lunes, Miércoles</span>
+                            <span th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}" th:text="${' ' + #temporals.format(alumno.diasHorariosAsistencia[0].horaEntrada, 'HH:mm') + ' hs'}"> 18:00 hs</span>
+                        </span>
+                    </span>
+                    <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'ONLINE' || #strings.toString(alumno.tipoAsistencia) == 'VIRTUAL'}">Virtual</span>
+                    <span th:if="${alumno.tipoAsistencia == null}">-</span>
+                </div>
+            </div>
+            <!-- 3) Último trabajo (series/ejercicios → violeta) -->
+            <div class="stat-item stat-card-trabajo">
+                <div class="stat-card-title"><i class="fas fa-dumbbell me-1"></i>Último trabajo</div>
+                <div class="stat-card-content">
+                    <th:block th:if="${historialAsistencia != null && !historialAsistencia.isEmpty()}" th:with="ultima=${historialAsistencia[0]}, obs=${historialAsistencia[0].observaciones != null && !historialAsistencia[0].observaciones.isEmpty() ? (#strings.length(historialAsistencia[0].observaciones) > 60 ? #strings.substring(historialAsistencia[0].observaciones, 0, 60) + '...' : historialAsistencia[0].observaciones) : '-'}">
+                        <span th:text="${#temporals.format(ultima.fecha, 'dd/MM/yyyy')}">-</span>
+                        <span th:if="${ultima.gruposTrabajados != null && !ultima.gruposTrabajados.isEmpty()}" th:text="${' · ' + #strings.listJoin(ultima.gruposTrabajados.![nombre], ', ')}">-</span>
+                        <br>
+                        <span class="text-muted small" th:title="${ultima.observaciones}" th:text="${obs}">-</span>
+                    </th:block>
+                    <span th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}" class="text-muted">Sin registros</span>
+                </div>
+            </div>
+            <!-- 4) Rutinas asignadas (rutinas → amarillo, clic → asignar; deshabilitado si inactivo) -->
+            <a th:if="${!alumnoInactivo}" th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="stat-item stat-item-link stat-card-rutinas text-decoration-none d-block">
+                <div class="stat-number" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
+                <div class="stat-label">Rutinas asignadas</div>
+                <small class="text-muted">Clic para asignar</small>
+            </a>
+            <div th:if="${alumnoInactivo}" class="stat-item stat-card-rutinas stat-item-link-disabled d-block">
+                <div class="stat-number" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
+                <div class="stat-label">Rutinas asignadas</div>
+                <small class="text-muted">Activa el alumno para asignar</small>
+            </div>
+        </div>
+
+        <!-- Datos personales del alumno (una sola tarjeta) -->
         <div class="alumno-info">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h4 class="mb-2">
+            <div class="row align-items-start">
+                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                    <h4 class="mb-3">
                         <i class="fas fa-user me-2"></i>
                         <span th:text="${alumno.nombre}">Nombre del Alumno</span>
                     </h4>
-                    <p class="mb-1">
-                        <strong>Edad:</strong> <span th:text="${alumno.edad}">Edad</span> años
-                    </p>
-                    <p class="mb-1">
-                        <strong>Sexo:</strong> <span th:text="${alumno.sexo}">Sexo</span>
-                    </p>
-                    <p class="mb-0">
-                        <strong>Email:</strong> <span th:text="${alumno.correo}">Email</span>
-                    </p>
-                    <p class="mb-0">
-                        <strong>Celular:</strong> <span th:text="${alumno.celular != null ? alumno.celular : '-'}">-</span>
-                    </p>
+                    <p class="mb-1"><strong>Edad:</strong> <span th:text="${alumno.edad}">Edad</span> años</p>
+                    <p class="mb-1"><strong>Sexo:</strong> <span th:text="${alumno.sexo}">Sexo</span></p>
+                    <p class="mb-1"><strong>Email:</strong> <span th:text="${alumno.correo}">Email</span></p>
+                    <p class="mb-0"><strong>Celular:</strong> <span th:text="${alumno.celular != null ? alumno.celular : '-'}">-</span></p>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="text-center">
-                        <div class="h2 text-primary mb-0" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</div>
-                        <small class="text-muted">Rutinas Activas</small>
-                    </div>
+                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                    <p class="mb-1"><strong>Fecha de Inicio:</strong> <span th:text="${alumno.fechaInicio != null ? #temporals.format(alumno.fechaInicio, 'dd/MM/yyyy') : '-'}">-</span></p>
+                    <p class="mb-0"><strong>Contacto de Emergencia:</strong> <span th:text="${alumno.contactoEmergenciaNombre != null ? alumno.contactoEmergenciaNombre + ' (' + alumno.contactoEmergenciaTelefono + ')' : '-'}">-</span></p>
+                </div>
+                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                    <p class="mb-1"><strong>Restricciones Médicas:</strong> <span th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : '-'}">-</span></p>
+                    <p class="mb-1"><strong>Historial de Estado:</strong></p>
+                    <p class="mb-1 small" th:text="${historialEstadoFormateado != null && !historialEstadoFormateado.isEmpty() ? historialEstadoFormateado : (alumno.historialEstado != null ? alumno.historialEstado : '-')}">-</p>
+                    <p class="mb-0"><strong>Objetivos:</strong> <span class="small" th:text="${alumno.objetivosPersonales != null && !alumno.objetivosPersonales.isEmpty() ? alumno.objetivosPersonales : '-'}">-</span></p>
                 </div>
             </div>
         </div>
-
-        <!-- Estadísticas rápidas -->
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number" th:text="${rutinasEnProceso != null ? rutinasEnProceso.size() : 0}">0</div>
-                <div class="stat-label">Rutinas en Proceso</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" th:text="${rutinasTerminadas != null ? rutinasTerminadas.size() : 0}">0</div>
-                <div class="stat-label">Rutinas Completadas</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" th:text="${historialAsistencia != null ? historialAsistencia.size() : 0}">0</div>
-                <div class="stat-label">Registros de Asistencia</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" th:text="${medicionesFisicas != null ? medicionesFisicas.size() : 0}">0</div>
-                <div class="stat-label">Mediciones Físicas</div>
-        </div>
-        </div>
-
-        <!-- Información Personal -->
-        <div class="info-card">
-            <div class="card-header">
-                <h5><i class="fas fa-id-card me-2"></i>Información Personal</h5>
-    </div>
-        <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="info-row">
-                            <span class="info-label">Tipo de Asistencia:</span>
-                            <span class="info-value">
-                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL'}" class="badge bg-success">Presencial</span>
-                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'ONLINE' or #strings.toString(alumno.tipoAsistencia) == 'VIRTUAL'}" class="badge bg-info">Virtual</span>
-                                <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}" class="badge bg-warning text-dark">Semipresencial</span>
-                                <span th:if="${alumno.tipoAsistencia == null}">-</span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Estado del Alumno:</span>
-                            <span class="info-value">
-                                <span th:if="${alumno.estadoAlumno == 'ACTIVO'}" class="badge bg-success">Activo</span>
-                                <span th:if="${alumno.estadoAlumno == 'INACTIVO'}" class="badge bg-secondary">Inactivo</span>
-                                <span th:if="${alumno.estadoAlumno == null}">-</span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Fecha de Alta:</span>
-                            <span class="info-value" th:text="${alumno.fechaAlta != null ? #temporals.format(alumno.fechaAlta, 'dd/MM/yyyy') : '-'}">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Fecha de Baja:</span>
-                            <span class="info-value" th:text="${alumno.fechaBaja != null ? #temporals.format(alumno.fechaBaja, 'dd/MM/yyyy') : '-'}">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Estado de Membresía:</span>
-                            <span class="info-value">
-                                <span th:if="${alumno.estadoMembresia == 'ACTIVA'}" class="badge bg-success">Activa</span>
-                                <span th:if="${alumno.estadoMembresia == 'VENCIDA'}" class="badge bg-danger">Vencida</span>
-                                <span th:if="${alumno.estadoMembresia == 'EN_PAUSA'}" class="badge bg-warning">En Pausa</span>
-                                <span th:if="${alumno.estadoMembresia == null}">-</span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Fecha de Inicio:</span>
-                            <span class="info-value" th:text="${alumno.fechaInicio != null ? #temporals.format(alumno.fechaInicio, 'dd/MM/yyyy') : '-'}">-</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-row">
-                            <span class="info-label">Contacto de Emergencia:</span>
-                            <span class="info-value" th:text="${alumno.contactoEmergenciaNombre != null ? alumno.contactoEmergenciaNombre + ' (' + alumno.contactoEmergenciaTelefono + ')' : '-'}">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Restricciones Médicas:</span>
-                            <span class="info-value" th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : '-'}">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Historial de Estado:</span>
-                            <span class="info-value">
-                                <pre class="mb-0" th:text="${historialEstadoFormateado != null && !historialEstadoFormateado.isEmpty() ? historialEstadoFormateado : (alumno.historialEstado != null ? alumno.historialEstado : '-')}">-</pre>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Objetivos Personales:</span>
-                            <span class="info-value" th:text="${alumno.objetivosPersonales != null && !alumno.objetivosPersonales.isEmpty() ? alumno.objetivosPersonales : '-'}">-</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Horarios de Asistencia -->
-                <div th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}" class="mt-3">
-                    <h6 class="text-primary mb-2"><i class="fas fa-clock me-2"></i>Horarios de Asistencia</h6>
-                    <div class="row">
-                        <div th:each="dh : ${alumno.diasHorariosAsistencia}" class="col-md-4 mb-2">
-                            <div class="badge bg-primary p-2">
-                                <i class="fas fa-calendar-day me-1"></i>
-                            <span th:text="${dh.dia}"></span>:
-                            <span th:text="${dh.horaEntrada}"></span> - <span th:text="${dh.horaSalida}"></span>
-            </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
 
         <!-- Historial de Asistencia -->
         <div class="info-card">
@@ -506,9 +506,10 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <span class="text-muted">Historial de rutinas asignadas</span>
-                    <a th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-success btn-sm">
+                    <a th:if="${!alumnoInactivo}" th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-success btn-sm">
                         <i class="fas fa-dumbbell me-1"></i>Asignar rutina
                     </a>
+                    <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled">Asignar rutina (activa al alumno)</span>
                 </div>
 
                 <div th:if="${rutinasAsignadas == null || rutinasAsignadas.isEmpty()}" class="text-center text-muted py-5">
@@ -538,18 +539,23 @@
                                     <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
                                 </td>
                                 <td class="d-flex gap-2">
-                                    <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                    <a th:if="${!alumnoInactivo}" th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
                                         <i class="fas fa-eye me-1"></i>Ver
                                     </a>
-                                    <button type="button"
+                                    <span th:if="${alumnoInactivo}" class="btn btn-info btn-sm btn-disabled-inactivo disabled"><i class="fas fa-eye me-1"></i>Ver</span>
+                                    <button th:if="${!alumnoInactivo}" type="button"
                                             class="btn btn-outline-dark btn-sm copiar-enlace-rutina"
                                             th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})}">
                                         <i class="fas fa-link me-1"></i>Copiar enlace
                                     </button>
-                                    <a href="#" class="btn btn-success btn-sm compartir-whatsapp" target="_blank" rel="noopener"
+                                    <button th:if="${alumnoInactivo}" type="button" class="btn btn-outline-dark btn-sm btn-disabled-inactivo disabled">
+                                        <i class="fas fa-link me-1"></i>Copiar enlace
+                                    </button>
+                                    <a th:if="${!alumnoInactivo}" href="#" class="btn btn-success btn-sm compartir-whatsapp" target="_blank" rel="noopener"
                                        th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-phone=${alumno.celular}">
                                         <i class="fab fa-whatsapp me-1"></i>WhatsApp
                                     </a>
+                                    <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled"><i class="fab fa-whatsapp me-1"></i>WhatsApp</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -566,13 +572,6 @@
             <div class="card-body">
                 <textarea class="form-control" rows="3" placeholder="Escribe notas privadas sobre el alumno... Solo visible para el profesor."></textarea>
     </div>
-    </div>
-    
-        <!-- Botones de Acción -->
-        <div class="d-flex gap-3 justify-content-center mt-4">
-            <a th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-chat" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <i class="fas fa-plus me-2"></i>Asignar Nueva Rutina
-        </a>
     </div>
      </div>
 </div>

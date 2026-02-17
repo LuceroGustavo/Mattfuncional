@@ -83,11 +83,7 @@ public class UsuarioService {
     @CacheEvict(value = "usuarios", allEntries = true)
     public Usuario crearAlumno(Usuario usuario) {
         usuario.setRol("ALUMNO");
-        String password = usuario.getPassword();
-        if (password == null || password.trim().isEmpty()) {
-            password = java.util.UUID.randomUUID().toString();
-        }
-        usuario.setPassword(passwordEncoder.encode(password));
+        // Alumnos no usan login: no se guarda contraseña (queda null en BD)
 
         if (usuario.getEstadoAlumno() == null || usuario.getEstadoAlumno().trim().isEmpty()) {
             usuario.setEstadoAlumno("ACTIVO");
@@ -118,7 +114,6 @@ public class UsuarioService {
 
         // Actualizar campos básicos
         usuarioExistente.setNombre(usuario.getNombre());
-        usuarioExistente.setApellido(usuario.getApellido());
         usuarioExistente.setEdad(usuario.getEdad());
         usuarioExistente.setSexo(usuario.getSexo());
         usuarioExistente.setPeso(usuario.getPeso());
@@ -126,6 +121,11 @@ public class UsuarioService {
         usuarioExistente.setTipoAsistencia(usuario.getTipoAsistencia());
         usuarioExistente.setDiasHorariosAsistencia(usuario.getDiasHorariosAsistencia());
         usuarioExistente.setCelular(usuario.getCelular());
+        usuarioExistente.setNotasProfesor(usuario.getNotasProfesor());
+        usuarioExistente.setObjetivosPersonales(usuario.getObjetivosPersonales());
+        usuarioExistente.setRestriccionesMedicas(usuario.getRestriccionesMedicas());
+        usuarioExistente.setContactoEmergenciaNombre(usuario.getContactoEmergenciaNombre());
+        usuarioExistente.setContactoEmergenciaTelefono(usuario.getContactoEmergenciaTelefono());
         if (usuarioExistente.getFechaAlta() == null) {
             usuarioExistente.setFechaAlta(java.time.LocalDate.now());
         }
@@ -271,8 +271,7 @@ public class UsuarioService {
     @CacheEvict(value = "usuarios", allEntries = true)
     public Usuario crearUsuarioParaProfesor(Profesor profesor, String password) {
         Usuario usuario = new Usuario();
-        usuario.setNombre(profesor.getNombre());
-        usuario.setApellido(profesor.getApellido());
+        usuario.setNombre(profesor.getNombre() + (profesor.getApellido() != null && !profesor.getApellido().isEmpty() ? " " + profesor.getApellido() : ""));
         usuario.setCorreo(profesor.getCorreo());
         usuario.setPassword(passwordEncoder.encode(password));
         usuario.setRol("ADMIN");

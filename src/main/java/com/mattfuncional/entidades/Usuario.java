@@ -34,8 +34,7 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre;
-    private String apellido;
+    private String nombre; // Nombre completo del alumno (un solo campo)
     private int edad;
     private String sexo;
     private double peso;
@@ -72,7 +71,6 @@ public class Usuario implements UserDetails {
     private String contactoEmergenciaNombre;
     private String contactoEmergenciaTelefono;
     private LocalDate fechaInicio;
-    private String estadoMembresia; // Ej: ACTIVA, VENCIDA, EN_PAUSA
     private String historialAsistencia; // (JSON o texto, para futuro)
     private String detalleAsistencia; // Detalle libre de asistencia (ej: "Martes y jueves de 18 a 19 hs", "Pase libre", etc)
 
@@ -117,14 +115,6 @@ public class Usuario implements UserDetails {
         this.nombre = nombre;
     }
 
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
     public int getEdad() {
         return edad;
     }
@@ -159,7 +149,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return password != null ? password : "";
     }
 
     @Override
@@ -333,14 +323,6 @@ public class Usuario implements UserDetails {
 
     public void setFechaInicio(LocalDate fechaInicio) {
         this.fechaInicio = fechaInicio;
-    }
-
-    public String getEstadoMembresia() {
-        return estadoMembresia;
-    }
-
-    public void setEstadoMembresia(String estadoMembresia) {
-        this.estadoMembresia = estadoMembresia;
     }
 
     public String getHistorialAsistencia() {

@@ -373,12 +373,6 @@ public class ProfesorController {
         if (profesor != null) {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         }
-        // Rutinas en proceso / terminadas para estadísticas
-        java.util.List<com.mattfuncional.entidades.Rutina> rutinasEnProceso = rutinaService.obtenerRutinasActivasPorUsuario(id);
-        java.util.List<com.mattfuncional.entidades.Rutina> rutinasTerminadas = rutinaService.obtenerRutinasCompletadasPorUsuario(id);
-        model.addAttribute("rutinasEnProceso", rutinasEnProceso != null ? rutinasEnProceso : java.util.Collections.emptyList());
-        model.addAttribute("rutinasTerminadas", rutinasTerminadas != null ? rutinasTerminadas : java.util.Collections.emptyList());
-
         return "profesor/alumno-detalle";
     }
 

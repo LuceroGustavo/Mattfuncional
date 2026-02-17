@@ -35,6 +35,11 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 - DataInitializer optimizado (solo corre cuando es necesario).
 - Perfiles: `application-dev.properties` y `application-railway.properties`.
 
+### 2.5 Detalle del alumno: alumno inactivo y limpieza (Feb 2026)
+- Eliminado el botón obsoleto "Asignar Nueva Rutina" al final de la ficha del alumno.
+- Cuando el alumno está INACTIVO se desactivan: Progreso, tarjeta "Rutinas asignadas", botón "Asignar rutina", y en la tabla de rutinas los botones Ver, Copiar enlace y WhatsApp. Editar y Eliminar siguen activos.
+- Documento: `Documentacion/CHANGELOG_ALUMNO_INACTIVO_Y_BOTON_ASIGNAR_FEB2026.md`.
+
 ---
 
 ## 3. Decisiones de arquitectura que siguen vigentes

@@ -36,7 +36,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findAllAlumnosWithProfesor();
 
     // Obtener todos los alumnos incluyendo los que no tienen profesor asignado
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'ALUMNO' ORDER BY u.nombre, u.apellido")
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.profesor WHERE u.rol = 'ALUMNO' ORDER BY u.nombre")
     List<Usuario> findAllAlumnosIncludingOrphans();
 
     // Obtener usuarios por profesor con todas las relaciones cargadas
