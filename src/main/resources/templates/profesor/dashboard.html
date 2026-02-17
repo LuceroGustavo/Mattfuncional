@@ -11,13 +11,14 @@
     <link rel="stylesheet" href="/style.css">
     <link href="/css/footer.css" rel="stylesheet">
     <style>
+        /* Paleta pastel – Panel del Profesor */
         body {
-            background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+            background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
             min-height: 100vh;
         }
         .navbar {
-            background: linear-gradient(90deg, #1976d2 0%, #7e57c2 100%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            background: linear-gradient(90deg, #90caf9 0%, #ce93d8 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         .dashboard-cards {
             gap: 2rem;
@@ -25,8 +26,8 @@
         .card-module {
             border: none;
             border-radius: 1.5rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            color: #333;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            color: #37474f;
             min-width: 180px;
             min-height: 160px;
             display: flex;
@@ -37,26 +38,26 @@
         }
         .card-module:hover {
             transform: translateY(-6px) scale(1.03);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        .card-alumnos { background: linear-gradient(135deg, #e8f5e9 60%, #b2dfdb 100%); }
-        .card-series { background: linear-gradient(135deg, #ede7f6 60%, #b39ddb 100%); }
-        .card-rutinas { background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%); }
-        .card-asignadas { background: linear-gradient(135deg, #e3f2fd 60%, #b3e5fc 100%); }
+        .card-alumnos { background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); }
+        .card-series { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
+        .card-rutinas { background: linear-gradient(135deg, #fff9c4 60%, #ffe082 100%); }
+        .card-asignadas { background: linear-gradient(135deg, #bbdefb 60%, #b3e5fc 100%); }
         .card-module i {
             font-size: 2.8rem;
             margin-bottom: 0.5rem;
-            color: #1976d2;
+            color: #7e57c2;
         }
         .card-module .stat {
             font-size: 2.2rem;
             font-weight: bold;
-            color: #333;
+            color: #37474f;
         }
         .card-module .label {
             font-size: 1.1rem;
             font-weight: 500;
-            color: #555;
+            color: #546e7a;
         }
         .main-actions .btn {
             font-size: 1.1rem;
@@ -64,27 +65,75 @@
             border-radius: 1.5rem;
             margin: 0 0.3rem 0.7rem 0.3rem;
             padding: 0.7rem 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             transition: background 0.2s, color 0.2s;
         }
-        .btn-alumnos { background: #43a047; color: #fff; }
-        .btn-alumnos:hover { background: #2e7d32; color: #fff; }
-        .btn-series { background: #7e57c2; color: #fff; }
-        .btn-series:hover { background: #512da8; color: #fff; }
-        .btn-rutinas { background: #ffd54f; color: #333; }
-        .btn-rutinas:hover { background: #ffb300; color: #333; }
-        .btn-calendario { background: #f06292; color: #fff; }
-        .btn-calendario:hover { background: #ad1457; color: #fff; }
+        .btn-alumnos { background: #81c784; color: #1b5e20; border: none; }
+        .btn-alumnos:hover { background: #66bb6a; color: #1b5e20; }
+        .btn-series { background: #b39ddb; color: #4a148c; border: none; }
+        .btn-series:hover { background: #9575cd; color: #4a148c; }
+        .btn-rutinas { background: #ffe082; color: #e65100; border: none; }
+        .btn-rutinas:hover { background: #ffd54f; color: #e65100; }
+        .btn-calendario { background: #f8bbd0; color: #880e4f; border: none; }
+        .btn-calendario:hover { background: #f48fb1; color: #880e4f; }
+        .main-actions .btn-outline-secondary {
+            background: #eceff1;
+            color: #455a64;
+            border: 1px solid #b0bec5;
+        }
+        .main-actions .btn-outline-secondary:hover {
+            background: #cfd8dc;
+            color: #37474f;
+            border-color: #90a4ae;
+        }
         .tabs-section {
             background: #fff;
             border-radius: 1.2rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             margin-top: 2.5rem;
             padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+        .tabs-section .nav-tabs .nav-link {
+            color: #5e35b1;
+            border-color: transparent;
+        }
+        .tabs-section .nav-tabs .nav-link:hover {
+            color: #7e57c2;
+            border-color: #e1bee7;
+        }
+        .tabs-section .nav-tabs .nav-link.active {
+            background: #f3e5f5;
+            color: #4a148c;
+            border-color: #e1bee7 #e1bee7 #fff;
+            font-weight: 600;
         }
         .tab-content {
             min-height: 120px;
         }
+        /* Tablas – cabeceras pastel */
+        .tabs-section .table-primary { background: #e3f2fd !important; color: #0d47a1; }
+        .tabs-section .table-success { background: #e8f5e9 !important; color: #1b5e20; }
+        .tabs-section .table-warning { background: #fff8e1 !important; color: #e65100; }
+        /* Badges pastel */
+        .tabs-section .badge.bg-primary { background: #90caf9 !important; color: #0d47a1; }
+        .tabs-section .badge.bg-info { background: #80deea !important; color: #006064; }
+        .tabs-section .badge.bg-success { background: #a5d6a7 !important; color: #1b5e20; }
+        .tabs-section .badge.bg-secondary { background: #b0bec5 !important; color: #263238; }
+        .tabs-section .badge.bg-warning { background: #ffcc80 !important; color: #e65100; }
+        .tabs-section .badge.bg-light { background: #eceff1 !important; color: #37474f; }
+        /* Botones en tablas – pastel */
+        .tabs-section .btn-primary { background: #90caf9; border-color: #64b5f6; color: #0d47a1; }
+        .tabs-section .btn-primary:hover { background: #64b5f6; border-color: #42a5f5; color: #0d47a1; }
+        .tabs-section .btn-success { background: #a5d6a7; border-color: #81c784; color: #1b5e20; }
+        .tabs-section .btn-success:hover { background: #81c784; border-color: #66bb6a; color: #1b5e20; }
+        .tabs-section .btn-info { background: #80deea; border-color: #4dd0e1; color: #006064; }
+        .tabs-section .btn-info:hover { background: #4dd0e1; border-color: #26c6da; color: #006064; }
+        .tabs-section .btn-warning { background: #ffcc80; border-color: #ffb74d; color: #e65100; }
+        .tabs-section .btn-warning:hover { background: #ffb74d; border-color: #ffa726; color: #e65100; }
+        .tabs-section .btn-outline-success { color: #2e7d32; border-color: #81c784; }
+        .tabs-section .btn-outline-success:hover { background: #c8e6c9; color: #1b5e20; border-color: #66bb6a; }
+        .tabs-section .btn-danger { background: #ef9a9a; border-color: #e57373; color: #b71c1c; }
+        .tabs-section .btn-danger:hover { background: #e57373; border-color: #ef5350; color: #b71c1c; }
         @media (max-width: 991px) {
             .dashboard-cards { flex-direction: column; gap: 1.2rem; }
             .card-module { min-width: 100%; }
@@ -104,22 +153,22 @@
                 Mattfuncional
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="profile-badge d-flex align-items-center" style="background:#fff; border-radius:2rem; padding:0.25rem 1rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); font-weight:500;">
-                    <i class="fa-solid fa-user-circle fa-lg me-2" style="color:#7e57c2;"></i>
+                <span class="profile-badge d-flex align-items-center" style="background:#fff; border-radius:2rem; padding:0.25rem 1rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); font-weight:500;">
+                    <i class="fa-solid fa-user-circle fa-lg me-2" style="color:#9575cd;"></i>
                     <span th:text="${profesor != null ? (profesor.nombre + ' ' + (profesor.apellido != null ? profesor.apellido : '')).trim() : 'Profesor'}"></span>
                 </span>
-                <a href="/logout" class="btn logout-btn ms-2" style="background:#e57373; color:#fff; border-radius:1.5rem; font-weight:500;">
+                <a href="/logout" class="btn logout-btn ms-2" style="background:#ef9a9a; color:#b71c1c; border-radius:1.5rem; font-weight:500;">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </a>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%); min-height: 100vh;">
+    <div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
         <!-- Título y bienvenida -->
         <div class="text-center mb-4">
             <div class="d-flex justify-content-center align-items-center mb-2">
-                <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#7e57c2;"></i>
+                <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#9575cd;"></i>
                 <h1 class="fw-bold mb-0">Panel del Profesor</h1>
             </div>
             <div class="fs-5 text-secondary">
@@ -263,7 +312,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-1">
-                                    <button id="limpiarFiltrosAlumnos" type="button" class="btn btn-warning w-100">
+                                    <button id="limpiarFiltrosAlumnos" type="button" class="btn btn-warning w-100" style="background:#ffcc80; border-color:#ffb74d; color:#e65100;">
                                         Limpiar filtros
                                     </button>
                                 </div>
