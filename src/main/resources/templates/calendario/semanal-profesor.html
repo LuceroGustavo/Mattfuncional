@@ -125,6 +125,27 @@
             color: #495057;
         }
         
+        /* Encabezado de día clicable */
+        .tabla-horarios th.columna-dia-header {
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .tabla-horarios th.columna-dia-header:hover {
+            background: #e9ecef;
+        }
+        /* Columna del día resaltada al hacer clic (pastel tenue) */
+        .tabla-horarios th.columna-destacada,
+        .tabla-horarios td.columna-destacada {
+            background: #e8eaf6 !important; /* Lavanda pastel muy tenue */
+        }
+        .tabla-horarios th.columna-destacada {
+            background: #c5cae9 !important; /* Un poco más visible en el encabezado */
+        }
+        .tabla-horarios td.columna-destacada.slot-disponible { background: linear-gradient(135deg, #c5cae9 0%, #b0bdd4 100%) !important; }
+        .tabla-horarios td.columna-destacada.slot-moderado { background: linear-gradient(135deg, #d1c4e9 0%, #c5cae9 100%) !important; }
+        .tabla-horarios td.columna-destacada.slot-ocupado { background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%) !important; }
+        .tabla-horarios td.columna-destacada.slot-vacio { background: #e8eaf6 !important; }
+        
         .tabla-horarios td {
             border: 1px solid #e9ecef;
             padding: 8px;
@@ -324,7 +345,10 @@
                                     <th>Hora</th>
                                     <th th:each="dia, diaStat : ${diasSemana}"
                                         th:with="fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
-                                        th:text="${dia + ' ' + #temporals.format(fechaDia, 'dd')}"></th>
+                                        th:text="${dia + ' ' + #temporals.format(fechaDia, 'dd')}"
+                                        class="columna-dia-header"
+                                        th:attr="data-col-index=${diaStat.index}"
+                                        title="Clic para resaltar esta columna"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -332,6 +356,7 @@
                                     <td th:text="${horas[i] != null ? horas[i] : ''}"></td>
                                     <td th:each="dia, diaStat : ${diasSemana}"
                                         th:with="slot=${slotsPorDiaList[diaStat.index][i]}"
+                                        th:attr="data-col-index=${diaStat.index}"
                                         th:classappend="${slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible'))}"
                                         style="cursor:pointer; position:relative;"
                                         th:title="${slot.capacidadActual == slot.capacidadMaxima ? 'Capacidad al máximo' : ''}">
@@ -387,6 +412,26 @@
             
             modal.show();
         }
+
+        // Resaltar columna del día al hacer clic en el encabezado (pastel tenue); otro clic quita el resaltado
+        (function() {
+            var tabla = document.querySelector('.tabla-horarios');
+            if (!tabla) return;
+            var headers = tabla.querySelectorAll('thead th.columna-dia-header[data-col-index]');
+            headers.forEach(function(th) {
+                th.addEventListener('click', function() {
+                    var idx = this.getAttribute('data-col-index');
+                    var celdas = tabla.querySelectorAll('th[data-col-index="' + idx + '"], td[data-col-index="' + idx + '"]');
+                    var yaDestacada = this.classList.contains('columna-destacada');
+                    if (yaDestacada) {
+                        celdas.forEach(function(el) { el.classList.remove('columna-destacada'); });
+                    } else {
+                        tabla.querySelectorAll('th[data-col-index], td[data-col-index]').forEach(function(el) { el.classList.remove('columna-destacada'); });
+                        celdas.forEach(function(el) { el.classList.add('columna-destacada'); });
+                    }
+                });
+            });
+        })();
     </script>
 </body>
 </html> 

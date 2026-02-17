@@ -18,10 +18,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import com.mattfuncional.entidades.DiaHorarioAsistencia;
 import java.time.format.DateTimeParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -259,6 +262,24 @@ public class ProfesorController {
             model.addAttribute("usuario", alumno);
             model.addAttribute("usuarioActual", profesorUsuario);
             model.addAttribute("editMode", true);
+            // Pasar horarios existentes como JSON para que el calendario los precargue al editar
+            String horariosExistentesJson = "[]";
+            if (alumno.getDiasHorariosAsistencia() != null && !alumno.getDiasHorariosAsistencia().isEmpty()) {
+                try {
+                    List<Map<String, String>> list = new ArrayList<>();
+                    DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm:ss");
+                    for (DiaHorarioAsistencia d : alumno.getDiasHorariosAsistencia()) {
+                        Map<String, String> m = new HashMap<>();
+                        m.put("dia", d.getDia() != null ? d.getDia().name() : null);
+                        m.put("horaEntrada", d.getHoraEntrada() != null ? d.getHoraEntrada().format(timeFmt) : null);
+                        list.add(m);
+                    }
+                    horariosExistentesJson = new ObjectMapper().writeValueAsString(list);
+                } catch (Exception e) {
+                    logger.warn("No se pudo serializar horarios existentes para edición: {}", e.getMessage());
+                }
+            }
+            model.addAttribute("horariosExistentesJson", horariosExistentesJson);
             return "profesor/nuevoalumno";
         }
         return "redirect:/profesor/" + profesor.getId() + "?error=permiso";

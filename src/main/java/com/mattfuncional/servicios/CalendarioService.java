@@ -50,13 +50,16 @@ public class CalendarioService {
 
         calendario.setSlotsPorDia(slotsPorDia);
 
-        // Cargar usuarios y asignarlos a los slots correspondientes
+        // Cargar usuarios y asignarlos a los slots (solo alumnos ACTIVOS; los inactivos no aparecen en el calendario)
         List<Usuario> usuarios;
         if (profesorId != null) {
             usuarios = usuarioRepository.findByProfesor_IdAndRol(profesorId, "ALUMNO");
         } else {
             usuarios = usuarioRepository.findByTipoAsistencia(com.mattfuncional.enums.TipoAsistencia.PRESENCIAL);
         }
+        usuarios = usuarios.stream()
+                .filter(u -> u != null && !"INACTIVO".equals(u.getEstadoAlumno()))
+                .collect(Collectors.toList());
         asignarUsuariosASlots(calendario, usuarios);
 
         // Eliminar duplicados de usuarios en cada slot
@@ -127,6 +130,7 @@ public class CalendarioService {
         List<Usuario> usuarios = usuarioRepository.findByTipoAsistencia(com.mattfuncional.enums.TipoAsistencia.PRESENCIAL);
 
         return usuarios.stream()
+                .filter(usuario -> usuario != null && !"INACTIVO".equals(usuario.getEstadoAlumno()))
                 .filter(usuario -> usuario.getDiasHorariosAsistencia() != null)
                 .filter(usuario -> usuario.getDiasHorariosAsistencia().stream()
                         .anyMatch(horario -> horario.getDia().equals(dia)
@@ -150,6 +154,10 @@ public class CalendarioService {
         } else {
             usuariosPresenciales = usuarioRepository.findByTipoAsistencia(com.mattfuncional.enums.TipoAsistencia.PRESENCIAL);
         }
+        // Solo contar alumnos activos (coherente con el calendario)
+        usuariosPresenciales = usuariosPresenciales.stream()
+                .filter(u -> u != null && !"INACTIVO".equals(u.getEstadoAlumno()))
+                .collect(Collectors.toList());
         int totalUsuarios = usuariosPresenciales.size();
 
         int slotsOcupados = 0;

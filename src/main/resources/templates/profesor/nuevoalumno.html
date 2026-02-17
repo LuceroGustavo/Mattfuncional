@@ -172,6 +172,8 @@
                             </div>
                             <div class="card-body">
                                 <div class="horario-selector">
+                                    <!-- Datos de horarios existentes (edición): el JS los lee para precargar el calendario -->
+                                    <div id="horariosExistentesData" class="d-none" th:attr="data-horarios=${editMode} ? ${horariosExistentesJson} : '[]'"></div>
                                     <div id="horarioGrid" class="horario-grid"></div>
                                     <!-- Información de horarios seleccionados -->
                                     <div class="mt-3">
@@ -505,7 +507,7 @@ function limpiarHorarios() {
 document.addEventListener('DOMContentLoaded', function() {
     actualizarHorariosSeleccionados();
     
-    // Si estamos en modo edición, cargar horarios existentes
+    // Si estamos en modo edición, cargar horarios existentes desde el JSON que envía el servidor
     const editMode = document.querySelector('input[name="id"]') !== null;
     if (editMode) {
         cargarHorariosExistentes();
@@ -513,17 +515,23 @@ document.addEventListener('DOMContentLoaded', function() {
     mostrarSelectorHorarios(); // Mostrar/ocultar al cargar según valor
 });
 
-// Función para cargar horarios existentes en modo edición
+// Función para cargar horarios existentes en modo edición (lee JSON desde data-horarios)
 function cargarHorariosExistentes() {
+    var el = document.getElementById('horariosExistentesData');
+    var jsonStr = (el && el.getAttribute('data-horarios')) ? el.getAttribute('data-horarios') : '[]';
+    var horariosExistentes = [];
+    try {
+        horariosExistentes = JSON.parse(jsonStr);
+    } catch (e) {
+        console.warn('No se pudieron parsear horarios existentes:', e);
+    }
     if (horariosExistentes && horariosExistentes.length > 0) {
         horariosExistentes.forEach(function(horario) {
-            // El objeto horario tiene: dia (string), horaEntrada (string tipo 'HH:mm:ss'), horaSalida (string)
             var dia = horario.dia;
-            var horaStr = horario.horaEntrada;
-            // Extraer la hora como número entero
+            var horaStr = horario.horaEntrada || '';
             var hora = parseInt(horaStr.split(":")[0], 10);
-            // Seleccionar el slot correspondiente
-            var element = document.querySelector(`[data-dia="${dia}"][data-hora="${hora}"]`);
+            if (!dia || isNaN(hora)) return;
+            var element = document.querySelector('[data-dia="' + dia + '"][data-hora="' + hora + '"]');
             if (element) {
                 element.classList.add('selected');
                 if (!horariosSeleccionados.has(dia)) {
@@ -609,12 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Si estamos en modo edición, pasar los horarios existentes al JS como array serializado
-    var horariosExistentes = /*[[${usuario.diasHorariosAsistencia != null} ? ${usuario.diasHorariosAsistencia} : '[]']]*/ [];
-    /*]]>*/
-</script>
+<!-- Horarios existentes se pasan vía data-horarios en #horariosExistentesData y se parsean en cargarHorariosExistentes() -->
 
 <script>
 function calcularIMC() {
