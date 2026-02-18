@@ -1,5 +1,7 @@
 # Avances del app – Mattfuncional
 
+**Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
+
 **Última actualización:** Febrero 2026  
 **Uso:** Referencia única de todo lo implementado hasta la fecha.
 
@@ -56,7 +58,7 @@
   - **Clic en el punto** alterna presente/ausente vía API; la vista se actualiza sin recargar.
   - Al **abrir el calendario** se ejecuta `registrarAusentesParaSlotsPasados`: para cada slot ya pasado de la semana se crea registro “ausente” solo si no existe ninguno (no se sobrescribe un presente ya guardado).
   - Endpoint único: `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente). Estado por slot en DTO (`presentePorUsuarioId`); carga con JOIN FETCH para que los colores persistan al recargar.
-- **Detalle:** Ver `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
+- **Detalle:** Ver `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 ---
 
@@ -105,7 +107,7 @@
 
 | Tema | Documento |
 |------|-----------|
-| Asistencia calendario + vista alumnos | `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` |
+| Asistencia calendario + vista alumnos | `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` |
 | Ejercicios predeterminados (imágenes 1–60) | `Documentacion/OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md` |
 | Grupos musculares (plan e implementación) | `Documentacion/PLAN_GRUPOS_MUSCULARES_ENTIDAD.md` |
 | Changelog detallado Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo) | `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` |

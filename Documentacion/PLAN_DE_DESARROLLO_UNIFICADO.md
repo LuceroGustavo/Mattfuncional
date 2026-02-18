@@ -1,5 +1,7 @@
 # Plan de desarrollo unificado – Mattfuncional
 
+**Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
+
 **Última actualización:** Febrero 2026  
 **Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO y PLAN_MODIFICACIONES (ya eliminados); referencias a PLAN_GRUPOS_MUSCULARES_ENTIDAD.md.  
 **Uso:** Un solo documento con la visión del proyecto, fases, lo que se elimina, lo que falta y checklist. Los avances implementados están en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md). Las tareas concretas por implementar están en [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
@@ -119,7 +121,7 @@
 | [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) | Lista de mejoras (ítem por ítem, estado implementado / por implementar). |
 | [PLAN_GRUPOS_MUSCULARES_ENTIDAD.md](PLAN_GRUPOS_MUSCULARES_ENTIDAD.md) | Plan e implementación de grupos musculares (ya hecho). |
 | [OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md](OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md) | Imágenes 1–60 en `uploads/ejercicios/`. |
-| `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
+| `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
 
 ---
 

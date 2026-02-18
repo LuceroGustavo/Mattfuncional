@@ -1,5 +1,9 @@
 # Dónde están los planes y qué falta
 
+**Contexto:** Para entrar en tema del proyecto ver [LEEME_PRIMERO.md](LEEME_PRIMERO.md). Todo lo implementado está en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md).
+
+---
+
 ## Estructura actual (reorganizada)
 
 | Documento | Ruta | Contenido |
@@ -7,7 +11,7 @@
 | **Avances del app** | `Documentacion/AVANCES_DEL_APP.md` | **Todo lo implementado** en un solo archivo. |
 | **Plan de desarrollo unificado** | `Documentacion/PLAN_DE_DESARROLLO_UNIFICADO.md` | **Todos los planes en uno:** visión, fases, lo que se elimina, checklist, pendientes. |
 | **Ayuda memoria** | `Documentacion/AYUDA_MEMORIA.md` | Lista de mejoras (ítem por ítem, estado por implementar / implementado). |
-| **Documentación asistencia** | `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
+| **Documentación asistencia** | `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
 | **Plan grupos musculares** | `Documentacion/PLAN_GRUPOS_MUSCULARES_ENTIDAD.md` | Grupos musculares como entidad (ya implementado; referencia). |
 
 Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fueron eliminados; su contenido está en el plan unificado y en avances.
@@ -18,7 +22,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 1. **Calendario semanal – Dar presente / falta desde el calendario**  
    - **Estado en AYUDA_MEMORIA:** "Por implementar".  
-   - **Realidad:** Implementado. Puntos verde/rojo/gris, clic para alternar, API única, persistencia y vista Mis Alumnos unificada. Ver `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
+   - **Realidad:** Implementado. Puntos verde/rojo/gris, clic para alternar, API única, persistencia y vista Mis Alumnos unificada. Ver `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 2. **Asistencia – Marcar ausente si pasó el horario sin presente**  
    - **Estado en AYUDA_MEMORIA:** "Por implementar".  
@@ -29,7 +33,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 ## Lo que falta según AYUDA_MEMORIA
 
 | Ítem | Descripción | Estado en doc |
-|------|-------------|----------------|
+|------|-------------|---------------|
 | **Calendario – Acceso al detalle del usuario** | Desde el nombre/botón del alumno en cada celda del calendario, ir a la ficha del alumno (`/profesor/alumnos/{id}`). | Por implementar |
 | **Calendario – Día por excepción (recuperar clase)** | Que el profesor pueda asignar a un alumno un día/horario puntual (ej. recuperar clase) sin que sea su horario habitual; que se vea en el calendario. | Por implementar |
 | **Asistencia – Ausente automático** | Opcional: proceso programado (cron) que, por ejemplo cada noche, marque ausentes para slots ya pasados sin presente (hoy se hace al abrir el calendario). | Por implementar (opcional) |
@@ -51,7 +55,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 - [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
-- [ ] **Calendario semanal y presentismo** (marcar como hecho el punto “dar presente/ausente desde calendario y vista alumnos”).
+- [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
 - [ ] Eliminar: panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
@@ -66,6 +70,6 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 1. **Actualizar AYUDA_MEMORIA.md:** Cambiar a "Implementado" el ítem "Calendario semanal – Dar presente / falta desde el calendario" y anotar que "Asistencia – Marcar ausente automáticamente" está cubierto al abrir el calendario (y opcionalmente cron más adelante).
 2. **Calendario – Clic en alumno → ficha:** Implementar que al hacer clic en el nombre del alumno en una celda se abra `/profesor/alumnos/{id}`.
-3. **Calendario – Día por excepción:** Diseñar e implementar “recuperar clase” / asignar un slot puntual a un alumno.
+3. **Calendario – Día por excepción:** Diseñar e implementar "recuperar clase" / asignar un slot puntual a un alumno.
 4. **Plan general:** Seguir con Fase 5 (acceso anónimo a hoja de rutina si se desea), Fase 6 (alumnos sin login), Fase 7 (pantalla sala), Fase 8 (página pública) y ítems del checklist (renombrar app, eliminar módulos no usados).
-5. **Ficha alumno:** Mejoras de detalle según “Pendiente inmediato” del plan.
+5. **Ficha alumno:** Mejoras de detalle según "Pendiente inmediato" del plan.

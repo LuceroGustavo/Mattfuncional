@@ -1,0 +1,4 @@
+Hola “Leé Documentacion/LEEME_PRIMERO.md para tener contexto del proyecto”, despues podes leer 
+“Documentacion/AVANCES_DEL_APP.md”. con eso deverias tener un contexto general del proyecto 
+
+Con eso tiene claro qué es la app, dónde está el código y en qué archivo profundizar según la tarea.

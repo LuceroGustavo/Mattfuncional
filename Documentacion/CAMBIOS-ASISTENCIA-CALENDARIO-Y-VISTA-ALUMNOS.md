@@ -15,7 +15,7 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
   - **Rojo:** ausente
   - **Gris:** pendiente (aún sin marcar)
 - **Clic en el punto:** alterna entre presente y ausente vía API; la vista se actualiza sin recargar.
-- Al **abrir el calendario** se ejecuta la lógica de “registrar ausentes” para slots ya pasados (solo se crean registros cuando no existe ninguno).
+- Al **abrir el calendario** se ejecuta la lógica de "registrar ausentes" para slots ya pasados (solo se crean registros cuando no existe ninguno).
 
 ### Archivos modificados / añadidos
 
@@ -36,7 +36,7 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 
 ---
 
-## 2. Vista Mis Alumnos – Columna “Presente”
+## 2. Vista Mis Alumnos – Columna "Presente"
 
 ### Comportamiento
 
@@ -53,12 +53,12 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 | Archivo | Cambios |
 |---------|--------|
 | `ProfesorController` (dashboard) | Sustitución de `asistenciaHoy` (Boolean) por `estadoAsistenciaHoy` (Map<Long, String>: "PENDIENTE" \| "AUSENTE" \| "PRESENTE"). Cálculo solo para usuarios presenciales con horario el día de hoy (mapeo `DayOfWeek` → `DiaSemana`). Modelo: `estadoAsistenciaHoy`, `fechaHoyFormateada` |
-| `ProfesorController` (vista alumno) | La columna “Presente” en Mis Alumnos usaba `asistenciaHoy`; ahora se basa en `estadoAsistenciaHoy` y en “asiste hoy” |
+| `ProfesorController` (vista alumno) | La columna "Presente" en Mis Alumnos usaba `asistenciaHoy`; ahora se basa en `estadoAsistenciaHoy` y en "asiste hoy" |
 | `dashboard.html` | Encabezado "Presente (fecha)"; celda con botón solo si `estadoAsistenciaHoy[usuario.id]` existe; estilos gris/rojo/verde e iconos según estado; script de toggle que usa `urlMarcarAsistencia` y actualiza botón (clase, icono, texto, data-presente, data-estado) |
 
 ### Corrección previa (Presente vs Ausente)
 
-- En el dashboard se corregió la lógica para que “Presente” solo se muestre cuando el registro de asistencia tiene `presente == true` (antes se consideraba “presente” si existía cualquier registro para ese día).
+- En el dashboard se corregió la lógica para que "Presente" solo se muestre cuando el registro de asistencia tiene `presente == true` (antes se consideraba "presente" si existía cualquier registro para ese día).
 
 ---
 
@@ -77,7 +77,7 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 - **Controladores:** `CalendarioController`, `ProfesorController`
 - **DTOs:** `CalendarioSemanalDTO` (SlotHorarioDTO)
 - **Vistas:** `calendario/semanal-profesor.html`, `profesor/dashboard.html`
-- **Documentación:** `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` (este archivo)
+- **Documentación:** `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` (este archivo)
 
 ---
 
@@ -92,5 +92,5 @@ feat(asistencia): calendario y vista alumnos con presente/ausente/pendiente unif
 - Endpoint POST /calendario/api/marcar-asistencia (usuarioId, fecha, presente)
 - Vista Mis Alumnos: columna Presente con fecha actual; botones solo para quienes asisten hoy
 - Tres estados: Pendiente (gris), Ausente (rojo), Presente (verde); mismo API que calendario
-- Documentación en docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md
+- Documentación en Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md
 ```
