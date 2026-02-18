@@ -1,6 +1,7 @@
 package com.mattfuncional.servicios;
 
 import com.mattfuncional.dto.CalendarioSemanalDTO;
+import com.mattfuncional.entidades.CalendarioExcepcion;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.DiaHorarioAsistencia;
 import com.mattfuncional.enums.DiaSemana;
@@ -26,6 +27,9 @@ public class CalendarioService {
 
     @Autowired
     private AsistenciaService asistenciaService;
+
+    @Autowired
+    private CalendarioExcepcionService calendarioExcepcionService;
 
     private static final int CAPACIDAD_MAXIMA_POR_SLOT = 10; // Configurable
     private static final LocalTime HORA_INICIO = LocalTime.of(6, 0);
@@ -64,6 +68,10 @@ public class CalendarioService {
                 .filter(u -> u != null && !"INACTIVO".equals(u.getEstadoAlumno()))
                 .collect(Collectors.toList());
         asignarUsuariosASlots(calendario, usuarios);
+
+        List<CalendarioExcepcion> excepcionesSemana = calendarioExcepcionService
+                .obtenerExcepcionesSemana(profesorId, inicioSemana, finSemana);
+        aplicarExcepcionesASlots(calendario, excepcionesSemana);
 
         // Eliminar duplicados de usuarios en cada slot
         for (List<CalendarioSemanalDTO.SlotHorarioDTO> slots : calendario.getSlotsPorDia().values()) {
@@ -113,6 +121,15 @@ public class CalendarioService {
     }
 
     private void asignarUsuarioASlot(CalendarioSemanalDTO calendario, Usuario usuario, DiaHorarioAsistencia horario) {
+        java.time.LocalDate fechaSlot = calendario.getFechaInicioSemana()
+                .plusDays(horario.getDia().ordinal());
+        if (usuario.getFechaAlta() != null && fechaSlot.isBefore(usuario.getFechaAlta())) {
+            return;
+        }
+        if (usuario.getFechaBaja() != null && fechaSlot.isAfter(usuario.getFechaBaja())) {
+            return;
+        }
+
         List<CalendarioSemanalDTO.SlotHorarioDTO> slotsDelDia = calendario.getSlotsPorDia().get(horario.getDia());
 
         if (slotsDelDia != null) {
@@ -126,6 +143,59 @@ public class CalendarioService {
                     }
                 }
             }
+        }
+    }
+
+    private void aplicarExcepcionesASlots(CalendarioSemanalDTO calendario, List<CalendarioExcepcion> excepciones) {
+        if (excepciones == null || excepciones.isEmpty()) {
+            return;
+        }
+        for (CalendarioExcepcion excepcion : excepciones) {
+            if (excepcion == null || excepcion.getUsuario() == null) {
+                continue;
+            }
+            DiaSemana dia = mapearDiaSemana(excepcion.getFecha());
+            if (dia == null) {
+                continue;
+            }
+            List<CalendarioSemanalDTO.SlotHorarioDTO> slotsDelDia = calendario.getSlotsPorDia().get(dia);
+            if (slotsDelDia == null) {
+                continue;
+            }
+            for (CalendarioSemanalDTO.SlotHorarioDTO slot : slotsDelDia) {
+                if (slot.getHoraInicio().equals(excepcion.getHoraInicio())
+                        && slot.getHoraFin().equals(excepcion.getHoraFin())) {
+                    slot.getUsuariosAsignados().add(excepcion.getUsuario());
+                    slot.getExcepcionPorUsuarioId().put(excepcion.getUsuario().getId(), true);
+                    slot.setCapacidadActual(slot.getUsuariosAsignados().size());
+                    break;
+                }
+            }
+        }
+    }
+
+    private DiaSemana mapearDiaSemana(LocalDate fecha) {
+        if (fecha == null) {
+            return null;
+        }
+        DayOfWeek dayOfWeek = fecha.getDayOfWeek();
+        switch (dayOfWeek) {
+            case MONDAY:
+                return DiaSemana.LUNES;
+            case TUESDAY:
+                return DiaSemana.MARTES;
+            case WEDNESDAY:
+                return DiaSemana.MIERCOLES;
+            case THURSDAY:
+                return DiaSemana.JUEVES;
+            case FRIDAY:
+                return DiaSemana.VIERNES;
+            case SATURDAY:
+                return DiaSemana.SABADO;
+            case SUNDAY:
+                return DiaSemana.DOMINGO;
+            default:
+                return null;
         }
     }
 

@@ -2,6 +2,7 @@ package com.mattfuncional.controladores;
 
 import com.mattfuncional.dto.CalendarioSemanalDTO;
 import com.mattfuncional.servicios.CalendarioService;
+import com.mattfuncional.servicios.CalendarioExcepcionService;
 import com.mattfuncional.servicios.AsistenciaService;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Profesor;
@@ -15,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -32,6 +35,9 @@ public class CalendarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private CalendarioExcepcionService calendarioExcepcionService;
 
     // @GetMapping("/semanal")
     // public String calendarioSemanal(@RequestParam(required = false) String fecha,
@@ -130,6 +136,15 @@ public class CalendarioController {
         }
         model.addAttribute("horas", horas);
         model.addAttribute("profesorId", profesorId);
+        model.addAttribute("fechaSemana", calendario.getFechaInicioSemana());
+
+        List<Usuario> alumnosParaExcepcion = usuarioService.getAlumnosByProfesorId(profesorId);
+        alumnosParaExcepcion = alumnosParaExcepcion.stream()
+                .filter(a -> a != null && !"INACTIVO".equals(a.getEstadoAlumno()))
+                .filter(a -> a.getTipoAsistencia() == com.mattfuncional.enums.TipoAsistencia.PRESENCIAL
+                        || a.getTipoAsistencia() == com.mattfuncional.enums.TipoAsistencia.SEMIPRESENCIAL)
+                .toList();
+        model.addAttribute("alumnosParaExcepcion", alumnosParaExcepcion);
 
         return "calendario/semanal-profesor";
     }
@@ -171,6 +186,23 @@ public class CalendarioController {
         LocalDate fechaDate = LocalDate.parse(fecha);
         asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presente, null, null);
         return ResponseEntity.ok(java.util.Map.of("ok", true, "presente", presente));
+    }
+
+    @PostMapping("/excepcion")
+    public String crearExcepcion(
+            @RequestParam Long profesorId,
+            @RequestParam Long usuarioId,
+            @RequestParam String fecha,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin,
+            @RequestParam(required = false) String motivo,
+            @RequestParam(required = false) String fechaSemana) {
+        LocalDate fechaDate = LocalDate.parse(fecha);
+        LocalTime horaInicioTime = LocalTime.parse(horaInicio);
+        LocalTime horaFinTime = LocalTime.parse(horaFin);
+        calendarioExcepcionService.crearExcepcion(profesorId, usuarioId, fechaDate, horaInicioTime, horaFinTime, motivo);
+        String fechaRedirect = (fechaSemana != null && !fechaSemana.isBlank()) ? fechaSemana : fecha;
+        return "redirect:/calendario/semanal/profesor/" + profesorId + "?fecha=" + fechaRedirect;
     }
 
     @PostMapping("/actualizar-capacidad-maxima")

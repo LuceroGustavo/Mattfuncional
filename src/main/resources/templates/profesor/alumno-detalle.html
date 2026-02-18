@@ -406,8 +406,11 @@
 
         <!-- Historial de Asistencia -->
         <div class="info-card">
-            <div class="card-header">
-                <h5><i class="fas fa-calendar-check me-2"></i>Historial de Asistencia</h5>
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Historial de Asistencia</h5>
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalResumenAsistencias">
+                    Consultar asistencias
+                </button>
             </div>
             <div class="card-body">
                 <div class="table-responsive historial-asistencia-scroll">
@@ -421,11 +424,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="asistencia : ${historialAsistencia}">
+                            <tr th:each="asistencia : ${historialAsistencia}"
+                                th:attr="data-fecha=${#temporals.format(asistencia.fecha, 'yyyy-MM-dd')}, data-presente=${asistencia.presente}">
                                 <td th:text="${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')}">Fecha</td>
                                 <td>
                                     <span th:if="${asistencia.presente}" class="badge bg-success">Presente</span>
-                                    <span th:if="${!asistencia.presente}" class="badge bg-secondary">Sin presente</span>
+                                    <span th:if="${!asistencia.presente}" class="badge bg-danger">Ausente</span>
                                 </td>
                                 <td>
                                     <span th:if="${asistencia.gruposTrabajados != null && !asistencia.gruposTrabajados.isEmpty()}" th:text="${#strings.listJoin(asistencia.gruposTrabajados.![nombre], ', ')}">-</span>
@@ -445,6 +449,64 @@
             </div>
         </div>
 
+        <!-- Modal: resumen mensual de asistencias -->
+        <div class="modal fade" id="modalResumenAsistencias" tabindex="-1" aria-labelledby="modalResumenAsistenciasLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalResumenAsistenciasLabel">
+                            <i class="fas fa-calendar-alt me-2"></i>Resumen mensual de asistencias
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                            <label for="resumenMesSelect" class="form-label mb-0">Mes</label>
+                            <select id="resumenMesSelect" class="form-select form-select-sm w-auto">
+                                <option value="">Seleccionar mes</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Asistencias</th>
+                                        <th>Ausencias</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resumenAsistenciasBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Sin datos de asistencia.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr class="my-3">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalleAsistenciasBody">
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted py-3">Selecciona un mes para ver el detalle.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Progreso: registrar grupos trabajados y observaciones -->
         <div class="modal fade" id="modalProgreso" tabindex="-1" aria-labelledby="modalProgresoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -459,13 +521,6 @@
                             <div class="mb-3">
                                 <label for="progresoFecha" class="form-label">Fecha</label>
                                 <input type="date" id="progresoFecha" name="fecha" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
-                            </div>
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="presente" value="true" id="progresoPresente"
-                                           th:checked="${asistenciaHoy != null && asistenciaHoy.isPresente()}">
-                                    <label class="form-check-label" for="progresoPresente">Marcar como presente</label>
-                                </div>
                             </div>
                             <div class="mb-3" th:if="${gruposMusculares != null && !gruposMusculares.isEmpty()}">
                                 <label class="form-label">Grupos musculares trabajados</label>
@@ -619,6 +674,104 @@
                     modal.show();
                 }
             }
+        })();
+
+        // Resumen mensual de asistencias en modal
+        (function() {
+            const modalEl = document.getElementById('modalResumenAsistencias');
+            const tbody = document.getElementById('resumenAsistenciasBody');
+            const detalleBody = document.getElementById('detalleAsistenciasBody');
+            const mesSelect = document.getElementById('resumenMesSelect');
+            if (!modalEl || !tbody) return;
+            const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            function construirDetalle(registros, clave) {
+                if (!detalleBody) return;
+                detalleBody.innerHTML = '';
+                if (!clave) {
+                    detalleBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">Selecciona un mes para ver el detalle.</td></tr>';
+                    return;
+                }
+                const items = registros.filter(r => r.claveMes === clave);
+                if (items.length === 0) {
+                    detalleBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">Sin registros en este mes.</td></tr>';
+                    return;
+                }
+                items.sort((a, b) => b.fecha.localeCompare(a.fecha));
+                items.forEach(function(item) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td>' + item.fechaFormateada + '</td>' +
+                        '<td>' + (item.presente
+                            ? '<span class="badge bg-success">Presente</span>'
+                            : '<span class="badge bg-danger">Ausente</span>') + '</td>';
+                    detalleBody.appendChild(tr);
+                });
+            }
+            modalEl.addEventListener('show.bs.modal', function() {
+                const rows = document.querySelectorAll('tbody tr[data-fecha][data-presente]');
+                const resumen = new Map();
+                const registros = [];
+                rows.forEach(function(row) {
+                    const fecha = row.getAttribute('data-fecha');
+                    if (!fecha) return;
+                    const presente = row.getAttribute('data-presente') === 'true';
+                    const partes = fecha.split('-');
+                    if (partes.length < 2) return;
+                    const clave = partes[0] + '-' + partes[1];
+                    if (!resumen.has(clave)) {
+                        resumen.set(clave, { presente: 0, ausente: 0 });
+                    }
+                    const item = resumen.get(clave);
+                    if (presente) item.presente += 1;
+                    else item.ausente += 1;
+                    const fechaFormateada = partes[2] + '/' + partes[1] + '/' + partes[0];
+                    registros.push({ claveMes: clave, fecha: fecha, fechaFormateada: fechaFormateada, presente: presente });
+                });
+                if (resumen.size === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin datos de asistencia.</td></tr>';
+                    if (mesSelect) {
+                        mesSelect.innerHTML = '<option value="">Seleccionar mes</option>';
+                    }
+                    construirDetalle([], '');
+                    return;
+                }
+                const clavesOrdenadas = Array.from(resumen.keys()).sort();
+                tbody.innerHTML = '';
+                clavesOrdenadas.forEach(function(clave) {
+                    const item = resumen.get(clave);
+                    const partes = clave.split('-');
+                    const year = partes[0];
+                    const monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
+                    const mesLabel = meses[monthIdx] + ' ' + year;
+                    const total = item.presente + item.ausente;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td>' + mesLabel + '</td>' +
+                        '<td><span class="badge bg-success">' + item.presente + '</span></td>' +
+                        '<td><span class="badge bg-secondary">' + item.ausente + '</span></td>' +
+                        '<td>' + total + '</td>';
+                    tbody.appendChild(tr);
+                });
+                if (mesSelect) {
+                    mesSelect.innerHTML = '<option value="">Seleccionar mes</option>';
+                    clavesOrdenadas.forEach(function(clave) {
+                        const partes = clave.split('-');
+                        const year = partes[0];
+                        const monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
+                        const mesLabel = meses[monthIdx] + ' ' + year;
+                        const opt = document.createElement('option');
+                        opt.value = clave;
+                        opt.textContent = mesLabel;
+                        mesSelect.appendChild(opt);
+                    });
+                    mesSelect.onchange = function() {
+                        construirDetalle(registros, mesSelect.value);
+                    };
+                    const ultimoMes = clavesOrdenadas[clavesOrdenadas.length - 1];
+                    mesSelect.value = ultimoMes;
+                    construirDetalle(registros, ultimoMes);
+                    return;
+                }
+                construirDetalle(registros, '');
+            });
         })();
     </script>
  

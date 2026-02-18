@@ -74,6 +74,8 @@ public class CalendarioSemanalDTO {
         private boolean disponible;
         /** Presente por usuario (id -> true/false). null = pendiente. Se rellena en el controlador según la fecha del día. */
         private Map<Long, Boolean> presentePorUsuarioId = new HashMap<>();
+        /** Marca si el usuario fue agregado por excepción en este slot. */
+        private Map<Long, Boolean> excepcionPorUsuarioId = new HashMap<>();
 
         public SlotHorarioDTO() {
         }
@@ -90,6 +92,11 @@ public class CalendarioSemanalDTO {
         public Map<Long, Boolean> getPresentePorUsuarioId() { return presentePorUsuarioId; }
         public void setPresentePorUsuarioId(Map<Long, Boolean> presentePorUsuarioId) {
             this.presentePorUsuarioId = presentePorUsuarioId != null ? presentePorUsuarioId : new HashMap<>();
+        }
+
+        public Map<Long, Boolean> getExcepcionPorUsuarioId() { return excepcionPorUsuarioId; }
+        public void setExcepcionPorUsuarioId(Map<Long, Boolean> excepcionPorUsuarioId) {
+            this.excepcionPorUsuarioId = excepcionPorUsuarioId != null ? excepcionPorUsuarioId : new HashMap<>();
         }
 
         public LocalTime getHoraInicio() {

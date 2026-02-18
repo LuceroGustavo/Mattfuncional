@@ -196,6 +196,13 @@
             letter-spacing: 0.5px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
+        .usuario-link {
+            color: inherit;
+            text-decoration: none;
+        }
+        .usuario-link:hover {
+            text-decoration: underline;
+        }
         .punto-asistencia {
             display: inline-block;
             width: 10px;
@@ -209,6 +216,30 @@
         .btn-punto-asistencia { cursor: pointer; }
         .btn-punto-asistencia:hover { opacity: 0.85; transform: scale(1.15); }
         
+        .btn-excepcion {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 12px;
+            line-height: 16px;
+            opacity: 0.5;
+        }
+        .btn-excepcion:hover { opacity: 0.95; }
+        .tabla-horarios:not(.excepcion-activa) .btn-excepcion { display: none; }
+
+        .badge-excepcion {
+            background: #6c757d;
+            color: #fff;
+            font-size: 0.6rem;
+            padding: 1px 4px;
+            border-radius: 6px;
+            opacity: 0.85;
+        }
+
         .capacidad-info {
             position: absolute;
             top: 2px;
@@ -346,12 +377,17 @@
                     </div>
                     
                     <!-- Formulario para modificar capacidad máxima -->
-                    <form th:action="@{/calendario/actualizar-capacidad-maxima}" method="post" class="mb-4 d-flex align-items-center">
-                        <label for="capacidadMaxima" class="me-2 mb-0">Capacidad de usuarios x Día:</label>
-                        <input type="number" id="capacidadMaxima" name="capacidadMaxima" min="1" max="100" th:value="${estadisticas.capacidadMaxima}" class="form-control w-auto me-2" required>
-                        <input type="hidden" name="profesorId" th:value="${profesorId}" />
-                        <button type="submit" class="btn btn-primary">Actualizar</button>
-                    </form>
+                    <div class="mb-4 d-flex align-items-center justify-content-between">
+                        <form th:action="@{/calendario/actualizar-capacidad-maxima}" method="post" class="d-flex align-items-center">
+                            <label for="capacidadMaxima" class="me-2 mb-0">Capacidad de usuarios x Día:</label>
+                            <input type="number" id="capacidadMaxima" name="capacidadMaxima" min="1" max="100" th:value="${estadisticas.capacidadMaxima}" class="form-control w-auto me-2" required>
+                            <input type="hidden" name="profesorId" th:value="${profesorId}" />
+                            <button type="submit" class="btn btn-primary">Actualizar</button>
+                        </form>
+                        <button type="button" class="btn btn-outline-dark" id="toggleExcepciones">
+                            Agregar usuarios por excepción
+                        </button>
+                    </div>
                     
                     <!-- Tabla de horarios -->
                     <div class="calendario-table">
@@ -372,18 +408,21 @@
                                     <td th:text="${horas[i] != null ? horas[i] : ''}"></td>
                                     <td th:each="dia, diaStat : ${diasSemana}"
                                         th:with="slot=${slotsPorDiaList[diaStat.index][i]}, fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
-                                        th:attr="data-col-index=${diaStat.index}"
+                                        th:attr="data-col-index=${diaStat.index}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-hora-inicio=${slot.horaInicio}, data-hora-fin=${slot.horaFin}"
                                         th:classappend="${slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible'))}"
                                         style="cursor:pointer; position:relative;"
                                         th:title="${slot.capacidadActual == slot.capacidadMaxima ? 'Capacidad al máximo' : ''}">
+                                        <button type="button" class="btn btn-light btn-excepcion" title="Agregar excepción">+</button>
                                         <div th:if="${slot.usuariosAsignados != null and !#lists.isEmpty(slot.usuariosAsignados)}" class="usuarios-lista">
                                             <div th:each="usuario : ${slot.usuariosAsignados}"
-                                                th:with="presente=${slot.presentePorUsuarioId != null ? slot.presentePorUsuarioId[usuario.id] : null}"
+                                                th:with="presente=${slot.presentePorUsuarioId != null ? slot.presentePorUsuarioId[usuario.id] : null}, esExcepcion=${slot.excepcionPorUsuarioId != null ? slot.excepcionPorUsuarioId[usuario.id] : null}"
                                                 class="usuario-item d-flex align-items-center justify-content-center gap-1">
-                                                <span class="punto-asistencia btn-punto-asistencia"
+                                                <span th:if="${fechaDia != null and (fechaDia.isBefore(#temporals.createNow().toLocalDate()) or fechaDia.isEqual(#temporals.createNow().toLocalDate()))}"
+                                                    class="punto-asistencia btn-punto-asistencia"
                                                     th:classappend="${presente == true ? 'punto-presente' : (presente == false ? 'punto-ausente' : 'punto-pendiente')}"
                                                     th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-presente=${presente != null ? presente : false}, title=${presente == true ? 'Presente (clic para cambiar)' : (presente == false ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para marcar presente/ausente)')}"></span>
-                                                <span th:text="${usuario.nombre}"></span>
+                                                <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="usuario-link" target="_blank" rel="noopener" th:text="${usuario.nombre}"></a>
+                                                <span th:if="${esExcepcion == true}" class="badge-excepcion" title="Agregado por excepción">Ex</span>
                                             </div>
                                         </div>
                                         <div th:if="${slot.usuariosAsignados == null or #lists.isEmpty(slot.usuariosAsignados)}">-</div>
@@ -411,6 +450,49 @@
                 <div class="modal-body" id="modalBody">
                     <!-- Contenido dinámico -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear excepción -->
+    <div class="modal fade" id="modalExcepcion" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar alumno por excepción
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/calendario/excepcion}" method="post" id="formExcepcion">
+                    <div class="modal-body">
+                        <div class="mb-2 text-muted" id="excepcionDetalle"></div>
+                        <div class="mb-3">
+                            <label for="excepcionUsuario" class="form-label">Alumno</label>
+                            <select id="excepcionUsuario" name="usuarioId" class="form-select" required>
+                                <option value="" disabled selected>Seleccionar alumno</option>
+                                <option th:each="alumno : ${alumnosParaExcepcion}" th:value="${alumno.id}"
+                                        th:text="${alumno.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="excepcionMotivo" class="form-label">Motivo (opcional)</label>
+                            <input type="text" id="excepcionMotivo" name="motivo" class="form-control" maxlength="255"
+                                   placeholder="Ej: recuperación de clase">
+                        </div>
+                        <input type="hidden" id="excepcionFecha" name="fecha">
+                        <input type="hidden" id="excepcionHoraInicio" name="horaInicio">
+                        <input type="hidden" id="excepcionHoraFin" name="horaFin">
+                        <input type="hidden" name="profesorId" th:value="${profesorId}">
+                        <input type="hidden" name="fechaSemana" th:value="${fechaSemana}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar excepción</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -470,6 +552,10 @@
                 var usuarioId = dot.getAttribute('data-usuario-id');
                 var fecha = dot.getAttribute('data-fecha');
                 if (!usuarioId || !fecha) return;
+                var fechaHoy = new Date();
+                var fechaSlot = new Date(fecha + 'T00:00:00');
+                fechaHoy.setHours(0, 0, 0, 0);
+                if (fechaSlot > fechaHoy) return;
                 var presenteActual = dot.getAttribute('data-presente') === 'true';
                 var nuevoPresente = !presenteActual;
                 var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&presente=' + nuevoPresente;
@@ -489,6 +575,50 @@
                         dot.setAttribute('title', presente ? 'Presente (clic para cambiar)' : 'Ausente (clic para cambiar)');
                     }
                 }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
+            });
+        })();
+
+        // Abrir modal para agregar excepción desde el "+"
+        (function() {
+            var modalEl = document.getElementById('modalExcepcion');
+            if (!modalEl) return;
+            var modal = new bootstrap.Modal(modalEl);
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.btn-excepcion');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+                var td = btn.closest('td');
+                if (!td) return;
+                var fecha = td.getAttribute('data-fecha');
+                var horaInicio = td.getAttribute('data-hora-inicio');
+                var horaFin = td.getAttribute('data-hora-fin');
+                var detalle = document.getElementById('excepcionDetalle');
+                if (detalle) {
+                    detalle.textContent = (fecha && horaInicio && horaFin)
+                        ? (fecha + " - " + horaInicio + " a " + horaFin)
+                        : "";
+                }
+                var inputFecha = document.getElementById('excepcionFecha');
+                var inputHoraInicio = document.getElementById('excepcionHoraInicio');
+                var inputHoraFin = document.getElementById('excepcionHoraFin');
+                if (inputFecha) inputFecha.value = fecha || "";
+                if (inputHoraInicio) inputHoraInicio.value = horaInicio || "";
+                if (inputHoraFin) inputHoraFin.value = horaFin || "";
+                modal.show();
+            });
+        })();
+
+        // Toggle para habilitar/deshabilitar los "+"
+        (function() {
+            var toggleBtn = document.getElementById('toggleExcepciones');
+            var tabla = document.querySelector('.tabla-horarios');
+            if (!toggleBtn || !tabla) return;
+            toggleBtn.addEventListener('click', function() {
+                var activa = tabla.classList.toggle('excepcion-activa');
+                toggleBtn.classList.toggle('btn-dark', activa);
+                toggleBtn.classList.toggle('btn-outline-dark', !activa);
+                toggleBtn.textContent = activa ? 'Desactivar excepciones' : 'Agregar usuarios por excepción';
             });
         })();
     </script>

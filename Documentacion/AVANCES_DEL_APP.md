@@ -58,6 +58,11 @@
   - **Clic en el punto** alterna presente/ausente vía API; la vista se actualiza sin recargar.
   - Al **abrir el calendario** se ejecuta `registrarAusentesParaSlotsPasados`: para cada slot ya pasado de la semana se crea registro “ausente” solo si no existe ninguno (no se sobrescribe un presente ya guardado).
   - Endpoint único: `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente). Estado por slot en DTO (`presentePorUsuarioId`); carga con JOIN FETCH para que los colores persistan al recargar.
+- **Excepciones por día/hora (nuevo):**
+  - Botón sutil “+” por celda para agregar un alumno **por excepción**.
+  - Botón superior “Agregar usuarios por excepción” que **habilita/deshabilita** los “+” (por defecto ocultos).
+  - Modal con alumno + motivo opcional, y guardado por fecha/hora; etiqueta `Ex` junto al nombre.
+- **Reglas de marcado:** los puntos **no se muestran ni se pueden marcar** en fechas futuras.
 - **Detalle:** Ver `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 ---
@@ -89,7 +94,7 @@
 
 ## 9. Modal de progreso unificado
 
-- **Checkbox presente:** En el modal de progreso se usa `asistenciaHoy.isPresente()` para que quede tildado cuando ya hay registro de presente ese día.
+- **Checkbox presente:** Eliminado del modal; el progreso ya no fuerza presente desde la ficha.
 - **Grupos musculares:** Select múltiple reemplazado por checkboxes; en historial se muestran separados por coma.
 - **Observaciones:** Columna ampliada a 2000 caracteres; formularios con `maxlength="2000"`.
 - **Un solo flujo:** El botón “Progreso” en la tabla del panel redirige a la ficha del alumno con `?openModal=progreso`; el modal se abre allí. Eliminado el modal duplicado del dashboard.
@@ -100,6 +105,7 @@
 
 - **Tipos:** Presencial, Virtual (antes “Online”), Semipresencial. Horarios visibles en presencial/semipresencial.
 - **Ficha de alumno:** Scroll asegurado para historial y rutinas completas.
+- **Resumen mensual de asistencias:** Modal con resumen por mes (asistencias/ausencias) y **detalle por día** del mes seleccionado (ordenado por fecha reciente primero).
 
 ---
 

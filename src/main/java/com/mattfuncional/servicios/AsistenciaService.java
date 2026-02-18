@@ -32,6 +32,13 @@ public class AsistenciaService {
         return asistenciaRepository.findByUsuarioOrderByFechaDesc(usuario);
     }
 
+    public List<Asistencia> obtenerAsistenciasPorUsuarioId(Long usuarioId) {
+        if (usuarioId == null) {
+            return java.util.Collections.emptyList();
+        }
+        return asistenciaRepository.findByUsuario_IdOrderByFechaDesc(usuarioId);
+    }
+
     public List<Asistencia> obtenerAsistenciaPorUsuarioYFecha(Usuario usuario, LocalDate fecha) {
         return asistenciaRepository.findByUsuarioAndFecha(usuario, fecha);
     }

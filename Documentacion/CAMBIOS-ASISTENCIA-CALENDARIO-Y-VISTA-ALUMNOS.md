@@ -16,6 +16,8 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
   - **Gris:** pendiente (aún sin marcar)
 - **Clic en el punto:** alterna entre presente y ausente vía API; la vista se actualiza sin recargar.
 - Al **abrir el calendario** se ejecuta la lógica de "registrar ausentes" para slots ya pasados (solo se crean registros cuando no existe ninguno).
+- **Fechas futuras:** los puntos no se muestran ni se pueden marcar en días posteriores a hoy.
+- **Excepciones por día/hora:** botón “+” sutil por celda, habilitable con un botón superior, para agregar un alumno por excepción (modal con alumno + motivo). Los alumnos agregados por excepción muestran etiqueta `Ex`.
 
 ### Archivos modificados / añadidos
 
@@ -26,8 +28,12 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 | `CalendarioService` | Inyección de `AsistenciaService`, `registrarAusentesParaSlotsPasados(calendario)` para marcar ausentes en slots pasados de la semana |
 | `CalendarioController` | Tras generar el calendario: llamada a `registrarAusentesParaSlotsPasados`, construcción de `asistenciaMap`, **relleno de `presentePorUsuarioId` por slot** según fecha del día, paso de `slotsPorDiaList` (con estado por usuario) a la vista |
 | `CalendarioSemanalDTO.SlotHorarioDTO` | Nuevo campo `Map<Long, Boolean> presentePorUsuarioId` (true/false/null por usuario del slot) |
-| `semanal-profesor.html` | Puntos verde/rojo/gris por usuario usando `slot.presentePorUsuarioId[usuario.id]`, leyenda (Presente, Ausente, Pendiente), script con delegación de eventos para clic en el punto y llamada a `POST /calendario/api/marcar-asistencia` |
+| `CalendarioSemanalDTO.SlotHorarioDTO` | Nuevo campo `Map<Long, Boolean> excepcionPorUsuarioId` para marcar alumnos agregados por excepción |
+| `semanal-profesor.html` | Puntos verde/rojo/gris por usuario usando `slot.presentePorUsuarioId[usuario.id]`, leyenda (Presente, Ausente, Pendiente), **puntos ocultos en fechas futuras**, botón “+” por celda y modal de excepción, script con delegación de eventos para clic en el punto y llamada a `POST /calendario/api/marcar-asistencia` |
 | `CalendarioController` | Endpoint `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente) → `guardarOActualizarProgreso` |
+| `CalendarioExcepcion` | Nueva entidad para guardar excepciones (alumno, profesor, fecha, horaInicio, horaFin, motivo) |
+| `CalendarioExcepcionService` | Alta de excepción y listado por semana |
+| `CalendarioExcepcionRepository` | Query por semana y validación de duplicados |
 
 ### Persistencia y consistencia
 
@@ -67,6 +73,13 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 - **Única fuente de verdad:** tabla `Asistencia` (usuario, fecha, presente) y método `AsistenciaService.guardarOActualizarProgreso`.
 - **Mismo endpoint para marcar:** `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente) usado tanto por el calendario como por la vista de alumnos.
 - Así, lo que se marca en el calendario se refleja en Mis Alumnos y al revés.
+
+---
+
+## 4. Ficha del alumno – Resumen mensual y detalle por día
+
+- **Modal “Consultar asistencias”:** resumen por mes (asistencias/ausencias/total).
+- **Detalle por día:** selector de mes para listar las asistencias del mes (fecha + estado), ordenadas por fecha más reciente.
 
 ---
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<Asistencia> findByUsuarioOrderByFechaDesc(Usuario usuario);
+    List<Asistencia> findByUsuario_IdOrderByFechaDesc(Long usuarioId);
     List<Asistencia> findByUsuarioAndFecha(Usuario usuario, LocalDate fecha);
     List<Asistencia> findByFechaBetween(LocalDate inicio, LocalDate fin);
 

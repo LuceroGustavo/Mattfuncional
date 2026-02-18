@@ -30,9 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.stream.Stream;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
@@ -388,7 +386,7 @@ public class ProfesorController {
         model.addAttribute("alumno", alumno);
         model.addAttribute("historialEstadoFormateado", formatearFechasEnHistorialEstado(alumno.getHistorialEstado()));
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
-        java.util.List<Asistencia> historialAsistencia = asistenciaService.obtenerAsistenciasPorUsuario(alumno);
+        java.util.List<Asistencia> historialAsistencia = asistenciaService.obtenerAsistenciasPorUsuarioId(alumno.getId());
         model.addAttribute("historialAsistencia", historialAsistencia);
         // Asistencia de hoy (para pre-rellenar el modal Progreso si ya se dio presente desde el panel)
         java.util.List<Asistencia> asistenciasHoy = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(alumno, java.time.LocalDate.now());

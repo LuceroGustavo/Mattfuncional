@@ -99,13 +99,13 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 **Resumen:** Mejoras en registro de progreso (asistencia, grupos musculares, observaciones) y un solo flujo desde panel y desde detalle del alumno.
 
 ### 4.1 Cambios
-- **Checkbox "Marcar como presente":** En el modal se muestra tildado cuando ese día el alumno ya tiene registro de presente (`asistenciaHoy.isPresente()` en Thymeleaf).
+- **Checkbox "Marcar como presente":** Eliminado del modal (el registro de progreso no fuerza presente).
 - **Varios grupos musculares:** Sustituido `<select multiple>` por **checkboxes**; en historial se muestran separados por coma.
 - **Observaciones largas:** Columna `observaciones` ampliada a 2000 caracteres (script `alter_asistencia_observaciones.sql`); textareas con `maxlength="2000"`.
 - **Un solo modal de progreso:** El botón "Progreso" en la tabla del panel redirige a `/profesor/alumnos/{id}?openModal=progreso`; en alumno-detalle un script abre el modal si existe ese query param. Eliminado modal y JS de progreso en dashboard.
 
 ### 4.2 Archivos modificados
-- **alumno-detalle.html:** Checkbox con `isPresente()`; checkboxes para grupos; textarea 2000; script para abrir modal con `openModal=progreso`.
+- **alumno-detalle.html:** checkboxes para grupos; textarea 2000; script para abrir modal con `openModal=progreso`; modal de resumen mensual de asistencias con detalle por día.
 - **dashboard.html:** Botón Progreso → enlace a ficha con `?openModal=progreso`; eliminado modal y JS de progreso.
 - **scripts/alter_asistencia_observaciones.sql:** `ALTER TABLE asistencia MODIFY COLUMN observaciones VARCHAR(2000) NULL;`
 
