@@ -14,7 +14,7 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
 ### Calendario semanal – Dar presente / falta desde el calendario
 
 - **Qué falta:** Poder **dar el presente** (o marcar falta) al usuario directamente desde el calendario semanal. En cada celda/slot donde aparece un alumno, mostrar un indicador visual: **punto verde** cuando tiene el presente dado ese día y **punto rojo** cuando faltó. Incluir la acción para marcar presente o falta desde el propio calendario (clic en el alumno o en un botón del slot).
-- **Estado:** Por implementar.
+- **Estado:** **Implementado.** Puntos verde/rojo/gris por alumno y slot; clic en el punto alterna presente/ausente vía API. Vista Mis Alumnos unificada: columna Presente con fecha, tres estados (Pendiente/Ausente/Presente), mismo endpoint. Ver `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 ### Calendario semanal – Acceso al detalle del usuario desde el botón del usuario
 
@@ -34,7 +34,7 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
   - Un **proceso programado** (cron/scheduled) que, por ejemplo cada noche o al inicio del día, revise los slots ya pasados y cree registros de ausente para quienes no tienen presente.
   - O bien calcular “ausente” al **mostrar** el calendario/historial (sin guardar registro), comparando día/hora del slot con la fecha actual y la existencia de registro de asistencia.
   - Definir modelo de datos si hace falta un estado explícito “ausente” (o si se infiere por “no hay registro de presente”).
-- **Estado:** Por implementar.
+- **Estado:** **Implementado (on-demand).** Al abrir el calendario semanal se llama a `registrarAusentesParaSlotsPasados`: para cada slot ya pasado de la semana se crea registro "ausente" solo si no existe ninguno (no sobrescribe presente). Opcional a futuro: cron que ejecute algo similar cada noche. Ver `CalendarioService.registrarAusentesParaSlotsPasados` y `docs/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 ---
 
