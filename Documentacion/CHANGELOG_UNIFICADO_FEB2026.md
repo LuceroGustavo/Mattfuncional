@@ -12,6 +12,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 4. [Modal de progreso y ficha del alumno](#4-modal-de-progreso-y-ficha-del-alumno)
 5. [Ejercicios (panel) y hoja de rutina pública](#5-ejercicios-panel-y-hoja-de-rutina-pública)
 6. [Alumno inactivo y limpieza en detalle del alumno](#6-alumno-inactivo-y-limpieza-en-detalle-del-alumno)
+7. [Calendario y presentismo – Cierre](#7-calendario-y-presentismo--cierre-feb-2026)
 
 ---
 
@@ -151,4 +152,31 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md.*
+## 7. Calendario y presentismo – Cierre (Feb 2026)
+
+**Resumen:** Ajustes finales de lógica de presentismo (tres estados por defecto pendiente, sin ausente automático), sincronización del historial y modal de resumen con el calendario, y apertura del calendario en nueva pestaña. **Calendario y presentismo quedan cerrados por ahora.**
+
+### 7.1 Lógica de tres estados (pendiente por defecto)
+- **Por defecto** todos los alumnos hasta el día actual quedan en **pendiente**; el sistema **no asume ausente** si no se cambió el estado (feriados, días sin clase, profesor faltó).
+- **Ciclo completo:** en calendario (puntos) y en vista Mis Alumnos (botón Presente) se puede alternar **Pendiente → Presente → Ausente → Pendiente**.
+- **API** `POST /calendario/api/marcar-asistencia`: parámetro **`estado`** (PENDIENTE | PRESENTE | AUSENTE). PENDIENTE elimina el registro; PRESENTE/AUSENTE crean o actualizan. Compatibilidad con parámetro antiguo `presente` (boolean).
+- **Backend:** Se dejó de llamar a `CalendarioService.registrarAusentesParaSlotsPasados`. `AsistenciaService.eliminarRegistroAsistencia(Usuario, LocalDate)` para dejar estado pendiente.
+
+### 7.2 Sincronización historial y modal con el calendario
+- **Problema:** Lo marcado en el calendario (p. ej. presente por excepción el 18/2 a las 10) no se veía en el historial de la ficha ni en el modal “Resumen mensual de asistencias”.
+- **Solución:** GET **`/profesor/alumnos/{id}/asistencias`** (JSON) con la lista actualizada de asistencias del alumno. Al **cargar la ficha** se refresca el historial con esa API. Al **abrir el modal** “Consultar asistencias” se vuelve a pedir la lista, se actualiza el historial y se arma el resumen/detalle del modal. Así, lo marcado en el calendario (incluido por excepción) se refleja en historial y resumen.
+
+### 7.3 Calendario en nueva pestaña
+- El botón **“Calendario Semanal”** en el panel del profesor abre el calendario en **nueva pestaña** (`target="_blank"` y `rel="noopener noreferrer"` en `dashboard.html`).
+
+### 7.4 Archivos tocados
+- **AsistenciaService:** `eliminarRegistroAsistencia(Usuario, LocalDate)`; `eliminarAsistenciaDeHoy` lo usa.
+- **CalendarioController:** sin llamada a `registrarAusentesParaSlotsPasados`; API `marcar-asistencia` con `estado` (y opcional `presente` por compatibilidad).
+- **ProfesorController:** GET `/profesor/alumnos/{id}/asistencias` (JSON) para listar asistencias del alumno.
+- **semanal-profesor.html:** puntos con `data-estado`; JS ciclo PENDIENTE→PRESENTE→AUSENTE→PENDIENTE.
+- **dashboard.html:** botón Presente con ciclo de 3 estados; enlace Calendario Semanal con `target="_blank"`.
+- **alumno-detalle.html:** `id="historialAsistenciaBody"`; al cargar página fetch asistencias y rellenar historial; al abrir modal fetch asistencias, actualizar historial y construir resumen/detalle.
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora.*

@@ -215,7 +215,7 @@
             <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-secondary mx-1">
                 <i class="fa-solid fa-layer-group me-2"></i>Grupos Musculares
             </a>
-            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1">
+            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal
             </a>
         </div>
@@ -389,7 +389,7 @@
                                                 class="btn btn-sm btn-toggle-asistencia"
                                                 th:classappend="${estadoAsistenciaHoy[usuario.id] == 'PRESENTE' ? 'btn-success' : (estadoAsistenciaHoy[usuario.id] == 'AUSENTE' ? 'btn-outline-danger' : 'btn-secondary')}"
                                                 th:disabled="${usuario.estadoAlumno == 'INACTIVO'}"
-                                                th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(#temporals.createNow().toLocalDate(), 'yyyy-MM-dd')}, data-presente=${estadoAsistenciaHoy[usuario.id] == 'PRESENTE'}, data-estado=${estadoAsistenciaHoy[usuario.id]}, aria-disabled=${usuario.estadoAlumno == 'INACTIVO'}, title=${usuario.estadoAlumno == 'INACTIVO' ? 'Alumno inactivo' : 'Clic para cambiar presente/ausente'}"
+                                                th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(#temporals.createNow().toLocalDate(), 'yyyy-MM-dd')}, data-estado=${estadoAsistenciaHoy[usuario.id]}, aria-disabled=${usuario.estadoAlumno == 'INACTIVO'}, title=${usuario.estadoAlumno == 'INACTIVO' ? 'Alumno inactivo' : 'Clic para cambiar estado (Pendiente / Presente / Ausente)'}"
                                                 aria-label="Cambiar estado de asistencia">
                                             <i class="fa-solid fa-check me-1" th:if="${estadoAsistenciaHoy[usuario.id] == 'PRESENTE'}"></i>
                                             <i class="fa-solid fa-times me-1" th:if="${estadoAsistenciaHoy[usuario.id] == 'AUSENTE'}"></i>
@@ -648,39 +648,52 @@
         cargarFiltros();
         aplicarFiltrosAlumnos();
 
-        // Toggle presente/ausente (mismo API que el calendario: se refleja en calendario y viceversa)
-        document.addEventListener('click', function(e) {
-            var btn = e.target && e.target.closest && e.target.closest('.btn-toggle-asistencia');
-            if (!btn || btn.disabled) return;
-            e.preventDefault();
-            var usuarioId = btn.getAttribute('data-usuario-id');
-            var fecha = btn.getAttribute('data-fecha');
-            if (!usuarioId || !fecha) return;
-            var presenteActual = btn.getAttribute('data-presente') === 'true';
-            var nuevoPresente = !presenteActual;
-            var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&presente=' + nuevoPresente;
-            fetch(typeof urlMarcarAsistencia !== 'undefined' ? urlMarcarAsistencia : '/calendario/api/marcar-asistencia', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: params
-            }).then(function(r) {
-                if (!r.ok) throw new Error('Error ' + r.status);
-                return r.json();
-            }).then(function(data) {
-                if (data && data.ok === true) {
-                    var presente = !!data.presente;
-                    var estado = presente ? 'PRESENTE' : 'AUSENTE';
-                    btn.setAttribute('data-presente', presente);
-                    btn.setAttribute('data-estado', estado);
-                    btn.classList.remove('btn-success', 'btn-outline-success', 'btn-outline-danger', 'btn-danger', 'btn-secondary');
-                    btn.classList.add(presente ? 'btn-success' : 'btn-outline-danger');
-                    var icon = btn.querySelector('i.fa-solid');
-                    var span = btn.querySelector('span');
-                    if (icon) { icon.className = 'fa-solid me-1 ' + (presente ? 'fa-check' : 'fa-times'); }
-                    if (span) { span.textContent = presente ? 'Presente' : 'Ausente'; }
-                }
-            }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
-        });
+        // Ciclo de 3 estados: PENDIENTE -> PRESENTE -> AUSENTE -> PENDIENTE (mismo API que el calendario)
+        (function() {
+            var orden = ['PENDIENTE', 'PRESENTE', 'AUSENTE'];
+            function siguienteEstado(actual) {
+                var a = (actual || 'PENDIENTE').toUpperCase();
+                var i = orden.indexOf(a);
+                if (i < 0) i = 0;
+                return orden[(i + 1) % orden.length];
+            }
+            function estilosPorEstado(estado) {
+                if (estado === 'PRESENTE') return { clase: 'btn-success', icono: 'fa-check', texto: 'Presente' };
+                if (estado === 'AUSENTE') return { clase: 'btn-outline-danger', icono: 'fa-times', texto: 'Ausente' };
+                return { clase: 'btn-secondary', icono: 'fa-minus', texto: 'Pendiente' };
+            }
+            document.addEventListener('click', function(e) {
+                var btn = e.target && e.target.closest && e.target.closest('.btn-toggle-asistencia');
+                if (!btn || btn.disabled) return;
+                e.preventDefault();
+                var usuarioId = btn.getAttribute('data-usuario-id');
+                var fecha = btn.getAttribute('data-fecha');
+                var estadoActual = btn.getAttribute('data-estado') || 'PENDIENTE';
+                if (!usuarioId || !fecha) return;
+                var nuevoEstado = siguienteEstado(estadoActual);
+                var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&estado=' + encodeURIComponent(nuevoEstado);
+                fetch(typeof urlMarcarAsistencia !== 'undefined' ? urlMarcarAsistencia : '/calendario/api/marcar-asistencia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: params
+                }).then(function(r) {
+                    if (!r.ok) throw new Error('Error ' + r.status);
+                    return r.json();
+                }).then(function(data) {
+                    if (data && data.ok === true && data.estado) {
+                        var estado = data.estado;
+                        var s = estilosPorEstado(estado);
+                        btn.setAttribute('data-estado', estado);
+                        btn.classList.remove('btn-success', 'btn-outline-success', 'btn-outline-danger', 'btn-danger', 'btn-secondary');
+                        btn.classList.add(s.clase);
+                        var icon = btn.querySelector('i.fa-solid');
+                        var span = btn.querySelector('span');
+                        if (icon) { icon.className = 'fa-solid me-1 ' + s.icono; }
+                        if (span) { span.textContent = s.texto; }
+                    }
+                }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
+            });
+        })();
     </script>
 </body>
 </html>

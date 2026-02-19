@@ -52,17 +52,19 @@
 
 ## 5. Calendario semanal
 
+**Estado:** Calendario y presentismo cerrados por ahora (Feb 2026).
+
 - **Vista:** Encabezados con día + número (ej. Lunes 09), mes visible, horario extendido hasta 20–21.
-- **Asistencia desde el calendario (implementado):**
+- **Acceso:** El botón “Calendario Semanal” en el panel del profesor abre el calendario en **nueva pestaña** (`target="_blank"`).
+- **Asistencia desde el calendario:**
   - En cada celda, junto a cada alumno: **punto verde** (presente), **rojo** (ausente), **gris** (pendiente).
-  - **Clic en el punto** alterna presente/ausente vía API; la vista se actualiza sin recargar.
-  - Al **abrir el calendario** se ejecuta `registrarAusentesParaSlotsPasados`: para cada slot ya pasado de la semana se crea registro “ausente” solo si no existe ninguno (no se sobrescribe un presente ya guardado).
-  - Endpoint único: `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente). Estado por slot en DTO (`presentePorUsuarioId`); carga con JOIN FETCH para que los colores persistan al recargar.
-- **Excepciones por día/hora (nuevo):**
-  - Botón sutil “+” por celda para agregar un alumno **por excepción**.
-  - Botón superior “Agregar usuarios por excepción” que **habilita/deshabilita** los “+” (por defecto ocultos).
-  - Modal con alumno + motivo opcional, y guardado por fecha/hora; etiqueta `Ex` junto al nombre.
-- **Reglas de marcado:** los puntos **no se muestran ni se pueden marcar** en fechas futuras.
+  - **Ciclo de 3 estados:** clic en el punto alterna **Pendiente → Presente → Ausente → Pendiente**. Por defecto **no se asume ausente**: todos quedan pendientes hasta que el profesor marque (permite feriados o días sin clase).
+  - **No se marcan ausentes automáticamente** al abrir el calendario; se eliminó la llamada a `registrarAusentesParaSlotsPasados`.
+  - Endpoint: `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, **estado**: PENDIENTE | PRESENTE | AUSENTE). PENDIENTE elimina el registro; PRESENTE/AUSENTE crean o actualizan.
+  - Estado por slot en DTO (`presentePorUsuarioId`); carga con JOIN FETCH para que los colores persistan al recargar.
+- **Excepciones por día/hora:** Botón “+” por celda (habilitable con botón superior), modal con alumno + motivo; etiqueta `Ex` junto al nombre. Las marcas de presente/ausente desde excepción se guardan en la misma tabla de asistencia.
+- **Sincronización con ficha del alumno:** Al abrir la ficha, el **historial de asistencia** y el **modal “Resumen mensual de asistencias”** cargan datos actualizados del servidor (GET `/profesor/alumnos/{id}/asistencias`), de modo que lo marcado en el calendario (incluido por excepción) se refleja en historial y resumen sin recargar la página.
+- **Reglas de marcado:** los puntos no se muestran ni se pueden marcar en fechas futuras.
 - **Detalle:** Ver `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
 
 ---
@@ -70,9 +72,9 @@
 ## 6. Asistencia – Vista Mis Alumnos (columna Presente)
 
 - **Título de columna:** “Presente (dd/MM/yyyy)” con la fecha del día actual.
-- **Botones solo para quienes asisten hoy:** Se muestra botón solo si el alumno es **presencial** y tiene al menos un horario de asistencia para el **día de la semana actual** (ej. martes → debe tener `DiaHorarioAsistencia` con día MARTES). El resto de celdas quedan en blanco.
-- **Tres estados:** Gris = Pendiente, Rojo = Ausente, Verde = Presente. Clic en el botón alterna el estado y llama al **mismo endpoint** que el calendario; los cambios se reflejan en calendario y viceversa.
-- **Corrección:** “Presente” solo se muestra cuando el registro de asistencia tiene `presente == true` (antes se consideraba presente si existía cualquier registro ese día).
+- **Botones solo para quienes asisten hoy:** Se muestra botón solo si el alumno es **presencial** y tiene al menos un horario de asistencia para el **día de la semana actual**. El resto de celdas quedan en blanco.
+- **Tres estados (ciclo completo):** Gris = Pendiente, Rojo = Ausente, Verde = Presente. Clic en el botón **cicla** Pendiente → Presente → Ausente → Pendiente; mismo endpoint que el calendario (`estado` PENDIENTE/PRESENTE/AUSENTE). Los cambios se reflejan en calendario y viceversa.
+- **Presente** solo se considera cuando existe registro con `presente == true`; sin registro = Pendiente.
 
 ---
 

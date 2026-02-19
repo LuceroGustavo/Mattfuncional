@@ -423,7 +423,7 @@
                                 <th>Observaciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="historialAsistenciaBody">
                             <tr th:each="asistencia : ${historialAsistencia}"
                                 th:attr="data-fecha=${#temporals.format(asistencia.fecha, 'yyyy-MM-dd')}, data-presente=${asistencia.presente}">
                                 <td th:text="${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')}">Fecha</td>
@@ -676,14 +676,51 @@
             }
         })();
 
-        // Resumen mensual de asistencias en modal
+        // Al cargar la ficha, refrescar el historial de asistencia desde el servidor para que coincida con el calendario
+        (function() {
+            var historialBody = document.getElementById('historialAsistenciaBody');
+            if (!historialBody) return;
+            var m = window.location.pathname.match(/\/profesor\/alumnos\/(\d+)/);
+            var alumnoId = m ? m[1] : null;
+            if (!alumnoId) return;
+            fetch('/profesor/alumnos/' + alumnoId + '/asistencias', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(res) { return res.ok ? res.json() : []; })
+                .then(function(data) {
+                    historialBody.innerHTML = '';
+                    if (!data || data.length === 0) {
+                        historialBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="fas fa-calendar-times fa-2x mb-2"></i><p class="mb-0">Sin registros de asistencia. Usa el botón <strong>Progreso</strong> o marca desde el calendario.</p></td></tr>';
+                        return;
+                    }
+                    data.sort(function(a, b) { return (b.fecha || '').localeCompare(a.fecha || ''); });
+                    data.forEach(function(r) {
+                        var tr = document.createElement('tr');
+                        tr.setAttribute('data-fecha', r.fecha || '');
+                        tr.setAttribute('data-presente', r.presente ? 'true' : 'false');
+                        var grupos = (r.gruposTrabajados && r.gruposTrabajados.length) ? r.gruposTrabajados.join(', ') : '-';
+                        var obs = (r.observaciones && r.observaciones.trim()) ? r.observaciones : '-';
+                        tr.innerHTML = '<td>' + (r.fechaFormateada || r.fecha) + '</td>' +
+                            '<td>' + (r.presente ? '<span class="badge bg-success">Presente</span>' : '<span class="badge bg-danger">Ausente</span>') + '</td>' +
+                            '<td class="text-muted">' + grupos + '</td><td>' + obs + '</td>';
+                        historialBody.appendChild(tr);
+                    });
+                })
+                .catch(function() {});
+        })();
+
+        // Resumen mensual de asistencias: al abrir el modal se cargan asistencias actualizadas del servidor
+        // (incluye marcas hechas desde el calendario, p. ej. presente por excepción) y se actualiza también el historial.
         (function() {
             const modalEl = document.getElementById('modalResumenAsistencias');
-            const tbody = document.getElementById('resumenAsistenciasBody');
+            const tbodyResumen = document.getElementById('resumenAsistenciasBody');
             const detalleBody = document.getElementById('detalleAsistenciasBody');
             const mesSelect = document.getElementById('resumenMesSelect');
-            if (!modalEl || !tbody) return;
+            const historialBody = document.getElementById('historialAsistenciaBody');
+            if (!modalEl || !tbodyResumen) return;
             const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            function getAlumnoId() {
+                var m = window.location.pathname.match(/\/profesor\/alumnos\/(\d+)/);
+                return m ? m[1] : null;
+            }
             function construirDetalle(registros, clave) {
                 if (!detalleBody) return;
                 detalleBody.innerHTML = '';
@@ -691,14 +728,14 @@
                     detalleBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">Selecciona un mes para ver el detalle.</td></tr>';
                     return;
                 }
-                const items = registros.filter(r => r.claveMes === clave);
+                var items = registros.filter(function(r) { return r.claveMes === clave; });
                 if (items.length === 0) {
                     detalleBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">Sin registros en este mes.</td></tr>';
                     return;
                 }
-                items.sort((a, b) => b.fecha.localeCompare(a.fecha));
+                items.sort(function(a, b) { return b.fecha.localeCompare(a.fecha); });
                 items.forEach(function(item) {
-                    const tr = document.createElement('tr');
+                    var tr = document.createElement('tr');
                     tr.innerHTML = '<td>' + item.fechaFormateada + '</td>' +
                         '<td>' + (item.presente
                             ? '<span class="badge bg-success">Presente</span>'
@@ -706,71 +743,98 @@
                     detalleBody.appendChild(tr);
                 });
             }
-            modalEl.addEventListener('show.bs.modal', function() {
-                const rows = document.querySelectorAll('tbody tr[data-fecha][data-presente]');
-                const resumen = new Map();
-                const registros = [];
-                rows.forEach(function(row) {
-                    const fecha = row.getAttribute('data-fecha');
-                    if (!fecha) return;
-                    const presente = row.getAttribute('data-presente') === 'true';
-                    const partes = fecha.split('-');
+            function actualizarHistorialYModal(registros) {
+                var resumen = new Map();
+                registros.forEach(function(r) {
+                    if (!r.fecha) return;
+                    var partes = r.fecha.split('-');
                     if (partes.length < 2) return;
-                    const clave = partes[0] + '-' + partes[1];
-                    if (!resumen.has(clave)) {
-                        resumen.set(clave, { presente: 0, ausente: 0 });
-                    }
-                    const item = resumen.get(clave);
-                    if (presente) item.presente += 1;
-                    else item.ausente += 1;
-                    const fechaFormateada = partes[2] + '/' + partes[1] + '/' + partes[0];
-                    registros.push({ claveMes: clave, fecha: fecha, fechaFormateada: fechaFormateada, presente: presente });
+                    var clave = partes[0] + '-' + partes[1];
+                    if (!resumen.has(clave)) resumen.set(clave, { presente: 0, ausente: 0 });
+                    var item = resumen.get(clave);
+                    if (r.presente) item.presente += 1; else item.ausente += 1;
                 });
-                if (resumen.size === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin datos de asistencia.</td></tr>';
-                    if (mesSelect) {
-                        mesSelect.innerHTML = '<option value="">Seleccionar mes</option>';
+                if (historialBody) {
+                    historialBody.innerHTML = '';
+                    if (registros.length === 0) {
+                        historialBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="fas fa-calendar-times fa-2x mb-2"></i><p class="mb-0">Sin registros de asistencia. Usa el botón <strong>Progreso</strong> o marca desde el calendario.</p></td></tr>';
+                    } else {
+                        registros.forEach(function(r) {
+                            var tr = document.createElement('tr');
+                            tr.setAttribute('data-fecha', r.fecha);
+                            tr.setAttribute('data-presente', r.presente ? 'true' : 'false');
+                            var grupos = (r.gruposTrabajados && r.gruposTrabajados.length) ? r.gruposTrabajados.join(', ') : '-';
+                            var obs = (r.observaciones && r.observaciones.trim()) ? r.observaciones : '-';
+                            tr.innerHTML = '<td>' + (r.fechaFormateada || r.fecha) + '</td>' +
+                                '<td>' + (r.presente ? '<span class="badge bg-success">Presente</span>' : '<span class="badge bg-danger">Ausente</span>') + '</td>' +
+                                '<td class="text-muted">' + grupos + '</td><td>' + obs + '</td>';
+                            historialBody.appendChild(tr);
+                        });
                     }
+                }
+                if (resumen.size === 0) {
+                    tbodyResumen.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin datos de asistencia.</td></tr>';
+                    if (mesSelect) { mesSelect.innerHTML = '<option value="">Seleccionar mes</option>'; }
                     construirDetalle([], '');
                     return;
                 }
-                const clavesOrdenadas = Array.from(resumen.keys()).sort();
-                tbody.innerHTML = '';
+                var clavesOrdenadas = Array.from(resumen.keys()).sort();
+                tbodyResumen.innerHTML = '';
                 clavesOrdenadas.forEach(function(clave) {
-                    const item = resumen.get(clave);
-                    const partes = clave.split('-');
-                    const year = partes[0];
-                    const monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
-                    const mesLabel = meses[monthIdx] + ' ' + year;
-                    const total = item.presente + item.ausente;
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = '<td>' + mesLabel + '</td>' +
-                        '<td><span class="badge bg-success">' + item.presente + '</span></td>' +
-                        '<td><span class="badge bg-secondary">' + item.ausente + '</span></td>' +
-                        '<td>' + total + '</td>';
-                    tbody.appendChild(tr);
+                    var item = resumen.get(clave);
+                    var partes = clave.split('-');
+                    var monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
+                    var mesLabel = meses[monthIdx] + ' ' + partes[0];
+                    var total = item.presente + item.ausente;
+                    var tr = document.createElement('tr');
+                    tr.innerHTML = '<td>' + mesLabel + '</td><td><span class="badge bg-success">' + item.presente + '</span></td><td><span class="badge bg-secondary">' + item.ausente + '</span></td><td>' + total + '</td>';
+                    tbodyResumen.appendChild(tr);
                 });
                 if (mesSelect) {
                     mesSelect.innerHTML = '<option value="">Seleccionar mes</option>';
                     clavesOrdenadas.forEach(function(clave) {
-                        const partes = clave.split('-');
-                        const year = partes[0];
-                        const monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
-                        const mesLabel = meses[monthIdx] + ' ' + year;
-                        const opt = document.createElement('option');
+                        var partes = clave.split('-');
+                        var monthIdx = Math.max(0, Math.min(11, parseInt(partes[1], 10) - 1));
+                        var opt = document.createElement('option');
                         opt.value = clave;
-                        opt.textContent = mesLabel;
+                        opt.textContent = meses[monthIdx] + ' ' + partes[0];
                         mesSelect.appendChild(opt);
                     });
-                    mesSelect.onchange = function() {
-                        construirDetalle(registros, mesSelect.value);
-                    };
-                    const ultimoMes = clavesOrdenadas[clavesOrdenadas.length - 1];
+                    var ultimoMes = clavesOrdenadas[clavesOrdenadas.length - 1];
                     mesSelect.value = ultimoMes;
+                    mesSelect.onchange = function() { construirDetalle(registros, mesSelect.value); };
                     construirDetalle(registros, ultimoMes);
+                } else {
+                    construirDetalle(registros, '');
+                }
+            }
+            modalEl.addEventListener('show.bs.modal', function() {
+                var alumnoId = getAlumnoId();
+                if (!alumnoId) {
+                    actualizarHistorialYModal([]);
                     return;
                 }
-                construirDetalle(registros, '');
+                var url = '/profesor/alumnos/' + alumnoId + '/asistencias';
+                fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(res) { return res.ok ? res.json() : []; })
+                    .then(function(data) {
+                        var registros = (data || []).map(function(a) {
+                            var fecha = a.fecha || '';
+                            var partes = fecha.split('-');
+                            var clave = partes.length >= 2 ? partes[0] + '-' + partes[1] : '';
+                            return {
+                                fecha: fecha,
+                                fechaFormateada: a.fechaFormateada || fecha,
+                                presente: !!a.presente,
+                                claveMes: clave,
+                                gruposTrabajados: a.gruposTrabajados || [],
+                                observaciones: a.observaciones || ''
+                            };
+                        });
+                        registros.sort(function(a, b) { return (b.fecha || '').localeCompare(a.fecha || ''); });
+                        actualizarHistorialYModal(registros);
+                    })
+                    .catch(function() { actualizarHistorialYModal([]); });
             });
         })();
     </script>

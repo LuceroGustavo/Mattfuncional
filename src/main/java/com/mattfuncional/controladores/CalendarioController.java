@@ -69,7 +69,7 @@ public class CalendarioController {
         LocalDate fechaCalendario = fecha != null ? LocalDate.parse(fecha) : LocalDate.now();
 
         CalendarioSemanalDTO calendario = calendarioService.generarCalendarioSemanal(fechaCalendario, profesorId);
-        calendarioService.registrarAusentesParaSlotsPasados(calendario);
+        // No se marcan ausentes automáticamente: por defecto todos quedan pendientes (feriados, profesor faltó, etc.)
         Map<String, Boolean> asistenciaMap = asistenciaService.getMapaPresentePorUsuarioYFecha(
                 calendario.getFechaInicioSemana(), calendario.getFechaFinSemana());
         Map<String, Object> estadisticas = calendarioService.obtenerEstadisticasSemana(fechaCalendario, profesorId);
@@ -173,19 +173,39 @@ public class CalendarioController {
         return java.util.Map.of("disponible", disponible);
     }
 
+    /**
+     * Marca el estado de asistencia: PENDIENTE (sin registro), PRESENTE o AUSENTE.
+     * Acepta "estado" (PENDIENTE/PRESENTE/AUSENTE) o, por compatibilidad, "presente" (true/false).
+     */
     @PostMapping("/api/marcar-asistencia")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> marcarAsistencia(
             @RequestParam Long usuarioId,
             @RequestParam String fecha,
-            @RequestParam boolean presente) {
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Boolean presente) {
         Usuario alumno = usuarioService.getUsuarioById(usuarioId);
         if (alumno == null) {
             return ResponseEntity.badRequest().body(java.util.Map.of("ok", false, "error", "Usuario no encontrado"));
         }
+        String estadoNorm;
+        if (estado != null && !estado.isBlank()) {
+            estadoNorm = estado.toUpperCase().trim();
+            if (!java.util.Set.of("PENDIENTE", "PRESENTE", "AUSENTE").contains(estadoNorm)) {
+                return ResponseEntity.badRequest().body(java.util.Map.of("ok", false, "error", "Estado inválido"));
+            }
+        } else {
+            // Compatibilidad: si envían el viejo parámetro "presente" (true/false)
+            estadoNorm = Boolean.TRUE.equals(presente) ? "PRESENTE" : "AUSENTE";
+        }
         LocalDate fechaDate = LocalDate.parse(fecha);
-        asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presente, null, null);
-        return ResponseEntity.ok(java.util.Map.of("ok", true, "presente", presente));
+        if ("PENDIENTE".equals(estadoNorm)) {
+            asistenciaService.eliminarRegistroAsistencia(alumno, fechaDate);
+            return ResponseEntity.ok(java.util.Map.of("ok", true, "estado", "PENDIENTE", "presente", false));
+        }
+        boolean presenteVal = "PRESENTE".equals(estadoNorm);
+        asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presenteVal, null, null);
+        return ResponseEntity.ok(java.util.Map.of("ok", true, "estado", estadoNorm, "presente", presenteVal));
     }
 
     @PostMapping("/excepcion")

@@ -70,40 +70,46 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 
 ## 3. Unificación y flujo de datos
 
-- **Única fuente de verdad:** tabla `Asistencia` (usuario, fecha, presente) y método `AsistenciaService.guardarOActualizarProgreso`.
-- **Mismo endpoint para marcar:** `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, presente) usado tanto por el calendario como por la vista de alumnos.
-- Así, lo que se marca en el calendario se refleja en Mis Alumnos y al revés.
+- **Única fuente de verdad:** tabla `Asistencia` (usuario, fecha, presente). Sin registro = pendiente.
+- **Endpoint para marcar:** `POST /calendario/api/marcar-asistencia` (usuarioId, fecha, **estado**: PENDIENTE | PRESENTE | AUSENTE). PENDIENTE elimina el registro; PRESENTE/AUSENTE llaman a `guardarOActualizarProgreso`. Compatibilidad con parámetro `presente` (boolean).
+- Lo que se marca en el calendario se refleja en Mis Alumnos y al revés.
 
 ---
 
-## 4. Ficha del alumno – Resumen mensual y detalle por día
+## 4. Tres estados y pendiente por defecto (cierre presentismo)
 
-- **Modal “Consultar asistencias”:** resumen por mes (asistencias/ausencias/total).
-- **Detalle por día:** selector de mes para listar las asistencias del mes (fecha + estado), ordenadas por fecha más reciente.
+- **Por defecto** no se asume ausente: todos quedan **pendiente** hasta que el profesor marque (feriados, días sin clase).
+- **Ciclo en puntos y en columna Presente:** Pendiente → Presente → Ausente → Pendiente.
+- **Se eliminó** la llamada a `registrarAusentesParaSlotsPasados` al abrir el calendario; ya no se crean registros "ausente" automáticamente para slots pasados.
+- **AsistenciaService:** `eliminarRegistroAsistencia(Usuario, LocalDate)` para dejar estado pendiente.
 
 ---
 
-## 4. Resumen de archivos tocados
+## 5. Ficha del alumno – Historial y resumen mensual sincronizados con el calendario
+
+- **GET `/profesor/alumnos/{id}/asistencias`:** devuelve en JSON la lista actualizada de asistencias del alumno (fecha, presente, observaciones, grupos trabajados).
+- **Al cargar la ficha:** se llama a esa API y se actualiza la tabla "Historial de Asistencia" con los datos del servidor (incluye lo marcado en el calendario, también por excepción).
+- **Al abrir el modal "Consultar asistencias":** se vuelve a pedir la lista, se actualiza el historial y se construye el resumen por mes y el detalle por día. El resumen y el historial reflejan lo marcado en el calendario sin recargar la página.
+
+---
+
+## 6. Calendario en nueva pestaña
+
+- El botón **"Calendario Semanal"** en el panel del profesor (`dashboard.html`) abre el calendario en **nueva pestaña** (`target="_blank"`, `rel="noopener noreferrer"`).
+
+---
+
+## 7. Resumen de archivos tocados
 
 - **Repositorios:** `AsistenciaRepository`
 - **Servicios:** `AsistenciaService`, `CalendarioService`
-- **Controladores:** `CalendarioController`, `ProfesorController`
+- **Controladores:** `CalendarioController` (API `estado`, sin `registrarAusentesParaSlotsPasados`), `ProfesorController` (GET `/profesor/alumnos/{id}/asistencias` en JSON)
 - **DTOs:** `CalendarioSemanalDTO` (SlotHorarioDTO)
-- **Vistas:** `calendario/semanal-profesor.html`, `profesor/dashboard.html`
-- **Documentación:** `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` (este archivo)
+- **Vistas:** `calendario/semanal-profesor.html` (ciclo 3 estados, `data-estado`), `profesor/dashboard.html` (ciclo 3 estados, Calendario Semanal `target="_blank"`), `profesor/alumno-detalle.html` (historial con id, fetch asistencias al cargar y al abrir modal)
+- **Documentación:** `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` (este archivo), `AVANCES_DEL_APP.md`, `CHANGELOG_UNIFICADO_FEB2026.md` (sección 7)
 
 ---
 
-## 5. Sugerencia de commit
+## 8. Estado: calendario y presentismo cerrados por ahora
 
-```
-feat(asistencia): calendario y vista alumnos con presente/ausente/pendiente unificados
-
-- Calendario semanal: puntos verde/rojo/gris por alumno y slot; clic alterna estado vía API
-- Registrar ausentes al abrir calendario (solo slots pasados, sin sobrescribir)
-- Estado por slot en DTO (presentePorUsuarioId) y carga con JOIN FETCH para persistencia al recargar
-- Endpoint POST /calendario/api/marcar-asistencia (usuarioId, fecha, presente)
-- Vista Mis Alumnos: columna Presente con fecha actual; botones solo para quienes asisten hoy
-- Tres estados: Pendiente (gris), Ausente (rojo), Presente (verde); mismo API que calendario
-- Documentación en Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md
-```
+- Calendario semanal, asistencia (tres estados), excepciones, sincronización con historial y resumen, y apertura en nueva pestaña están implementados. **Se considera cerrado el módulo de calendario y presentismo por ahora** (Feb 2026).

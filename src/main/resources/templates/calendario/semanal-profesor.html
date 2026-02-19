@@ -420,7 +420,7 @@
                                                 <span th:if="${fechaDia != null and (fechaDia.isBefore(#temporals.createNow().toLocalDate()) or fechaDia.isEqual(#temporals.createNow().toLocalDate()))}"
                                                     class="punto-asistencia btn-punto-asistencia"
                                                     th:classappend="${presente == true ? 'punto-presente' : (presente == false ? 'punto-ausente' : 'punto-pendiente')}"
-                                                    th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-presente=${presente != null ? presente : false}, title=${presente == true ? 'Presente (clic para cambiar)' : (presente == false ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para marcar presente/ausente)')}"></span>
+                                                    th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-estado=${presente == null ? 'PENDIENTE' : (presente == true ? 'PRESENTE' : 'AUSENTE')}, title=${presente == true ? 'Presente (clic para cambiar)' : (presente == false ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para cambiar)')}"></span>
                                                 <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="usuario-link" target="_blank" rel="noopener" th:text="${usuario.nombre}"></a>
                                                 <span th:if="${esExcepcion == true}" class="badge-excepcion" title="Agregado por excepción">Ex</span>
                                             </div>
@@ -541,9 +541,20 @@
             });
         })();
 
-        // Marcar presente/ausente desde el calendario (clic en el punto) — delegación para que siempre funcione
+        // Ciclo de 3 estados: PENDIENTE -> PRESENTE -> AUSENTE -> PENDIENTE (clic en el punto)
         (function() {
             var urlApi = (typeof urlMarcarAsistencia !== 'undefined' ? urlMarcarAsistencia : '/calendario/api/marcar-asistencia');
+            var orden = ['PENDIENTE', 'PRESENTE', 'AUSENTE'];
+            function siguienteEstado(actual) {
+                var i = orden.indexOf(actual);
+                return orden[(i + 1) % orden.length];
+            }
+            function clasePorEstado(estado) {
+                return estado === 'PRESENTE' ? 'punto-presente' : (estado === 'AUSENTE' ? 'punto-ausente' : 'punto-pendiente');
+            }
+            function tituloPorEstado(estado) {
+                return estado === 'PRESENTE' ? 'Presente (clic para cambiar)' : (estado === 'AUSENTE' ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para cambiar)');
+            }
             document.addEventListener('click', function(e) {
                 var dot = e.target;
                 if (!dot || !dot.classList || !dot.classList.contains('btn-punto-asistencia')) return;
@@ -551,14 +562,14 @@
                 e.stopPropagation();
                 var usuarioId = dot.getAttribute('data-usuario-id');
                 var fecha = dot.getAttribute('data-fecha');
+                var estadoActual = (dot.getAttribute('data-estado') || 'PENDIENTE').toUpperCase();
                 if (!usuarioId || !fecha) return;
                 var fechaHoy = new Date();
                 var fechaSlot = new Date(fecha + 'T00:00:00');
                 fechaHoy.setHours(0, 0, 0, 0);
                 if (fechaSlot > fechaHoy) return;
-                var presenteActual = dot.getAttribute('data-presente') === 'true';
-                var nuevoPresente = !presenteActual;
-                var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&presente=' + nuevoPresente;
+                var nuevoEstado = siguienteEstado(estadoActual);
+                var params = 'usuarioId=' + encodeURIComponent(usuarioId) + '&fecha=' + encodeURIComponent(fecha) + '&estado=' + encodeURIComponent(nuevoEstado);
                 fetch(urlApi, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -567,12 +578,12 @@
                     if (!r.ok) throw new Error('Error ' + r.status);
                     return r.json();
                 }).then(function(data) {
-                    if (data && data.ok === true) {
-                        var presente = !!data.presente;
-                        dot.setAttribute('data-presente', presente);
+                    if (data && data.ok === true && data.estado) {
+                        var estado = data.estado;
+                        dot.setAttribute('data-estado', estado);
                         dot.classList.remove('punto-presente', 'punto-ausente', 'punto-pendiente');
-                        dot.classList.add(presente ? 'punto-presente' : 'punto-ausente');
-                        dot.setAttribute('title', presente ? 'Presente (clic para cambiar)' : 'Ausente (clic para cambiar)');
+                        dot.classList.add(clasePorEstado(estado));
+                        dot.setAttribute('title', tituloPorEstado(estado));
                     }
                 }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
             });

@@ -63,12 +63,22 @@ public class AsistenciaService {
     }
 
     public boolean eliminarAsistenciaDeHoy(Usuario usuario) {
-        List<Asistencia> existentes = asistenciaRepository.findByUsuarioAndFecha(usuario, LocalDate.now());
+        return eliminarRegistroAsistencia(usuario, LocalDate.now());
+    }
+
+    /**
+     * Elimina el registro de asistencia para (usuario, fecha). Deja el estado como "pendiente" (sin registro).
+     * Útil cuando el profesor quiere marcar explícitamente pendiente (ej. feriado, no hubo clase).
+     */
+    @Transactional
+    public boolean eliminarRegistroAsistencia(Usuario usuario, LocalDate fecha) {
+        if (usuario == null || fecha == null) return false;
+        List<Asistencia> existentes = asistenciaRepository.findByUsuarioAndFecha(usuario, fecha);
         if (existentes != null && !existentes.isEmpty()) {
             asistenciaRepository.deleteAll(existentes);
             return true;
         }
-        return false;
+        return true; // ya no había registro
     }
 
     /**

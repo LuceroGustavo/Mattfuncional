@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -403,6 +404,38 @@ public class ProfesorController {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         }
         return "profesor/alumno-detalle";
+    }
+
+    /** API: lista de asistencias del alumno (para actualizar modal e historial sin recargar la página). */
+    @GetMapping(value = "/alumnos/{id}/asistencias", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getAsistenciasAlumno(@PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuarioActual) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (alumno == null || profesor == null || alumno.getProfesor() == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Asistencia> list = asistenciaService.obtenerAsistenciasPorUsuarioId(alumno.getId());
+        List<Map<String, Object>> out = new ArrayList<>();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter fmtShow = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        for (Asistencia a : list) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("fecha", a.getFecha() != null ? a.getFecha().format(fmt) : null);
+            m.put("fechaFormateada", a.getFecha() != null ? a.getFecha().format(fmtShow) : null);
+            m.put("presente", a.isPresente());
+            m.put("observaciones", a.getObservaciones() != null ? a.getObservaciones() : "");
+            List<String> grupos = new ArrayList<>();
+            if (a.getGruposTrabajados() != null) {
+                for (com.mattfuncional.entidades.GrupoMuscular g : a.getGruposTrabajados()) {
+                    if (g != null && g.getNombre() != null) grupos.add(g.getNombre());
+                }
+            }
+            m.put("gruposTrabajados", grupos);
+            out.add(m);
+        }
+        return ResponseEntity.ok(out);
     }
 
     // POST: Registrar asistencia
