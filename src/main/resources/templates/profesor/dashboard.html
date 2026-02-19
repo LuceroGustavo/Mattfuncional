@@ -16,10 +16,6 @@
             background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
             min-height: 100vh;
         }
-        .navbar {
-            background: linear-gradient(90deg, #90caf9 0%, #ce93d8 100%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
         .dashboard-cards {
             gap: 2rem;
         }
@@ -145,24 +141,7 @@
     </style>
 </head>
 <body>
-    <!-- Navbar personalizado -->
-    <nav class="navbar navbar-expand-lg navbar-dark w-100">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img th:src="@{/img/logo matt.jpeg}" src="/img/logo%20matt.jpeg" alt="Logo Mattfuncional" width="48" height="48" class="me-2 rounded-circle object-fit-cover" onerror="this.src='/img/not_imagen.png'">
-                Mattfuncional
-            </a>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="profile-badge d-flex align-items-center" style="background:#fff; border-radius:2rem; padding:0.25rem 1rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); font-weight:500;">
-                    <i class="fa-solid fa-user-circle fa-lg me-2" style="color:#9575cd;"></i>
-                    <span th:text="${profesor != null ? (profesor.nombre + ' ' + (profesor.apellido != null ? profesor.apellido : '')).trim() : 'Profesor'}"></span>
-                </span>
-                <a href="/logout" class="btn logout-btn ms-2" style="background:#ef9a9a; color:#b71c1c; border-radius:1.5rem; font-weight:500;">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
-            </div>
-        </div>
-    </nav>
+    <div th:replace="fragments/navbar :: navbar"></div>
 
     <div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
         <!-- Título y bienvenida -->
