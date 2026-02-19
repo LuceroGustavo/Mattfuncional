@@ -48,6 +48,10 @@ public class UsuarioService {
         return usuarioRepository.findAllAlumnosIncludingOrphans();
     }
 
+    public List<Usuario> getUsuariosSistema() {
+        return usuarioRepository.findByRolIn(java.util.List.of("ADMIN", "AYUDANTE"));
+    }
+
     @Cacheable(value = "usuarios", key = "'profesor-' + #profesorId")
     public List<Usuario> getAlumnosByProfesorId(Long profesorId) {
         return usuarioRepository.findAlumnosByProfesorIdWithRelations(profesorId);
@@ -105,6 +109,55 @@ public class UsuarioService {
         }
         
         return usuarioRepository.save(usuario);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public Usuario crearUsuarioSistema(String nombre, String correo, String password, String rol, Profesor profesor) {
+        if (correo == null || correo.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Correo y contraseña son obligatorios");
+        }
+        String rolNorm = rol != null ? rol.toUpperCase().trim() : "AYUDANTE";
+        if (!java.util.Set.of("ADMIN", "AYUDANTE").contains(rolNorm)) {
+            throw new IllegalArgumentException("Rol inválido");
+        }
+        if (usuarioRepository.findByCorreo(correo).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un usuario con ese correo");
+        }
+        Usuario usuario = new Usuario();
+        usuario.setNombre(nombre != null && !nombre.isBlank() ? nombre.trim() : correo);
+        usuario.setCorreo(correo.trim());
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setRol(rolNorm);
+        usuario.setEdad(0);
+        usuario.setSexo("No especificado");
+        usuario.setAvatar("/img/avatar1.png");
+        if (profesor != null) {
+            usuario.setProfesor(profesor);
+        }
+        return usuarioRepository.save(usuario);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public void actualizarRolUsuario(Long usuarioId, String rol) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String rolNorm = rol != null ? rol.toUpperCase().trim() : "";
+        if (!java.util.Set.of("ADMIN", "AYUDANTE").contains(rolNorm)) {
+            throw new IllegalArgumentException("Rol inválido");
+        }
+        usuario.setRol(rolNorm);
+        usuarioRepository.save(usuario);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public void cambiarPasswordUsuario(Long usuarioId, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("La contraseña no puede estar vacía");
+        }
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setPassword(passwordEncoder.encode(newPassword.trim()));
+        usuarioRepository.save(usuario);
     }
 
     @CacheEvict(value = "usuarios", allEntries = true)

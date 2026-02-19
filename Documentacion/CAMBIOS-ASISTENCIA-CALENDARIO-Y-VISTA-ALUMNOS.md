@@ -90,6 +90,11 @@ Se implementó y unificó la funcionalidad de **dar presente / ausente** entre e
 - **GET `/profesor/alumnos/{id}/asistencias`:** devuelve en JSON la lista actualizada de asistencias del alumno (fecha, presente, observaciones, grupos trabajados).
 - **Al cargar la ficha:** se llama a esa API y se actualiza la tabla "Historial de Asistencia" con los datos del servidor (incluye lo marcado en el calendario, también por excepción).
 - **Al abrir el modal "Consultar asistencias":** se vuelve a pedir la lista, se actualiza el historial y se construye el resumen por mes y el detalle por día. El resumen y el historial reflejan lo marcado en el calendario sin recargar la página.
+- **Robustez del modal:** si el JSON falla, el resumen se arma con el historial ya renderizado. Abrir/cerrar el modal **no modifica** la tabla de historial.
+
+## 5.1 Admin: selector de profesor en historial
+- En filas con **trabajo/observaciones**, el admin ve **selector directo** (no requiere click previo).
+- El cambio se guarda **automáticamente** al seleccionar otro usuario.
 
 ---
 

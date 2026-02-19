@@ -23,6 +23,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findByRol(String rol);
 
+    @Query("SELECT u FROM Usuario u WHERE u.rol IN :roles ORDER BY u.nombre")
+    List<Usuario> findByRolIn(@Param("roles") List<String> roles);
+
     List<Usuario> findByProfesor_Id(Long profesorId);
 
     List<Usuario> findByProfesor_IdAndRol(Long profesorId, String rol);

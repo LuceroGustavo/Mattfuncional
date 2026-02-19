@@ -34,9 +34,9 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 | Ítem | Descripción | Estado en doc |
 |------|-------------|---------------|
-| **Calendario – Acceso al detalle del usuario** | Desde el nombre/botón del alumno en cada celda del calendario, ir a la ficha del alumno (`/profesor/alumnos/{id}`). | Por implementar |
-| **Calendario – Día por excepción (recuperar clase)** | Que el profesor pueda asignar a un alumno un día/horario puntual (ej. recuperar clase) sin que sea su horario habitual; que se vea en el calendario. | Por implementar |
-| **Asistencia – Ausente automático** | Opcional: proceso programado (cron) que, por ejemplo cada noche, marque ausentes para slots ya pasados sin presente (hoy se hace al abrir el calendario). | Por implementar (opcional) |
+| **Calendario – Acceso al detalle del usuario** | Desde el nombre/botón del alumno en cada celda del calendario, ir a la ficha del alumno (`/profesor/alumnos/{id}`). | **Implementado (backend).** Falta pulir frontend |
+| **Calendario – Día por excepción (recuperar clase)** | Que el profesor pueda asignar a un alumno un día/horario puntual (ej. recuperar clase) sin que sea su horario habitual; que se vea en el calendario. | **Implementado (backend).** Falta pulir frontend |
+| **Asistencia – Ausente automático** | Opcional: proceso programado (cron) que, por ejemplo cada noche, marque ausentes para slots ya pasados sin presente (hoy se hace al abrir el calendario). | **Implementado (backend, on-demand).** Cron opcional |
 
 ---
 
@@ -46,15 +46,15 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 | Fase | Contenido | Estado |
 |------|-----------|--------|
-| **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | Pendiente / parcial |
-| **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. Calendario y presentismo (gran parte ya hecha). | Pendiente |
+| **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | **Implementado (backend).** Falta pulir frontend |
+| **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. Calendario y presentismo (gran parte ya hecha). | **Implementado (backend).** Falta pulir frontend |
 | **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). | Pendiente |
 | **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | Pendiente |
 
 ### Checklist general (ítems sin marcar)
 
 - [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
-- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
+- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. (**Backend OK; frontend pendiente**)
 - [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.

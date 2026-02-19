@@ -95,7 +95,7 @@
 - [x] Un único **panel: profesor** (no admin, no alumno).
 - [x] **Ejercicios:** Predeterminados desde `uploads/ejercicios/` (1–60); ABM en panel profesor.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series (crear, editar, orden de series).
-- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña.
+- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. **Backend OK; frontend pendiente**.
 - [x] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** (hoja en `/rutinas/hoja/{token}`).
 - [x] **Calendario semanal y presentismo** (dar presente/ausente desde calendario y vista Mis Alumnos; tres estados; mismo API).
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
@@ -107,9 +107,9 @@
 ## 8. Pendientes inmediatos (próximas sesiones)
 
 - **Ficha del detalle de alumno:** Mejorar vista de detalle (organización, legibilidad, accesos rápidos, historial y progreso más claros).
-- **Calendario – Acceso al detalle del usuario:** Al hacer clic en el nombre del alumno en una celda del calendario, abrir la ficha del alumno (`/profesor/alumnos/{id}`).
-- **Calendario – Día por excepción (recuperar clase):** Que el profesor pueda asignar a un alumno un día/horario puntual que no sea su horario habitual y que se vea en el calendario.
-- **Asistencia – Cron opcional:** Proceso programado (cron) que marque ausentes para slots ya pasados (hoy se hace al abrir el calendario; opcional para ejecución nocturna).
+- **Calendario – Acceso al detalle del usuario:** **Resuelto (backend).** Pendiente de mejora visual al final.
+- **Calendario – Día por excepción (recuperar clase):** **Resuelto (backend).** Pendiente de mejora visual al final.
+- **Asistencia – Cron opcional:** **Resuelto (backend on-demand).** Cron nocturno opcional si se desea.
 
 ---
 

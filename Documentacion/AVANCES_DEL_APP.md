@@ -108,6 +108,8 @@
 - **Tipos:** Presencial, Virtual (antes “Online”), Semipresencial. Horarios visibles en presencial/semipresencial.
 - **Ficha de alumno:** Scroll asegurado para historial y rutinas completas.
 - **Resumen mensual de asistencias:** Modal con resumen por mes (asistencias/ausencias) y **detalle por día** del mes seleccionado (ordenado por fecha reciente primero).
+- **Admin – profesor por registro:** En historial, el admin ve **selector directo** por fila (solo cuando hay trabajo/observaciones) con **guardado automático**.
+- **Modal resumen robusto:** Si el endpoint JSON falla, usa el historial ya renderizado como fallback; abrir/cerrar el modal **no borra** la vista del progreso.
 
 ---
 

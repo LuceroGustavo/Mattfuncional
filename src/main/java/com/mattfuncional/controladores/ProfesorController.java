@@ -385,9 +385,10 @@ public class ProfesorController {
         }
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         model.addAttribute("alumno", alumno);
+        model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
         model.addAttribute("historialEstadoFormateado", formatearFechasEnHistorialEstado(alumno.getHistorialEstado()));
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
-        java.util.List<Asistencia> historialAsistencia = asistenciaService.obtenerAsistenciasPorUsuarioId(alumno.getId());
+        java.util.List<com.mattfuncional.dto.AsistenciaVistaDTO> historialAsistencia = asistenciaService.obtenerAsistenciasVistaParaAlumno(alumno);
         model.addAttribute("historialAsistencia", historialAsistencia);
         // Asistencia de hoy (para pre-rellenar el modal Progreso si ya se dio presente desde el panel)
         java.util.List<Asistencia> asistenciasHoy = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(alumno, java.time.LocalDate.now());
@@ -416,26 +417,36 @@ public class ProfesorController {
         if (alumno == null || profesor == null || alumno.getProfesor() == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
             return ResponseEntity.notFound().build();
         }
-        List<Asistencia> list = asistenciaService.obtenerAsistenciasPorUsuarioId(alumno.getId());
+        java.util.List<com.mattfuncional.dto.AsistenciaVistaDTO> list = asistenciaService.obtenerAsistenciasVistaParaAlumno(alumno);
         List<Map<String, Object>> out = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter fmtShow = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        for (Asistencia a : list) {
+        for (com.mattfuncional.dto.AsistenciaVistaDTO a : list) {
             Map<String, Object> m = new HashMap<>();
+            m.put("id", a.getId());
             m.put("fecha", a.getFecha() != null ? a.getFecha().format(fmt) : null);
             m.put("fechaFormateada", a.getFecha() != null ? a.getFecha().format(fmtShow) : null);
-            m.put("presente", a.isPresente());
+            m.put("presente", a.getPresente());
+            m.put("pendiente", a.isPendiente());
             m.put("observaciones", a.getObservaciones() != null ? a.getObservaciones() : "");
-            List<String> grupos = new ArrayList<>();
-            if (a.getGruposTrabajados() != null) {
-                for (com.mattfuncional.entidades.GrupoMuscular g : a.getGruposTrabajados()) {
-                    if (g != null && g.getNombre() != null) grupos.add(g.getNombre());
-                }
-            }
-            m.put("gruposTrabajados", grupos);
+            m.put("registradoPorId", a.getRegistradoPorId());
+            m.put("registradoPorNombre", a.getRegistradoPorNombre());
+            m.put("gruposTrabajados", a.getGruposTrabajados() != null ? a.getGruposTrabajados() : java.util.List.of());
             out.add(m);
         }
         return ResponseEntity.ok(out);
+    }
+
+    @PostMapping("/alumnos/{id}/asistencias/{asistenciaId}/registrado-por")
+    public String actualizarRegistradoPor(@PathVariable Long id,
+                                          @PathVariable Long asistenciaId,
+                                          @RequestParam Long registradoPorId,
+                                          @AuthenticationPrincipal Usuario usuarioActual) {
+        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+            return "redirect:/profesor/alumnos/" + id;
+        }
+        asistenciaService.actualizarRegistradoPor(asistenciaId, registradoPorId);
+        return "redirect:/profesor/alumnos/" + id + "?profesor=ok";
     }
 
     // POST: Registrar asistencia
@@ -457,7 +468,7 @@ public class ProfesorController {
                     : "redirect:/profesor/alumnos/" + id;
         }
         var asistencia = asistenciaService.registrarAsistencia(alumno, java.time.LocalDate.now(), presente,
-                observaciones);
+                observaciones, profesorUsuario);
         if (asistencia == null) {
             // Ya existe asistencia hoy
             if ("dashboard".equals(origen)) {
@@ -505,7 +516,7 @@ public class ProfesorController {
             fecha = java.time.LocalDate.now();
         }
         java.util.Set<com.mattfuncional.entidades.GrupoMuscular> grupos = grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of());
-        asistenciaService.guardarOActualizarProgreso(alumno, fecha, presente, observaciones, grupos);
+        asistenciaService.guardarOActualizarProgreso(alumno, fecha, presente, observaciones, grupos, usuarioActual);
         return "redirect:/profesor/alumnos/" + id + "?progreso=ok";
     }
 

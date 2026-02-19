@@ -20,6 +20,10 @@ public class Asistencia {
     @ManyToOne
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "registrado_por_id")
+    private Usuario registradoPor;
+
     /** Grupos musculares que trabajó el alumno ese día (seleccionados por el profesor). */
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "asistencia_grupos_trabajados",
@@ -46,6 +50,8 @@ public class Asistencia {
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public Usuario getRegistradoPor() { return registradoPor; }
+    public void setRegistradoPor(Usuario registradoPor) { this.registradoPor = registradoPor; }
     public Set<GrupoMuscular> getGruposTrabajados() { return gruposTrabajados; }
     public void setGruposTrabajados(Set<GrupoMuscular> gruposTrabajados) { this.gruposTrabajados = gruposTrabajados != null ? gruposTrabajados : new HashSet<>(); }
 } 

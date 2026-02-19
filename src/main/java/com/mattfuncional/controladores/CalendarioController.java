@@ -183,7 +183,8 @@ public class CalendarioController {
             @RequestParam Long usuarioId,
             @RequestParam String fecha,
             @RequestParam(required = false) String estado,
-            @RequestParam(required = false) Boolean presente) {
+            @RequestParam(required = false) Boolean presente,
+            @AuthenticationPrincipal Usuario usuarioActual) {
         Usuario alumno = usuarioService.getUsuarioById(usuarioId);
         if (alumno == null) {
             return ResponseEntity.badRequest().body(java.util.Map.of("ok", false, "error", "Usuario no encontrado"));
@@ -204,7 +205,7 @@ public class CalendarioController {
             return ResponseEntity.ok(java.util.Map.of("ok", true, "estado", "PENDIENTE", "presente", false));
         }
         boolean presenteVal = "PRESENTE".equals(estadoNorm);
-        asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presenteVal, null, null);
+        asistenciaService.guardarOActualizarProgreso(alumno, fechaDate, presenteVal, null, null, usuarioActual);
         return ResponseEntity.ok(java.util.Map.of("ok", true, "estado", estadoNorm, "presente", presenteVal));
     }
 

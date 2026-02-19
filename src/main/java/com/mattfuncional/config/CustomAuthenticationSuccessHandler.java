@@ -30,7 +30,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
             // El único rol que gestiona el panel es ADMIN (el profesor es el administrador)
-            if (role.equals("ROLE_ADMIN")) {
+            if (role.equals("ROLE_ADMIN") || role.equals("ROLE_AYUDANTE")) {
                 if (authentication.getPrincipal() instanceof Usuario) {
                     Usuario usuario = (Usuario) authentication.getPrincipal();
                     Profesor profesor = usuario.getProfesor() != null ? usuario.getProfesor() : profesorService.getProfesorByCorreo(usuario.getCorreo());

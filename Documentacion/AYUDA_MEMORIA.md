@@ -21,12 +21,12 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
 ### Calendario semanal – Acceso al detalle del usuario desde el botón del usuario
 
 - **Qué falta:** Desde el **botón del usuario** (el recuadro verde con el nombre del alumno en cada celda del calendario semanal), poder **ingresar al detalle del usuario** (ficha del alumno). Es decir, que al hacer clic en el nombre del alumno en el calendario se abra o redirija a la vista de detalle de ese alumno (`/profesor/alumnos/{id}`).
-- **Estado:** Por implementar.
+- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
 
 ### Calendario semanal – Día por excepción para un alumno (recuperar clase)
 
 - **Qué falta:** Definir un **método** para que el profesor pueda **agregar a un alumno un día por excepción** en el calendario semanal. Por ejemplo, cuando el alumno tiene que **recuperar una clase** en un día/horario que no es su horario habitual. Es decir: asignar temporalmente a un alumno a un slot concreto (día + hora) sin que forme parte de su asistencia habitual, y que se refleje en el calendario.
-- **Estado:** Por implementar.
+- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
 
 ### Asistencia – Marcar ausente automáticamente si pasó el horario sin presente
 
@@ -36,7 +36,7 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
   - Un **proceso programado** (cron/scheduled) que, por ejemplo cada noche o al inicio del día, revise los slots ya pasados y cree registros de ausente para quienes no tienen presente.
   - O bien calcular “ausente” al **mostrar** el calendario/historial (sin guardar registro), comparando día/hora del slot con la fecha actual y la existencia de registro de asistencia.
   - Definir modelo de datos si hace falta un estado explícito “ausente” (o si se infiere por “no hay registro de presente”).
-- **Estado:** **Implementado (on-demand).** Al abrir el calendario semanal se llama a `registrarAusentesParaSlotsPasados`: para cada slot ya pasado de la semana se crea registro "ausente" solo si no existe ninguno (no sobrescribe presente). Opcional a futuro: cron que ejecute algo similar cada noche. Ver `CalendarioService.registrarAusentesParaSlotsPasados` y `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
+- **Estado:** **Implementado (backend, on-demand).** Falta mejorar frontend al final. Opcional a futuro: cron nocturno.
 
 ---
 

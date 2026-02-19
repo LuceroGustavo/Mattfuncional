@@ -53,7 +53,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/", "/error", "/demo").permitAll()
                         .requestMatchers("/rutinas/hoja/**").permitAll()
-                        .requestMatchers("/profesor/**", "/series/**", "/rutinas/**", "/exercise/**", "/ejercicios/**", "/calendario/**").hasRole("ADMIN")
+                        .requestMatchers("/profesor/usuarios-sistema/**").hasRole("ADMIN")
+                        .requestMatchers("/profesor/**", "/series/**", "/rutinas/**", "/exercise/**", "/ejercicios/**", "/calendario/**")
+                        .hasAnyRole("ADMIN", "AYUDANTE")
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

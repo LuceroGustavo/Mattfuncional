@@ -165,6 +165,11 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 ### 7.2 Sincronización historial y modal con el calendario
 - **Problema:** Lo marcado en el calendario (p. ej. presente por excepción el 18/2 a las 10) no se veía en el historial de la ficha ni en el modal “Resumen mensual de asistencias”.
 - **Solución:** GET **`/profesor/alumnos/{id}/asistencias`** (JSON) con la lista actualizada de asistencias del alumno. Al **cargar la ficha** se refresca el historial con esa API. Al **abrir el modal** “Consultar asistencias” se vuelve a pedir la lista, se actualiza el historial y se arma el resumen/detalle del modal. Así, lo marcado en el calendario (incluido por excepción) se refleja en historial y resumen.
+- **Ajustes posteriores:** el modal **no actualiza** la tabla de historial al abrir (evita borrar la vista del progreso) y agrega **fallback** a los datos ya renderizados si el JSON falla.
+
+### 7.5 Admin: selector de profesor en historial
+- **Antes:** el admin debía hacer clic en el nombre para que aparezca el selector.
+- **Ahora:** el selector aparece **siempre** en filas con trabajo/observaciones y **guarda automáticamente** al cambiar.
 
 ### 7.3 Calendario en nueva pestaña
 - El botón **“Calendario Semanal”** en el panel del profesor abre el calendario en **nueva pestaña** (`target="_blank"` y `rel="noopener noreferrer"` en `dashboard.html`).
