@@ -26,7 +26,7 @@
 - **Ejercicios:** ABM en panel profesor; predeterminados auto-asegurados desde `uploads/ejercicios/` (1–60). Estructura: `Exercise`, `ExerciseService`, `ExerciseCargaDefaultOptimizado`, `ExerciseRepository`.
 - **Series:** ABM de series (agrupaciones de ejercicios). `Serie`, `SerieEjercicio`, `SerieService`, `SerieController`, `SerieRepository`.
 - **Rutinas:** Creación en base a series, ABM, asignación rutina → alumno, enlace único (token), hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp desde ficha alumno.
-- **Usuarios (alumnos):** Ficha (datos físicos y online). Pendiente: quitar usuario/contraseña del alumno (Fase 6).
+- **Usuarios (alumnos):** Ficha (datos físicos y online). Sin usuario/contraseña; alumnos nunca autentican (Fase 6 completada).
 - **Calendario semanal:** Mantener. Uso: alumnos que asisten, vista por día/horario, presentismo. Asistencia (presente/ausente/pendiente) ya implementada en calendario y vista Mis Alumnos. Estructura: `CalendarioController`, `CalendarioService`, `Asistencia`, `DiaHorarioAsistencia`, `SlotConfig`, `semanal-profesor.html`.
 - **Grupos musculares:** Entidad `GrupoMuscular` (ya implementado). ABM en `/profesor/mis-grupos-musculares`. Ver AVANCES_DEL_APP.md y PLAN_GRUPOS_MUSCULARES_ENTIDAD.md.
 
@@ -62,7 +62,7 @@
 | **Fase 3 – Ejercicios y series** | Ejercicios con asegurar predeterminados. ABM de ejercicios y ABM de series en panel profesor. | Completado |
 | **Fase 4 – Rutinas y asignación** | ABM rutinas basadas en series, asignación rutina → alumno, token, hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp, modificar rutina con series, orden de series, tabs dashboard, logo. | Completado |
 | **Fase 5 – Vista rutina por enlace** | Página pública (sin login) con token que muestre la rutina en HTML. Hoja en `/rutinas/hoja/{token}` implementada; opcional: reforzar permitAll en SecurityConfig. | Pendiente / parcial |
-| **Fase 6 – Alumnos sin login** | Alumno solo como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo (gran parte ya hecha). | Pendiente |
+| **Fase 6 – Alumnos sin login** | Alumno solo como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo (gran parte ya hecha). UserDetailsService excluye ALUMNO del login. | Completado |
 | **Fase 7 – Pantalla de sala** | Modo sala para TV: ruta de solo lectura, control desde panel profesor, vista fullscreen. Ruta tipo `/sala/{token}` o `/sala?token=xxx`. | Pendiente |
 | **Fase 8 – Página pública** | Sitio institucional: presentación, servicios, horarios, contacto, promociones, productos. Rutas públicas bajo `/public` o raíz. | Pendiente |
 
@@ -83,7 +83,7 @@
 ## 6. Ajustes de modelo y seguridad
 
 - **Roles:** ADMIN y AYUDANTE. No hay panel admin separado; la gestión de usuarios del sistema se hace desde `/profesor/usuarios-sistema`.
-- **Alumnos:** Solo registros de ficha; sin rol de login. Decidir si se mantiene `Usuario` para alumnos sin credenciales o se crea entidad `Alumno`.
+- **Alumnos:** Solo registros de ficha; sin rol de login. Se mantiene `Usuario` con `rol=ALUMNO`; `findByCorreoParaLogin` excluye ALUMNO para que nunca puedan autenticarse.
 - **Usuarios sistema:** Se crean por el admin (y developer por sistema). No hay pantallas de crear/listar profesores tradicionales.
 - **Seguridad:** Rutas públicas para `/`, `/public/**`, `/rutinas/hoja/**`, `/sala/**`. Ruta privada: panel del profesor (ej. `/profesor/**`). Eliminar reglas para `/admin/**` y login alumno.
 
@@ -95,7 +95,7 @@
 - [x] Un único **panel: profesor** (no admin, no alumno).
 - [x] **Ejercicios:** Predeterminados desde `uploads/ejercicios/` (1–60); ABM en panel profesor.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series (crear, editar, orden de series).
-- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. **Backend OK; frontend pendiente**.
+- [x] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO.
 - [x] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** (hoja en `/rutinas/hoja/{token}`).
 - [x] **Calendario semanal y presentismo** (dar presente/ausente desde calendario y vista Mis Alumnos; tres estados; mismo API).
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).

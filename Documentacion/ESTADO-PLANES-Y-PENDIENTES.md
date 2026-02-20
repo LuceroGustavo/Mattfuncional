@@ -47,14 +47,14 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 | Fase | Contenido | Estado |
 |------|-----------|--------|
 | **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | **Implementado (backend).** Falta pulir frontend |
-| **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. Calendario y presentismo (gran parte ya hecha). | **Implementado (backend).** Falta pulir frontend |
+| **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO del login. | **Completado** |
 | **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). | Pendiente |
 | **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | Pendiente |
 
 ### Checklist general (ítems sin marcar)
 
 - [x] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
-- [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. (**Backend OK; frontend pendiente**)
+- [x] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. (**Completado**)
 - [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
@@ -71,5 +71,5 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 1. **Actualizar AYUDA_MEMORIA.md:** Cambiar a "Implementado" el ítem "Calendario semanal – Dar presente / falta desde el calendario" y anotar que "Asistencia – Marcar ausente automáticamente" está cubierto al abrir el calendario (y opcionalmente cron más adelante).
 2. **Calendario – Clic en alumno → ficha:** Implementar que al hacer clic en el nombre del alumno en una celda se abra `/profesor/alumnos/{id}`.
 3. **Calendario – Día por excepción:** Diseñar e implementar "recuperar clase" / asignar un slot puntual a un alumno.
-4. **Plan general:** Seguir con Fase 5 (acceso anónimo a hoja de rutina si se desea), Fase 6 (alumnos sin login), Fase 7 (pantalla sala), Fase 8 (página pública) y ítems del checklist (renombrar app, eliminar módulos no usados).
+4. **Plan general:** Seguir con Fase 5 (acceso anónimo a hoja de rutina si se desea), Fase 7 (pantalla sala), Fase 8 (página pública) y ítems del checklist (renombrar app, eliminar módulos no usados). Fase 6 (alumnos sin login) completada.
 5. **Ficha alumno:** Mejoras de detalle según "Pendiente inmediato" del plan.

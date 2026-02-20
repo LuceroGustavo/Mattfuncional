@@ -17,6 +17,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByCorreo(String correo);
 
+    /**
+     * Usuarios que pueden iniciar sesión (ADMIN, AYUDANTE, DEVELOPER).
+     * Excluye ALUMNO: los alumnos son solo ficha, sin login.
+     */
+    @Query("SELECT u FROM Usuario u WHERE u.correo = :correo AND u.rol IN ('ADMIN','AYUDANTE','DEVELOPER')")
+    Optional<Usuario> findByCorreoParaLogin(@Param("correo") String correo);
+
     java.util.List<Usuario> findAllByProfesorId(Long profesorId);
 
     Usuario findByProfesor(Profesor profesor);

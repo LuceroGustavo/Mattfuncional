@@ -30,8 +30,10 @@
 
 ---
 
-## 3. Alumnos
+## 3. Alumnos (Fase 6 – sin login)
 
+- **Sin usuario ni contraseña:** El alumno es solo ficha (física + online). No hay login de alumno; el profesor envía rutinas por WhatsApp.
+- **Seguridad:** `UsuarioRepository.findByCorreoParaLogin` y `UserDetailsService` excluyen rol ALUMNO; los alumnos nunca pueden autenticarse.
 - **Formulario:** Sin contraseña; agregado **celular**.
 - **Estado del alumno:** ACTIVO/INACTIVO, fecha de alta/baja, historial de estado.
 - **Vista de alumnos (panel):** Columnas estado y celular; **filtros** por nombre, estado, tipo (presencial/virtual/semipresencial), día y horario. Filtros persistentes en localStorage.

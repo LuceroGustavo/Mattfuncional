@@ -13,6 +13,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 5. [Ejercicios (panel) y hoja de rutina pública](#5-ejercicios-panel-y-hoja-de-rutina-pública)
 6. [Alumno inactivo y limpieza en detalle del alumno](#6-alumno-inactivo-y-limpieza-en-detalle-del-alumno)
 7. [Calendario y presentismo – Cierre](#7-calendario-y-presentismo--cierre-feb-2026)
+8. [Fase 6 – Alumnos sin login](#8-fase-6--alumnos-sin-login)
 
 ---
 
@@ -190,4 +191,19 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora.*
+## 8. Fase 6 – Alumnos sin login
+
+**Resumen:** El alumno es solo ficha (física + online); nunca tiene usuario ni contraseña. El profesor envía rutinas por WhatsApp. Se refuerza la seguridad para que los alumnos nunca puedan autenticarse.
+
+### 8.1 Cambios técnicos
+- **UsuarioRepository:** Nuevo método `findByCorreoParaLogin(String correo)` que solo devuelve usuarios con rol ADMIN, AYUDANTE o DEVELOPER. Excluye ALUMNO.
+- **SecurityConfig / UserDetailsService:** Usa `findByCorreoParaLogin` en lugar de `findByCorreo`. Así, aunque un alumno tuviera contraseña por error, nunca se cargaría para autenticación.
+- **UsuarioService.crearAlumno:** Ya no guardaba contraseña (queda null); sin cambios adicionales.
+
+### 8.2 Archivos modificados
+- `UsuarioRepository.java`: método `findByCorreoParaLogin`.
+- `SecurityConfig.java`: `loadUserByUsername` usa `findByCorreoParaLogin`.
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada.*

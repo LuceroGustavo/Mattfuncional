@@ -33,7 +33,8 @@ public class SecurityConfig {
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                return usuarioRepository.findByCorreo(username)
+                // Solo usuarios con login (ADMIN, AYUDANTE, DEVELOPER). Alumnos nunca autentican.
+                return usuarioRepository.findByCorreoParaLogin(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
             }
         };
