@@ -77,9 +77,6 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicionFisica> medicionesFisicas;
     
-    // Campo transitorio para contar mensajes no leídos (no se persiste en BD)
-    @jakarta.persistence.Transient
-    private Integer mensajesNoLeidos;
 
     // Constructor sin argumentos
     public Usuario() {
@@ -349,11 +346,4 @@ public class Usuario implements UserDetails {
         this.detalleAsistencia = detalleAsistencia;
     }
     
-    public Integer getMensajesNoLeidos() {
-        return mensajesNoLeidos;
-    }
-    
-    public void setMensajesNoLeidos(Integer mensajesNoLeidos) {
-        this.mensajesNoLeidos = mensajesNoLeidos;
-    }
 }

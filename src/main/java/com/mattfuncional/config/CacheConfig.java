@@ -21,7 +21,6 @@ public class CacheConfig {
             "ejercicios",
             "rutinas",
             "series",
-            "mensajes",
             "dashboard-data"
         ));
         return cacheManager;

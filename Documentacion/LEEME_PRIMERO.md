@@ -59,7 +59,7 @@
 ## 4. Resumen rápido de estado (para la IA)
 
 - **Implementado:** Ejercicios predeterminados (auto-asegurar 60), ABM ejercicios/series/rutinas, grupos musculares como entidad, asignación rutina→alumno, enlace público por token, hoja `/rutinas/hoja/{token}` (permitAll), Copiar enlace y WhatsApp desde ficha, **calendario y presentismo (cerrado por ahora):** calendario semanal con tres estados (pendiente/presente/ausente) por defecto pendiente sin ausente automático, excepciones por día/hora, columna Presente en Mis Alumnos con ciclo de 3 estados, historial y modal “Resumen mensual” sincronizados con el calendario vía API, calendario abre en nueva pestaña desde el panel; modal de progreso unificado, alumno inactivo (acciones deshabilitadas), filtros alumnos persistentes, orden de series y ejercicios.
-- **Pendiente (próximos pasos):** Clic en alumno en calendario → ficha; día por excepción (recuperar clase); opcional cron para ausentes; Fase 5–8 (acceso anónimo reforzado, alumnos sin login, pantalla sala, página pública); mejorar ficha alumno; renombrar app a Mattfuncional en pom/títulos; eliminar módulos no usados (panel admin, chat, WebSocket, etc.).
+- **Pendiente (próximos pasos):** Clic en alumno en calendario → ficha; día por excepción (recuperar clase); opcional cron para ausentes; Fase 5–8 (acceso anónimo reforzado, alumnos sin login, pantalla sala, página pública); mejorar ficha alumno.
 
 ---
 

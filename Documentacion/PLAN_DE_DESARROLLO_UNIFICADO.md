@@ -91,7 +91,7 @@
 
 ## 7. Checklist único
 
-- [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
+- [x] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
 - [x] Un único **panel: profesor** (no admin, no alumno).
 - [x] **Ejercicios:** Predeterminados desde `uploads/ejercicios/` (1–60); ABM en panel profesor.
 - [x] **Series y rutinas:** ABM y rutinas basadas en series (crear, editar, orden de series).
@@ -100,7 +100,7 @@
 - [x] **Calendario semanal y presentismo** (dar presente/ausente desde calendario y vista Mis Alumnos; tres estados; mismo API).
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
-- [ ] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
+- [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ---
 

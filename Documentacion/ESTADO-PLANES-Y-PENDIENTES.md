@@ -53,12 +53,12 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 
 ### Checklist general (ítems sin marcar)
 
-- [ ] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
+- [x] Renombrar app a **Mattfuncional** (pom, títulos, documentación).
 - [ ] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. (**Backend OK; frontend pendiente**)
 - [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
-- [ ] Eliminar: panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
+- [x] Eliminar: panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ### Pendiente inmediato (próxima sesión) según PLAN_DE_DESARROLLO
 

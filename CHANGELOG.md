@@ -1,4 +1,4 @@
-# CHANGELOG - MiGym Application
+# CHANGELOG - Mattfuncional Application
 
 ## [2025-12-04] - Corrección de Visualización de Imágenes y Optimización de Carga de Ejercicios Predeterminados ✅
 
