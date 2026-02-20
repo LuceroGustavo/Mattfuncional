@@ -3,7 +3,7 @@
 **Para contexto del proyecto:** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).  
 **Plan de desarrollo:** [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
-**Estado:** En planificación  
+**Estado:** En desarrollo (primera versión implementada)  
 **Última actualización:** Febrero 2026
 
 ---
@@ -159,29 +159,29 @@ PizarraItem (pizarra_item)
 ### Fase 8.1 – Backend
 
 - [ ] Crear entidades `Pizarra`, `PizarraColumna`, `PizarraItem`
-- [ ] Repositorios JPA
-- [ ] Servicios: crear, guardar, cargar, obtener por token
-- [ ] Controlador REST: `GET /api/sala/{token}/estado` (JSON)
-- [ ] Controlador profesor: rutas para listar, crear, editar pizarra
-- [ ] Generar token único al crear pizarra
-- [ ] SecurityConfig: `permitAll` para `/sala/**` y `/api/sala/**`
+- [x] Repositorios JPA
+- [x] Servicios: crear, guardar, cargar, obtener por token
+- [x] Controlador REST: `GET /api/sala/{token}/estado` (JSON)
+- [x] Controlador profesor: rutas para listar, crear, editar pizarra
+- [x] Generar token único al crear pizarra
+- [x] SecurityConfig: `permitAll` para `/sala/**` y `/api/sala/**`
 
 ### Fase 8.2 – Editor de pizarra (panel profesor)
 
-- [ ] Vista lista de pizarras guardadas
-- [ ] Vista crear pizarra: selector 1-6 columnas, títulos
-- [ ] Vista editor: columnas + área de ejercicios con filtros
-- [ ] Drag and drop ejercicios a columnas
-- [ ] Tarjetas con peso y reps editables
-- [ ] Botón Guardar
-- [ ] Botón "Copiar enlace" / "Abrir en TV"
+- [x] Vista lista de pizarras guardadas
+- [x] Vista crear pizarra: selector 1-6 columnas, títulos
+- [x] Vista editor: columnas + área de ejercicios con filtros
+- [x] Drag and drop ejercicios a columnas
+- [x] Tarjetas con peso y reps editables
+- [x] Botón Guardar
+- [x] Botón "Copiar enlace" / "Abrir en TV"
 
 ### Fase 8.3 – Vista TV
 
-- [ ] Template `sala.html` con layout de columnas
-- [ ] Tarjetas: grupo muscular, imagen, nombre, peso, reps
-- [ ] Polling para actualizar estado
-- [ ] Estilos fullscreen-friendly
+- [x] Template `sala.html` con layout de columnas
+- [x] Tarjetas: grupo muscular, imagen, nombre, peso, reps
+- [x] Polling para actualizar estado (15 s)
+- [x] Estilos fullscreen-friendly
 
 ### Fase 8.4 – Integración y pruebas
 
@@ -216,3 +216,11 @@ PizarraItem (pizarra_item)
 - **Referencia visual:** Ver esquema en `assets/` (imagen de columnas con "Pablo", "Juan/Edu", tarjetas BRAZOS, Curl de Biceps, etc.).
 - **Reutilizar:** Lógica de filtros de ejercicios en `crearSerie.html`; estructura de `SerieEjercicio` (valor, unidad, peso) para los items.
 - **Orden sugerido:** Backend primero (entidades, repos, servicios, API), luego editor, luego vista TV.
+
+### Implementado (primera versión, feb 2026)
+
+- Entidades: `Pizarra`, `PizarraColumna`, `PizarraItem`. Tablas: `pizarra`, `pizarra_columna`, `pizarra_item`.
+- Rutas: `/profesor/pizarra` (lista), `/profesor/pizarra/nueva`, `/profesor/pizarra/editar/{id}`, `/sala/{token}` (TV).
+- API: `GET /sala/api/{token}/estado` para polling.
+- Editor: arrastrar ejercicios a columnas, editar títulos, peso y reps en tarjeta, guardar.
+- Vista TV: layout de columnas, polling cada 15 s, estilos oscuros para pantalla.

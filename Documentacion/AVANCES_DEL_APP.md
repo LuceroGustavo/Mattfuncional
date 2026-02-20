@@ -122,7 +122,17 @@
 
 ---
 
-## 11. Referencias a documentación detallada
+## 11. Pizarra (Fase 7 – Pantalla de sala)
+
+- **Objetivo:** Reemplazar la pizarra física por una pizarra digital mostrada en TV.
+- **Panel profesor:** Lista de pizarras, crear nueva (1-6 columnas), editor con drag and drop de ejercicios.
+- **Columnas:** Título editable por columna (ej: nombre de alumno). Ejercicios con peso y repeticiones editables en tarjeta.
+- **Vista TV:** URL `/sala/{token}`; fullscreen con F11. Polling cada 15 s para actualizar.
+- **Plan detallado:** [FASE_7_PANTALLA_DE_SALA.md](FASE_7_PANTALLA_DE_SALA.md).
+
+---
+
+## 12. Referencias a documentación detallada
 
 | Tema | Documento |
 |------|-----------|
@@ -130,6 +140,7 @@
 | Ejercicios predeterminados (imágenes 1–60) | `Documentacion/OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md` |
 | Grupos musculares (plan e implementación) | `Documentacion/PLAN_GRUPOS_MUSCULARES_ENTIDAD.md` |
 | Changelog detallado Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo) | `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` |
+| Fase 7 – Pizarra / Pantalla de sala | `Documentacion/FASE_7_PANTALLA_DE_SALA.md` |
 
 ---
 

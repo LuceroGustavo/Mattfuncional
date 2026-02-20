@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Pizarra: ' + ${pizarra.nombre}">Editor de pizarra</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .pizarra-editor { display: flex; gap: 1rem; min-height: 70vh; }
+        .ejercicios-panel { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; }
+        .ejercicios-panel .ejercicio-draggable { cursor: grab; margin-bottom: 0.5rem; }
+        .ejercicios-panel .ejercicio-draggable:active { cursor: grabbing; }
+        .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; }
+        .pizarra-columna { min-width: 200px; flex: 1; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
+        .pizarra-columna.drag-over { border-color: #0d6efd; background: #e7f1ff; }
+        .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; }
+        .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; width: 100%; font-weight: 700; }
+        .pizarra-item { background: #fff; border-radius: 10px; padding: 0.5rem; margin-bottom: 0.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: move; }
+        .pizarra-item .grupo-badge { font-size: 0.7rem; background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.4rem; border-radius: 4px; }
+        .pizarra-item img { width: 100%; height: 80px; object-fit: contain; }
+        .pizarra-item .item-nombre { font-size: 0.85rem; font-weight: 600; }
+        .pizarra-item .item-peso-reps { font-size: 0.8rem; display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+        .pizarra-item .item-peso-reps input { width: 50px; font-size: 0.8rem; padding: 0.2rem; }
+        .drop-zone { min-height: 100px; }
+        .ejercicio-mini { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; }
+        .ejercicio-mini img { height: 60px; object-fit: contain; }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container-fluid py-4" th:with="pizarraId=${pizarra.id}, token=${pizarra.token}">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="pizarraNombre" class="form-control form-control-lg" style="max-width: 300px;"
+                   th:value="${pizarra.nombre}" placeholder="Nombre de la pizarra">
+            <button type="button" class="btn btn-primary" id="btnGuardar"><i class="fa-solid fa-save me-1"></i>Guardar</button>
+        </div>
+        <div>
+            <a th:href="@{/sala/{t}(t=${pizarra.token})}" class="btn btn-success" target="_blank">
+                <i class="fa-solid fa-tv me-1"></i>Abrir en TV
+            </a>
+            <a th:href="@{/profesor/pizarra}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <div class="pizarra-editor">
+        <!-- Panel de ejercicios -->
+        <div class="ejercicios-panel card p-3">
+            <h6 class="mb-2">Ejercicios</h6>
+            <input type="text" id="filtro-ejercicio" class="form-control form-control-sm mb-2" placeholder="Buscar...">
+            <select id="filtro-grupo" class="form-select form-select-sm mb-2">
+                <option value="">Todos los grupos</option>
+                <option th:each="g : ${gruposMusculares}" th:value="${g.id}" th:text="${g.nombre}"></option>
+            </select>
+            <div id="lista-ejercicios">
+                <div th:each="ej : ${ejercicios}" class="ejercicio-draggable ejercicio-mini" draggable="true"
+                     th:data-id="${ej.id}"
+                     th:data-nombre="${ej.name}"
+                     th:data-grupo-ids="${ej.grupos != null ? #strings.listJoin(ej.grupos.![id], ',') : ''}">
+                    <img th:if="${ej.imagen != null}" th:src="${ej.imagen.url}" alt="">
+                    <img th:if="${ej.imagen == null}" src="/img/not_imagen.png" alt="">
+                    <div class="p-2">
+                        <small class="d-block text-muted" th:text="${ej.grupos != null ? #strings.listJoin(ej.grupos.![nombre], ', ') : ''}"></small>
+                        <strong th:text="${ej.name}"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columnas -->
+        <div class="columnas-panel flex-grow-1">
+            <div th:each="col, iterStat : ${pizarra.columnas}" class="pizarra-columna" th:data-columna-id="${col.id}"
+                 data-columna-id="">
+                <div class="columna-titulo">
+                    <input type="text" th:value="${col.titulo}" placeholder="Título" class="col-titulo-input"
+                           th:attr="data-col-id=${col.id}">
+                </div>
+                <div class="drop-zone columna-items" th:attr="data-columna-id=${col.id}">
+                    <div th:each="item : ${col.items}" class="pizarra-item" th:attr="data-item-id=${item.id}">
+                        <span class="grupo-badge" th:text="${item.exercise.grupos != null ? #strings.listJoin(item.exercise.grupos.![nombre], ', ') : ''}"></span>
+                        <img th:if="${item.exercise.imagen != null}" th:src="${item.exercise.imagen.url}" alt="">
+                        <img th:if="${item.exercise.imagen == null}" src="/img/not_imagen.png" alt="">
+                        <div class="item-nombre" th:text="${item.exercise.name}"></div>
+                        <div class="item-peso-reps">
+                            <input type="number" placeholder="kg" th:value="${item.peso}" class="item-peso" min="0" th:attr="data-item-id=${item.id}">
+                            <input type="number" placeholder="reps" th:value="${item.repeticiones}" class="item-reps" min="0" th:attr="data-item-id=${item.id}">
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-item" th:attr="data-item-id=${item.id}"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const pizarraId = [[${pizarra.id}]];
+
+    document.getElementById('btnGuardar').addEventListener('click', guardarBasico);
+
+    function guardarBasico() {
+        const nombre = document.getElementById('pizarraNombre').value.trim();
+        const titulos = [];
+        document.querySelectorAll('.col-titulo-input').forEach(inp => titulos.push(inp.value.trim()));
+        fetch('/profesor/pizarra/actualizar-basico', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: pizarraId, nombre, titulos })
+        }).then(r => { if (r.ok) alert('Guardado'); else alert('Error'); });
+    }
+
+    // Filtros ejercicios
+    function filtrarEjercicios() {
+        const texto = document.getElementById('filtro-ejercicio').value.toLowerCase();
+        const grupoId = document.getElementById('filtro-grupo').value;
+        document.querySelectorAll('.ejercicio-draggable').forEach(el => {
+            const nom = (el.dataset.nombre || '').toLowerCase();
+            const grupoIds = (el.dataset.grupoIds || '');
+            const matchTexto = !texto || nom.includes(texto);
+            const matchGrupo = !grupoId || grupoIds.split(',').includes(grupoId);
+            el.style.display = matchTexto && matchGrupo ? '' : 'none';
+        });
+    }
+    document.getElementById('filtro-ejercicio').addEventListener('input', filtrarEjercicios);
+    document.getElementById('filtro-grupo').addEventListener('change', filtrarEjercicios);
+
+    // Drag and drop
+    let draggedExerciseId = null;
+    document.querySelectorAll('.ejercicio-draggable').forEach(el => {
+        el.addEventListener('dragstart', e => {
+            draggedExerciseId = el.dataset.id;
+            e.dataTransfer.setData('text/plain', el.dataset.id);
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+    });
+
+    document.querySelectorAll('.pizarra-columna').forEach(col => {
+        const dropZone = col.querySelector('.columna-items');
+        col.addEventListener('dragover', e => {
+            e.preventDefault();
+            col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', e => {
+            e.preventDefault();
+            col.classList.remove('drag-over');
+            const exerciseId = e.dataTransfer.getData('text/plain');
+            if (!exerciseId) return;
+            const columnaId = col.dataset.columnaId;
+            agregarItem(columnaId, exerciseId, dropZone);
+        });
+    });
+
+    function agregarItem(columnaId, exerciseId, dropZone) {
+        fetch('/profesor/pizarra/agregar-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ columnaId, exerciseId, peso: null, repeticiones: null, unidad: 'reps' })
+        }).then(r => r.json()).then(data => {
+            location.reload();
+        }).catch(() => alert('Error al agregar'));
+    }
+
+    // Actualizar peso/reps
+    document.querySelectorAll('.item-peso, .item-reps').forEach(inp => {
+        inp.addEventListener('change', function() {
+            const itemId = this.dataset.itemId;
+            const card = this.closest('.pizarra-item');
+            const peso = card.querySelector('.item-peso').value ? parseInt(card.querySelector('.item-peso').value) : null;
+            const reps = card.querySelector('.item-reps').value ? parseInt(card.querySelector('.item-reps').value) : null;
+            fetch('/profesor/pizarra/actualizar-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify({ itemId, peso, repeticiones: reps, unidad: 'reps' })
+            });
+        });
+    });
+
+    // Eliminar item
+    document.querySelectorAll('.btn-eliminar-item').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('¿Eliminar este ejercicio?')) return;
+            const itemId = this.dataset.itemId;
+            fetch('/profesor/pizarra/eliminar-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId })
+            }).then(r => { if (r.ok) this.closest('.pizarra-item').remove(); });
+        });
+    });
+</script>
+</body>
+</html>

@@ -72,6 +72,8 @@
         .btn-rutinas:hover { background: #ffd54f; color: #e65100; }
         .btn-calendario { background: #f8bbd0; color: #880e4f; border: none; }
         .btn-calendario:hover { background: #f48fb1; color: #880e4f; }
+        .btn-pizarra { background: #ffcc80; color: #e65100; border: none; }
+        .btn-pizarra:hover { background: #ffb74d; color: #e65100; }
         .main-actions .btn-outline-secondary {
             background: #eceff1;
             color: #455a64;
@@ -196,6 +198,9 @@
             </a>
             <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal
+            </a>
+            <a th:href="@{/profesor/pizarra}" class="btn btn-pizarra mx-1">
+                <i class="fa-solid fa-tv me-2"></i>Pizarra
             </a>
         </div>
 
