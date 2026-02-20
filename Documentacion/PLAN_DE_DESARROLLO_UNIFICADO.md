@@ -14,7 +14,7 @@
 |--------|------------|
 | **Nombre** | Mattfuncional (evolución de MiGym) |
 | **Referencia** | Presupuesto - Mat Funcional.pdf + indicaciones del cliente |
-| **Único rol con acceso** | Admin (el profesor administrador del sistema) |
+| **Roles con acceso** | ADMIN y AYUDANTE (gestionados por el admin). Sin panel admin separado |
 | **Alumnos** | Solo ficha física + online, **sin usuario ni contraseña**; no hay login de alumno |
 | **Acceso a rutinas** | Por enlace (ej. WhatsApp); el alumno abre el link y ve la rutina en HTML |
 | **Objetivo** | Un único panel de profesor, sin panel alumno ni admin, con pantalla de sala y página pública |
@@ -36,15 +36,15 @@
 
 | Elemento | Acción recomendada |
 |----------|---------------------|
-| **Panel del usuario/alumno** | Eliminar rutas, controladores y vistas del panel alumno (`/usuario/*`, dashboard alumno con login). |
-| **Chat profesor–alumno** | Eliminar módulo de mensajería: `MensajeController`, `MensajeService`, entidad `Mensaje`, repositorio, vistas de chat y referencias en navbar. |
-| **Panel de administrador** | Eliminar `AdministradorController` y vistas bajo `admin/`. El profesor es el único rol. |
-| **Creación de profesores** | Eliminar alta/edición de profesores. Un único profesor creado por el sistema (DataInitializer o config). |
-| **Login de alumno** | Eliminar flujo de login para rol USER/alumno. |
-| **WebSocket / chat en tiempo real** | Eliminar `WebSocketController`, `WebSocketConfig` y dependencias de WebSocket. |
+| **Panel del usuario/alumno** | Eliminado: rutas, controladores y vistas del panel alumno (`/usuario/*`, dashboard alumno con login). |
+| **Chat profesor–alumno** | Eliminado: módulo de mensajería (`MensajeController`, `MensajeService`, entidad `Mensaje`, repositorio, vistas de chat y referencias en navbar). |
+| **Panel de administrador** | Eliminado: `AdministradorController` y vistas bajo `admin/`. |
+| **Creación de profesores** | Eliminado: alta/edición de profesores; se gestiona por usuarios del sistema. |
+| **Login de alumno** | Eliminado: flujo de login para rol USER/alumno. |
+| **WebSocket / chat en tiempo real** | Eliminado: `WebSocketController`, `WebSocketConfig` y dependencias de WebSocket. |
 | **Gestión de múltiples profesores** | Quitar lógica de “elegir profesor”, “profesores disponibles”, etc. |
 
-### Archivos/carpetas a eliminar o dejar de usar
+### Archivos/carpetas ya eliminados o desactivados
 
 - `AdministradorController.java`, templates `admin/*`, `usuario/dashboard.html`, `profesor/chat-alumno.html`.
 - `MensajeController`, `MensajeService`, `WebSocketController`, `WebSocketConfig`.
@@ -58,7 +58,7 @@
 | Fase | Contenido | Estado |
 |------|-----------|--------|
 | **Fase 1 – Limpieza** | Renombrar proyecto a Mattfuncional. Eliminar panel admin, chat, WebSocket, ABM de profesores. Ajustar SecurityConfig y navbar. | Completado |
-| **Fase 2 – Un solo profesor** | Profesor único en arranque. Redirigir login al panel del profesor. Quitar referencias a admin y lista de profesores. | Completado |
+| **Fase 2 – Un solo panel** | Redirigir login al panel del profesor. Quitar referencias a panel admin/alumno y lista de profesores. | Completado |
 | **Fase 3 – Ejercicios y series** | Ejercicios con asegurar predeterminados. ABM de ejercicios y ABM de series en panel profesor. | Completado |
 | **Fase 4 – Rutinas y asignación** | ABM rutinas basadas en series, asignación rutina → alumno, token, hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp, modificar rutina con series, orden de series, tabs dashboard, logo. | Completado |
 | **Fase 5 – Vista rutina por enlace** | Página pública (sin login) con token que muestre la rutina en HTML. Hoja en `/rutinas/hoja/{token}` implementada; opcional: reforzar permitAll en SecurityConfig. | Pendiente / parcial |
@@ -82,9 +82,9 @@
 
 ## 6. Ajustes de modelo y seguridad
 
-- **Roles:** Un solo rol efectivo (ADMIN). No hay panel admin separado; el ADMIN es el profesor.
+- **Roles:** ADMIN y AYUDANTE. No hay panel admin separado; la gestión de usuarios del sistema se hace desde `/profesor/usuarios-sistema`.
 - **Alumnos:** Solo registros de ficha; sin rol de login. Decidir si se mantiene `Usuario` para alumnos sin credenciales o se crea entidad `Alumno`.
-- **Profesor único:** En DataInitializer crear un único usuario con rol ADMIN. Sin pantallas de crear/listar profesores.
+- **Usuarios sistema:** Se crean por el admin (y developer por sistema). No hay pantallas de crear/listar profesores tradicionales.
 - **Seguridad:** Rutas públicas para `/`, `/public/**`, `/rutinas/hoja/**`, `/sala/**`. Ruta privada: panel del profesor (ej. `/profesor/**`). Eliminar reglas para `/admin/**` y login alumno.
 
 ---

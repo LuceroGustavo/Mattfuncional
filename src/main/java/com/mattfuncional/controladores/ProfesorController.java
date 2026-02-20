@@ -74,6 +74,9 @@ public class ProfesorController {
     /** Obtiene el Profesor asociado al usuario actual (el único rol del panel es ADMIN). */
     private Profesor getProfesorParaUsuarioActual(Usuario usuarioActual) {
         if (usuarioActual == null) return null;
+        if ("DEVELOPER".equals(usuarioActual.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
         if (usuarioActual.getProfesor() != null) return usuarioActual.getProfesor();
         return profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
     }
@@ -442,7 +445,7 @@ public class ProfesorController {
                                           @PathVariable Long asistenciaId,
                                           @RequestParam Long registradoPorId,
                                           @AuthenticationPrincipal Usuario usuarioActual) {
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
             return "redirect:/profesor/alumnos/" + id;
         }
         asistenciaService.actualizarRegistradoPor(asistenciaId, registradoPorId);

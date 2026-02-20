@@ -165,37 +165,30 @@ public class DataInitializer implements CommandLineRunner {
             java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findByCorreo(CORREO_DEVELOPER);
             if (usuarioExistente.isPresent()) {
                 Usuario usuario = usuarioExistente.get();
-                if (!"ADMIN".equals(usuario.getRol())) {
-                    usuario.setRol("ADMIN");
+                boolean actualizado = false;
+                if (!"DEVELOPER".equals(usuario.getRol())) {
+                    usuario.setRol("DEVELOPER");
+                    actualizado = true;
+                }
+                if (usuario.getProfesor() != null) {
+                    usuario.setProfesor(null);
+                    actualizado = true;
+                }
+                if (actualizado) {
                     usuarioRepository.save(usuario);
                 }
                 System.out.println("ℹ️ Usuario developer ya existe");
                 return;
             }
 
-            Profesor profesor = profesorService.getProfesorByCorreo(CORREO_PROFESOR);
-            if (profesor == null) {
-                profesor = new Profesor();
-                profesor.setNombre("Profesor");
-                profesor.setApellido("");
-                profesor.setEdad(30);
-                profesor.setSexo("No especificado");
-                profesor.setEstablecimiento("-");
-                profesor.setCorreo(CORREO_PROFESOR);
-                profesor.setTelefono("-");
-                profesorService.guardarProfesor(profesor);
-                System.out.println("✅ Entidad Profesor creada (para developer)");
-            }
-
             Usuario usuario = new Usuario();
             usuario.setNombre("Developer");
             usuario.setCorreo(CORREO_DEVELOPER);
             usuario.setPassword(passwordEncoder.encode(PASSWORD_DEVELOPER));
-            usuario.setRol("ADMIN");
+            usuario.setRol("DEVELOPER");
             usuario.setEdad(0);
             usuario.setSexo("No especificado");
             usuario.setAvatar("/img/avatar1.png");
-            usuario.setProfesor(profesor);
 
             usuarioRepository.save(usuario);
             System.out.println("✅ Usuario developer creado (correo: " + CORREO_DEVELOPER + ")");

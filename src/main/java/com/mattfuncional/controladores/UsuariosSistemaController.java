@@ -25,7 +25,7 @@ public class UsuariosSistemaController {
 
     @GetMapping
     public String verUsuariosSistema(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
         model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
@@ -40,13 +40,16 @@ public class UsuariosSistemaController {
                                       @RequestParam String password,
                                       @RequestParam String rol,
                                       Model model) {
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
         try {
             Profesor profesor = usuarioActual.getProfesor() != null
                     ? usuarioActual.getProfesor()
                     : profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
+            if (profesor == null) {
+                profesor = profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+            }
             usuarioService.crearUsuarioSistema(nombre, correo, password, rol, profesor);
             return "redirect:/profesor/usuarios-sistema?ok=creado";
         } catch (Exception e) {
@@ -61,8 +64,15 @@ public class UsuariosSistemaController {
     public String actualizarRol(@AuthenticationPrincipal Usuario usuarioActual,
                                 @RequestParam Long usuarioId,
                                 @RequestParam String rol) {
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
+        }
+        Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
+        if (objetivo == null) {
+            return "redirect:/profesor/usuarios-sistema?error=notfound";
+        }
+        if (isDeveloper(objetivo)) {
+            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
         }
         if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId) && !"ADMIN".equalsIgnoreCase(rol)) {
             return "redirect:/profesor/usuarios-sistema?error=self-rol";
@@ -75,10 +85,55 @@ public class UsuariosSistemaController {
     public String actualizarPassword(@AuthenticationPrincipal Usuario usuarioActual,
                                      @RequestParam Long usuarioId,
                                      @RequestParam String password) {
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
+        }
+        Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
+        if (objetivo == null) {
+            return "redirect:/profesor/usuarios-sistema?error=notfound";
+        }
+        if (isDeveloper(objetivo) && !isDeveloper(usuarioActual)) {
+            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
         }
         usuarioService.cambiarPasswordUsuario(usuarioId, password);
         return "redirect:/profesor/usuarios-sistema?ok=password";
+    }
+
+    @PostMapping("/perfil")
+    public String actualizarPerfil(@AuthenticationPrincipal Usuario usuarioActual,
+                                   @RequestParam String nombre,
+                                   @RequestParam String correo) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        usuarioService.actualizarDatosUsuarioSistema(usuarioActual.getId(), nombre, correo);
+        return "redirect:/profesor/usuarios-sistema?ok=perfil";
+    }
+
+    @PostMapping("/editar")
+    public String actualizarUsuarioSistema(@AuthenticationPrincipal Usuario usuarioActual,
+                                           @RequestParam Long usuarioId,
+                                           @RequestParam String nombre,
+                                           @RequestParam String correo) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
+        if (objetivo == null) {
+            return "redirect:/profesor/usuarios-sistema?error=notfound";
+        }
+        if (isDeveloper(objetivo) && !isDeveloper(usuarioActual)) {
+            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+        }
+        usuarioService.actualizarDatosUsuarioSistema(usuarioId, nombre, correo);
+        return "redirect:/profesor/usuarios-sistema?ok=datos";
+    }
+
+    private boolean isAdminOrDeveloper(Usuario usuario) {
+        return usuario != null && ("ADMIN".equals(usuario.getRol()) || "DEVELOPER".equals(usuario.getRol()));
+    }
+
+    private boolean isDeveloper(Usuario usuario) {
+        return usuario != null && "DEVELOPER".equals(usuario.getRol());
     }
 }

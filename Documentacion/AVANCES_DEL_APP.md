@@ -10,10 +10,17 @@
 ## 1. Resumen general
 
 - **Proyecto:** Mattfuncional (evolución de MiGym).
-- **Panel único:** Profesor (no hay panel alumno ni admin con acceso).
+- **Panel único:** Profesor (roles DEVELOPER, ADMIN y AYUDANTE; no hay panel alumno ni panel admin separado).
 - Este documento concentra **todos los avances**; los planes de desarrollo y pendientes están en [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md). La lista de mejoras concretas (por implementar / implementado) está en [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
 
 ---
+
+## 1.1 Usuarios del sistema (roles)
+
+- **DEVELOPER:** super admin con acceso total al sistema; no aparece en selectores de profesor.
+- **ADMIN:** gestiona usuarios del sistema (admin/ayudante), puede editar su perfil y contraseñas.
+- **AYUDANTE:** acceso a panel profesor, sin panel de usuarios.
+- **Panel de usuarios:** edición de nombre/correo/rol/contraseña y bloque de “Mi perfil”.
 
 ## 2. Ejercicios predeterminados
 

@@ -96,7 +96,7 @@
                     </a>
                     <!-- Botón para usuarios autenticados -->
                     <a th:if="${#authentication.principal != 'anonymousUser'}" 
-                       th:href="${usuarioActual != null && usuarioActual.rol == 'ADMIN' ? '/profesor/dashboard' : '/'}"
+                      th:href="${usuarioActual != null && (usuarioActual.rol == 'ADMIN' or usuarioActual.rol == 'AYUDANTE' or usuarioActual.rol == 'DEVELOPER') ? '/profesor/dashboard' : '/'}"
                        class="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 @[480px]:h-14 @[480px]:px-8 bg-gradient-to-r from-green-500 to-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] @[480px]:text-lg @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] hover:from-green-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       <i class="fas fa-tachometer-alt mr-2"></i>

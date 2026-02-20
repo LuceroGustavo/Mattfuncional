@@ -33,7 +33,7 @@ Conclusión: el enum está muy integrado (entidad, repositorio, servicios, contr
 - El profesor puede **crear, editar y listar** sus propios grupos (por ejemplo "Fascia", "Core", "Mobilidad").
 - Los grupos del sistema (los 6 actuales) se representan como **registros con `profesor_id = null`**.
 - Un solo modelo: "grupo muscular" = registro en BD (sistema o del profesor). Filtros, ejercicios y series trabajan siempre con la misma entidad.
-- Escalable: no hay que tocar código cada vez que se quiera un grupo nuevo del sistema; se puede añadir por datos o por un futuro panel de administración.
+- Escalable: no hay que tocar código cada vez que se quiera un grupo nuevo del sistema; se puede añadir por datos o por un futuro panel del profesor.
 
 ### 2.2 Alternativas descartadas
 

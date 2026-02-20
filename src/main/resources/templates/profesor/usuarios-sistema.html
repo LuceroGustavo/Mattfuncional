@@ -13,12 +13,34 @@
 <div class="container my-4">
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <h3 class="mb-0"><i class="fas fa-user-cog me-2"></i>Usuarios del sistema</h3>
-        <span class="text-muted">Admin y ayudantes</span>
+        <span class="text-muted">Admins y ayudantes</span>
     </div>
 
     <div th:if="${param.ok != null}" class="alert alert-success">Operación realizada correctamente.</div>
     <div th:if="${param.error != null}" class="alert alert-danger">Hubo un error. Revisá los datos.</div>
+    <div th:if="${param.error == 'developer-locked'}" class="alert alert-warning">No está permitido modificar el usuario developer.</div>
+    <div th:if="${param.error == 'notfound'}" class="alert alert-danger">Usuario no encontrado.</div>
     <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Error</div>
+
+    <div class="card mb-4">
+        <div class="card-header"><strong>Mi perfil</strong></div>
+        <div class="card-body">
+            <form th:action="@{/profesor/usuarios-sistema/perfil}" method="post" class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" th:value="${usuarioActual != null ? usuarioActual.nombre : ''}" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="email" name="correo" class="form-control" placeholder="Correo" th:value="${usuarioActual != null ? usuarioActual.correo : ''}" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" th:value="${usuarioActual != null ? usuarioActual.rol : ''}" disabled>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card mb-4">
         <div class="card-header"><strong>Crear nuevo usuario</strong></div>
@@ -55,6 +77,7 @@
                     <th>Nombre</th>
                     <th>Correo</th>
                     <th>Rol</th>
+                    <th>Actualizar datos</th>
                     <th>Actualizar rol</th>
                     <th>Cambiar contraseña</th>
                 </tr>
@@ -65,6 +88,14 @@
                     <td th:text="${u.correo}">correo</td>
                     <td>
                         <span class="badge bg-dark" th:text="${u.rol}">ROL</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/profesor/usuarios-sistema/editar}" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="usuarioId" th:value="${u.id}">
+                            <input type="text" name="nombre" class="form-control form-control-sm" th:value="${u.nombre}" required>
+                            <input type="email" name="correo" class="form-control form-control-sm" th:value="${u.correo}" required>
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Guardar</button>
+                        </form>
                     </td>
                     <td>
                         <form th:action="@{/profesor/usuarios-sistema/rol}" method="post" class="d-flex gap-2">
@@ -85,7 +116,7 @@
                     </td>
                 </tr>
                 <tr th:if="${usuariosSistema == null || usuariosSistema.isEmpty()}">
-                    <td colspan="5" class="text-center text-muted">Sin usuarios del sistema.</td>
+                    <td colspan="6" class="text-center text-muted">Sin usuarios del sistema.</td>
                 </tr>
                 </tbody>
             </table>

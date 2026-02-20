@@ -7,7 +7,7 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 ## 1. Contexto general del proyecto original
 - App original: **MiGym** (Spring Boot + Thymeleaf + MySQL).
 - Roles originales: Admin, Profesor, Alumno.
-- Modulos principales: ejercicios, series, rutinas, calendario/presentismo, chat, dashboard admin.
+- Modulos principales: ejercicios, series, rutinas, calendario/presentismo. En MiGym existían chat y dashboard admin (removidos en Mattfuncional).
 
 ## 2. Cambios clave ya implementados
 

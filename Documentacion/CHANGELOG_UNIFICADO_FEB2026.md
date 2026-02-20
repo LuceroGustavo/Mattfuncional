@@ -171,6 +171,12 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - **Antes:** el admin debía hacer clic en el nombre para que aparezca el selector.
 - **Ahora:** el selector aparece **siempre** en filas con trabajo/observaciones y **guarda automáticamente** al cambiar.
 
+### 7.6 Roles del sistema (DEVELOPER/ADMIN/AYUDANTE)
+- **DEVELOPER:** rol super admin con acceso total al sistema y sin aparecer en listas de profesor.
+- **ADMIN:** gestiona usuarios del sistema y puede editar su propio perfil.
+- **AYUDANTE:** acceso a panel profesor sin panel de usuarios.
+- **Panel usuarios:** edición de nombre/correo/rol/contraseña y bloque “Mi perfil”.
+
 ### 7.3 Calendario en nueva pestaña
 - El botón **“Calendario Semanal”** en el panel del profesor abre el calendario en **nueva pestaña** (`target="_blank"` y `rel="noopener noreferrer"` en `dashboard.html`).
 

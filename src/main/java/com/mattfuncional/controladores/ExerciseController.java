@@ -42,10 +42,16 @@ public class ExerciseController {
             Model model, @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
         List<Exercise> exercises;
         List<GrupoMuscular> gruposMusculares;
-        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol()) && usuarioActual.getProfesor() != null) {
-            Long profesorId = usuarioActual.getProfesor().getId();
-            gruposMusculares = grupoMuscularService.findDisponiblesParaProfesor(profesorId);
-            exercises = exerciseService.findEjerciciosDisponiblesParaProfesor(profesorId);
+        if (usuarioActual != null && isAdminOrDeveloper(usuarioActual)) {
+            com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+            Long profesorId = profesor != null ? profesor.getId() : null;
+            if (profesorId == null) {
+                gruposMusculares = grupoMuscularService.findGruposSistema();
+                exercises = exerciseService.findEjerciciosPredeterminados();
+            } else {
+                gruposMusculares = grupoMuscularService.findDisponiblesParaProfesor(profesorId);
+                exercises = exerciseService.findEjerciciosDisponiblesParaProfesor(profesorId);
+            }
         } else {
             gruposMusculares = grupoMuscularService.findGruposSistema();
             exercises = exerciseService.findEjerciciosPredeterminados();
@@ -115,9 +121,10 @@ public class ExerciseController {
         if (exercise == null) {
             return "redirect:/ejercicios/abm";
         }
-        // Solo el admin o el profesor dueño puede editar
-        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
+        // Solo el admin, developer o el profesor dueño puede editar
+        if (usuarioActual != null && isAdminOrDeveloper(usuarioActual) && !isDeveloper(usuarioActual)) {
             if (exercise.getProfesor() == null
+                    || usuarioActual.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
             }
@@ -140,8 +147,9 @@ public class ExerciseController {
             return "ejercicios/formulario-modificar-ejercicio";
         }
         Exercise original = exerciseService.findById(id);
-        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual != null && isAdminOrDeveloper(usuarioActual) && !isDeveloper(usuarioActual)) {
             if (original.getProfesor() == null
+                    || usuarioActual.getProfesor() == null
                     || !original.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
             }
@@ -162,9 +170,10 @@ public class ExerciseController {
     public String eliminarEjercicio(@PathVariable("id") Long id,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
         Exercise exercise = exerciseService.findById(id);
-        // Solo el admin o el profesor dueño puede eliminar
-        if (usuarioActual != null && "ADMIN".equals(usuarioActual.getRol())) {
+        // Solo el admin, developer o el profesor dueño puede eliminar
+        if (usuarioActual != null && isAdminOrDeveloper(usuarioActual) && !isDeveloper(usuarioActual)) {
             if (exercise.getProfesor() == null
+                    || usuarioActual.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
                 return "redirect:/exercise/lista?error=permiso";
             }
@@ -233,21 +242,14 @@ public class ExerciseController {
             Model model,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
 
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/login";
         }
 
         // Buscar el profesor por correo si no está asociado directamente
-        com.mattfuncional.entidades.Profesor profesor = usuarioActual.getProfesor();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
         if (profesor == null) {
-            try {
-                profesor = profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
-                if (profesor == null) {
-                    return "redirect:/login?error=profesor_no_encontrado";
-                }
-            } catch (Exception e) {
-                return "redirect:/login?error=error_buscar_profesor";
-            }
+            return "redirect:/login?error=profesor_no_encontrado";
         }
 
         if (bindingResult.hasErrors()) {
@@ -288,21 +290,13 @@ public class ExerciseController {
             Model model,
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
 
-        if (usuarioActual == null || !"ADMIN".equals(usuarioActual.getRol())) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/login";
         }
 
-        // Buscar el profesor por correo si no está asociado directamente
-        com.mattfuncional.entidades.Profesor profesor = usuarioActual.getProfesor();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
         if (profesor == null) {
-            try {
-                profesor = profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
-                if (profesor == null) {
-                    return "redirect:/login?error=profesor_no_encontrado";
-                }
-            } catch (Exception e) {
-                return "redirect:/login?error=error_buscar_profesor";
-            }
+            return "redirect:/login?error=profesor_no_encontrado";
         }
 
         if (bindingResult.hasErrors()) {
@@ -314,7 +308,7 @@ public class ExerciseController {
         if (original == null) {
             return "redirect:/profesor/ejercicios";
         }
-        if (!original.getProfesor().getId().equals(profesor.getId())) {
+        if (!isDeveloper(usuarioActual) && !original.getProfesor().getId().equals(profesor.getId())) {
             return "redirect:/profesor/ejercicios?error=permiso";
         }
         exercise.setProfesor(profesor);
@@ -339,5 +333,21 @@ public class ExerciseController {
         
         // Redirigir a la nueva vista optimizada
         return "redirect:/profesor/mis-ejercicios";
+    }
+
+    private boolean isAdminOrDeveloper(com.mattfuncional.entidades.Usuario usuarioActual) {
+        return usuarioActual != null && ("ADMIN".equals(usuarioActual.getRol()) || "DEVELOPER".equals(usuarioActual.getRol()));
+    }
+
+    private boolean isDeveloper(com.mattfuncional.entidades.Usuario usuarioActual) {
+        return usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol());
+    }
+
+    private com.mattfuncional.entidades.Profesor getProfesorAcceso(com.mattfuncional.entidades.Usuario usuarioActual) {
+        if (usuarioActual == null) return null;
+        if ("DEVELOPER".equals(usuarioActual.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
+        return usuarioActual.getProfesor() != null ? usuarioActual.getProfesor() : profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
     }
 }

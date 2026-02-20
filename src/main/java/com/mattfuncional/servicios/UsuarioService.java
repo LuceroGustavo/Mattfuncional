@@ -161,6 +161,28 @@ public class UsuarioService {
     }
 
     @CacheEvict(value = "usuarios", allEntries = true)
+    public void actualizarDatosUsuarioSistema(Long usuarioId, String nombre, String correo) {
+        if (usuarioId == null) {
+            throw new IllegalArgumentException("Usuario inválido");
+        }
+        String nombreNorm = nombre != null ? nombre.trim() : "";
+        String correoNorm = correo != null ? correo.trim() : "";
+        if (nombreNorm.isEmpty() || correoNorm.isEmpty()) {
+            throw new IllegalArgumentException("Nombre y correo son obligatorios");
+        }
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuarioRepository.findByCorreo(correoNorm).ifPresent(existente -> {
+            if (!existente.getId().equals(usuarioId)) {
+                throw new IllegalArgumentException("Ya existe un usuario con ese correo");
+            }
+        });
+        usuario.setNombre(nombreNorm);
+        usuario.setCorreo(correoNorm);
+        usuarioRepository.save(usuario);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
     public Usuario actualizarUsuario(Usuario usuario) {
         Usuario usuarioExistente = usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuario.getId()));

@@ -6,6 +6,7 @@ import com.mattfuncional.entidades.Serie;
 import com.mattfuncional.servicios.RutinaService;
 import com.mattfuncional.servicios.UsuarioService;
 import com.mattfuncional.servicios.SerieService;
+import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.excepciones.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,17 +31,21 @@ public class RutinaControlador {
     @Autowired
     private SerieService serieService;
 
+    @Autowired
+    private ProfesorService profesorService;
+
     // GET: Mostrar formulario de creación de rutina plantilla
     @GetMapping("/crear")
     public String crearRutina(Model model) {
         Usuario usuarioActual = usuarioService.getUsuarioActual();
-        if (usuarioActual == null || usuarioActual.getProfesor() == null) {
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) {
             // Si no es un profesor, no debería estar aquí. Redirigir.
             return "redirect:/login";
         }
 
         // Cargar las series plantilla del profesor logueado
-        Long profesorId = usuarioActual.getProfesor().getId();
+        Long profesorId = profesor.getId();
         List<Serie> seriesDelProfesor = serieService.findByProfesorId(profesorId);
 
         // Filtrar en Java para obtener solo las plantillas
@@ -108,13 +113,14 @@ public class RutinaControlador {
 
             // Obtener el profesor actual
             Usuario usuarioActual = usuarioService.getUsuarioActual();
-            if (usuarioActual == null || usuarioActual.getProfesor() == null) {
+            com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+            if (profesor == null) {
                 return "redirect:/login";
             }
-            Long profesorId = usuarioActual.getProfesor().getId();
+            Long profesorId = profesor.getId();
 
             // Verificar que el profesor sea el dueño de la rutina
-            if (!rutina.getProfesor().getId().equals(profesorId)) {
+            if (!isDeveloper(usuarioActual) && !rutina.getProfesor().getId().equals(profesorId)) {
                 return "redirect:/profesor/dashboard?tab=rutinas&error=No tiene permiso para editar esta rutina";
             }
 
@@ -139,6 +145,18 @@ public class RutinaControlador {
         } catch (ResourceNotFoundException e) {
             return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina no encontrada";
         }
+    }
+
+    private com.mattfuncional.entidades.Profesor getProfesorAcceso(Usuario usuarioActual) {
+        if (usuarioActual == null) return null;
+        if ("DEVELOPER".equals(usuarioActual.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
+        return usuarioActual.getProfesor();
+    }
+
+    private boolean isDeveloper(Usuario usuarioActual) {
+        return usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol());
     }
 
     // POST: Actualizar rutina

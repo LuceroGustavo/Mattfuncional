@@ -1,5 +1,7 @@
 # CHANGELOG - Mattfuncional Application
 
+> Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
+
 ## [2025-12-04] - Corrección de Visualización de Imágenes y Optimización de Carga de Ejercicios Predeterminados ✅
 
 ### 🎯 **Problema Resuelto**

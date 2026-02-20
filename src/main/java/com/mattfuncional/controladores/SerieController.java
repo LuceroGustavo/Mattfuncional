@@ -11,6 +11,7 @@ import com.mattfuncional.servicios.ExerciseService;
 import com.mattfuncional.servicios.GrupoMuscularService;
 import com.mattfuncional.servicios.SerieService;
 import com.mattfuncional.servicios.UsuarioService;
+import com.mattfuncional.servicios.ProfesorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +37,9 @@ public class SerieController {
     @Autowired
     private GrupoMuscularService grupoMuscularService;
 
+    @Autowired
+    private ProfesorService profesorService;
+
     // GET: Mostrar el formulario para crear una nueva serie plantilla
     @GetMapping("/crear")
     public String mostrarFormularioCrearSerie(
@@ -43,10 +47,11 @@ public class SerieController {
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual,
             @RequestParam(name = "grupoId", required = false) Long grupoId,
             @RequestParam(name = "search", required = false) String search) {
-        if (usuarioActual == null || usuarioActual.getProfesor() == null) {
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) {
             return "redirect:/login";
         }
-        Long profesorId = usuarioActual.getProfesor().getId();
+        Long profesorId = profesor.getId();
         List<Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
         if (grupoId != null) {
             ejercicios = ejercicios.stream()
@@ -78,12 +83,13 @@ public class SerieController {
             @AuthenticationPrincipal Usuario profesorUsuario) {
         try {
             // Obtenemos el usuario logueado (que es el profesor)
-            if (profesorUsuario == null || profesorUsuario.getProfesor() == null) {
+            com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(profesorUsuario);
+            if (profesor == null) {
                 return ResponseEntity.badRequest().body("Error: No se pudo identificar al profesor.");
             }
 
             // Asignamos el ID del profesor al DTO
-            serieDTO.setProfesorId(profesorUsuario.getProfesor().getId());
+            serieDTO.setProfesorId(profesor.getId());
 
             // Llamamos al servicio para crear la serie
             serieService.crearSeriePlantilla(serieDTO);
@@ -103,8 +109,9 @@ public class SerieController {
         // 1. Obtener la serie CON sus ejercicios cargados (evita LazyInitialization y muestra la tabla)
         Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
 
-        if (profesorUsuario.getProfesor() == null
-                || !serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId())) {
+        if (!isDeveloper(profesorUsuario)
+                && (profesorUsuario.getProfesor() == null
+                || !serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()))) {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
 
@@ -113,6 +120,10 @@ public class SerieController {
 
         // 3. Preparar el modelo para la vista
         Long profesorId = profesorUsuario.getProfesor() != null ? profesorUsuario.getProfesor().getId() : null;
+        if (profesorId == null && isDeveloper(profesorUsuario)) {
+            com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(profesorUsuario);
+            profesorId = profesor != null ? profesor.getId() : null;
+        }
         List<Exercise> ejercicios;
         if (profesorId != null) {
             ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
@@ -138,10 +149,11 @@ public class SerieController {
     public String verSerie(@PathVariable Long id, Model model,
             @AuthenticationPrincipal Usuario profesorUsuario) {
         Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
-        boolean esPropietario = profesorUsuario != null
+        boolean esPropietario = isDeveloper(profesorUsuario)
+                || (profesorUsuario != null
                 && profesorUsuario.getProfesor() != null
                 && serie.getProfesor() != null
-                && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId());
+                && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
         if (!esPropietario) {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
@@ -157,8 +169,8 @@ public class SerieController {
         try {
             Serie serieExistente = serieService.obtenerSeriePorId(id);
 
-            boolean esPropietario = profesorUsuario.getProfesor() != null && serieExistente.getProfesor() != null &&
-                    serieExistente.getProfesor().getId().equals(profesorUsuario.getProfesor().getId());
+            boolean esPropietario = isDeveloper(profesorUsuario) || (profesorUsuario.getProfesor() != null && serieExistente.getProfesor() != null &&
+                    serieExistente.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
 
             if (!esPropietario) {
                 return ResponseEntity.status(403).body("No tiene permiso para editar esta serie.");
@@ -175,14 +187,29 @@ public class SerieController {
     public String eliminarSerie(@PathVariable Long id, @AuthenticationPrincipal Usuario profesorUsuario) {
         Serie serie = serieService.obtenerSeriePorId(id);
 
-        boolean esPropietario = profesorUsuario.getProfesor() != null && serie.getProfesor() != null &&
-                serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId());
+        boolean esPropietario = isDeveloper(profesorUsuario) || (profesorUsuario.getProfesor() != null && serie.getProfesor() != null &&
+                serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
 
         if (esPropietario) {
             serieService.eliminarSerie(id);
-            return "redirect:/profesor/" + profesorUsuario.getProfesor().getId() + "?tab=series";
+            if (profesorUsuario != null && profesorUsuario.getProfesor() != null) {
+                return "redirect:/profesor/" + profesorUsuario.getProfesor().getId() + "?tab=series";
+            }
+            return "redirect:/profesor/dashboard?tab=series";
         } else {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
+    }
+
+    private com.mattfuncional.entidades.Profesor getProfesorAcceso(Usuario usuarioActual) {
+        if (usuarioActual == null) return null;
+        if ("DEVELOPER".equals(usuarioActual.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
+        return usuarioActual.getProfesor();
+    }
+
+    private boolean isDeveloper(Usuario usuarioActual) {
+        return usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol());
     }
 }

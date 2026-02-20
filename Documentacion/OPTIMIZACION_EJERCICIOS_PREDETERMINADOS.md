@@ -1,7 +1,7 @@
 # Optimización: Ejercicios predeterminados (Mattfuncional)
 
 ## Situación anterior (MiGym)
-- El **admin** cargaba los 60 ejercicios para los profesores.
+- En MiGym el **admin** cargaba los 60 ejercicios para los profesores.
 - Flujo: leer imágenes desde **classpath** (`/static/gif-ejercicios/1.gif`…`60.gif`) → copiar a **uploads/ejercicios/** → crear registros en BD.
 - Redundancia: misma imagen en dos sitios (recurso estático + uploads) y proceso pesado (leer, guardar, transacciones).
 

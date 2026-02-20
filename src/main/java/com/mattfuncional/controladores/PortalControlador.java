@@ -77,8 +77,11 @@ public class PortalControlador {
     public String dashboard(Model model) {
         try {
             com.mattfuncional.entidades.Usuario usuarioActual = usuarioService.getUsuarioActual();
-            if (usuarioActual != null && ("ADMIN".equals(usuarioActual.getRol()) || "AYUDANTE".equals(usuarioActual.getRol()))) {
+            if (usuarioActual != null && ("ADMIN".equals(usuarioActual.getRol()) || "AYUDANTE".equals(usuarioActual.getRol()) || "DEVELOPER".equals(usuarioActual.getRol()))) {
                 com.mattfuncional.entidades.Profesor p = usuarioActual.getProfesor() != null ? usuarioActual.getProfesor() : profesorService.getProfesorByCorreo(usuarioActual.getCorreo());
+                if (p == null && "DEVELOPER".equals(usuarioActual.getRol())) {
+                    p = profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+                }
                 if (p != null) return "redirect:/profesor/" + p.getId();
                 return "redirect:/profesor/dashboard";
             }
