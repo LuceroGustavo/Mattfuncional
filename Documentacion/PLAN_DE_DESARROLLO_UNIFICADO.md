@@ -122,6 +122,7 @@
 | [PLAN_GRUPOS_MUSCULARES_ENTIDAD.md](PLAN_GRUPOS_MUSCULARES_ENTIDAD.md) | Plan e implementación de grupos musculares (ya hecho). |
 | [OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md](OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md) | Imágenes 1–60 en `uploads/ejercicios/`. |
 | `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
+| [FASE_7_PANTALLA_DE_SALA.md](FASE_7_PANTALLA_DE_SALA.md) | Plan detallado de la pizarra digital para TV. |
 
 ---
 
