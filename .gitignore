@@ -23,6 +23,8 @@ target/
 
 # Logs y temporales
 *.log
+logs/
+*.pid
 *.tmp
 *.bak
 *.swp
