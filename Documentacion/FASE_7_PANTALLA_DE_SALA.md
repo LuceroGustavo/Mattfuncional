@@ -134,7 +134,7 @@ PizarraItem (pizarra_item)
 ### 6.2 Vista TV
 
 - HTML/CSS responsive para pantalla grande.
-- **Polling:** `setInterval` cada **2,5 segundos** a `GET /sala/api/{token}/estado`; primera petición al cargar la página para ver cambios casi al instante.
+- **Actualización manual:** botón **"Actualizar"** en la barra superior (misma fila que logo y título). Al hacer clic se consulta `GET /sala/api/{token}/estado` y se redibuja el contenido. Sin polling automático para no consumir recursos; el usuario actualiza cuando el profesor indica que hubo cambios.
 - Sin controles de edición; solo visualización.
 - Diseño similar al esquema: columnas, títulos en rectángulo negro, tarjetas con grupo muscular, imagen, nombre, peso, reps.
 
@@ -185,7 +185,7 @@ PizarraItem (pizarra_item)
 
 - [x] Template `sala.html` con layout de columnas
 - [x] Tarjetas: grupo muscular, imagen, nombre, peso, reps
-- [x] Polling para actualizar estado (2,5 s) y primera actualización al cargar
+- [x] Botón "Actualizar" para refrescar contenido (sin polling automático)
 - [x] Estilos fullscreen-friendly
 - [x] Agregar columna / Quitar columna desde el editor (máx. 6, mín. 1)
 
@@ -229,7 +229,7 @@ PizarraItem (pizarra_item)
 - Rutas: `/profesor/pizarra` (lista), `/profesor/pizarra/nueva`, `/profesor/pizarra/editar/{id}`, `/sala/{token}` (TV).
 - API: `GET /sala/api/{token}/estado` para polling.
 - Editor: arrastrar ejercicios a columnas, editar títulos, peso y reps en tarjeta, guardar.
-- Vista TV: layout de columnas, polling cada 2,5 s, estilos oscuros para pantalla.
+- Vista TV: layout de columnas, botón "Actualizar" en la barra (logo + título + botón), estilos oscuros para pantalla.
 
 ---
 
@@ -251,9 +251,10 @@ PizarraItem (pizarra_item)
 - **Problema:** Los títulos de columna solo se enviaban al hacer clic en "Guardar"; en la TV no se veían hasta guardar.
 - **Solución:** Auto-guardado de nombre y títulos: al salir del campo (blur) y con debounce de 500 ms al escribir. Backend: `columnaRepository.saveAll(cols)` tras actualizar títulos; controlador convierte la lista `titulos` del JSON a `List<String>` de forma segura.
 
-### 11.4 Vista TV casi en tiempo real
+### 11.4 Vista TV – Actualización manual (sin polling)
 
-- **Polling:** Intervalo reducido de 15 s a **2,5 segundos**; primera petición a la API al cargar la página. Así el profesor puede editar desde el notebook y el monitor/TV (pestaña compartida) muestra los cambios en pocos segundos.
+- **Antes:** Polling cada 2,5 s para actualizar la vista TV (más consumo de red/servidor si la pantalla queda abierta horas).
+- **Ahora:** Botón **"Actualizar"** en la barra superior (misma fila que logo y título). Quien esté frente a la TV pulsa cuando el profesor avisa que cambió la pizarra. Sin peticiones en segundo plano.
 
 ### 11.5 Agregar y quitar columnas desde el editor
 

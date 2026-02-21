@@ -223,8 +223,9 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - Guardado al salir del campo (blur) y con debounce 500 ms al escribir en nombre de pizarra y títulos de columnas.
 - Backend: `columnaRepository.saveAll(cols)` tras actualizar títulos; controlador convierte `titulos` del JSON a `List<String>` de forma segura.
 
-### 9.4 Vista TV casi en tiempo real
-- Polling cada **2,5 s** (antes 15 s); primera petición al cargar. Flujo: profesor edita en notebook, monitor comparte solo la pestaña TV.
+### 9.4 Vista TV – Actualización manual (sin polling)
+- **Antes:** Polling cada 2,5 s (consumía recursos con la pantalla abierta horas).
+- **Ahora:** Botón **"Actualizar"** en la barra superior (logo + título + botón). Una sola petición al hacer clic; sin peticiones en segundo plano.
 
 ### 9.5 Agregar y quitar columnas
 - **Agregar:** Botón "Agregar columna" (máx. 6). POST `/profesor/pizarra/agregar-columna`.
@@ -236,7 +237,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ### 9.7 Archivos modificados
 - `pizarra-editor.html`: CSRF, postHeaders, agregar tarjeta en DOM sin reload, blur + debounce para títulos, botones agregar/quitar columna.
-- `sala.html`: POLL_INTERVAL 2500, `actualizarDesdeAPI()` al cargar.
+- `sala.html`: logo Mattfuncional arriba a la izquierda, botón "Actualizar" en la barra (sin polling); `actualizarDesdeAPI()` solo al clic.
 - `PizarraService.java`: saveAll(cols), agregarColumna, quitarColumna, imports explícitos.
 - `PizarraController.java`: actualizar-basico con titulos como List<String>, agregar-columna, quitar-columna.
 - `PortalControlador.java`: return "login", "index", "demo" (sin .html).

@@ -128,7 +128,7 @@
 - **Panel profesor:** Lista de pizarras, crear nueva (1-6 columnas), editor con drag and drop de ejercicios. **Agregar columna** (hasta 6) y **Quitar columna** (mínimo 1) desde el editor, con botones en la interfaz.
 - **Columnas:** Título editable por columna (ej: nombre de alumno). Los títulos se guardan al salir del campo (blur) y con debounce al escribir; no se pierden al arrastrar un ejercicio (ya no se recarga la página al agregar un item).
 - **Ejercicios:** Peso y repeticiones editables en tarjeta; se guardan al cambiar el valor (peticiones con CSRF). Al soltar un ejercicio en una columna se añade la tarjeta en el DOM sin recargar.
-- **Vista TV:** URL `/sala/{token}`; fullscreen con F11. **Polling cada 2,5 s** y primera actualización al cargar, para ver cambios casi al instante.
+- **Vista TV:** URL `/sala/{token}`; fullscreen con F11. Logo Mattfuncional arriba a la izquierda; botón **"Actualizar"** en la misma barra para refrescar el contenido (sin polling automático).
 - **Rutas API:** `GET /sala/api/{token}/estado`; POST actualizar-basico, agregar-item, actualizar-item, eliminar-item, agregar-columna, quitar-columna.
 - **Plan y mejoras detalladas:** [FASE_7_PANTALLA_DE_SALA.md](FASE_7_PANTALLA_DE_SALA.md). Changelog: [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §9.
 
