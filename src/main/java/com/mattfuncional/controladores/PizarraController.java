@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -111,9 +112,14 @@ public class PizarraController {
         Profesor profesor = getProfesorAcceso(usuario);
         if (profesor == null) return ResponseEntity.status(401).build();
         Long id = Long.valueOf(body.get("id").toString());
-        String nombre = (String) body.get("nombre");
-        @SuppressWarnings("unchecked")
-        List<String> titulos = (List<String>) body.get("titulos");
+        String nombre = body.get("nombre") != null ? body.get("nombre").toString().trim() : null;
+        List<String> titulos = new ArrayList<>();
+        Object titulosObj = body.get("titulos");
+        if (titulosObj instanceof List<?> list) {
+            for (Object t : list) {
+                titulos.add(t != null ? t.toString().trim() : "");
+            }
+        }
         pizarraService.actualizarBasico(id, nombre, titulos, profesor.getId());
         return ResponseEntity.ok().build();
     }
@@ -157,6 +163,36 @@ public class PizarraController {
         Long itemId = Long.valueOf(body.get("itemId").toString());
         pizarraService.eliminarItem(itemId, profesor.getId());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/agregar-columna")
+    @ResponseBody
+    public ResponseEntity<?> agregarColumna(@RequestBody Map<String, Object> body,
+                                          @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long pizarraId = Long.valueOf(body.get("pizarraId").toString());
+        try {
+            pizarraService.agregarColumna(pizarraId, profesor.getId());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/quitar-columna")
+    @ResponseBody
+    public ResponseEntity<?> quitarColumna(@RequestBody Map<String, Object> body,
+                                          @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long columnaId = Long.valueOf(body.get("columnaId").toString());
+        try {
+            pizarraService.quitarColumna(columnaId, profesor.getId());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/eliminar/{id}")

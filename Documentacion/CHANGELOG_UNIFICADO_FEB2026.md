@@ -14,6 +14,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 6. [Alumno inactivo y limpieza en detalle del alumno](#6-alumno-inactivo-y-limpieza-en-detalle-del-alumno)
 7. [Calendario y presentismo – Cierre](#7-calendario-y-presentismo--cierre-feb-2026)
 8. [Fase 6 – Alumnos sin login](#8-fase-6--alumnos-sin-login)
+9. [Fase 7 – Pizarra / Pantalla de sala – Mejoras](#9-fase-7--pizarra--pantalla-de-sala--mejoras-feb-2026)
 
 ---
 
@@ -206,4 +207,40 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada.*
+## 9. Fase 7 – Pizarra / Pantalla de sala – Mejoras (Feb 2026)
+
+**Resumen:** Pulido de la Fase 7 para que los cambios del profesor se reflejen en la vista TV casi al instante, persistencia correcta de títulos y peso/reps, agregar/quitar columnas desde el editor, y correcciones de login y arranque.
+
+### 9.1 Peso y repeticiones en la TV
+- Las peticiones POST del editor no enviaban CSRF; Spring rechazaba y no se guardaban peso/reps.
+- Metas `_csrf` y `_csrf_header` en `pizarra-editor.html`; función `postHeaders()` en todos los fetch POST.
+
+### 9.2 Títulos que no se borran al agregar ejercicio
+- Al soltar un ejercicio se hacía `location.reload()` y se perdían los títulos no guardados.
+- Se deja de recargar: se crea la tarjeta en el DOM con los datos del ejercicio arrastrado y se enlazan eventos.
+
+### 9.3 Auto-guardado de títulos y nombre
+- Guardado al salir del campo (blur) y con debounce 500 ms al escribir en nombre de pizarra y títulos de columnas.
+- Backend: `columnaRepository.saveAll(cols)` tras actualizar títulos; controlador convierte `titulos` del JSON a `List<String>` de forma segura.
+
+### 9.4 Vista TV casi en tiempo real
+- Polling cada **2,5 s** (antes 15 s); primera petición al cargar. Flujo: profesor edita en notebook, monitor comparte solo la pestaña TV.
+
+### 9.5 Agregar y quitar columnas
+- **Agregar:** Botón "Agregar columna" (máx. 6). POST `/profesor/pizarra/agregar-columna`.
+- **Quitar:** Botón ✕ en cada columna (mín. 1). POST `/profesor/pizarra/quitar-columna`. Elimina columna e items, reordena y actualiza `cantidadColumnas`.
+
+### 9.6 Corrección login y arranque
+- **Login:** `PortalControlador` devolvía `"login.html"`; Thymeleaf requiere `"login"`. Corregido también `"index"` y `"demo"`.
+- **PizarraService:** `import com.mattfuncional.entidades.*` sustituido por imports explícitos para evitar `ClassNotFoundException` con DevTools RestartClassLoader.
+
+### 9.7 Archivos modificados
+- `pizarra-editor.html`: CSRF, postHeaders, agregar tarjeta en DOM sin reload, blur + debounce para títulos, botones agregar/quitar columna.
+- `sala.html`: POLL_INTERVAL 2500, `actualizarDesdeAPI()` al cargar.
+- `PizarraService.java`: saveAll(cols), agregarColumna, quitarColumna, imports explícitos.
+- `PizarraController.java`: actualizar-basico con titulos como List<String>, agregar-columna, quitar-columna.
+- `PortalControlador.java`: return "login", "index", "demo" (sin .html).
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas.*

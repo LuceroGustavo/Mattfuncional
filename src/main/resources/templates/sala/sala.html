@@ -45,7 +45,7 @@
 
 <script th:inline="javascript">
     const token = [[${token}]];
-    const POLL_INTERVAL = 15000; // 15 segundos
+    const POLL_INTERVAL = 2500; // 2.5 segundos: la TV se actualiza casi al instante con títulos, ejercicios nuevos y peso/reps
 
     function actualizarDesdeAPI() {
         fetch('/sala/api/' + token + '/estado')
@@ -78,6 +78,7 @@
             });
     }
 
+    actualizarDesdeAPI();
     setInterval(actualizarDesdeAPI, POLL_INTERVAL);
 </script>
 </body>

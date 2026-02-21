@@ -60,17 +60,17 @@ public class PortalControlador {
             // Usuario no autenticado, no hacer nada
         }
         
-        return "index.html";
+        return "index";
     }
 
     @GetMapping("/login")
     public String login() {
-        return "login.html";
+        return "login";
     }
 
     @GetMapping("/demo")
     public String demo() {
-        return "demo.html";
+        return "demo";
     }
 
     @GetMapping("/dashboard")

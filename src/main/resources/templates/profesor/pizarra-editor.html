@@ -6,6 +6,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
+    <meta name="_csrf" th:content="${_csrf?.token}">
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <style>
         .pizarra-editor { display: flex; gap: 1rem; min-height: 70vh; }
         .ejercicios-panel { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; }
@@ -14,8 +16,10 @@
         .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; }
         .pizarra-columna { min-width: 200px; flex: 1; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
         .pizarra-columna.drag-over { border-color: #0d6efd; background: #e7f1ff; }
-        .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; }
-        .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; width: 100%; font-weight: 700; }
+        .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; display: flex; align-items: center; gap: 0.25rem; }
+        .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; flex: 1; min-width: 0; font-weight: 700; }
+        .columna-titulo .btn-quitar-col { padding: 0.15rem 0.35rem; font-size: 0.75rem; color: #fff; border-color: rgba(255,255,255,0.6); }
+        .columna-titulo .btn-quitar-col:hover { background: rgba(255,255,255,0.2); color: #fff; }
         .pizarra-item { background: #fff; border-radius: 10px; padding: 0.5rem; margin-bottom: 0.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: move; }
         .pizarra-item .grupo-badge { font-size: 0.7rem; background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.4rem; border-radius: 4px; }
         .pizarra-item img { width: 100%; height: 80px; object-fit: contain; }
@@ -69,12 +73,15 @@
         </div>
 
         <!-- Columnas -->
-        <div class="columnas-panel flex-grow-1">
-            <div th:each="col, iterStat : ${pizarra.columnas}" class="pizarra-columna" th:data-columna-id="${col.id}"
-                 data-columna-id="">
+        <div class="columnas-panel flex-grow-1 d-flex align-items-flex-start gap-2">
+            <div th:each="col, iterStat : ${pizarra.columnas}" class="pizarra-columna" th:attr="data-columna-id=${col.id}">
                 <div class="columna-titulo">
                     <input type="text" th:value="${col.titulo}" placeholder="Título" class="col-titulo-input"
                            th:attr="data-col-id=${col.id}">
+                    <button type="button" class="btn btn-outline-light btn-quitar-col btn-quitar-columna"
+                            th:attr="data-columna-id=${col.id}"
+                            th:if="${pizarra.columnas.size() > 1}"
+                            title="Quitar columna"><i class="fa-solid fa-times"></i></button>
                 </div>
                 <div class="drop-zone columna-items" th:attr="data-columna-id=${col.id}">
                     <div th:each="item : ${col.items}" class="pizarra-item" th:attr="data-item-id=${item.id}">
@@ -90,6 +97,11 @@
                     </div>
                 </div>
             </div>
+            <div th:if="${pizarra.columnas.size() < 6}" class="pizarra-columna align-self-stretch d-flex align-items-center justify-content-center" style="min-width: 120px;">
+                <button type="button" class="btn btn-outline-primary btn-agregar-columna" id="btnAgregarColumna" title="Agregar columna (máx. 6)">
+                    <i class="fa-solid fa-plus me-1"></i>Agregar columna
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -97,19 +109,76 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     const pizarraId = [[${pizarra.id}]];
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+
+    function postHeaders() {
+        const h = { 'Content-Type': 'application/json' };
+        if (csrfToken) h[csrfHeader] = csrfToken;
+        return h;
+    }
 
     document.getElementById('btnGuardar').addEventListener('click', guardarBasico);
 
     function guardarBasico() {
+        guardarNombreYTitulos().then(r => { if (r.ok) alert('Guardado'); else alert('Error'); });
+    }
+
+    function guardarNombreYTitulos() {
         const nombre = document.getElementById('pizarraNombre').value.trim();
         const titulos = [];
         document.querySelectorAll('.col-titulo-input').forEach(inp => titulos.push(inp.value.trim()));
-        fetch('/profesor/pizarra/actualizar-basico', {
+        return fetch('/profesor/pizarra/actualizar-basico', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: postHeaders(),
             body: JSON.stringify({ id: pizarraId, nombre, titulos })
-        }).then(r => { if (r.ok) alert('Guardado'); else alert('Error'); });
+        });
     }
+
+    // Auto-guardar nombre y títulos: al salir del campo (blur) y al dejar de escribir (debounce) para que la TV actualice
+    let debounceGuardar = null;
+    function programarGuardadoNombreYTitulos() {
+        if (debounceGuardar) clearTimeout(debounceGuardar);
+        debounceGuardar = setTimeout(function() {
+            debounceGuardar = null;
+            guardarNombreYTitulos();
+        }, 500);
+    }
+    document.getElementById('pizarraNombre').addEventListener('blur', function() { guardarNombreYTitulos(); });
+    document.getElementById('pizarraNombre').addEventListener('input', programarGuardadoNombreYTitulos);
+    document.querySelectorAll('.col-titulo-input').forEach(inp => {
+        inp.addEventListener('blur', function() { guardarNombreYTitulos(); });
+        inp.addEventListener('input', programarGuardadoNombreYTitulos);
+    });
+
+    // Agregar columna (máx. 6)
+    const btnAgregarCol = document.getElementById('btnAgregarColumna');
+    if (btnAgregarCol) btnAgregarCol.addEventListener('click', function() {
+        fetch('/profesor/pizarra/agregar-columna', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ pizarraId })
+        }).then(r => {
+            if (r.ok) location.reload();
+            else r.json().then(d => alert(d.error || 'No se pudo agregar'));
+        }).catch(() => alert('Error al agregar columna'));
+    });
+
+    // Quitar columna (mín. 1)
+    document.querySelectorAll('.btn-quitar-columna').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('¿Quitar esta columna? Se borrarán los ejercicios que tenga.')) return;
+            const columnaId = this.getAttribute('data-columna-id');
+            fetch('/profesor/pizarra/quitar-columna', {
+                method: 'POST',
+                headers: postHeaders(),
+                body: JSON.stringify({ columnaId })
+            }).then(r => {
+                if (r.ok) location.reload();
+                else r.json().then(d => alert(d.error || 'No se pudo quitar'));
+            }).catch(() => alert('Error al quitar columna'));
+        });
+    });
 
     // Filtros ejercicios
     function filtrarEjercicios() {
@@ -127,10 +196,10 @@
     document.getElementById('filtro-grupo').addEventListener('change', filtrarEjercicios);
 
     // Drag and drop
-    let draggedExerciseId = null;
+    let draggedElement = null;
     document.querySelectorAll('.ejercicio-draggable').forEach(el => {
         el.addEventListener('dragstart', e => {
-            draggedExerciseId = el.dataset.id;
+            draggedElement = el;
             e.dataTransfer.setData('text/plain', el.dataset.id);
             e.dataTransfer.effectAllowed = 'copy';
         });
@@ -149,47 +218,68 @@
             const exerciseId = e.dataTransfer.getData('text/plain');
             if (!exerciseId) return;
             const columnaId = col.dataset.columnaId;
-            agregarItem(columnaId, exerciseId, dropZone);
+            if (!columnaId) return;
+            agregarItem(columnaId, exerciseId, dropZone, draggedElement);
         });
     });
 
-    function agregarItem(columnaId, exerciseId, dropZone) {
+    function agregarItem(columnaId, exerciseId, dropZone, draggedEl) {
         fetch('/profesor/pizarra/agregar-item', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: postHeaders(),
             body: JSON.stringify({ columnaId, exerciseId, peso: null, repeticiones: null, unidad: 'reps' })
         }).then(r => r.json()).then(data => {
-            location.reload();
+            if (!data || !data.id) { alert('Error al agregar'); return; }
+            const nombre = (draggedEl && draggedEl.querySelector('strong')) ? draggedEl.querySelector('strong').textContent : 'Ejercicio';
+            const grupos = (draggedEl && draggedEl.querySelector('small')) ? draggedEl.querySelector('small').textContent : '';
+            const imgSrc = (draggedEl && draggedEl.querySelector('img')) ? draggedEl.querySelector('img').src : '/img/not_imagen.png';
+            const card = crearTarjetaItem(data.id, nombre, grupos, imgSrc);
+            dropZone.appendChild(card);
+            bindItemEvents(card);
         }).catch(() => alert('Error al agregar'));
     }
 
-    // Actualizar peso/reps
-    document.querySelectorAll('.item-peso, .item-reps').forEach(inp => {
-        inp.addEventListener('change', function() {
-            const itemId = this.dataset.itemId;
-            const card = this.closest('.pizarra-item');
-            const peso = card.querySelector('.item-peso').value ? parseInt(card.querySelector('.item-peso').value) : null;
-            const reps = card.querySelector('.item-reps').value ? parseInt(card.querySelector('.item-reps').value) : null;
-            fetch('/profesor/pizarra/actualizar-item', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
-                body: JSON.stringify({ itemId, peso, repeticiones: reps, unidad: 'reps' })
+    function crearTarjetaItem(itemId, ejercicioNombre, grupoTexto, imgSrc) {
+        const div = document.createElement('div');
+        div.className = 'pizarra-item';
+        div.setAttribute('data-item-id', itemId);
+        div.innerHTML = '<span class="grupo-badge">' + (grupoTexto || '').replace(/</g, '&lt;') + '</span>' +
+            '<img src="' + (imgSrc || '/img/not_imagen.png') + '" alt="">' +
+            '<div class="item-nombre">' + (ejercicioNombre || '').replace(/</g, '&lt;') + '</div>' +
+            '<div class="item-peso-reps">' +
+            '<input type="number" placeholder="kg" class="item-peso" min="0" data-item-id="' + itemId + '">' +
+            '<input type="number" placeholder="reps" class="item-reps" min="0" data-item-id="' + itemId + '">' +
+            '<button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-item" data-item-id="' + itemId + '"><i class="fa-solid fa-trash"></i></button>' +
+            '</div>';
+        return div;
+    }
+
+    function bindItemEvents(card) {
+        const itemId = card.getAttribute('data-item-id');
+        card.querySelectorAll('.item-peso, .item-reps').forEach(inp => {
+            inp.addEventListener('change', function() {
+                const c = this.closest('.pizarra-item');
+                const peso = c.querySelector('.item-peso').value ? parseInt(c.querySelector('.item-peso').value, 10) : null;
+                const reps = c.querySelector('.item-reps').value ? parseInt(c.querySelector('.item-reps').value, 10) : null;
+                fetch('/profesor/pizarra/actualizar-item', {
+                    method: 'POST',
+                    headers: postHeaders(),
+                    body: JSON.stringify({ itemId, peso, repeticiones: reps, unidad: 'reps' })
+                });
             });
         });
-    });
-
-    // Eliminar item
-    document.querySelectorAll('.btn-eliminar-item').forEach(btn => {
-        btn.addEventListener('click', function() {
+        card.querySelector('.btn-eliminar-item').addEventListener('click', function() {
             if (!confirm('¿Eliminar este ejercicio?')) return;
-            const itemId = this.dataset.itemId;
             fetch('/profesor/pizarra/eliminar-item', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: postHeaders(),
                 body: JSON.stringify({ itemId })
-            }).then(r => { if (r.ok) this.closest('.pizarra-item').remove(); });
+            }).then(r => { if (r.ok) card.remove(); });
         });
-    });
+    }
+
+    // Actualizar peso/reps (tarjetas cargadas al inicio)
+    document.querySelectorAll('.pizarra-item').forEach(card => bindItemEvents(card));
 </script>
 </body>
 </html>

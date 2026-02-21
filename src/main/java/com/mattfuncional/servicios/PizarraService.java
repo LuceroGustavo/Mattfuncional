@@ -1,7 +1,12 @@
 package com.mattfuncional.servicios;
 
 import com.mattfuncional.dto.PizarraEstadoDTO;
-import com.mattfuncional.entidades.*;
+import com.mattfuncional.entidades.Exercise;
+import com.mattfuncional.entidades.GrupoMuscular;
+import com.mattfuncional.entidades.Pizarra;
+import com.mattfuncional.entidades.PizarraColumna;
+import com.mattfuncional.entidades.PizarraItem;
+import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.PizarraColumnaRepository;
 import com.mattfuncional.repositorios.PizarraItemRepository;
@@ -83,11 +88,13 @@ public class PizarraService {
             throw new RuntimeException("No tiene permisos para editar esta pizarra");
         }
         if (nombre != null) p.setNombre(nombre.trim());
-        if (titulos != null) {
+        if (titulos != null && !titulos.isEmpty()) {
             List<PizarraColumna> cols = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
             for (int i = 0; i < Math.min(titulos.size(), cols.size()); i++) {
-                cols.get(i).setTitulo(titulos.get(i));
+                String titulo = titulos.get(i);
+                cols.get(i).setTitulo(titulo != null ? titulo.trim() : "");
             }
+            columnaRepository.saveAll(cols);
         }
         return pizarraRepository.save(p);
     }
@@ -229,6 +236,52 @@ public class PizarraService {
             builder.append(TOKEN_CHARS[TOKEN_RANDOM.nextInt(TOKEN_CHARS.length)]);
         }
         return builder.toString();
+    }
+
+    /**
+     * Agrega una columna a la pizarra (máximo 6).
+     */
+    public void agregarColumna(Long pizarraId, Long profesorId) {
+        Pizarra p = pizarraRepository.findById(pizarraId)
+                .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
+        if (!p.getProfesor().getId().equals(profesorId)) {
+            throw new RuntimeException("No tiene permisos");
+        }
+        List<PizarraColumna> columnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
+        if (columnas.size() >= 6) {
+            throw new IllegalArgumentException("Máximo 6 columnas");
+        }
+        PizarraColumna nueva = new PizarraColumna();
+        nueva.setPizarra(p);
+        nueva.setTitulo("");
+        nueva.setOrden(columnas.size());
+        columnaRepository.save(nueva);
+        p.setCantidadColumnas(columnas.size() + 1);
+        pizarraRepository.save(p);
+    }
+
+    /**
+     * Quita una columna (y sus items). Mínimo 1 columna. Reordena el resto.
+     */
+    public void quitarColumna(Long columnaId, Long profesorId) {
+        PizarraColumna col = columnaRepository.findById(columnaId)
+                .orElseThrow(() -> new RuntimeException("Columna no encontrada"));
+        Pizarra p = col.getPizarra();
+        if (!p.getProfesor().getId().equals(profesorId)) {
+            throw new RuntimeException("No tiene permisos");
+        }
+        List<PizarraColumna> columnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
+        if (columnas.size() <= 1) {
+            throw new IllegalArgumentException("Debe haber al menos 1 columna");
+        }
+        columnaRepository.delete(col);
+        List<PizarraColumna> restantes = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
+        for (int i = 0; i < restantes.size(); i++) {
+            restantes.get(i).setOrden(i);
+        }
+        columnaRepository.saveAll(restantes);
+        p.setCantidadColumnas(restantes.size());
+        pizarraRepository.save(p);
     }
 
     public void eliminar(Long id, Long profesorId) {

@@ -112,8 +112,13 @@ PizarraItem (pizarra_item)
 | `/profesor/pizarra/editar/{id}` | idem | Editor de pizarra (arrastrar, editar tarjetas) |
 | `/profesor/pizarra/nueva` | idem | Crear pizarra (elegir columnas, títulos) |
 | `/sala/{token}` | `permitAll` | Vista solo lectura para TV (sin login) |
-| `GET /api/sala/{token}/estado` | `permitAll` | JSON con estado actual (para polling) |
-| `POST /api/profesor/pizarra/*` | autenticado | Guardar, actualizar, crear items |
+| `GET /sala/api/{token}/estado` | `permitAll` | JSON con estado actual (para polling) |
+| `POST /profesor/pizarra/actualizar-basico` | autenticado | Nombre y títulos de columnas |
+| `POST /profesor/pizarra/agregar-item` | autenticado | Añadir ejercicio a columna |
+| `POST /profesor/pizarra/actualizar-item` | autenticado | Peso y repeticiones de un item |
+| `POST /profesor/pizarra/eliminar-item` | autenticado | Quitar ejercicio de columna |
+| `POST /profesor/pizarra/agregar-columna` | autenticado | Añadir columna (máx. 6) |
+| `POST /profesor/pizarra/quitar-columna` | autenticado | Quitar columna (mín. 1) |
 
 ---
 
@@ -129,7 +134,7 @@ PizarraItem (pizarra_item)
 ### 6.2 Vista TV
 
 - HTML/CSS responsive para pantalla grande.
-- **Polling:** `setInterval` cada 10-15 segundos a `GET /api/sala/{token}/estado`.
+- **Polling:** `setInterval` cada **2,5 segundos** a `GET /sala/api/{token}/estado`; primera petición al cargar la página para ver cambios casi al instante.
 - Sin controles de edición; solo visualización.
 - Diseño similar al esquema: columnas, títulos en rectángulo negro, tarjetas con grupo muscular, imagen, nombre, peso, reps.
 
@@ -180,14 +185,15 @@ PizarraItem (pizarra_item)
 
 - [x] Template `sala.html` con layout de columnas
 - [x] Tarjetas: grupo muscular, imagen, nombre, peso, reps
-- [x] Polling para actualizar estado (15 s)
+- [x] Polling para actualizar estado (2,5 s) y primera actualización al cargar
 - [x] Estilos fullscreen-friendly
+- [x] Agregar columna / Quitar columna desde el editor (máx. 6, mín. 1)
 
 ### Fase 8.4 – Integración y pruebas
 
-- [ ] Probar flujo completo: crear → guardar → abrir en TV
-- [ ] Probar edición en vivo y actualización en TV
-- [ ] Documentar en AVANCES_DEL_APP y CHANGELOG
+- [x] Probar flujo completo: crear → guardar → abrir en TV
+- [x] Probar edición en vivo y actualización en TV
+- [x] Documentar en AVANCES_DEL_APP y CHANGELOG
 
 ---
 
@@ -223,4 +229,45 @@ PizarraItem (pizarra_item)
 - Rutas: `/profesor/pizarra` (lista), `/profesor/pizarra/nueva`, `/profesor/pizarra/editar/{id}`, `/sala/{token}` (TV).
 - API: `GET /sala/api/{token}/estado` para polling.
 - Editor: arrastrar ejercicios a columnas, editar títulos, peso y reps en tarjeta, guardar.
-- Vista TV: layout de columnas, polling cada 15 s, estilos oscuros para pantalla.
+- Vista TV: layout de columnas, polling cada 2,5 s, estilos oscuros para pantalla.
+
+---
+
+## 11. Mejoras implementadas (pulido Feb 2026)
+
+### 11.1 Peso y repeticiones visibles en la TV
+
+- **Problema:** Al editar peso/reps en el editor no se guardaban y en la vista TV aparecía "-".
+- **Causa:** Las peticiones POST del editor no enviaban el token CSRF; Spring rechazaba las peticiones.
+- **Solución:** Metas `_csrf` y `_csrf_header` en el editor; función `postHeaders()` que incluye el token en todas las peticiones POST (actualizar-basico, agregar-item, actualizar-item, eliminar-item).
+
+### 11.2 Títulos de columnas que no se borran al agregar ejercicio
+
+- **Problema:** Al arrastrar un ejercicio a una columna se hacía `location.reload()`; los títulos escritos (aún no guardados) desaparecían.
+- **Solución:** Al soltar un ejercicio ya no se recarga la página: se crea la tarjeta en el DOM con los datos del ejercicio arrastrado y se enlazan los eventos (peso/reps, eliminar). Los títulos permanecen.
+
+### 11.3 Títulos y nombre actualizados en la TV
+
+- **Problema:** Los títulos de columna solo se enviaban al hacer clic en "Guardar"; en la TV no se veían hasta guardar.
+- **Solución:** Auto-guardado de nombre y títulos: al salir del campo (blur) y con debounce de 500 ms al escribir. Backend: `columnaRepository.saveAll(cols)` tras actualizar títulos; controlador convierte la lista `titulos` del JSON a `List<String>` de forma segura.
+
+### 11.4 Vista TV casi en tiempo real
+
+- **Polling:** Intervalo reducido de 15 s a **2,5 segundos**; primera petición a la API al cargar la página. Así el profesor puede editar desde el notebook y el monitor/TV (pestaña compartida) muestra los cambios en pocos segundos.
+
+### 11.5 Agregar y quitar columnas desde el editor
+
+- **Agregar columna:** Botón "Agregar columna" (visible si hay menos de 6). POST `/profesor/pizarra/agregar-columna` con `pizarraId`; recarga el editor.
+- **Quitar columna:** Botón ✕ en el título de cada columna (solo si hay más de 1). POST `/profesor/pizarra/quitar-columna` con `columnaId`; se elimina la columna y sus items, se reordena el resto y se actualiza `cantidadColumnas`.
+- **Backend:** `PizarraService.agregarColumna(pizarraId, profesorId)` y `quitarColumna(columnaId, profesorId)`.
+
+### 11.6 Corrección vista de login
+
+- **Problema:** En `/login` se mostraba la página por defecto de Spring ("Please sign in") en lugar de la plantilla personalizada ("Iniciar Sesión").
+- **Causa:** `PortalControlador` devolvía `"login.html"`; Thymeleaf espera el nombre de vista sin extensión.
+- **Solución:** Devolver `"login"` (y `"index"`, `"demo"` en sus rutas) en `PortalControlador.java`.
+
+### 11.7 Arranque de la aplicación (PizarraService)
+
+- **Problema:** `ClassNotFoundException: Profesor` / `PizarraItem` al iniciar (RestartClassLoader de DevTools).
+- **Solución:** En `PizarraService.java` se reemplazó `import com.mattfuncional.entidades.*` por imports explícitos de `Exercise`, `GrupoMuscular`, `Pizarra`, `PizarraColumna`, `PizarraItem`, `Profesor`.
