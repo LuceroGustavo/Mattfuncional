@@ -2,6 +2,18 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - Token de sala legible (tv + 6 dígitos) ✅
+
+### 🎯 **Cambio**
+- La URL de la sala para la pizarra TV deja de usar un token alfanumérico largo y pasa a un formato legible: **"tv" + 6 dígitos** (ej. `http://localhost:8080/sala/tv45677`).
+
+### ✅ **Implementación**
+- **PizarraService:** `generarTokenUnico()` ahora genera `"tv"` + número aleatorio de 6 dígitos (000000–999999), con comprobación de unicidad. Eliminados `TOKEN_CHARS` y el método `generarToken(int length)`.
+- Las pizarras ya existentes conservan su token; solo las **nuevas** usan el formato `tvXXXXXX`.
+- Detalle en `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` sección 9.7.
+
+---
+
 ## [2025-12-04] - Corrección de Visualización de Imágenes y Optimización de Carga de Ejercicios Predeterminados ✅
 
 ### 🎯 **Problema Resuelto**

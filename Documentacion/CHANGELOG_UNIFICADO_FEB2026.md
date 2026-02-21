@@ -235,10 +235,16 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - **Login:** `PortalControlador` devolvía `"login.html"`; Thymeleaf requiere `"login"`. Corregido también `"index"` y `"demo"`.
 - **PizarraService:** `import com.mattfuncional.entidades.*` sustituido por imports explícitos para evitar `ClassNotFoundException` con DevTools RestartClassLoader.
 
-### 9.7 Archivos modificados
+### 9.7 Token de sala legible (tv + 6 dígitos)
+- **Antes:** La URL de la sala usaba un token alfanumérico largo (ej. `http://localhost:8080/sala/lexmGIFeyzCX`), poco legible para escribir o dictar.
+- **Ahora:** El token de las **nuevas** pizarras tiene formato **"tv" + 6 dígitos** (ej. `tv45677`, `tv123456`). La URL queda tipo `http://localhost:8080/sala/tv45677`.
+- **Implementación:** En `PizarraService.generarTokenUnico()` se genera `"tv" + String.format("%06d", num)` con `num` aleatorio 0–999999; se comprueba unicidad con `pizarraRepository.existsByToken(token)` y se repite hasta obtener un token no usado. Se eliminaron la constante `TOKEN_CHARS` y el método auxiliar `generarToken(int length)`.
+- **Compatibilidad:** Las pizarras ya existentes conservan su token antiguo; solo las creadas a partir de este cambio usan el formato `tvXXXXXX`. El campo `token` en la entidad `Pizarra` sigue siendo único y `length = 32` (suficiente para 8 caracteres).
+
+### 9.8 Archivos modificados
 - `pizarra-editor.html`: CSRF, postHeaders, agregar tarjeta en DOM sin reload, blur + debounce para títulos, botones agregar/quitar columna.
 - `sala.html`: logo Mattfuncional arriba a la izquierda, botón "Actualizar" en la barra (sin polling); `actualizarDesdeAPI()` solo al clic.
-- `PizarraService.java`: saveAll(cols), agregarColumna, quitarColumna, imports explícitos.
+- `PizarraService.java`: saveAll(cols), agregarColumna, quitarColumna, imports explícitos; **generarTokenUnico()** ahora genera token "tv" + 6 dígitos (eliminados TOKEN_CHARS y generarToken(length)).
 - `PizarraController.java`: actualizar-basico con titulos como List<String>, agregar-columna, quitar-columna.
 - `PortalControlador.java`: return "login", "index", "demo" (sin .html).
 

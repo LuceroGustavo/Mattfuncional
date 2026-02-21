@@ -19,6 +19,10 @@ public class Pizarra {
     @Column(unique = true, length = 32)
     private String token;
 
+    /** Hash del PIN de 4 dígitos para ver la sala en TV (null = sin código). */
+    @Column(name = "pin_sala_hash", length = 80)
+    private String pinSalaHash;
+
     @Column(nullable = false)
     private int cantidadColumnas = 1;
 
@@ -53,6 +57,9 @@ public class Pizarra {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public String getPinSalaHash() { return pinSalaHash; }
+    public void setPinSalaHash(String pinSalaHash) { this.pinSalaHash = pinSalaHash; }
 
     public int getCantidadColumnas() { return cantidadColumnas; }
     public void setCantidadColumnas(int cantidadColumnas) { this.cantidadColumnas = cantidadColumnas; }

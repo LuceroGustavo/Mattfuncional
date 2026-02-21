@@ -41,10 +41,41 @@
             <button type="button" class="btn btn-primary" id="btnGuardar"><i class="fa-solid fa-save me-1"></i>Guardar</button>
         </div>
         <div>
-            <a th:href="@{/sala/{t}(t=${pizarra.token})}" class="btn btn-success" target="_blank">
-                <i class="fa-solid fa-tv me-1"></i>Abrir en TV
-            </a>
+            <button type="button" class="btn btn-success" id="btnTransmitirTV" th:attr="data-pizarra-id=${pizarra.id}, data-token=${pizarra.token}">
+                <i class="fa-solid fa-tv me-1"></i>Transmitir en TV
+            </button>
             <a th:href="@{/profesor/pizarra}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <!-- Modal Transmitir en TV: código de 4 dígitos y enlace -->
+    <div class="modal fade" id="modalTransmitirTV" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-tv me-2"></i>Transmitir en TV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Opcional: un código de 4 dígitos para que en el TV pidan el código antes de ver la pizarra. Dejá vacío para abrir sin código.</p>
+                    <div class="mb-3">
+                        <label for="inputPinSala" class="form-label">Código de 4 dígitos</label>
+                        <input type="text" id="inputPinSala" class="form-control" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="Ej: 1234" autocomplete="off">
+                        <button type="button" class="btn btn-link btn-sm p-0 mt-1" id="btnSinCodigo">Sin código</button>
+                    </div>
+                    <div id="transmitirEnlaceBox" style="display: none;">
+                        <label class="form-label">Enlace para abrir en el navegador del TV</label>
+                        <div class="input-group">
+                            <input type="text" id="transmitirEnlaceUrl" class="form-control" readonly>
+                            <button type="button" class="btn btn-outline-primary" id="btnCopiarEnlace"><i class="fa-solid fa-copy me-1"></i>Copiar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="btnGuardarPinYEnlace"><i class="fa-solid fa-check me-1"></i>Guardar y ver enlace</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -178,6 +209,43 @@
                 else r.json().then(d => alert(d.error || 'No se pudo quitar'));
             }).catch(() => alert('Error al quitar columna'));
         });
+    });
+
+    // Modal Transmitir en TV
+    const modalTransmitir = new bootstrap.Modal(document.getElementById('modalTransmitirTV'));
+    const tokenSala = document.getElementById('btnTransmitirTV').getAttribute('data-token');
+    document.getElementById('btnTransmitirTV').addEventListener('click', function() {
+        document.getElementById('inputPinSala').value = '';
+        document.getElementById('transmitirEnlaceBox').style.display = 'none';
+        modalTransmitir.show();
+    });
+    document.getElementById('btnSinCodigo').addEventListener('click', function() {
+        document.getElementById('inputPinSala').value = '';
+    });
+    document.getElementById('btnGuardarPinYEnlace').addEventListener('click', function() {
+        const pin = document.getElementById('inputPinSala').value.trim();
+        if (pin.length > 0 && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
+            alert('El código debe tener exactamente 4 dígitos.');
+            return;
+        }
+        fetch('/profesor/pizarra/' + pizarraId + '/pin', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ pin: pin || '' })
+        }).then(function(r) {
+            if (r.ok) {
+                var url = window.location.origin + '/sala/' + tokenSala;
+                document.getElementById('transmitirEnlaceUrl').value = url;
+                document.getElementById('transmitirEnlaceBox').style.display = 'block';
+            } else {
+                r.json().then(function(d) { alert(d.error || 'Error al guardar'); });
+            }
+        }).catch(function() { alert('Error al guardar'); });
+    });
+    document.getElementById('btnCopiarEnlace').addEventListener('click', function() {
+        var input = document.getElementById('transmitirEnlaceUrl');
+        input.select();
+        navigator.clipboard.writeText(input.value).then(function() { alert('Enlace copiado'); }).catch(function() { alert('Copiá el enlace manualmente'); });
     });
 
     // Filtros ejercicios

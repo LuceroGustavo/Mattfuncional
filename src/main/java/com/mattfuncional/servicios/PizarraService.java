@@ -11,6 +11,7 @@ import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.PizarraColumnaRepository;
 import com.mattfuncional.repositorios.PizarraItemRepository;
 import com.mattfuncional.repositorios.PizarraRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,21 +26,23 @@ import java.util.stream.Collectors;
 public class PizarraService {
 
     private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
-    private static final char[] TOKEN_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     private final PizarraRepository pizarraRepository;
     private final PizarraColumnaRepository columnaRepository;
     private final PizarraItemRepository itemRepository;
     private final ExerciseRepository exerciseRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public PizarraService(PizarraRepository pizarraRepository,
                           PizarraColumnaRepository columnaRepository,
                           PizarraItemRepository itemRepository,
-                          ExerciseRepository exerciseRepository) {
+                          ExerciseRepository exerciseRepository,
+                          PasswordEncoder passwordEncoder) {
         this.pizarraRepository = pizarraRepository;
         this.columnaRepository = columnaRepository;
         this.itemRepository = itemRepository;
         this.exerciseRepository = exerciseRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Pizarra> listarPorProfesor(Long profesorId) {
@@ -222,20 +225,14 @@ public class PizarraService {
         return dto;
     }
 
+    /** Genera un token legible para la sala: "tv" + 6 dígitos (ej: tv45677). */
     private String generarTokenUnico() {
         String token;
         do {
-            token = generarToken(12);
+            int num = TOKEN_RANDOM.nextInt(1_000_000); // 0 a 999999
+            token = "tv" + String.format("%06d", num);
         } while (pizarraRepository.existsByToken(token));
         return token;
-    }
-
-    private String generarToken(int length) {
-        StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            builder.append(TOKEN_CHARS[TOKEN_RANDOM.nextInt(TOKEN_CHARS.length)]);
-        }
-        return builder.toString();
     }
 
     /**
@@ -291,5 +288,44 @@ public class PizarraService {
             throw new RuntimeException("No tiene permisos");
         }
         pizarraRepository.delete(p);
+    }
+
+    /**
+     * Establece o quita el PIN de 4 dígitos para ver la sala en TV.
+     * @param pin 4 dígitos, o null/vacío para quitar el código.
+     */
+    public void setPinSala(Long pizarraId, Long profesorId, String pin) {
+        Pizarra p = pizarraRepository.findById(pizarraId)
+                .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
+        if (!p.getProfesor().getId().equals(profesorId)) {
+            throw new RuntimeException("No tiene permisos");
+        }
+        if (pin == null || pin.trim().isEmpty()) {
+            p.setPinSalaHash(null);
+        } else {
+            String limpio = pin.trim();
+            if (limpio.length() != 4 || !limpio.matches("\\d{4}")) {
+                throw new IllegalArgumentException("El código debe tener exactamente 4 dígitos");
+            }
+            p.setPinSalaHash(passwordEncoder.encode(limpio));
+        }
+        pizarraRepository.save(p);
+    }
+
+    /**
+     * Verifica si el PIN es correcto para la pizarra con el token dado.
+     */
+    public boolean verificarPinSala(String token, String pin) {
+        if (pin == null || pin.trim().isEmpty()) return false;
+        Pizarra p = pizarraRepository.findByToken(token).orElse(null);
+        if (p == null || p.getPinSalaHash() == null) return false;
+        return passwordEncoder.matches(pin.trim(), p.getPinSalaHash());
+    }
+
+    /** Indica si la pizarra con este token requiere PIN para ver la sala. */
+    public boolean requierePinSala(String token) {
+        return pizarraRepository.findByToken(token)
+                .map(p -> p.getPinSalaHash() != null && !p.getPinSalaHash().isEmpty())
+                .orElse(false);
     }
 }

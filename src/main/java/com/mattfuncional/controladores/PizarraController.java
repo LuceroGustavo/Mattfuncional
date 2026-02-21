@@ -195,6 +195,21 @@ public class PizarraController {
         }
     }
 
+    @PostMapping("/{id}/pin")
+    @ResponseBody
+    public ResponseEntity<?> setPinSala(@PathVariable Long id, @RequestBody Map<String, String> body,
+                                       @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        String pin = body != null ? body.get("pin") : null;
+        try {
+            pizarraService.setPinSala(id, profesor.getId(), pin);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
         Profesor profesor = getProfesorAcceso(usuario);
