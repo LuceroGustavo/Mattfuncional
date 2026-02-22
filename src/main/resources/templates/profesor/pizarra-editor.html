@@ -26,6 +26,9 @@
         .pizarra-item .item-nombre { font-size: 0.85rem; font-weight: 600; }
         .pizarra-item .item-peso-reps { font-size: 0.8rem; display: flex; gap: 0.5rem; margin-top: 0.3rem; }
         .pizarra-item .item-peso-reps input { width: 50px; font-size: 0.8rem; padding: 0.2rem; }
+        .pizarra-item.dragging { opacity: 0.6; }
+        .pizarra-item.drag-over-item { border: 2px dashed #0d6efd; }
+        .btn-group-orden-item .btn { font-size: 0.65rem; }
         .drop-zone { min-height: 100px; }
         .ejercicio-mini { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; }
         .ejercicio-mini img { height: 60px; object-fit: contain; }
@@ -64,14 +67,21 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small">Un solo enlace para todo el día. Opcional: código de 4 dígitos para que en el TV pidan el código. Dejá vacío para abrir sin código.</p>
+                    <p class="text-muted small mb-2">Un solo enlace para todo el día. El código es <strong>opcional</strong>.</p>
+                    <ul class="text-muted small mb-3">
+                        <li><strong>Para que el TV abra sin pedir código:</strong> dejá el cuadro vacío (o hacé clic en «Sin código») y luego <em>Guardar y ver enlace</em>.</li>
+                        <li><strong>Para pedir un código de 4 dígitos en el TV:</strong> ingresá el código (ej: 1234) y luego <em>Guardar y ver enlace</em>.</li>
+                    </ul>
                     <div id="transmitirMsgYaConfigurado" class="alert alert-info py-2 small" style="display: none;" role="alert">
-                        Tenés un código de 4 dígitos configurado (no se puede mostrar por seguridad). Para cambiarlo, ingresá el nuevo código abajo y guardá.
+                        Tenés un código de 4 dígitos configurado (no se puede mostrar por seguridad). Para cambiarlo, ingresá el nuevo código abajo y guardá. Para quitar el código, hacé clic en «Sin código» y guardá.
                     </div>
                     <div class="mb-3">
-                        <label for="inputPinSala" class="form-label">Código de 4 dígitos</label>
-                        <input type="text" id="inputPinSala" class="form-control" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="Ej: 1234" autocomplete="off">
-                        <button type="button" class="btn btn-link btn-sm p-0 mt-1" id="btnSinCodigo">Sin código</button>
+                        <label for="inputPinSala" class="form-label">Código de 4 dígitos (opcional)</label>
+                        <input type="text" id="inputPinSala" class="form-control" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="Vacío = el TV abre sin código" autocomplete="off">
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <button type="button" class="btn btn-link btn-sm p-0 text-primary" id="btnSinCodigo">Sin código</button>
+                            <span id="msgSinCodigoAplicado" class="text-success small" style="display: none;">Campo vaciado. Guardá para que el TV abra sin código.</span>
+                        </div>
                     </div>
                     <div id="transmitirEnlaceBox" style="display: none;">
                         <label class="form-label">Enlace para abrir en el navegador del TV</label>
@@ -171,8 +181,14 @@
                             title="Quitar columna"><i class="fa-solid fa-times"></i></button>
                 </div>
                 <div class="drop-zone columna-items" th:attr="data-columna-id=${col.id}">
-                    <div th:each="item : ${col.items}" class="pizarra-item" th:attr="data-item-id=${item.id}">
-                        <span class="grupo-badge" th:text="${item.exercise.grupos != null ? #strings.listJoin(item.exercise.grupos.![nombre], ', ') : ''}"></span>
+                    <div th:each="item : ${col.items}" class="pizarra-item" draggable="true" th:attr="data-item-id=${item.id}, data-exercise-id=${item.exercise.id}">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="grupo-badge" th:text="${item.exercise.grupos != null ? #strings.listJoin(item.exercise.grupos.![nombre], ', ') : ''}"></span>
+                            <span class="btn-group-orden btn-group-orden-item">
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 btn-subir-item" th:attr="data-item-id=${item.id}" title="Subir"><i class="fa-solid fa-chevron-up"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 btn-bajar-item" th:attr="data-item-id=${item.id}" title="Bajar"><i class="fa-solid fa-chevron-down"></i></button>
+                            </span>
+                        </div>
                         <img th:if="${item.exercise.imagen != null}" th:src="${item.exercise.imagen.url}" alt="">
                         <img th:if="${item.exercise.imagen == null}" src="/img/not_imagen.png" alt="">
                         <div class="item-nombre" th:text="${item.exercise.name}"></div>
@@ -374,7 +390,12 @@
         modalTransmitir.show();
     });
     document.getElementById('btnSinCodigo').addEventListener('click', function() {
-        document.getElementById('inputPinSala').value = '';
+        var input = document.getElementById('inputPinSala');
+        input.value = '';
+        input.placeholder = 'Vacío = el TV abre sin código';
+        var msg = document.getElementById('msgSinCodigoAplicado');
+        msg.style.display = 'inline';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
     });
     document.getElementById('btnGuardarPinYEnlace').addEventListener('click', function() {
         var pin = document.getElementById('inputPinSala').value.trim();
@@ -454,53 +475,136 @@
         });
     });
 
+    function bindItemDrag(card) {
+        card.addEventListener('dragstart', function(e) {
+            draggedElement = card;
+            const col = card.closest('.pizarra-columna');
+            const columnaId = col ? col.dataset.columnaId : '';
+            const exerciseId = card.dataset.exerciseId || '';
+            const peso = card.querySelector('.item-peso') ? card.querySelector('.item-peso').value : '';
+            const reps = card.querySelector('.item-reps') ? card.querySelector('.item-reps').value : '';
+            card.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', ''); // algunos navegadores exigen algo
+            e.dataTransfer.setData('application/json', JSON.stringify({
+                source: 'item',
+                itemId: card.dataset.itemId,
+                exerciseId: exerciseId,
+                columnaId: columnaId,
+                peso: peso ? parseInt(peso, 10) : null,
+                reps: reps ? parseInt(reps, 10) : null
+            }));
+            e.dataTransfer.effectAllowed = 'copyMove';
+        });
+        card.addEventListener('dragend', function() {
+            card.classList.remove('dragging');
+            document.querySelectorAll('.pizarra-item.drag-over-item').forEach(x => x.classList.remove('drag-over-item'));
+        });
+    }
+    document.querySelectorAll('.pizarra-item').forEach(card => bindItemDrag(card));
+
     document.querySelectorAll('.pizarra-columna').forEach(col => {
         const dropZone = col.querySelector('.columna-items');
         col.addEventListener('dragover', e => {
             e.preventDefault();
             col.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'copy';
         });
-        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('dragleave', e => {
+            if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+        });
         col.addEventListener('drop', e => {
             e.preventDefault();
             col.classList.remove('drag-over');
-            const exerciseId = e.dataTransfer.getData('text/plain');
-            if (!exerciseId) return;
             const columnaId = col.dataset.columnaId;
             if (!columnaId) return;
-            agregarItem(columnaId, exerciseId, dropZone, draggedElement);
+            const json = e.dataTransfer.getData('application/json');
+            if (json) {
+                try {
+                    const d = JSON.parse(json);
+                    if (d.source === 'item') {
+                        if (d.columnaId === columnaId) {
+                            // Reordenar dentro de la misma columna
+                            const items = Array.from(dropZone.querySelectorAll('.pizarra-item'));
+                            let insertIndex = 0;
+                            for (let i = 0; i < items.length; i++) {
+                                const r = items[i].getBoundingClientRect();
+                                if (e.clientY > r.top + r.height / 2) insertIndex = i + 1;
+                                else { insertIndex = i; break; }
+                            }
+                            const idxDragged = items.indexOf(draggedElement);
+                            if (idxDragged >= 0 && (insertIndex !== idxDragged && insertIndex !== idxDragged + 1)) {
+                                const ref = insertIndex >= dropZone.children.length ? null : dropZone.children[insertIndex];
+                                dropZone.insertBefore(draggedElement, ref);
+                                const orderedIds = Array.from(dropZone.querySelectorAll('.pizarra-item')).map(it => it.dataset.itemId).map(Number);
+                                fetch('/profesor/pizarra/reordenar-items', {
+                                    method: 'POST',
+                                    headers: postHeaders(),
+                                    body: JSON.stringify({ columnaId: Number(columnaId), itemIds: orderedIds })
+                                }).catch(() => alert('Error al reordenar'));
+                            }
+                        } else {
+                            // Copiar a otra columna
+                            agregarItem(Number(columnaId), Number(d.exerciseId), dropZone, draggedElement, d.peso, d.reps);
+                        }
+                        return;
+                    }
+                } catch (err) { /* no es item */ }
+            }
+            const exerciseId = e.dataTransfer.getData('text/plain');
+            if (!exerciseId) return;
+            agregarItem(Number(columnaId), Number(exerciseId), dropZone, draggedElement, null, null);
         });
     });
 
-    function agregarItem(columnaId, exerciseId, dropZone, draggedEl) {
+    function agregarItem(columnaId, exerciseId, dropZone, draggedEl, peso, reps) {
+        const body = { columnaId, exerciseId, peso: peso != null ? peso : null, repeticiones: reps != null ? reps : null, unidad: 'reps' };
         fetch('/profesor/pizarra/agregar-item', {
             method: 'POST',
             headers: postHeaders(),
-            body: JSON.stringify({ columnaId, exerciseId, peso: null, repeticiones: null, unidad: 'reps' })
+            body: JSON.stringify(body)
         }).then(r => r.json()).then(data => {
             if (!data || !data.id) { alert('Error al agregar'); return; }
-            const nombre = (draggedEl && draggedEl.querySelector('strong')) ? draggedEl.querySelector('strong').textContent : 'Ejercicio';
-            const grupos = (draggedEl && draggedEl.querySelector('small')) ? draggedEl.querySelector('small').textContent : '';
+            const nombre = (draggedEl && draggedEl.querySelector('.item-nombre')) ? draggedEl.querySelector('.item-nombre').textContent : (draggedEl && draggedEl.querySelector('strong')) ? draggedEl.querySelector('strong').textContent : 'Ejercicio';
+            const grupos = (draggedEl && draggedEl.querySelector('.grupo-badge')) ? draggedEl.querySelector('.grupo-badge').textContent : (draggedEl && draggedEl.querySelector('small')) ? draggedEl.querySelector('small').textContent : '';
             const imgSrc = (draggedEl && draggedEl.querySelector('img')) ? draggedEl.querySelector('img').src : '/img/not_imagen.png';
-            const card = crearTarjetaItem(data.id, nombre, grupos, imgSrc);
+            const card = crearTarjetaItem(data.id, nombre, grupos, imgSrc, exerciseId, peso, reps);
             dropZone.appendChild(card);
             bindItemEvents(card);
+            bindItemDrag(card);
         }).catch(() => alert('Error al agregar'));
     }
 
-    function crearTarjetaItem(itemId, ejercicioNombre, grupoTexto, imgSrc) {
+    function crearTarjetaItem(itemId, ejercicioNombre, grupoTexto, imgSrc, exerciseId, pesoVal, repsVal) {
         const div = document.createElement('div');
         div.className = 'pizarra-item';
+        div.draggable = true;
         div.setAttribute('data-item-id', itemId);
-        div.innerHTML = '<span class="grupo-badge">' + (grupoTexto || '').replace(/</g, '&lt;') + '</span>' +
+        if (exerciseId) div.setAttribute('data-exercise-id', exerciseId);
+        const pv = (pesoVal != null && pesoVal !== '') ? (' value="' + pesoVal + '"') : '';
+        const rv = (repsVal != null && repsVal !== '') ? (' value="' + repsVal + '"') : '';
+        div.innerHTML = '<div class="d-flex justify-content-between align-items-start mb-1">' +
+            '<span class="grupo-badge">' + (grupoTexto || '').replace(/</g, '&lt;') + '</span>' +
+            '<span class="btn-group-orden btn-group-orden-item">' +
+            '<button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 btn-subir-item" data-item-id="' + itemId + '" title="Subir"><i class="fa-solid fa-chevron-up"></i></button>' +
+            '<button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 btn-bajar-item" data-item-id="' + itemId + '" title="Bajar"><i class="fa-solid fa-chevron-down"></i></button>' +
+            '</span></div>' +
             '<img src="' + (imgSrc || '/img/not_imagen.png') + '" alt="">' +
             '<div class="item-nombre">' + (ejercicioNombre || '').replace(/</g, '&lt;') + '</div>' +
             '<div class="item-peso-reps">' +
-            '<input type="number" placeholder="kg" class="item-peso" min="0" data-item-id="' + itemId + '">' +
-            '<input type="number" placeholder="reps" class="item-reps" min="0" data-item-id="' + itemId + '">' +
+            '<input type="number" placeholder="kg" class="item-peso" min="0" data-item-id="' + itemId + '"' + pv + '>' +
+            '<input type="number" placeholder="reps" class="item-reps" min="0" data-item-id="' + itemId + '"' + rv + '>' +
             '<button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-item" data-item-id="' + itemId + '"><i class="fa-solid fa-trash"></i></button>' +
             '</div>';
         return div;
+    }
+
+    function reordenarColumnaDesdeDOM(dropZone, columnaId) {
+        const orderedIds = Array.from(dropZone.querySelectorAll('.pizarra-item')).map(it => it.dataset.itemId).map(Number);
+        fetch('/profesor/pizarra/reordenar-items', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ columnaId: Number(columnaId), itemIds: orderedIds })
+        }).catch(() => alert('Error al reordenar'));
     }
 
     function bindItemEvents(card) {
@@ -525,6 +629,28 @@
                 body: JSON.stringify({ itemId })
             }).then(r => { if (r.ok) card.remove(); });
         });
+        const dropZone = card.closest('.columna-items');
+        const columnaId = card.closest('.pizarra-columna') && card.closest('.pizarra-columna').dataset.columnaId;
+        const btnSubir = card.querySelector('.btn-subir-item');
+        const btnBajar = card.querySelector('.btn-bajar-item');
+        if (btnSubir && dropZone && columnaId) {
+            btnSubir.addEventListener('click', function() {
+                const prev = card.previousElementSibling;
+                if (prev && prev.classList.contains('pizarra-item')) {
+                    dropZone.insertBefore(card, prev);
+                    reordenarColumnaDesdeDOM(dropZone, columnaId);
+                }
+            });
+        }
+        if (btnBajar && dropZone && columnaId) {
+            btnBajar.addEventListener('click', function() {
+                const next = card.nextElementSibling;
+                if (next && next.classList.contains('pizarra-item')) {
+                    dropZone.insertBefore(next, card);
+                    reordenarColumnaDesdeDOM(dropZone, columnaId);
+                }
+            });
+        }
     }
 
     // Actualizar peso/reps (tarjetas cargadas al inicio)

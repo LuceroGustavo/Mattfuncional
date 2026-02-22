@@ -400,6 +400,53 @@ Esta sección documenta las correcciones realizadas tras el uso del panel: error
 
 ---
 
+## 14. Mejoras en el editor: reordenar ejercicios, copiar entre columnas, modal TV (Feb 2026)
+
+Esta sección documenta las mejoras en el editor de pizarra: reorden de ejercicios dentro de cada columna (flechas y arrastre), arrastre entre columnas para copiar, aclaraciones en el modal "Transmitir en TV" y corrección del arrastre desde la lista de ejercicios.
+
+### 14.1 Reordenar ejercicios dentro de cada columna
+
+- **Funcionalidad:** En cada columna se puede cambiar el orden de los ejercicios de dos formas:
+  - **Flechas:** Cada tarjeta de ejercicio tiene dos botones (subir / bajar) arriba a la derecha. Al hacer clic, el ejercicio se mueve un lugar y se persiste el orden en el servidor.
+  - **Arrastrar:** Se puede arrastrar una tarjeta dentro de la misma columna y soltarla en la posición deseada; el resto de ejercicios se desplaza y se guarda el nuevo orden.
+- **Backend:** Endpoint `POST /profesor/pizarra/reordenar-items` con body `columnaId` y `itemIds` (lista de ids de ítems en el orden deseado). Usa el método existente `PizarraService.reordenarItems(columnaId, itemIdsEnOrden, profesorId)`.
+- **Frontend:** Tarjetas con `draggable="true"` y `data-exercise-id`; botones `.btn-subir-item` y `.btn-bajar-item`; en el drop dentro de la misma columna se calcula el índice de inserción, se reordena el DOM y se llama a `reordenar-items`. Función `reordenarColumnaDesdeDOM(dropZone, columnaId)` para sincronizar con el servidor.
+
+### 14.2 Arrastrar entre columnas (copiar)
+
+- **Funcionalidad:** Si se arrastra un ejercicio de una columna y se suelta en **otra columna**, se **copia** ahí (mismo ejercicio, mismo peso y repeticiones). El original permanece en su columna.
+- **Implementación:** En el `dragstart` del ítem se guarda en `dataTransfer` (tipo `application/json`) el origen (`source: 'item'`), `exerciseId`, `columnaId`, `peso`, `reps`. En el `drop` de la columna, si el origen es ítem y la columna destino es distinta, se llama a `agregar-item` con la columna destino y esos datos; se crea una nueva tarjeta al final con los mismos valores. La tarjeta creada recibe `data-exercise-id` para poder arrastrarla de nuevo.
+
+### 14.3 Modal "Transmitir en TV": sin código y texto aclaratorio
+
+- **Problema:** No quedaba claro cómo usar el sistema "sin código" y el enlace "Sin código" parecía no hacer nada (solo vaciaba el campo, sin feedback).
+- **Solución:**
+  - **Texto del modal:** Se reemplazó el párrafo único por una lista clara: (1) Para que el TV abra sin pedir código: dejar el cuadro vacío o hacer clic en «Sin código» y luego *Guardar y ver enlace*. (2) Para pedir código de 4 dígitos: ingresar el código y luego *Guardar y ver enlace*.
+  - **Campo:** Etiqueta "Código de 4 dígitos (opcional)" y placeholder "Vacío = el TV abre sin código".
+  - **Enlace "Sin código":** Al hacer clic se vacía el campo y se muestra durante unos segundos el mensaje: "Campo vaciado. Guardá para que el TV abra sin código." Así se entiende que hay que guardar después.
+  - **Mensaje cuando ya hay código:** Se añade la indicación de que para quitar el código se puede hacer clic en «Sin código» y guardar.
+
+### 14.4 Arrastre desde la lista de ejercicios (fix)
+
+- **Problema:** Tras implementar el arrastre entre columnas, dejó de funcionar arrastrar ejercicios desde el **panel de ejercicios** (lista izquierda) a las columnas.
+- **Causa:** En las columnas se usaba `dropEffect = 'move'` en el `dragover`, mientras que el panel de ejercicios usa `effectAllowed = 'copy'`. En muchos navegadores esa combinación hace que el drop se rechace.
+- **Solución:** En el `dragover` de la columna se usa siempre `dropEffect = 'copy'`. En el `dragstart` de los ítems de columna se cambió `effectAllowed` de `'move'` a `'copyMove'`, para que tanto el arrastre desde el panel (copy) como desde otra columna (copy/move) sean aceptados.
+
+### 14.5 Resumen de archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `PizarraController.java` | Endpoint `POST /profesor/pizarra/reordenar-items` (body: `columnaId`, `itemIds`). |
+| `pizarra-editor.html` | Tarjetas con flechas subir/bajar y `draggable`; `data-exercise-id`; `bindItemDrag` y lógica de drop para reorden (misma columna) y copia (otra columna); `reordenarColumnaDesdeDOM` y handlers de flechas; modal Transmitir en TV con texto aclaratorio, placeholder y feedback "Sin código"; `dropEffect = 'copy'` en columnas; `effectAllowed = 'copyMove'` en ítems. |
+
+### 14.6 Ruta nueva
+
+| Ruta | Descripción |
+|------|-------------|
+| `POST /profesor/pizarra/reordenar-items` | Reordena los ítems de una columna; body: `columnaId`, `itemIds` (array de ids en orden). |
+
+---
+
 ## Sugerencia para commit (ej. commit 37)
 
 **Título corto:**  
@@ -432,4 +479,24 @@ Esta sección documenta las correcciones realizadas tras el uso del panel: error
 - Insertar pizarra existente: listado por API (GET /profesor/pizarra/api/listado) al abrir el modal;
   se ven todas las pizarras, incluidas las guardadas recientemente.
 - Documentación: FASE_7_PANTALLA_DE_SALA.md sección 13.
+```
+
+---
+
+## Sugerencia para commit (reorden, copiar entre columnas, modal TV – ej. commit 39)
+
+**Título corto:**  
+`feat(pizarra): reordenar ejercicios en columnas, copiar entre columnas, aclarar modal TV`
+
+**Descripción sugerida:**
+
+```
+- Reordenar ejercicios en cada columna: flechas subir/bajar y arrastre dentro de la columna.
+  Endpoint POST /profesor/pizarra/reordenar-items (columnaId, itemIds).
+- Arrastrar ejercicio de una columna a otra: copia (mismo ejercicio, peso y reps) sin quitar el original.
+- Modal Transmitir en TV: texto más claro (sin código = campo vacío + Guardar; con código = ingresar 4 dígitos + Guardar).
+  Enlace "Sin código" vacía el campo y muestra feedback; placeholder "Vacío = el TV abre sin código".
+- Fix arrastre desde lista de ejercicios a columnas: dropEffect = 'copy' en columnas,
+  effectAllowed = 'copyMove' en ítems para que funcione tanto desde panel como entre columnas.
+- Documentación: FASE_7_PANTALLA_DE_SALA.md sección 14.
 ```

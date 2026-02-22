@@ -206,6 +206,26 @@ public class PizarraController {
         return ResponseEntity.ok().build();
     }
 
+    /** Reordena los ítems de una columna según el orden indicado (lista de itemIds). */
+    @PostMapping("/reordenar-items")
+    @ResponseBody
+    public ResponseEntity<?> reordenarItems(@RequestBody Map<String, Object> body,
+                                             @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long columnaId = Long.valueOf(body.get("columnaId").toString());
+        @SuppressWarnings("unchecked")
+        List<Number> raw = (List<Number>) body.get("itemIds");
+        if (raw == null) return ResponseEntity.badRequest().body(Map.of("error", "itemIds requerido"));
+        List<Long> itemIds = raw.stream().map(Number::longValue).toList();
+        try {
+            pizarraService.reordenarItems(columnaId, itemIds, profesor.getId());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/agregar-columna")
     @ResponseBody
     public ResponseEntity<?> agregarColumna(@RequestBody Map<String, Object> body,
