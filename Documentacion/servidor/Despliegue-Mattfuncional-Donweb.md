@@ -1,6 +1,8 @@
 # Despliegue de Mattfuncional en servidor Donweb
 
-**Objetivo:** Desplegar la app Mattfuncional en el mismo VPS Donweb (detodoya.com / 149.50.144.53) y gestionarla con un menú similar al de Detodoya.
+**Objetivo:** Desplegar la app Mattfuncional en el mismo VPS Donweb (149.50.144.53) y gestionarla con el menú de scripts.
+
+**Repositorio:** https://github.com/LuceroGustavo/Mattfuncional
 
 **Referencia:** Ver `Configuracion-Servidor-Donweb.md` para datos del servidor (IP, SSH, firewall, etc.).
 
