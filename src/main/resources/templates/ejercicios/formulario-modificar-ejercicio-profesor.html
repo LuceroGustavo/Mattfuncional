@@ -109,7 +109,7 @@
 <div class="container mt-4">
     <div class="hero-section mb-4">
         <div class="d-flex justify-content-between align-items-center px-3">
-            <a href="/profesor/ejercicios" class="btn btn-volver"><i class="fas fa-arrow-left me-2"></i>Volver a Ejercicios</a>
+            <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-volver"><i class="fas fa-arrow-left me-2"></i>Volver a Ejercicios</a>
             <span></span>
         </div>
         <h1 class="hero-title"><i class="fas fa-edit me-2"></i>Editar Ejercicio</h1>
@@ -234,7 +234,7 @@
 
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-between">
-                        <a href="/profesor/ejercicios" class="btn btn-secondary">
+                        <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-secondary">
                             <i class="fas fa-times me-2"></i>Cancelar
                         </a>
                         <button type="submit" class="btn btn-profesor">

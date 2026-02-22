@@ -1,7 +1,17 @@
 -- Seed de alumnos para pruebas (Mattfuncional)
+-- Verificado contra entidades Usuario y DiaHorarioAsistencia (Feb 2026).
+--
+-- PRERREQUISITO: Debe existir al menos un registro en la tabla profesor.
+--   (Ej.: iniciar la app una vez para que DataInitializer cree el profesor por defecto.)
+--
 -- Notas:
--- - tipo_asistencia (enum ordinal): PRESENCIAL=0, ONLINE=1
+-- - tipo_asistencia (enum ordinal): PRESENCIAL=0, ONLINE=1, SEMIPRESENCIAL=2
 -- - dia (enum ordinal): LUNES=0, MARTES=1, MIERCOLES=2, JUEVES=3, VIERNES=4, SABADO=5, DOMINGO=6
+-- - Columnas usuario: nombre, edad, sexo, peso, password, rol, correo, tipo_asistencia, celular,
+--   estado_alumno, fecha_alta, fecha_baja, historial_estado, fecha_inicio, detalle_asistencia, profesor_id.
+--   (Opcionales no usadas aquí: avatar, notas_profesor, objetivos_personales, restricciones_medicas,
+--   contacto_emergencia_nombre, contacto_emergencia_telefono, historial_asistencia.)
+-- - Tabla usuario_dias_horarios_asistencia: usuario_id, dia, hora_entrada, hora_salida.
 
 SET @profesor_id := (SELECT id FROM profesor LIMIT 1);
 

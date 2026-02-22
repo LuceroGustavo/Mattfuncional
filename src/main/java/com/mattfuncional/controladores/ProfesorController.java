@@ -574,11 +574,15 @@ public class ProfesorController {
         }
 
         // Asegurar que existan los 60 ejercicios predeterminados (imágenes desde uploads/ejercicios/ 1.webp..60.webp)
-        exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
+        try {
+            exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
+        } catch (Exception e) {
+            logger.warn("No se pudieron asegurar ejercicios predeterminados: {}", e.getMessage());
+        }
 
         Long profesorId = profesor.getId();
-        // Usar nuevo método que incluye predeterminados + propios
-        List<com.mattfuncional.entidades.Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesor(profesorId);
+        // Usar método con imágenes cargadas para evitar LazyInitializationException en la vista (ejercicio.imagen)
+        List<com.mattfuncional.entidades.Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
         
         // Separar predeterminados y propios para estadísticas
         List<com.mattfuncional.entidades.Exercise> ejerciciosPropios = exerciseService.findEjerciciosPropiosDelProfesor(profesorId);
