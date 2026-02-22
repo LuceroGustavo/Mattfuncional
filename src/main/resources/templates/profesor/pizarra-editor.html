@@ -102,11 +102,11 @@
                 </div>
                 <div class="modal-body">
                     <p class="text-muted small">Se reemplazará el contenido actual de la pizarra por el de la seleccionada.</p>
+                    <p class="text-muted mb-0" id="msgCargandoInsertar" style="display: none;">Cargando listado...</p>
                     <div class="list-group" id="listaPizarrasInsertar">
-                        <a href="#" class="list-group-item list-group-item-action pizarra-option" th:each="piz : ${pizarrasParaInsertar}" th:attr="data-id=${piz.id}" th:if="${piz.id != pizarra.id}"
-                           th:text="${piz.nombre + ' (' + piz.cantidadColumnas + ' col.)'}">Pizarra</a>
-                        <p class="text-muted mb-0" id="msgNoOtrasPizarras" style="display: none;">No hay otras pizarras guardadas.</p>
+                        <!-- Se llena por JS al abrir el modal (GET /profesor/pizarra/api/listado) -->
                     </div>
+                    <p class="text-muted mb-0 mt-2" id="msgNoOtrasPizarras" style="display: none;">No hay otras pizarras guardadas.</p>
                 </div>
             </div>
         </div>
@@ -247,7 +247,7 @@
         guardarNombreYTitulos()
             .then(function(r) {
                 if (r.ok) {
-                    alert('Contenido enviado a la TV. Para ver los cambios en la pantalla del TV, actualizá la página en el navegador del TV (tecla F5).');
+                    alert('Los cambios se actualizarán en la TV en menos de 30 segundos.');
                 } else {
                     alert('Error al guardar. Revisá el contenido e intentá de nuevo.');
                 }
@@ -256,9 +256,34 @@
     });
 
     document.getElementById('btnInsertarExistente').addEventListener('click', function() {
-        var opts = document.querySelectorAll('#modalInsertarExistente .pizarra-option');
-        document.getElementById('msgNoOtrasPizarras').style.display = opts.length === 0 ? 'block' : 'none';
+        var cont = document.getElementById('listaPizarrasInsertar');
+        var msgCargando = document.getElementById('msgCargandoInsertar');
+        var msgNoOtras = document.getElementById('msgNoOtrasPizarras');
+        cont.innerHTML = '';
+        msgNoOtras.style.display = 'none';
+        msgNoOtras.textContent = 'No hay otras pizarras guardadas.';
+        msgCargando.style.display = 'block';
         new bootstrap.Modal(document.getElementById('modalInsertarExistente')).show();
+        fetch('/profesor/pizarra/api/listado', { headers: postHeaders() })
+            .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function(lista) {
+                msgCargando.style.display = 'none';
+                var otras = lista.filter(function(p) { return p.id !== pizarraId; });
+                otras.forEach(function(p) {
+                    var a = document.createElement('a');
+                    a.href = '#';
+                    a.className = 'list-group-item list-group-item-action pizarra-option';
+                    a.setAttribute('data-id', p.id);
+                    a.textContent = (p.nombre || 'Pizarra') + ' (' + (p.cantidadColumnas || 0) + ' col.)';
+                    cont.appendChild(a);
+                });
+                msgNoOtras.style.display = otras.length === 0 ? 'block' : 'none';
+            })
+            .catch(function() {
+                msgCargando.style.display = 'none';
+                msgNoOtras.style.display = 'block';
+                msgNoOtras.textContent = 'Error al cargar el listado. Intentá de nuevo.';
+            });
     });
     document.getElementById('modalInsertarExistente').addEventListener('click', function(e) {
         var t = e.target.closest('.pizarra-option');

@@ -105,8 +105,9 @@
             .catch(function() {});
     }
 
-    // La vista TV solo carga el contenido al abrir la página. Para ver cambios, actualizar la página (F5) en el TV.
+    // Carga inicial y luego actualización automática cada 30 segundos (bajo consumo).
     actualizarDesdeAPI();
+    setInterval(actualizarDesdeAPI, 30000);
 </script>
 </body>
 </html>

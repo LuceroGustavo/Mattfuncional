@@ -76,6 +76,7 @@ public class PizarraService {
             return pizarraRepository.findByIdWithColumnas(pt.get().getPizarraId())
                     .orElseGet(() -> {
                         pizarraTrabajoRepository.delete(pt.get());
+                        pizarraTrabajoRepository.flush();
                         return crearPizarraTrabajo(profesor);
                     });
         }
@@ -148,6 +149,11 @@ public class PizarraService {
             throw new RuntimeException("No tiene permisos");
         }
         String nombre = nuevoNombre != null && !nuevoNombre.isBlank() ? nuevoNombre.trim() : "Pizarra";
+        boolean yaExiste = pizarraRepository.findByProfesorIdOrderByFechaModificacionDesc(profesorId).stream()
+                .anyMatch(p -> !p.getId().equals(pizarraOrigenId) && nombre.equalsIgnoreCase(p.getNombre() != null ? p.getNombre().trim() : ""));
+        if (yaExiste) {
+            throw new IllegalArgumentException("Ya tenés una pizarra guardada con el nombre \"" + nombre + "\". Usá otro nombre.");
+        }
         int cantidadColumnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(origen.getId()).size();
         if (cantidadColumnas < 1) cantidadColumnas = 1;
         Pizarra nueva = crear(origen.getProfesor(), nombre, cantidadColumnas);
@@ -462,6 +468,12 @@ public class PizarraService {
         if (!p.getProfesor().getId().equals(profesorId)) {
             throw new RuntimeException("No tiene permisos");
         }
+        pizarraTrabajoRepository.findByProfesorId(profesorId).ifPresent(pt -> {
+            if (pt.getPizarraId().equals(id)) {
+                pizarraTrabajoRepository.delete(pt);
+                pizarraTrabajoRepository.flush();
+            }
+        });
         pizarraRepository.delete(p);
     }
 

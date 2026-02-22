@@ -352,6 +352,54 @@ Esta sección documenta la evolución de la pizarra hacia un **panel de trabajo 
 
 ---
 
+## 13. Correcciones: panel tras borrar pizarra, guardar como nueva y listado al día (Feb 2026)
+
+Esta sección documenta las correcciones realizadas tras el uso del panel: error 500 al volver tras borrar la pizarra de trabajo, validación al guardar como nueva y listado actualizado en "Insertar pizarra existente".
+
+### 13.1 Error 500 al volver al panel tras borrar la pizarra de trabajo
+
+- **Problema:** Si el profesor iba a "Administrar pizarras", borraba una pizarra que era la **pizarra de trabajo** actual y luego volvía al panel (`/profesor/pizarra/panel`), la aplicación respondía **500 Internal Server Error** con `DataIntegrityViolationException`: *Duplicate entry '1' for key 'pizarra_trabajo.UKc5tgn2c7io9bb8gjek40hf9y6'* en un `INSERT` a `pizarra_trabajo`.
+- **Causa:**  
+  - La pizarra borrada seguía referenciada en `pizarra_trabajo`.  
+  - En `getOrCreatePizarraTrabajo` se detectaba que la pizarra ya no existía, se hacía `delete(pt.get())` y luego `crearPizarraTrabajo(profesor)`. El `DELETE` no se ejecutaba (flush) antes del `INSERT`, y la restricción única por `profesor_id` fallaba.
+- **Solución:**  
+  - **En `PizarraService.getOrCreatePizarraTrabajo`:** Después de `pizarraTrabajoRepository.delete(pt.get())` se llama a `pizarraTrabajoRepository.flush()` para que el DELETE se envíe a la BD antes de crear la nueva pizarra de trabajo.  
+  - **En `PizarraService.eliminar`:** Antes de borrar la pizarra se elimina cualquier fila de `pizarra_trabajo` que apunte a esa `pizarra_id` (si el profesor tenía esa pizarra como de trabajo) y se hace `flush`. Así no quedan referencias huérfanas y al volver al panel no se intenta insertar un duplicado.
+- **Comportamiento esperado:** Si no se encuentra la pizarra de trabajo (porque se borró), el sistema abre como **pizarra nueva**: se borra el registro viejo de `pizarra_trabajo`, se hace flush y se crea una nueva pizarra de trabajo.
+
+### 13.2 Guardar como nueva: no crear si ya existe ese nombre
+
+- **Problema:** Al guardar como nueva pizarra con un nombre que el profesor ya tenía en otra pizarra, se creaba una segunda pizarra con el mismo nombre, generando confusión en la lista.
+- **Solución:** En `PizarraService.guardarComoNuevaPizarra` se valida que el profesor no tenga ya otra pizarra (distinta de la actual) con el mismo nombre (comparación sin distinguir mayúsculas). Si existe, se lanza `IllegalArgumentException` con el mensaje: *"Ya tenés una pizarra guardada con el nombre \"...\". Usá otro nombre."*  
+  El controlador ya devuelve ese mensaje en la respuesta (400) y el front lo muestra en un `alert`.
+- **Archivo:** `PizarraService.java` (uso de `pizarraRepository.findByProfesorIdOrderByFechaModificacionDesc` para comprobar nombres).
+
+### 13.3 Insertar pizarra existente: listado siempre al día
+
+- **Problema:** En el modal "Insertar pizarra existente" la lista de pizarras se generaba en el servidor al cargar la página del editor. Las pizarras **guardadas recientemente** en la misma sesión no aparecían hasta recargar la página.
+- **Solución:**  
+  - **Nuevo endpoint:** `GET /profesor/pizarra/api/listado`. Devuelve JSON con la lista de pizarras del profesor: `id`, `nombre`, `cantidadColumnas`.  
+  - **Modal:** Al abrir "Insertar pizarra existente" se llama a este endpoint, se rellena la lista en el cliente (excluyendo la pizarra actual) y se muestra "Cargando listado..." mientras tanto. Así siempre se ven **todas** las pizarras del profesor, incluidas las guardadas en la misma sesión.
+- **Archivos:**  
+  - `PizarraController.java`: método `apiListado` con `@GetMapping("/api/listado")` y `@ResponseBody`.  
+  - `pizarra-editor.html`: modal con contenedor vacío; al hacer clic en "Insertar pizarra existente" se abre el modal, se hace `fetch('/profesor/pizarra/api/listado')` y se construyen los enlaces en el DOM. Mensajes para "Cargando...", "No hay otras pizarras" y error de carga.
+
+### 13.4 Resumen de archivos modificados en esta tanda
+
+| Archivo | Cambio |
+|---------|--------|
+| `PizarraService.java` | `getOrCreatePizarraTrabajo`: `flush()` tras `delete` del registro de pizarra de trabajo cuando la pizarra ya no existe. `eliminar`: borrar y hacer `flush` de `PizarraTrabajo` que apunte a la pizarra antes de borrar la pizarra. `guardarComoNuevaPizarra`: validación de nombre duplicado (IllegalArgumentException). |
+| `PizarraController.java` | `GET /profesor/pizarra/api/listado`: API que devuelve lista de pizarras del profesor (id, nombre, cantidadColumnas). Corrección de tipo en `getCantidadColumnas()` (int, no Integer). |
+| `pizarra-editor.html` | Modal "Insertar pizarra existente": lista vacía al cargar; al abrir el modal se hace fetch a `/profesor/pizarra/api/listado` y se rellena la lista; mensajes de carga, sin pizarras y error. |
+
+### 13.5 Ruta nueva
+
+| Ruta | Descripción |
+|------|-------------|
+| `GET /profesor/pizarra/api/listado` | Listado de pizarras del profesor (id, nombre, cantidadColumnas) en JSON; usada por el modal "Insertar pizarra existente". |
+
+---
+
 ## Sugerencia para commit (ej. commit 37)
 
 **Título corto:**  
@@ -366,4 +414,22 @@ Esta sección documenta la evolución de la pizarra hacia un **panel de trabajo 
 - Vista TV sin botón Actualizar ni polling; actualización con F5. Botón "Actualizar en TV" en el panel guarda y avisa.
 - Guardar crea nueva pizarra con nombre (no reemplaza); listado en /profesor/pizarra/lista.
 - Documentación: FASE_7_PANTALLA_DE_SALA.md sección 12 con todos los cambios.
+```
+
+---
+
+## Sugerencia para commit (correcciones panel y listado – ej. commit 38)
+
+**Título corto:**  
+`fix(pizarra): panel tras borrar pizarra de trabajo, validar nombre al guardar, listado al día`
+
+**Descripción sugerida:**
+
+```
+- Fix 500 al volver al panel tras borrar la pizarra de trabajo: flush tras delete en pizarra_trabajo;
+  al eliminar una pizarra se borra antes su fila en pizarra_trabajo si era la de trabajo.
+- Guardar como nueva: no crear si ya existe una pizarra con ese nombre (mensaje al usuario).
+- Insertar pizarra existente: listado por API (GET /profesor/pizarra/api/listado) al abrir el modal;
+  se ven todas las pizarras, incluidas las guardadas recientemente.
+- Documentación: FASE_7_PANTALLA_DE_SALA.md sección 13.
 ```

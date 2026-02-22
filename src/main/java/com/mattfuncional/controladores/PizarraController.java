@@ -62,6 +62,24 @@ public class PizarraController {
         return "redirect:/profesor/pizarra/editar/" + p.getId();
     }
 
+    /** API: listado de pizarras del profesor (id, nombre, cantidadColumnas) para el modal "Insertar existente". */
+    @GetMapping("/api/listado")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> apiListado(@AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        List<Pizarra> pizarras = pizarraService.listarPorProfesor(profesor.getId());
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Pizarra p : pizarras) {
+            Map<String, Object> m = new java.util.HashMap<>();
+            m.put("id", p.getId());
+            m.put("nombre", p.getNombre() != null ? p.getNombre() : "");
+            m.put("cantidadColumnas", p.getCantidadColumnas());
+            out.add(m);
+        }
+        return ResponseEntity.ok(out);
+    }
+
     /** Lista de pizarras guardadas (administrar). */
     @GetMapping("/lista")
     public String listar(Model model, @AuthenticationPrincipal Usuario usuario) {
