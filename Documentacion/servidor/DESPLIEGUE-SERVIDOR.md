@@ -178,13 +178,15 @@ chmod +x /root/mattfuncional/mattfuncional
 chmod +x /root/mattfuncional/scripts/servidor/iniciar-menu.sh
 ```
 
-### 6.5 Directorio de uploads (opcional)
+### 6.5 Directorio de uploads (recomendado para ver ejercicios e imágenes)
+
+El perfil `donweb` usa por defecto `/root/mattfuncional/uploads`. Crear la carpeta en el servidor:
 
 ```bash
-mkdir -p /home/mattfuncional/uploads
+mkdir -p /root/mattfuncional/uploads
 ```
 
-Si preferís usar la raíz del proyecto: `mkdir -p /root/mattfuncional/uploads` y ajustar `mattfuncional.uploads.dir` en `application-donweb.properties` en el servidor.
+La app crea automáticamente `uploads/ejercicios` al iniciar. Si las imágenes de ejercicios predeterminados (1.webp … 60.webp) no están, los ejercicios se crean igual pero sin imagen.
 
 ---
 

@@ -508,6 +508,8 @@ public class ExerciseCargaDefaultOptimizado {
     @Transactional(rollbackFor = Exception.class)
     public int asegurarEjerciciosPredeterminados() {
         if (exerciseRepository.countEjerciciosPredeterminados() >= 60) return 0;
+        // Asegurar grupos musculares primero (por si DataInitializer no corrió o falló, ej. en servidor Donweb)
+        grupoMuscularService.asegurarGruposSistema();
         List<Exercise> lista = crearListaEjerciciosPredeterminados(null, true, true);
         int creados = 0;
         for (int i = 0; i < lista.size(); i++) {
