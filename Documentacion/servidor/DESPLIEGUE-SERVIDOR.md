@@ -1,6 +1,6 @@
 # Despliegue de Mattfuncional en el servidor Donweb
 
-Guía para desplegar y gestionar la aplicación **Mattfuncional** en el VPS de Donweb. Incluye el uso por **Consola VNC** (sin copiar/pegar) y por SSH.
+Guía para desplegar y gestionar la aplicación **Mattfuncional** en el VPS de Donweb. Incluye acceso por **SSH con clave** (recomendado desde tu PC), por **SSH con contraseña** y por **Consola VNC** (cuando PowerShell está bloqueado).
 
 **Repositorio:** https://github.com/LuceroGustavo/Mattfuncional
 
@@ -12,7 +12,7 @@ Guía para desplegar y gestionar la aplicación **Mattfuncional** en el VPS de D
 |--------|--------|
 | IP     | `149.50.144.53` |
 | Puerto aplicación | **8080** |
-| SSH    | `ssh -p5638 root@149.50.144.53` |
+| SSH    | `ssh -p 5638 root@149.50.144.53` |
 | SO     | Ubuntu 24.04 |
 
 **URL de la aplicación (una vez desplegada):**  
@@ -20,7 +20,31 @@ Guía para desplegar y gestionar la aplicación **Mattfuncional** en el VPS de D
 
 ---
 
-## 2. Acceso cuando no podés usar PowerShell/SSH (Consola VNC)
+## 2. Acceso por SSH desde tu PC (recomendado: con clave, sin contraseña)
+
+**Forma recomendada** para entrar al servidor desde tu computadora (PowerShell, Cursor, etc.):
+
+- Se usa **SSH con clave** (clave pública en el servidor, clave privada en tu PC).
+- **No pide contraseña** en cada conexión: podés ejecutar comandos directamente y, si usás Cursor u otra herramienta que corra comandos en tu terminal, también puede ejecutar órdenes en el servidor sin que tengas que escribir la contraseña.
+- Evita confusiones entre “quién entra” y “quién ejecuta”: desde tu PC, cualquier comando `ssh -p 5638 root@149.50.144.53 "comando"` se ejecuta en el servidor si la clave está configurada.
+
+**Conectar (sesión interactiva):**
+
+```bash
+ssh -p 5638 root@149.50.144.53
+```
+
+**Ejecutar un comando sin abrir sesión** (útil para scripts o para que la IA ejecute tareas en el servidor):
+
+```bash
+ssh -p 5638 root@149.50.144.53 "cd /root/mattfuncional && ./mattfuncional"
+```
+
+Si todavía no tenés clave configurada y querés hacerlo, generá un par en tu PC y agregá la clave pública al servidor en `~/.ssh/authorized_keys` (documentación estándar de SSH).
+
+---
+
+## 3. Acceso cuando no podés usar PowerShell/SSH (Consola VNC)
 
 Si en tu trabajo PowerShell está bloqueado, podés gestionar el servidor desde la **Consola VNC** que ofrece Donweb:
 
@@ -28,7 +52,7 @@ Si en tu trabajo PowerShell está bloqueado, podés gestionar el servidor desde 
 2. Hacé clic en **Consola VNC** (botón verde).
 3. En la consola **no se puede copiar/pegar**; tenés que escribir los comandos a mano.
 
-### 2.1 Entrar al menú de Mattfuncional (primera vez o si no existe la sesión)
+### 3.1 Entrar al menú de Mattfuncional (primera vez o si no existe la sesión)
 
 Escribí en este orden (cada línea y Enter):
 
@@ -40,11 +64,11 @@ cd /root/mattfuncional
 ./iniciar-menu.sh
 ```
 
-Si la sesión ya existía, te dirá algo como: *"La sesión 'mattfuncional' ya existe. Para entrar al menú ejecutá: screen -r mattfuncional"*. En ese caso pasá al paso 2.2.
+Si la sesión ya existía, te dirá algo como: *"La sesión 'mattfuncional' ya existe. Para entrar al menú ejecutá: screen -r mattfuncional"*. En ese caso pasá al paso 3.2.
 
-Si se creó nueva, también te pedirá que entres con el comando del paso 2.2.
+Si se creó nueva, también te pedirá que entres con el comando del paso 3.2.
 
-### 2.2 Conectarte a la sesión del menú
+### 3.2 Conectarte a la sesión del menú
 
 Escribí **exactamente** (con **espacio** entre `screen` y `-r`):
 
@@ -54,14 +78,14 @@ screen -r mattfuncional
 
 Importante: no escribas `screen-r` junto; tiene que ser `screen`, espacio, `-r`, espacio, `mattfuncional`.
 
-### 2.3 Despliegue completo desde el menú
+### 3.3 Despliegue completo desde el menú
 
 En el menú **MATTFUNCIONAL - MENÚ DE GESTIÓN** elegí la opción **5** (Despliegue completo).  
 Eso hace: parar app → actualizar código (git pull) → compilar → iniciar.
 
 Cuando termine, la app queda en: **http://149.50.144.53:8080**
 
-### 2.4 Salir del menú sin cerrarlo
+### 3.4 Salir del menú sin cerrarlo
 
 Para salir de la consola pero dejar el menú y la app corriendo:  
 **Ctrl+A**, soltá, y después **D** (detach).  
@@ -69,7 +93,7 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 
 ---
 
-## 3. Opciones del menú (1-11)
+## 4. Opciones del menú (1-11)
 
 | Opción | Acción |
 |--------|--------|
@@ -87,7 +111,7 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 
 ---
 
-## 4. Acceso a la aplicación (usuario developer)
+## 5. Acceso a la aplicación (usuario developer)
 
 Una vez desplegada, entrá en el navegador a:
 
@@ -101,11 +125,11 @@ Para el **usuario developer** (creado automáticamente al iniciar la app):
 
 ---
 
-## 5. Primera vez: preparar el servidor
+## 6. Primera vez: preparar el servidor
 
 Solo hace falta hacerlo una vez (o si reinstalás el servidor).
 
-### 5.1 Base de datos MySQL
+### 6.1 Base de datos MySQL
 
 Crear la base y el usuario (por ejemplo desde SSH o desde la misma consola):
 
@@ -125,7 +149,7 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-### 5.2 Clonar el repositorio
+### 6.2 Clonar el repositorio
 
 ```bash
 cd /root
@@ -135,7 +159,7 @@ cd mattfuncional
 
 Si el repo es privado, configurá token o SSH antes.
 
-### 5.3 Variables de entorno para la base de datos
+### 6.3 Variables de entorno para la base de datos
 
 Para que el menú pueda iniciar la app correctamente:
 
@@ -147,14 +171,14 @@ source ~/.bashrc
 
 (Sustituí `Matt2026` si usaste otra contraseña en MySQL.)
 
-### 5.4 Permisos de ejecución
+### 6.4 Permisos de ejecución
 
 ```bash
 chmod +x /root/mattfuncional/mattfuncional
 chmod +x /root/mattfuncional/scripts/servidor/iniciar-menu.sh
 ```
 
-### 5.5 Directorio de uploads (opcional)
+### 6.5 Directorio de uploads (opcional)
 
 ```bash
 mkdir -p /home/mattfuncional/uploads
@@ -164,9 +188,9 @@ Si preferís usar la raíz del proyecto: `mkdir -p /root/mattfuncional/uploads` 
 
 ---
 
-## 6. Uso por SSH (alternativa)
+## 7. Uso por SSH con contraseña (alternativa)
 
-Si tenés SSH disponible:
+Si entrás con usuario y contraseña (no tenés clave configurada):
 
 ```bash
 ssh -p5638 root@149.50.144.53
@@ -179,7 +203,7 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 
 ---
 
-## 7. Archivos relacionados
+## 8. Archivos relacionados
 
 | Archivo | Descripción |
 |---------|-------------|
@@ -189,7 +213,7 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 
 ---
 
-## 8. Resumen rápido (Consola VNC)
+## 9. Resumen rápido (Consola VNC)
 
 1. Donweb → Consola VNC.
 2. `cd /root/mattfuncional`
@@ -201,4 +225,5 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 
 ---
 
-**Última actualización:** Febrero 2026
+**Última actualización:** Febrero 2026.  
+Se documentó el acceso por **SSH con clave (sin contraseña)** como forma recomendada desde tu PC; con la clave configurada, Cursor u otras herramientas pueden ejecutar comandos en el servidor sin pedir contraseña.
