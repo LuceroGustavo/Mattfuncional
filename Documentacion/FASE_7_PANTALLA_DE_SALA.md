@@ -3,7 +3,7 @@
 **Para contexto del proyecto:** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).  
 **Plan de desarrollo:** [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
-**Estado:** En desarrollo (primera versión implementada)  
+**Estado:** En desarrollo (panel de trabajo y conexión global implementados)  
 **Última actualización:** Febrero 2026
 
 ---
@@ -272,3 +272,98 @@ PizarraItem (pizarra_item)
 
 - **Problema:** `ClassNotFoundException: Profesor` / `PizarraItem` al iniciar (RestartClassLoader de DevTools).
 - **Solución:** En `PizarraService.java` se reemplazó `import com.mattfuncional.entidades.*` por imports explícitos de `Exercise`, `GrupoMuscular`, `Pizarra`, `PizarraColumna`, `PizarraItem`, `Profesor`.
+
+---
+
+## 12. Cambios recientes – Panel de trabajo y conexión global (Feb 2026)
+
+Esta sección documenta la evolución de la pizarra hacia un **panel de trabajo único** y una **conexión global por profesor** para la TV.
+
+### 12.1 Entrada directa al panel de trabajo
+
+- **Antes:** Al entrar a "Pizarra" desde el panel del profesor se mostraba la **lista** de pizarras guardadas; desde ahí se creaba una nueva (formulario nombre + columnas) o se editaba una existente.
+- **Ahora:** Al entrar a **Pizarra** (`/profesor/pizarra`) se redirige al **panel de trabajo** (`/profesor/pizarra/panel`), que abre directamente el editor con una pizarra de trabajo (4 columnas, nombre "Panel en vivo"). No hay formulario previo.
+- **Pizarra de trabajo:** Una por profesor. Se obtiene o crea con `PizarraService.getOrCreatePizarraTrabajo(profesor)`. Persistencia en tabla `pizarra_trabajo` (entidad `PizarraTrabajo`: `profesor_id`, `pizarra_id`).
+- **Lista de pizarras guardadas:** Sigue disponible en **/profesor/pizarra/lista** ("Administrar pizarras"). Desde el editor hay enlace "Administrar pizarras" y "Volver" (vuelve al panel).
+
+### 12.2 Conexión global para la TV (un enlace por profesor)
+
+- **Antes:** Cada pizarra tenía su propio token; la URL de la TV era distinta para cada pizarra. Si el profesor cambiaba de pizarra, en el TV había que abrir otra URL.
+- **Ahora:** Existe una **sala de transmisión por profesor** (entidad `SalaTransmision`: `profesor_id`, `token`, `pin_sala_hash`, `pizarra_id`). Un solo **token/enlace** por profesor. La TV abre siempre la misma URL; el profesor asigna qué pizarra se muestra (la que está editando en el panel). Puede cambiar de pizarra (p. ej. con "Insertar pizarra existente") y la TV sigue con el mismo enlace.
+- **Transmitir en TV:** Al pulsar "Transmitir en TV" se obtiene o crea la `SalaTransmision` del profesor, se asigna la pizarra actual (`pizarra_id`) y opcionalmente un PIN de 4 dígitos. El modal muestra el enlace (siempre el mismo hasta que se cambie). Si ya hay enlace/código configurado, al reabrir el modal se muestra el enlace y el mensaje de que el código está configurado (no se muestra por seguridad).
+- **Nuevo enlace:** Al **cerrar sesión y volver a entrar**, se genera un **nuevo token** para la sala (el enlace anterior deja de funcionar). Implementado en `CustomAuthenticationSuccessHandler`: tras login exitoso del profesor se llama a `PizarraService.rotarTokenSala(profesorId)`.
+- **Cambiar enlace manualmente:** En el modal "Transmitir en TV" hay botón **"Cambiar enlace (generar uno nuevo)"**. Genera un token nuevo, muestra la nueva URL y se debe configurar de nuevo el código (4 dígitos) si se desea. Endpoint: `POST /profesor/pizarra/transmitir/nuevo-enlace` con `pizarraId`.
+
+### 12.3 Insertar pizarra existente
+
+- **Funcionalidad:** En el editor hay botón **"Insertar pizarra existente"**. Abre un modal con el listado de todas las pizarras del profesor. Al elegir una, se **reemplaza el contenido** de la pizarra actual (panel) por el de la elegida: mismo número de columnas, títulos e ítems (clonación).
+- **Backend:** `POST /profesor/pizarra/clonar` con `pizarraOrigenId` y `pizarraDestinoId`. `PizarraService.clonarPizarra(origenId, destinoId, profesorId)`. Se limpia la colección `destino.getColumnas()` antes de borrar columnas en BD para evitar `ObjectDeletedException` de Hibernate al hacer merge.
+
+### 12.4 Vista TV: sin botón Actualizar y sin refresco automático
+
+- **Antes:** En la vista TV (`sala.html`) había botón "Actualizar" y en algún momento existió polling automático cada pocos segundos.
+- **Ahora:** En la vista TV **no hay botón Actualizar**. El contenido solo se carga al **abrir la página**. Para ver cambios, quien esté frente al TV debe **actualizar la página (F5)** cuando el profesor lo indique. Se añadieron meta `Cache-Control`, `Pragma` y `Expires` para evitar caché del navegador y que siempre se sirva la versión actual del template.
+
+### 12.5 Botón "Actualizar en TV" en el panel del profesor
+
+- **Ubicación:** En el editor de pizarra (panel), junto a "Transmitir en TV" e "Insertar pizarra existente".
+- **Comportamiento:** Al hacer clic se **sincroniza** el estado actual (nombre y títulos de columnas) con el servidor (`actualizar-basico`) y se muestra el mensaje: *"Contenido enviado a la TV. Para ver los cambios en la pantalla del TV, actualizá la página en el navegador del TV (tecla F5)."* Así el profesor confirma que guardó y sabe que en el TV hay que actualizar con F5.
+
+### 12.6 Guardar como nueva pizarra (no reemplazar)
+
+- **Antes:** Al pulsar "Guardar" se actualizaba la pizarra actual (nombre y títulos); si el profesor guardaba de nuevo con otro nombre, se sobrescribía la misma pizarra.
+- **Ahora:** Al pulsar **"Guardar"** se abre un modal para escribir el **nombre de la nueva pizarra**. Al confirmar:
+  1. Se sincroniza el estado actual del panel con la pizarra en la que se está editando (`actualizar-basico`).
+  2. Se **crea una nueva pizarra** con el nombre indicado y se **copia** en ella el contenido actual (columnas e ítems). La pizarra actual (panel) no se reemplaza; el profesor sigue editando en la misma.
+- **Efecto:** Cada vez que guarda con un nombre distinto se **genera una pizarra nueva** en la lista ("Administrar pizarras"). Endpoint: `POST /profesor/pizarra/guardar-como-nueva` con `pizarraId` y `nombre`. Servicio: `PizarraService.guardarComoNuevaPizarra(pizarraOrigenId, nuevoNombre, profesorId)` (crea pizarra nueva y llama a `clonarPizarra`).
+
+### 12.7 Resolución del estado en la sala (TV)
+
+- La API `GET /sala/api/{token}/estado` y las vistas `/sala/{token}` y verificación de PIN resuelven el token así:
+  - Primero se busca en **SalaTransmision** por token. Si existe, se usa `pizarra_id` de esa fila para construir el estado (y el PIN de la sala).
+  - Si no hay SalaTransmision con ese token, se usa el token como **token de Pizarra** (comportamiento anterior: una pizarra con ese token). Así se mantiene compatibilidad con pizarras antiguas que tenían su propio token.
+
+### 12.8 Archivos y rutas añadidos/modificados
+
+| Tipo | Ruta / detalle |
+|------|-----------------|
+| Entidad | `entidades/SalaTransmision.java` (profesor_id, token, pin_sala_hash, pizarra_id) |
+| Entidad | `entidades/PizarraTrabajo.java` (profesor_id, pizarra_id) |
+| Repo | `repositorios/SalaTransmisionRepository.java` |
+| Repo | `repositorios/PizarraTrabajoRepository.java` |
+| Servicio | `PizarraService`: getOrCreatePizarraTrabajo, clonarPizarra, getOrCreateSalaTransmision, findSalaTransmisionByProfesor, setPizarraYPinSala, rotarTokenSala, guardarComoNuevaPizarra; construirEstadoParaSala y PIN resuelven por SalaTransmision primero |
+| Controlador | `PizarraController`: GET `/profesor/pizarra` → redirect panel; GET `/profesor/pizarra/panel`; GET `/profesor/pizarra/lista`; POST `/profesor/pizarra/transmitir`; POST `/profesor/pizarra/transmitir/nuevo-enlace`; POST `/profesor/pizarra/clonar`; POST `/profesor/pizarra/guardar-como-nueva`; eliminar redirige a lista |
+| Config | `CustomAuthenticationSuccessHandler`: inyección de `PizarraService` y llamada a `rotarTokenSala(profesor.getId())` tras login exitoso de profesor |
+| Template | `pizarra-editor.html`: botón Actualizar en TV, Transmitir (API global), Insertar pizarra existente, Guardar (modal "Guardar como nueva"), modal Transmitir con enlace/código ya configurado y "Cambiar enlace" |
+| Template | `pizarra-lista.html`: enlace "Ir al panel de pizarra" a `/profesor/pizarra/panel`; lista en `/profesor/pizarra/lista` |
+| Template | `sala.html`: sin botón Actualizar; sin polling; meta no-cache; contenido solo al cargar la página |
+
+### 12.9 Rutas actualizadas (resumen)
+
+| Ruta | Descripción |
+|------|-------------|
+| `GET /profesor/pizarra` | Redirige a `/profesor/pizarra/panel` |
+| `GET /profesor/pizarra/panel` | Obtiene o crea pizarra de trabajo, redirige a `editar/{id}` |
+| `GET /profesor/pizarra/lista` | Lista de pizarras guardadas (administrar) |
+| `POST /profesor/pizarra/transmitir` | Asigna pizarra actual a la sala del profesor; body: `pizarraId`, `pin`; respuesta: `token` |
+| `POST /profesor/pizarra/transmitir/nuevo-enlace` | Genera nuevo token para la sala; body: `pizarraId` |
+| `POST /profesor/pizarra/clonar` | Clona contenido de una pizarra en otra; body: `pizarraOrigenId`, `pizarraDestinoId` |
+| `POST /profesor/pizarra/guardar-como-nueva` | Crea nueva pizarra con nombre indicado (copia del contenido actual); body: `pizarraId`, `nombre` |
+
+---
+
+## Sugerencia para commit (ej. commit 37)
+
+**Título corto:**  
+`feat(pizarra): panel de trabajo, conexión global TV, guardar como nueva`
+
+**Descripción sugerida:**
+
+```
+- Entrada a Pizarra lleva al panel de trabajo (4 columnas), no a la lista.
+- Conexión global: un enlace por profesor (SalaTransmision); nuevo token al login y opción "Cambiar enlace".
+- Insertar pizarra existente: clonar contenido en la actual. Fix ObjectDeletedException al clonar.
+- Vista TV sin botón Actualizar ni polling; actualización con F5. Botón "Actualizar en TV" en el panel guarda y avisa.
+- Guardar crea nueva pizarra con nombre (no reemplaza); listado en /profesor/pizarra/lista.
+- Documentación: FASE_7_PANTALLA_DE_SALA.md sección 12 con todos los cambios.
+```

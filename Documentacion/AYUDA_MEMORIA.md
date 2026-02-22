@@ -1,6 +1,7 @@
 # Ayuda memoria – Cosas a mejorar
 
-**Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
+**Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).  
+**Para el manual de uso de la app (profesor/admin):** [MANUAL-USUARIO.md](MANUAL-USUARIO.md).
 
 Lista de mejoras pendientes para implementar después. Se van agregando aquí para no olvidarlas.
 

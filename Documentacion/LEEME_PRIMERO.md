@@ -33,15 +33,18 @@
 **Orden sugerido para ponerte en contexto:**
 
 1. **Este archivo** (`LEEME_PRIMERO.md`) – Qué es el proyecto y dónde está cada doc.
-2. **AVANCES_DEL_APP.md** – Todo lo que ya está implementado (resumen por módulo).
+2. **MANUAL-USUARIO.md** – **Manual del usuario:** cómo usar la app (login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, pizarra, usuarios del sistema). Para el profesor o administrador que usa el sistema a diario.
 3. **AYUDA_MEMORIA.md** – Lista de mejoras: ítem por ítem, estado "por implementar" o "implementado".
-4. **PLAN_DE_DESARROLLO_UNIFICADO.md** – Visión, fases, lo que se elimina, checklist, pendientes.
-5. **ESTADO-PLANES-Y-PENDIENTES.md** – Qué falta priorizar y desfases entre docs (por si AYUDA_MEMORIA no está al día).
+4. **AVANCES_DEL_APP.md** – Todo lo que ya está implementado (resumen por módulo).
+5. **PLAN_DE_DESARROLLO_UNIFICADO.md** – Visión, fases, lo que se elimina, checklist, pendientes.
+6. **ESTADO-PLANES-Y-PENDIENTES.md** – Qué falta priorizar y desfases entre docs (por si AYUDA_MEMORIA no está al día).
 
 **Resto de documentos (consultar cuando haga falta):**
 
 | Archivo | Para qué sirve |
 |---------|-----------------|
+| **MANUAL-USUARIO.md** | Manual para el usuario final (profesor/admin): cómo hacer cada tarea en la app. |
+| **AYUDA_MEMORIA.md** | Mejoras pendientes o ya implementadas (lista para no olvidar). |
 | **CHANGELOG_UNIFICADO_FEB2026.md** | Detalle técnico de cambios de Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo). |
 | **CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md** | Detalle de asistencia en calendario y columna "Presente" en Mis Alumnos. |
 | **ESTADO-PLANES-Y-PENDIENTES.md** | Qué falta priorizar y desfases entre docs (por si AYUDA_MEMORIA no está al día). |

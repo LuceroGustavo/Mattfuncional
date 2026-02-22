@@ -13,8 +13,8 @@
     <h1 class="mb-4"><i class="fa-solid fa-tv me-2"></i>Pizarra</h1>
     <p class="text-muted mb-4">Crea y gestiona pizarras para mostrar ejercicios en el TV de la sala.</p>
 
-    <a th:href="@{/profesor/pizarra/nueva}" class="btn btn-primary mb-4">
-        <i class="fa-solid fa-plus me-2"></i>Nueva pizarra
+    <a th:href="@{/profesor/pizarra/panel}" class="btn btn-primary mb-4">
+        <i class="fa-solid fa-tv me-2"></i>Ir al panel de pizarra
     </a>
 
     <div th:if="${pizarras != null and !pizarras.isEmpty()}" class="card">
@@ -112,17 +112,19 @@
             alert('El código debe tener exactamente 4 dígitos.');
             return;
         }
-        fetch('/profesor/pizarra/' + pizarraIdSel + '/pin', {
+        fetch('/profesor/pizarra/transmitir', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || '' },
-            body: JSON.stringify({ pin: pin || '' })
+            body: JSON.stringify({ pizarraId: pizarraIdSel, pin: pin || '' })
         }).then(function(r) {
-            if (r.ok) {
-                document.getElementById('transmitirEnlaceUrlLista').value = window.location.origin + '/sala/' + tokenSel;
-                document.getElementById('transmitirEnlaceBoxLista').style.display = 'block';
-            } else {
-                r.json().then(function(d) { alert(d.error || 'Error al guardar'); });
-            }
+            return r.json().then(function(data) {
+                if (r.ok && data.token) {
+                    document.getElementById('transmitirEnlaceUrlLista').value = window.location.origin + '/sala/' + data.token;
+                    document.getElementById('transmitirEnlaceBoxLista').style.display = 'block';
+                } else {
+                    alert(data.error || 'Error al guardar');
+                }
+            });
         }).catch(function() { alert('Error al guardar'); });
     });
     document.getElementById('btnCopiarEnlaceLista').addEventListener('click', function() {

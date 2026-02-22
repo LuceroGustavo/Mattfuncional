@@ -1,6 +1,7 @@
 package com.mattfuncional.config;
 
 import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.servicios.PizarraService;
 import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.entidades.Profesor;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @Autowired
     private ProfesorService profesorService;
 
+    @Autowired
+    private PizarraService pizarraService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
@@ -39,6 +43,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     Usuario usuario = (Usuario) authentication.getPrincipal();
                     Profesor profesor = usuario.getProfesor() != null ? usuario.getProfesor() : profesorService.getProfesorByCorreo(usuario.getCorreo());
                     if (profesor != null) {
+                        try {
+                            pizarraService.rotarTokenSala(profesor.getId());
+                        } catch (Exception ignored) { }
                         response.sendRedirect("/profesor/" + profesor.getId());
                         return;
                     }

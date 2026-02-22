@@ -45,7 +45,25 @@ public class PizarraController {
         return profesorService.getProfesorByCorreo(usuario.getCorreo());
     }
 
+    /** Redirige al panel de trabajo (pizarra en vivo). */
     @GetMapping
+    public String index(@AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return "redirect:/login";
+        return "redirect:/profesor/pizarra/panel";
+    }
+
+    /** Panel de trabajo: obtiene o crea la pizarra de trabajo (4 columnas) y abre el editor. */
+    @GetMapping("/panel")
+    public String panel(@AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return "redirect:/login";
+        Pizarra p = pizarraService.getOrCreatePizarraTrabajo(profesor);
+        return "redirect:/profesor/pizarra/editar/" + p.getId();
+    }
+
+    /** Lista de pizarras guardadas (administrar). */
+    @GetMapping("/lista")
     public String listar(Model model, @AuthenticationPrincipal Usuario usuario) {
         Profesor profesor = getProfesorAcceso(usuario);
         if (profesor == null) return "redirect:/login";
@@ -82,7 +100,7 @@ public class PizarraController {
         Pizarra p = pizarraService.obtenerPorId(id)
                 .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
         if (!p.getProfesor().getId().equals(profesor.getId())) {
-            return "redirect:/profesor/pizarra?error=permiso";
+            return "redirect:/profesor/pizarra/lista?error=permiso";
         }
         List<Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesor.getId());
         if (grupoId != null) {
@@ -98,10 +116,15 @@ public class PizarraController {
                     .toList();
         }
         List<GrupoMuscular> gruposMusculares = grupoMuscularService.findDisponiblesParaProfesor(profesor.getId());
+        List<Pizarra> todasPizarras = pizarraService.listarPorProfesor(profesor.getId());
+        var salaActual = pizarraService.findSalaTransmisionByProfesor(profesor.getId());
         model.addAttribute("pizarra", p);
         model.addAttribute("ejercicios", ejercicios);
         model.addAttribute("gruposMusculares", gruposMusculares);
         model.addAttribute("selectedGrupoId", grupoId);
+        model.addAttribute("pizarrasParaInsertar", todasPizarras);
+        model.addAttribute("tokenSala", salaActual.map(s -> s.getToken()).orElse(null));
+        model.addAttribute("salaTienePin", salaActual.map(s -> s.getPinSalaHash() != null && !s.getPinSalaHash().isEmpty()).orElse(false));
         return "profesor/pizarra-editor";
     }
 
@@ -195,6 +218,43 @@ public class PizarraController {
         }
     }
 
+    /** Transmisión global: asigna la pizarra actual a la sala del profesor y opcionalmente el PIN. */
+    @PostMapping("/transmitir")
+    @ResponseBody
+    public ResponseEntity<?> transmitir(@RequestBody Map<String, Object> body,
+                                         @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long pizarraId = body.get("pizarraId") != null ? Long.valueOf(body.get("pizarraId").toString()) : null;
+        String pin = body.get("pin") != null ? body.get("pin").toString() : null;
+        if (pizarraId == null) return ResponseEntity.badRequest().body(Map.of("error", "pizarraId requerido"));
+        try {
+            pizarraService.setPizarraYPinSala(profesor.getId(), pizarraId, pin);
+            var sala = pizarraService.getOrCreateSalaTransmision(profesor.getId());
+            return ResponseEntity.ok(Map.of("token", sala.getToken()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** Genera un nuevo enlace para la TV (el anterior deja de funcionar). Hay que configurar el código de nuevo. */
+    @PostMapping("/transmitir/nuevo-enlace")
+    @ResponseBody
+    public ResponseEntity<?> transmitirNuevoEnlace(@RequestBody Map<String, Object> body,
+                                                    @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long pizarraId = body.get("pizarraId") != null ? Long.valueOf(body.get("pizarraId").toString()) : null;
+        if (pizarraId == null) return ResponseEntity.badRequest().body(Map.of("error", "pizarraId requerido"));
+        try {
+            String nuevoToken = pizarraService.rotarTokenSala(profesor.getId());
+            pizarraService.setPizarraYPinSala(profesor.getId(), pizarraId, null);
+            return ResponseEntity.ok(Map.of("token", nuevoToken));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/{id}/pin")
     @ResponseBody
     public ResponseEntity<?> setPinSala(@PathVariable Long id, @RequestBody Map<String, String> body,
@@ -210,11 +270,51 @@ public class PizarraController {
         }
     }
 
+    /** Guarda el contenido actual como una nueva pizarra (no reemplaza la actual). */
+    @PostMapping("/guardar-como-nueva")
+    @ResponseBody
+    public ResponseEntity<?> guardarComoNueva(@RequestBody Map<String, Object> body,
+                                              @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long pizarraId = body.get("pizarraId") != null ? Long.valueOf(body.get("pizarraId").toString()) : null;
+        String nombre = body.get("nombre") != null ? body.get("nombre").toString().trim() : null;
+        if (pizarraId == null || nombre == null || nombre.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "pizarraId y nombre requeridos"));
+        }
+        try {
+            pizarraService.guardarComoNuevaPizarra(pizarraId, nombre, profesor.getId());
+            return ResponseEntity.ok(Map.of("ok", true, "mensaje", "Pizarra guardada como \"" + nombre + "\". Seguís editando en el panel."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** Clona el contenido de una pizarra en otra (solo del mismo profesor). */
+    @PostMapping("/clonar")
+    @ResponseBody
+    public ResponseEntity<?> clonar(@RequestBody Map<String, Object> body,
+                                   @AuthenticationPrincipal Usuario usuario) {
+        Profesor profesor = getProfesorAcceso(usuario);
+        if (profesor == null) return ResponseEntity.status(401).build();
+        Long origenId = body.get("pizarraOrigenId") != null ? Long.valueOf(body.get("pizarraOrigenId").toString()) : null;
+        Long destinoId = body.get("pizarraDestinoId") != null ? Long.valueOf(body.get("pizarraDestinoId").toString()) : null;
+        if (origenId == null || destinoId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "pizarraOrigenId y pizarraDestinoId requeridos"));
+        }
+        try {
+            pizarraService.clonarPizarra(origenId, destinoId, profesor.getId());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
         Profesor profesor = getProfesorAcceso(usuario);
         if (profesor == null) return "redirect:/login";
         pizarraService.eliminar(id, profesor.getId());
-        return "redirect:/profesor/pizarra";
+        return "redirect:/profesor/pizarra/lista";
     }
 }

@@ -2,6 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title th:text="${estado != null ? estado.nombre : 'Pizarra'}">Pizarra - Mattfuncional</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,22 +33,6 @@
             text-align: center;
             margin: 0;
         }
-        .sala-btn-actualizar {
-            flex-shrink: 0;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #0a0a0a;
-            background: #81c784;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .sala-btn-actualizar:hover { background: #66bb6a; color: #0a0a0a; }
-        .sala-btn-actualizar:disabled { opacity: 0.7; cursor: not-allowed; }
         .sala-container { display: flex; gap: 1rem; padding: 1rem; min-height: 100vh; }
         .sala-columna { flex: 1; min-width: 180px; display: flex; flex-direction: column; border-left: 2px solid #333; padding-left: 1rem; }
         .sala-columna:first-child { border-left: none; padding-left: 0; }
@@ -61,9 +48,6 @@
 <div class="sala-header">
     <img class="sala-header-logo" src="/img/logo matt.jpeg" alt="Mattfuncional" onerror="this.style.display='none'">
     <h1 class="sala-header-titulo" id="salaNombre" th:text="${estado != null ? estado.nombre : 'Pizarra'}">Pizarra</h1>
-    <button type="button" class="sala-btn-actualizar" id="btnActualizarSala" title="Traer los últimos cambios de la pizarra">
-        <i class="fa-solid fa-arrows-rotate"></i> Actualizar
-    </button>
 </div>
 <div class="sala-container" id="salaContenido">
     <th:block th:if="${estado != null and estado.columnas != null}">
@@ -90,12 +74,9 @@
     const token = [[${token}]];
 
     function actualizarDesdeAPI() {
-        var btn = document.getElementById('btnActualizarSala');
-        if (btn) btn.disabled = true;
         fetch('/sala/api/' + token + '/estado')
             .then(r => r.ok ? r.json() : null)
             .then(estado => {
-                if (btn) btn.disabled = false;
                 if (!estado) return;
                 document.getElementById('salaNombre').textContent = estado.nombre || 'Pizarra';
                 const cont = document.getElementById('salaContenido');
@@ -121,10 +102,11 @@
                     cont.appendChild(colDiv);
                 });
             })
-            .catch(function() { if (btn) btn.disabled = false; });
+            .catch(function() {});
     }
 
-    document.getElementById('btnActualizarSala').addEventListener('click', actualizarDesdeAPI);
+    // La vista TV solo carga el contenido al abrir la página. Para ver cambios, actualizar la página (F5) en el TV.
+    actualizarDesdeAPI();
 </script>
 </body>
 </html>

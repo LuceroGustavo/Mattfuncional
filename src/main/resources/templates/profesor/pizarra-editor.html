@@ -33,22 +33,29 @@
 </head>
 <body>
 <div th:replace="fragments/navbar :: navbar"></div>
-<div class="container-fluid py-4" th:with="pizarraId=${pizarra.id}, token=${pizarra.token}">
+<div class="container-fluid py-4" th:with="pizarraId=${pizarra.id}">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-2">
             <input type="text" id="pizarraNombre" class="form-control form-control-lg" style="max-width: 300px;"
                    th:value="${pizarra.nombre}" placeholder="Nombre de la pizarra">
             <button type="button" class="btn btn-primary" id="btnGuardar"><i class="fa-solid fa-save me-1"></i>Guardar</button>
         </div>
-        <div>
-            <button type="button" class="btn btn-success" id="btnTransmitirTV" th:attr="data-pizarra-id=${pizarra.id}, data-token=${pizarra.token}">
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-info" id="btnActualizarTV" title="La TV se actualizará automáticamente en unos segundos">
+                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualizar en TV
+            </button>
+            <button type="button" class="btn btn-success" id="btnTransmitirTV" th:attr="data-pizarra-id=${pizarra.id}">
                 <i class="fa-solid fa-tv me-1"></i>Transmitir en TV
             </button>
+            <button type="button" class="btn btn-outline-primary" id="btnInsertarExistente">
+                <i class="fa-solid fa-file-import me-1"></i>Insertar pizarra existente
+            </button>
             <a th:href="@{/profesor/pizarra}" class="btn btn-outline-secondary">Volver</a>
+            <a th:href="@{/profesor/pizarra/lista}" class="btn btn-outline-secondary">Administrar pizarras</a>
         </div>
     </div>
 
-    <!-- Modal Transmitir en TV: código de 4 dígitos y enlace -->
+    <!-- Modal Transmitir en TV: código de 4 dígitos y enlace (conexión global por profesor) -->
     <div class="modal fade" id="modalTransmitirTV" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -57,7 +64,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small">Opcional: un código de 4 dígitos para que en el TV pidan el código antes de ver la pizarra. Dejá vacío para abrir sin código.</p>
+                    <p class="text-muted small">Un solo enlace para todo el día. Opcional: código de 4 dígitos para que en el TV pidan el código. Dejá vacío para abrir sin código.</p>
+                    <div id="transmitirMsgYaConfigurado" class="alert alert-info py-2 small" style="display: none;" role="alert">
+                        Tenés un código de 4 dígitos configurado (no se puede mostrar por seguridad). Para cambiarlo, ingresá el nuevo código abajo y guardá.
+                    </div>
                     <div class="mb-3">
                         <label for="inputPinSala" class="form-label">Código de 4 dígitos</label>
                         <input type="text" id="inputPinSala" class="form-control" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="Ej: 1234" autocomplete="off">
@@ -65,15 +75,61 @@
                     </div>
                     <div id="transmitirEnlaceBox" style="display: none;">
                         <label class="form-label">Enlace para abrir en el navegador del TV</label>
-                        <div class="input-group">
+                        <div class="input-group mb-2">
                             <input type="text" id="transmitirEnlaceUrl" class="form-control" readonly>
                             <button type="button" class="btn btn-outline-primary" id="btnCopiarEnlace"><i class="fa-solid fa-copy me-1"></i>Copiar</button>
                         </div>
+                        <button type="button" class="btn btn-outline-warning btn-sm" id="btnCambiarEnlace" title="Genera un enlace nuevo; el anterior deja de funcionar. Tenés que poner el código de nuevo.">
+                            <i class="fa-solid fa-link-slash me-1"></i>Cambiar enlace (generar uno nuevo)
+                        </button>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-success" id="btnGuardarPinYEnlace"><i class="fa-solid fa-check me-1"></i>Guardar y ver enlace</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Insertar pizarra existente -->
+    <div class="modal fade" id="modalInsertarExistente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-file-import me-2"></i>Insertar pizarra existente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Se reemplazará el contenido actual de la pizarra por el de la seleccionada.</p>
+                    <div class="list-group" id="listaPizarrasInsertar">
+                        <a href="#" class="list-group-item list-group-item-action pizarra-option" th:each="piz : ${pizarrasParaInsertar}" th:attr="data-id=${piz.id}" th:if="${piz.id != pizarra.id}"
+                           th:text="${piz.nombre + ' (' + piz.cantidadColumnas + ' col.)'}">Pizarra</a>
+                        <p class="text-muted mb-0" id="msgNoOtrasPizarras" style="display: none;">No hay otras pizarras guardadas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Guardar pizarra: solicitar nombre y guardar con fecha -->
+    <div class="modal fade" id="modalGuardarPizarra" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-save me-2"></i>Guardar pizarra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Se creará una <strong>nueva pizarra</strong> con el nombre que indiques (la actual se mantiene para seguir editando). Podés usar la fecha, ej: Lunes 10/02.</p>
+                    <div class="mb-3">
+                        <label for="inputNombreGuardar" class="form-label">Nombre de la nueva pizarra</label>
+                        <input type="text" id="inputNombreGuardar" class="form-control" placeholder="Ej: Lunes 10/02">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarGuardar"><i class="fa-solid fa-check me-1"></i>Guardar como nueva</button>
                 </div>
             </div>
         </div>
@@ -140,6 +196,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     const pizarraId = [[${pizarra.id}]];
+    var tokenSalaActual = /*[[${tokenSala != null ? tokenSala : ''}]]*/ '';
+    var salaTienePinActual = /*[[${salaTienePin != null && salaTienePin}]]*/ false;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
 
@@ -149,11 +207,74 @@
         return h;
     }
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarBasico);
+    document.getElementById('btnGuardar').addEventListener('click', function() {
+        document.getElementById('inputNombreGuardar').value = document.getElementById('pizarraNombre').value.trim() || '';
+        new bootstrap.Modal(document.getElementById('modalGuardarPizarra')).show();
+    });
+    document.getElementById('btnConfirmarGuardar').addEventListener('click', function() {
+        var nombre = document.getElementById('inputNombreGuardar').value.trim();
+        if (!nombre) { alert('Escribí un nombre para la nueva pizarra.'); return; }
+        var titulos = [];
+        document.querySelectorAll('.col-titulo-input').forEach(function(inp) { titulos.push(inp.value.trim()); });
+        var nombreActual = document.getElementById('pizarraNombre').value.trim();
+        // Primero sincronizar el estado actual del panel al servidor
+        fetch('/profesor/pizarra/actualizar-basico', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ id: pizarraId, nombre: nombreActual || 'Panel en vivo', titulos: titulos })
+        }).then(function(r1) {
+            if (!r1.ok) { alert('Error al sincronizar.'); return; }
+            // Luego crear una nueva pizarra con el nombre indicado (copia del contenido actual)
+            return fetch('/profesor/pizarra/guardar-como-nueva', {
+                method: 'POST',
+                headers: postHeaders(),
+                body: JSON.stringify({ pizarraId: pizarraId, nombre: nombre })
+            });
+        }).then(function(r2) {
+            if (!r2) return;
+            return r2.json().then(function(data) {
+                bootstrap.Modal.getInstance(document.getElementById('modalGuardarPizarra')).hide();
+                if (r2.ok && data.ok) {
+                    alert(data.mensaje || 'Pizarra guardada como \"' + nombre + '\". Seguís editando en el panel.');
+                } else {
+                    alert(data.error || 'Error al guardar');
+                }
+            });
+        }).catch(function() { alert('Error al guardar'); });
+    });
 
-    function guardarBasico() {
-        guardarNombreYTitulos().then(r => { if (r.ok) alert('Guardado'); else alert('Error'); });
-    }
+    document.getElementById('btnActualizarTV').addEventListener('click', function() {
+        guardarNombreYTitulos()
+            .then(function(r) {
+                if (r.ok) {
+                    alert('Contenido enviado a la TV. Para ver los cambios en la pantalla del TV, actualizá la página en el navegador del TV (tecla F5).');
+                } else {
+                    alert('Error al guardar. Revisá el contenido e intentá de nuevo.');
+                }
+            })
+            .catch(function() { alert('Error al guardar.'); });
+    });
+
+    document.getElementById('btnInsertarExistente').addEventListener('click', function() {
+        var opts = document.querySelectorAll('#modalInsertarExistente .pizarra-option');
+        document.getElementById('msgNoOtrasPizarras').style.display = opts.length === 0 ? 'block' : 'none';
+        new bootstrap.Modal(document.getElementById('modalInsertarExistente')).show();
+    });
+    document.getElementById('modalInsertarExistente').addEventListener('click', function(e) {
+        var t = e.target.closest('.pizarra-option');
+        if (!t) return;
+        e.preventDefault();
+        var origenId = t.getAttribute('data-id');
+        if (!origenId) return;
+        fetch('/profesor/pizarra/clonar', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ pizarraOrigenId: parseInt(origenId, 10), pizarraDestinoId: pizarraId })
+        }).then(function(r) {
+            if (r.ok) location.reload();
+            else r.json().then(function(d) { alert(d.error || 'Error'); });
+        }).catch(function() { alert('Error'); });
+    });
 
     function guardarNombreYTitulos() {
         const nombre = document.getElementById('pizarraNombre').value.trim();
@@ -211,41 +332,76 @@
         });
     });
 
-    // Modal Transmitir en TV
-    const modalTransmitir = new bootstrap.Modal(document.getElementById('modalTransmitirTV'));
-    const tokenSala = document.getElementById('btnTransmitirTV').getAttribute('data-token');
+    // Modal Transmitir en TV (conexión global: un token por profesor)
+    var modalTransmitir = new bootstrap.Modal(document.getElementById('modalTransmitirTV'));
     document.getElementById('btnTransmitirTV').addEventListener('click', function() {
         document.getElementById('inputPinSala').value = '';
-        document.getElementById('transmitirEnlaceBox').style.display = 'none';
+        var enlaceBox = document.getElementById('transmitirEnlaceBox');
+        var msgYa = document.getElementById('transmitirMsgYaConfigurado');
+        if (tokenSalaActual) {
+            document.getElementById('transmitirEnlaceUrl').value = window.location.origin + '/sala/' + tokenSalaActual;
+            enlaceBox.style.display = 'block';
+            msgYa.style.display = salaTienePinActual ? 'block' : 'none';
+        } else {
+            enlaceBox.style.display = 'none';
+            msgYa.style.display = 'none';
+        }
         modalTransmitir.show();
     });
     document.getElementById('btnSinCodigo').addEventListener('click', function() {
         document.getElementById('inputPinSala').value = '';
     });
     document.getElementById('btnGuardarPinYEnlace').addEventListener('click', function() {
-        const pin = document.getElementById('inputPinSala').value.trim();
+        var pin = document.getElementById('inputPinSala').value.trim();
         if (pin.length > 0 && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
             alert('El código debe tener exactamente 4 dígitos.');
             return;
         }
-        fetch('/profesor/pizarra/' + pizarraId + '/pin', {
+        fetch('/profesor/pizarra/transmitir', {
             method: 'POST',
             headers: postHeaders(),
-            body: JSON.stringify({ pin: pin || '' })
+            body: JSON.stringify({ pizarraId: pizarraId, pin: pin || '' })
         }).then(function(r) {
-            if (r.ok) {
-                var url = window.location.origin + '/sala/' + tokenSala;
-                document.getElementById('transmitirEnlaceUrl').value = url;
-                document.getElementById('transmitirEnlaceBox').style.display = 'block';
-            } else {
-                r.json().then(function(d) { alert(d.error || 'Error al guardar'); });
-            }
+            return r.json().then(function(data) {
+                if (r.ok && data.token) {
+                    tokenSalaActual = data.token;
+                    salaTienePinActual = pin.length > 0;
+                    var url = window.location.origin + '/sala/' + data.token;
+                    document.getElementById('transmitirEnlaceUrl').value = url;
+                    document.getElementById('transmitirEnlaceBox').style.display = 'block';
+                    document.getElementById('transmitirMsgYaConfigurado').style.display = salaTienePinActual ? 'block' : 'none';
+                } else {
+                    alert(data.error || 'Error al guardar');
+                }
+            });
         }).catch(function() { alert('Error al guardar'); });
     });
     document.getElementById('btnCopiarEnlace').addEventListener('click', function() {
         var input = document.getElementById('transmitirEnlaceUrl');
         input.select();
         navigator.clipboard.writeText(input.value).then(function() { alert('Enlace copiado'); }).catch(function() { alert('Copiá el enlace manualmente'); });
+    });
+    document.getElementById('btnCambiarEnlace').addEventListener('click', function() {
+        if (!confirm('Se generará un enlace nuevo. El enlace actual dejará de funcionar. ¿Continuar?')) return;
+        fetch('/profesor/pizarra/transmitir/nuevo-enlace', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ pizarraId: pizarraId })
+        }).then(function(r) {
+            return r.json().then(function(data) {
+                if (r.ok && data.token) {
+                    tokenSalaActual = data.token;
+                    salaTienePinActual = false;
+                    document.getElementById('transmitirEnlaceUrl').value = window.location.origin + '/sala/' + data.token;
+                    document.getElementById('transmitirEnlaceBox').style.display = 'block';
+                    document.getElementById('transmitirMsgYaConfigurado').style.display = 'none';
+                    document.getElementById('inputPinSala').value = '';
+                    alert('Enlace nuevo generado. Opcional: ingresá un código de 4 dígitos y hacé clic en "Guardar y ver enlace".');
+                } else {
+                    alert(data.error || 'Error al generar enlace');
+                }
+            });
+        }).catch(function() { alert('Error al generar enlace'); });
     });
 
     // Filtros ejercicios

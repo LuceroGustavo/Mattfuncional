@@ -6,11 +6,15 @@ import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.entidades.Pizarra;
 import com.mattfuncional.entidades.PizarraColumna;
 import com.mattfuncional.entidades.PizarraItem;
+import com.mattfuncional.entidades.PizarraTrabajo;
 import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.entidades.SalaTransmision;
 import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.PizarraColumnaRepository;
 import com.mattfuncional.repositorios.PizarraItemRepository;
 import com.mattfuncional.repositorios.PizarraRepository;
+import com.mattfuncional.repositorios.PizarraTrabajoRepository;
+import com.mattfuncional.repositorios.SalaTransmisionRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,17 +36,23 @@ public class PizarraService {
     private final PizarraItemRepository itemRepository;
     private final ExerciseRepository exerciseRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PizarraTrabajoRepository pizarraTrabajoRepository;
+    private final SalaTransmisionRepository salaTransmisionRepository;
 
     public PizarraService(PizarraRepository pizarraRepository,
                           PizarraColumnaRepository columnaRepository,
                           PizarraItemRepository itemRepository,
                           ExerciseRepository exerciseRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          PizarraTrabajoRepository pizarraTrabajoRepository,
+                          SalaTransmisionRepository salaTransmisionRepository) {
         this.pizarraRepository = pizarraRepository;
         this.columnaRepository = columnaRepository;
         this.itemRepository = itemRepository;
         this.exerciseRepository = exerciseRepository;
         this.passwordEncoder = passwordEncoder;
+        this.pizarraTrabajoRepository = pizarraTrabajoRepository;
+        this.salaTransmisionRepository = salaTransmisionRepository;
     }
 
     public List<Pizarra> listarPorProfesor(Long profesorId) {
@@ -55,6 +65,158 @@ public class PizarraService {
 
     public Optional<Pizarra> obtenerPorToken(String token) {
         return pizarraRepository.findByToken(token);
+    }
+
+    /**
+     * Obtiene o crea la pizarra de trabajo del profesor (panel en vivo, 4 columnas).
+     */
+    public Pizarra getOrCreatePizarraTrabajo(Profesor profesor) {
+        Optional<PizarraTrabajo> pt = pizarraTrabajoRepository.findByProfesorId(profesor.getId());
+        if (pt.isPresent()) {
+            return pizarraRepository.findByIdWithColumnas(pt.get().getPizarraId())
+                    .orElseGet(() -> {
+                        pizarraTrabajoRepository.delete(pt.get());
+                        return crearPizarraTrabajo(profesor);
+                    });
+        }
+        return crearPizarraTrabajo(profesor);
+    }
+
+    private Pizarra crearPizarraTrabajo(Profesor profesor) {
+        Pizarra p = crear(profesor, "Panel en vivo", 4);
+        PizarraTrabajo pt = new PizarraTrabajo();
+        pt.setProfesorId(profesor.getId());
+        pt.setPizarraId(p.getId());
+        pizarraTrabajoRepository.save(pt);
+        return pizarraRepository.findByIdWithColumnas(p.getId()).orElse(p);
+    }
+
+    /**
+     * Copia el contenido de la pizarra origen a la destino (solo del mismo profesor).
+     * La destino queda con las mismas columnas e ítems (por valor).
+     */
+    public void clonarPizarra(Long origenId, Long destinoId, Long profesorId) {
+        Pizarra origen = pizarraRepository.findByIdWithColumnas(origenId)
+                .orElseThrow(() -> new RuntimeException("Pizarra origen no encontrada"));
+        Pizarra destino = pizarraRepository.findByIdWithColumnas(destinoId)
+                .orElseThrow(() -> new RuntimeException("Pizarra destino no encontrada"));
+        if (!origen.getProfesor().getId().equals(profesorId) || !destino.getProfesor().getId().equals(profesorId)) {
+            throw new RuntimeException("No tiene permisos");
+        }
+        destino.getColumnas().clear();
+        List<PizarraColumna> destColumnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(destino.getId());
+        for (PizarraColumna dc : destColumnas) {
+            for (PizarraItem it : itemRepository.findByColumnaIdOrderByOrdenAsc(dc.getId())) {
+                itemRepository.delete(it);
+            }
+            columnaRepository.delete(dc);
+        }
+        destino.setCantidadColumnas(0);
+        pizarraRepository.save(destino);
+
+        int ordenCol = 0;
+        for (PizarraColumna oc : columnaRepository.findByPizarraIdOrderByOrdenAsc(origen.getId())) {
+            PizarraColumna nc = new PizarraColumna();
+            nc.setPizarra(destino);
+            nc.setTitulo(oc.getTitulo());
+            nc.setOrden(ordenCol++);
+            nc = columnaRepository.save(nc);
+            int ordenItem = 0;
+            for (PizarraItem oi : itemRepository.findByColumnaIdOrderByOrdenAsc(oc.getId())) {
+                PizarraItem ni = new PizarraItem();
+                ni.setColumna(nc);
+                ni.setExercise(oi.getExercise());
+                ni.setPeso(oi.getPeso());
+                ni.setRepeticiones(oi.getRepeticiones());
+                ni.setUnidad(oi.getUnidad());
+                ni.setOrden(ordenItem++);
+                itemRepository.save(ni);
+            }
+        }
+        destino.setCantidadColumnas(ordenCol);
+        pizarraRepository.save(destino);
+    }
+
+    /**
+     * Guarda el contenido actual como una nueva pizarra con el nombre indicado.
+     * La pizarra actual (origen) no se modifica; se crea una nueva en la lista del profesor.
+     */
+    public Pizarra guardarComoNuevaPizarra(Long pizarraOrigenId, String nuevoNombre, Long profesorId) {
+        Pizarra origen = pizarraRepository.findByIdWithColumnas(pizarraOrigenId)
+                .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
+        if (!origen.getProfesor().getId().equals(profesorId)) {
+            throw new RuntimeException("No tiene permisos");
+        }
+        String nombre = nuevoNombre != null && !nuevoNombre.isBlank() ? nuevoNombre.trim() : "Pizarra";
+        int cantidadColumnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(origen.getId()).size();
+        if (cantidadColumnas < 1) cantidadColumnas = 1;
+        Pizarra nueva = crear(origen.getProfesor(), nombre, cantidadColumnas);
+        clonarPizarra(pizarraOrigenId, nueva.getId(), profesorId);
+        return pizarraRepository.findByIdWithColumnas(nueva.getId()).orElse(nueva);
+    }
+
+    /**
+     * Obtiene la sala de transmisión del profesor si ya existe (sin crearla).
+     */
+    public Optional<SalaTransmision> findSalaTransmisionByProfesor(Long profesorId) {
+        return salaTransmisionRepository.findByProfesorId(profesorId);
+    }
+
+    /**
+     * Obtiene o crea la sala de transmisión del profesor (un token por profesor).
+     */
+    public SalaTransmision getOrCreateSalaTransmision(Long profesorId) {
+        return salaTransmisionRepository.findByProfesorId(profesorId)
+                .orElseGet(() -> {
+                    SalaTransmision s = new SalaTransmision();
+                    s.setProfesorId(profesorId);
+                    s.setToken(generarTokenSalaUnico());
+                    return salaTransmisionRepository.save(s);
+                });
+    }
+
+    private String generarTokenSalaUnico() {
+        String token;
+        do {
+            int num = TOKEN_RANDOM.nextInt(1_000_000);
+            token = "tv" + String.format("%06d", num);
+        } while (salaTransmisionRepository.existsByToken(token) || pizarraRepository.existsByToken(token));
+        return token;
+    }
+
+    /**
+     * Genera un nuevo token para la sala del profesor (el enlace anterior deja de funcionar).
+     * Se quita el PIN; el profesor debe configurarlo de nuevo. Se usa al cerrar sesión o al pulsar "Cambiar enlace".
+     */
+    public String rotarTokenSala(Long profesorId) {
+        SalaTransmision s = salaTransmisionRepository.findByProfesorId(profesorId)
+                .orElseGet(() -> {
+                    SalaTransmision nueva = new SalaTransmision();
+                    nueva.setProfesorId(profesorId);
+                    return salaTransmisionRepository.save(nueva);
+                });
+        s.setToken(generarTokenSalaUnico());
+        s.setPinSalaHash(null);
+        salaTransmisionRepository.save(s);
+        return s.getToken();
+    }
+
+    /**
+     * Asigna la pizarra que se muestra en la sala del profesor y opcionalmente el PIN.
+     */
+    public void setPizarraYPinSala(Long profesorId, Long pizarraId, String pin) {
+        SalaTransmision s = getOrCreateSalaTransmision(profesorId);
+        s.setPizarraId(pizarraId);
+        if (pin != null && !pin.trim().isEmpty()) {
+            String limpio = pin.trim();
+            if (limpio.length() != 4 || !limpio.matches("\\d{4}")) {
+                throw new IllegalArgumentException("El código debe tener exactamente 4 dígitos");
+            }
+            s.setPinSalaHash(passwordEncoder.encode(limpio));
+        } else {
+            s.setPinSalaHash(null);
+        }
+        salaTransmisionRepository.save(s);
     }
 
     /**
@@ -191,13 +353,26 @@ public class PizarraService {
 
     /**
      * Construye el DTO para la API de sala (vista TV).
+     * Primero intenta por SalaTransmision (token global del profesor); si no, por token de Pizarra.
      */
     public PizarraEstadoDTO construirEstadoParaSala(String token) {
-        Pizarra p = pizarraRepository.findByToken(token)
+        Long pizarraId = salaTransmisionRepository.findByToken(token)
+                .map(SalaTransmision::getPizarraId)
+                .orElse(null);
+        if (pizarraId == null) {
+            Pizarra p = pizarraRepository.findByToken(token)
+                    .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
+            return construirEstadoDesdePizarra(p);
+        }
+        Pizarra p = pizarraRepository.findByIdWithColumnas(pizarraId)
                 .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
+        return construirEstadoDesdePizarra(p);
+    }
+
+    private PizarraEstadoDTO construirEstadoDesdePizarra(Pizarra p) {
         PizarraEstadoDTO dto = new PizarraEstadoDTO();
         dto.setNombre(p.getNombre());
-        dto.setCantidadColumnas(p.getCantidadColumnas());// Load columnas
+        dto.setCantidadColumnas(p.getCantidadColumnas());
         List<PizarraColumna> columnas = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
         for (PizarraColumna col : columnas) {
             PizarraEstadoDTO.ColumnaDTO colDto = new PizarraEstadoDTO.ColumnaDTO();
@@ -313,17 +488,25 @@ public class PizarraService {
     }
 
     /**
-     * Verifica si el PIN es correcto para la pizarra con el token dado.
+     * Verifica si el PIN es correcto para la sala con el token dado (SalaTransmision o Pizarra).
      */
     public boolean verificarPinSala(String token, String pin) {
         if (pin == null || pin.trim().isEmpty()) return false;
+        Optional<SalaTransmision> st = salaTransmisionRepository.findByToken(token);
+        if (st.isPresent()) {
+            return st.get().getPinSalaHash() != null && passwordEncoder.matches(pin.trim(), st.get().getPinSalaHash());
+        }
         Pizarra p = pizarraRepository.findByToken(token).orElse(null);
         if (p == null || p.getPinSalaHash() == null) return false;
         return passwordEncoder.matches(pin.trim(), p.getPinSalaHash());
     }
 
-    /** Indica si la pizarra con este token requiere PIN para ver la sala. */
+    /** Indica si la sala con este token requiere PIN (SalaTransmision o Pizarra). */
     public boolean requierePinSala(String token) {
+        Optional<SalaTransmision> st = salaTransmisionRepository.findByToken(token);
+        if (st.isPresent()) {
+            return st.get().getPinSalaHash() != null && !st.get().getPinSalaHash().isEmpty();
+        }
         return pizarraRepository.findByToken(token)
                 .map(p -> p.getPinSalaHash() != null && !p.getPinSalaHash().isEmpty())
                 .orElse(false);
