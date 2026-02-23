@@ -321,10 +321,18 @@ public class ExerciseService {
     }
     
     /**
-     * Obtiene ejercicios disponibles para un profesor con imágenes cargadas
+     * Obtiene ejercicios disponibles para un profesor con imagen y grupos ya cargados.
+     * Inicializa grupos dentro de la transacción para que la vista no provoque LazyInitializationException.
      */
+    @Transactional(readOnly = true)
     public List<Exercise> findEjerciciosDisponiblesParaProfesorWithImages(Long profesorId) {
-        return exerciseRepository.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
+        List<Exercise> list = exerciseRepository.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
+        for (Exercise e : list) {
+            if (e.getGrupos() != null) {
+                e.getGrupos().size();
+            }
+        }
+        return list;
     }
     
     /**

@@ -89,7 +89,7 @@ public class ExerciseController {
         exercise.setGrupos(grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of()));
         try {
             exerciseService.saveExercise(exercise, imageFile);
-            return "redirect:/exercise/lista";
+            return "redirect:/profesor/mis-ejercicios";
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", e.getMessage());
@@ -98,19 +98,16 @@ public class ExerciseController {
         }
     }
 
-    // Ruta para la administración de ejercicios (ABM)
+    // ABM de ejercicios no se usa en esta app; todo se hace desde Mis Ejercicios (/profesor/mis-ejercicios).
+    // Redirigir para que enlaces antiguos lleven al profesor a su lista.
     @GetMapping("/exercise/editar")
-    public String listarEjercicios(Model model) {
-        List<Exercise> exercises = exerciseService.findAllExercises();
-        model.addAttribute("exercises", exercises);
-        return "ejercicios/abm-ejercicios";
+    public String listarEjercicios() {
+        return "redirect:/profesor/mis-ejercicios";
     }
 
     @GetMapping("/ejercicios/abm")
-    public String abmEjercicios(Model model) {
-        List<Exercise> exercises = exerciseService.findAllExercises();
-        model.addAttribute("exercises", exercises);
-        return "ejercicios/abm-ejercicios";
+    public String abmEjercicios() {
+        return "redirect:/profesor/mis-ejercicios";
     }
 
     // Método para mostrar el formulario de modificación de ejercicios
@@ -119,14 +116,14 @@ public class ExerciseController {
             @AuthenticationPrincipal com.mattfuncional.entidades.Usuario usuarioActual) {
         Exercise exercise = exerciseService.findById(id);
         if (exercise == null) {
-            return "redirect:/ejercicios/abm";
+            return "redirect:/profesor/mis-ejercicios";
         }
         // Solo el admin, developer o el profesor dueño puede editar
         if (usuarioActual != null && isAdminOrDeveloper(usuarioActual) && !isDeveloper(usuarioActual)) {
             if (exercise.getProfesor() == null
                     || usuarioActual.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
-                return "redirect:/exercise/lista?error=permiso";
+                return "redirect:/profesor/mis-ejercicios?error=permiso";
             }
         }
         model.addAttribute("exercise", exercise);
@@ -151,17 +148,18 @@ public class ExerciseController {
             if (original.getProfesor() == null
                     || usuarioActual.getProfesor() == null
                     || !original.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
-                return "redirect:/exercise/lista?error=permiso";
+                return "redirect:/profesor/mis-ejercicios?error=permiso";
             }
         }
         exercise.setGrupos(grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of()));
         try {
             exerciseService.modifyExercise(id, exercise, null, exercise.getGrupos());
-            return "redirect:/ejercicios/abm";
+            return "redirect:/profesor/mis-ejercicios";
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("gruposMusculares", grupoMuscularService.findGruposSistema());
+            model.addAttribute("exercise", exercise);
             return "ejercicios/formulario-modificar-ejercicio";
         }
     }
@@ -175,11 +173,11 @@ public class ExerciseController {
             if (exercise.getProfesor() == null
                     || usuarioActual.getProfesor() == null
                     || !exercise.getProfesor().getId().equals(usuarioActual.getProfesor().getId())) {
-                return "redirect:/exercise/lista?error=permiso";
+                return "redirect:/profesor/mis-ejercicios?error=permiso";
             }
         }
         exerciseService.deleteExercise(id);
-        return "redirect:/ejercicios/abm";
+        return "redirect:/profesor/mis-ejercicios";
     }
 
     // Método para cambiar la imagen de un ejercicio
@@ -205,11 +203,11 @@ public class ExerciseController {
                     exerciseService.updateImage(id, nuevaImagen);
                 }
             }
-            return "redirect:/ejercicios/abm";
+            return "redirect:/profesor/mis-ejercicios";
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", e.getMessage());
-            return "redirect:/ejercicios/abm";
+            return "redirect:/profesor/mis-ejercicios";
         }
     }
 

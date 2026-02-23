@@ -15,6 +15,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 7. [Calendario y presentismo – Cierre](#7-calendario-y-presentismo--cierre-feb-2026)
 8. [Fase 6 – Alumnos sin login](#8-fase-6--alumnos-sin-login)
 9. [Fase 7 – Pizarra / Pantalla de sala – Mejoras](#9-fase-7--pizarra--pantalla-de-sala--mejoras-feb-2026)
+10. [Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder](#10-mis-ejercicios-vista-lista-actualización-de-imágenes-redirects-y-placeholder-feb-2026)
 
 ---
 
@@ -247,6 +248,33 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - `PizarraService.java`: saveAll(cols), agregarColumna, quitarColumna, imports explícitos; **generarTokenUnico()** ahora genera token "tv" + 6 dígitos (eliminados TOKEN_CHARS y generarToken(length)).
 - `PizarraController.java`: actualizar-basico con titulos como List<String>, agregar-columna, quitar-columna.
 - `PortalControlador.java`: return "login", "index", "demo" (sin .html).
+
+---
+
+## 10. Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder (Feb 2026)
+
+**Resumen:** La vista Mis Ejercicios no mostraba la tabla de ejercicios (respuesta incompleta). Se corrigió la carga de `grupos` en transacción, se añadió la acción “Actualizar imágenes desde carpeta” mediante enlace GET (sin form en esa zona) y se unificaron redirects del ExerciseController a Mis Ejercicios. Imágenes no encontradas redirigen al placeholder.
+
+### 10.1 Vista lista visible
+- **Problema:** Tabla de ejercicios no se renderizaba; consola: `ERR_INCOMPLETE_CHUNKED_ENCODING`. Causa probable: `LazyInitializationException` al acceder a `ejercicio.grupos` en Thymeleaf.
+- **Solución:** `ExerciseService.findEjerciciosDisponiblesParaProfesorWithImages` con `@Transactional(readOnly = true)` e inicialización de `grupos` (`e.getGrupos().size()`) dentro de la transacción. Template con condiciones null-safe: `ejercicios == null or ejercicios.empty`.
+- **Archivos:** `ExerciseService.java`, `ExerciseRepository.java`, `profesor/ejercicios-lista.html`.
+
+### 10.2 Actualización de imágenes desde carpeta
+- **Objetivo:** Profesor coloca en `uploads/ejercicios/` los archivos 1.webp … 60.webp y actualiza en masa la relación ejercicio–imagen.
+- **Implementación:** Tarjeta en Mis Ejercicios con enlace a `GET /profesor/mis-ejercicios/actualizar-imagenes?confirm=1` (sin formulario ni _csrf en esa zona). Nuevo método GET en ProfesorController con `confirm=1`; POST se mantiene. Mensaje de éxito con `imagenesActualizadas`.
+- **Archivos:** `ProfesorController.java`, `profesor/ejercicios-lista.html`.
+
+### 10.3 ExerciseController: redirects a Mis Ejercicios
+- ABM de ejercicios (`abm-ejercicios.html`) no se usa; todo se hace desde Mis Ejercicios. `GET /exercise/editar` y `GET /ejercicios/abm` redirigen a `/profesor/mis-ejercicios`. Redirects tras crear, modificar, eliminar y cambiar imagen unificados a `/profesor/mis-ejercicios`.
+- **Archivos:** `ExerciseController.java`.
+
+### 10.4 ImagenController: redirect a placeholder
+- Si la imagen no existe o falla la lectura: 302 a `/img/not_imagen.png` en lugar de 404/500 para evitar errores en consola del navegador.
+- **Archivos:** `ImagenController.java`.
+
+### 10.5 Archivos tocados
+- `ExerciseController.java`, `ExerciseService.java`, `ExerciseRepository.java`, `ProfesorController.java`, `ImagenController.java`, `profesor/ejercicios-lista.html`.
 
 ---
 

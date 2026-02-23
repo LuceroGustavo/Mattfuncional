@@ -1,0 +1,21 @@
+Mis Ejercicios: vista lista visible, actualización de imágenes y ajustes
+
+- Vista Mis Ejercicios: tabla de ejercicios no se mostraba (ERR_INCOMPLETE_CHUNKED_ENCODING).
+  - ExerciseService: findEjerciciosDisponiblesParaProfesorWithImages con @Transactional(readOnly=true)
+    e inicialización de grupos en la transacción para evitar LazyInitializationException.
+  - ejercicios-lista.html: condiciones null-safe (ejercicios == null or ejercicios.empty).
+
+- Actualización de imágenes desde carpeta (uploads/ejercicios/ 1.webp..60.webp):
+  - Tarjeta en Mis Ejercicios con enlace GET .../actualizar-imagenes?confirm=1 (sin form/CSRF
+    en esa zona para no cortar el render).
+  - ProfesorController: nuevo GET /mis-ejercicios/actualizar-imagenes con confirm=1; POST se mantiene.
+  - Mensaje de éxito imagenesActualizadas en la misma vista.
+
+- ExerciseController: ABM no usado; /exercise/editar y /ejercicios/abm redirigen a /profesor/mis-ejercicios.
+  Redirects tras crear, modificar, eliminar y cambiar imagen unificados a /profesor/mis-ejercicios.
+  POST /ejercicios/nuevo redirige a /profesor/mis-ejercicios.
+
+- ImagenController: cuando imagen no encontrada o error, 302 a /img/not_imagen.png en lugar de 404/500.
+
+Archivos: ExerciseController, ExerciseService, ExerciseRepository, ProfesorController,
+ImagenController, profesor/ejercicios-lista.html. CHANGELOG y CHANGELOG_UNIFICADO_FEB2026 actualizados.

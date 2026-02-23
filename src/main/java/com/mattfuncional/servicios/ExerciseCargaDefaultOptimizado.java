@@ -527,6 +527,33 @@ public class ExerciseCargaDefaultOptimizado {
     }
 
     /**
+     * Actualiza las imágenes de los ejercicios predeterminados leyendo desde uploads/ejercicios/.
+     * La relación es por número de orden (1.webp, 1.gif, 2.webp, ... 60.webp), igual que en la carga inicial.
+     * Útil cuando el profesor reemplaza archivos en la carpeta (ej. cambia 11.gif por 11.webp) sin editar cada ejercicio.
+     * @return número de ejercicios a los que se les asignó o actualizó la imagen
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int actualizarImagenesDesdeCarpeta() {
+        List<Exercise> listaOrdenada = crearListaEjerciciosPredeterminados(null, true, true);
+        AtomicInteger actualizados = new AtomicInteger(0);
+        for (int i = 0; i < listaOrdenada.size(); i++) {
+            String nombre = listaOrdenada.get(i).getName();
+            int n = i + 1;
+            exerciseRepository.findByNameAndProfesorIsNull(nombre).ifPresent(e -> {
+                Imagen img = imagenServicio.registrarArchivoExistente(n + ".webp");
+                if (img == null) img = imagenServicio.registrarArchivoExistente(n + ".gif");
+                if (img != null) {
+                    e.setImagen(img);
+                    exerciseRepository.save(e);
+                    actualizados.incrementAndGet();
+                }
+            });
+        }
+        if (actualizados.get() > 0) logger.info("Imágenes de ejercicios actualizadas desde carpeta: {} ejercicios", actualizados.get());
+        return actualizados.get();
+    }
+
+    /**
      * Pre-carga todas las imágenes para evitar múltiples lecturas de archivo
      */
     private void cargarImagenesEnLote() {

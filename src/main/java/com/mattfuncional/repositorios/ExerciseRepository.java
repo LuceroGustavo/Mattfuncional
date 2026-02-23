@@ -65,7 +65,8 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
     List<Exercise> findEjerciciosDisponiblesParaProfesor(@Param("profesorId") Long profesorId);
     
     /**
-     * Obtiene ejercicios disponibles para un profesor con imágenes cargadas
+     * Obtiene ejercicios disponibles para un profesor con imágenes cargadas.
+     * Los grupos se inicializan en el servicio dentro de una transacción para evitar LazyInitializationException.
      */
     @Query("SELECT e FROM Exercise e LEFT JOIN FETCH e.imagen WHERE " +
            "(e.profesor IS NULL OR e.esPredeterminado = true) OR " +

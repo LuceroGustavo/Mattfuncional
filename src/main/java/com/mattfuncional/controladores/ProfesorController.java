@@ -567,7 +567,8 @@ public class ProfesorController {
     }
 
     @GetMapping("/mis-ejercicios")
-    public String listarEjerciciosProfesor(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+    public String listarEjerciciosProfesor(@AuthenticationPrincipal Usuario usuarioActual, Model model,
+            @RequestParam(name = "imagenesActualizadas", required = false) Integer imagenesActualizadas) {
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
@@ -578,6 +579,10 @@ public class ProfesorController {
             exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
         } catch (Exception e) {
             logger.warn("No se pudieron asegurar ejercicios predeterminados: {}", e.getMessage());
+        }
+
+        if (imagenesActualizadas != null) {
+            model.addAttribute("imagenesActualizadas", imagenesActualizadas);
         }
 
         Long profesorId = profesor.getId();
@@ -610,6 +615,34 @@ public class ProfesorController {
         model.addAttribute("profesor", profesor);
 
         return "profesor/ejercicios-lista";
+    }
+
+    /**
+     * Actualiza las imágenes de los ejercicios predeterminados desde uploads/ejercicios/ (1.webp, 2.webp, …).
+     * Redirige a Mis Ejercicios con el número de imágenes actualizadas.
+     * GET con confirm=1 evita usar formulario en la vista y que Thymeleaf corte la respuesta.
+     */
+    @GetMapping("/mis-ejercicios/actualizar-imagenes")
+    public String actualizarImagenesEjerciciosGet(
+            @RequestParam(name = "confirm", required = false) String confirm,
+            @AuthenticationPrincipal Usuario usuarioActual) {
+        if (!"1".equals(confirm)) {
+            return "redirect:/profesor/mis-ejercicios";
+        }
+        if (usuarioActual == null || getProfesorParaUsuarioActual(usuarioActual) == null) {
+            return "redirect:/login?error=true";
+        }
+        int n = exerciseCargaDefaultOptimizado.actualizarImagenesDesdeCarpeta();
+        return "redirect:/profesor/mis-ejercicios?imagenesActualizadas=" + n;
+    }
+
+    @PostMapping("/mis-ejercicios/actualizar-imagenes")
+    public String actualizarImagenesEjercicios(@AuthenticationPrincipal Usuario usuarioActual) {
+        if (usuarioActual == null || getProfesorParaUsuarioActual(usuarioActual) == null) {
+            return "redirect:/login?error=true";
+        }
+        int n = exerciseCargaDefaultOptimizado.actualizarImagenesDesdeCarpeta();
+        return "redirect:/profesor/mis-ejercicios?imagenesActualizadas=" + n;
     }
 
     @GetMapping("/mis-ejercicios/nuevo")

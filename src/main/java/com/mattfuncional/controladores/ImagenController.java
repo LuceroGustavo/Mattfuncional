@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import java.net.URI;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,11 +68,11 @@ public class ImagenController {
             return new ResponseEntity<>(contenido, headers, HttpStatus.OK);
             
         } catch (ResourceNotFoundException e) {
-            logger.error("❌ Imagen no encontrada: {} - {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
+            logger.debug("Imagen no encontrada (se sirve placeholder): {} - {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/img/not_imagen.png")).build();
         } catch (Exception e) {
-            logger.error("❌ Error al servir imagen {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            logger.warn("Error al servir imagen {} (se sirve placeholder): {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/img/not_imagen.png")).build();
         }
     }
 }

@@ -2,6 +2,94 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-22] - Mis Ejercicios: vista lista, actualización de imágenes y ajustes ABM ✅
+
+### 🎯 **Resumen**
+- La vista **Mis Ejercicios** (`/profesor/mis-ejercicios`) no mostraba la tabla de ejercicios (respuesta incompleta / `ERR_INCOMPLETE_CHUNKED_ENCODING`). Se corrigió la carga de datos y el orden del HTML para que la lista se renderice correctamente.
+- Se incorporó la **actualización de imágenes desde carpeta** (`uploads/ejercicios/`: 1.webp, 2.webp, … 60.webp) mediante un enlace GET visible en la misma vista, sin usar formulario en esa zona para no cortar el render.
+- Se unificaron redirects del **ExerciseController** hacia **Mis Ejercicios** (ABM de ejercicios no se usa en esta app).
+- Se mejoró el **ImagenController** para que imágenes no encontradas redirijan al placeholder en lugar de devolver 404.
+
+---
+
+### ✅ **1. Vista Mis Ejercicios: lista de ejercicios visible**
+
+#### Problema
+- La página cargaba (tarjetas, búsqueda, filtro) pero la **tabla de ejercicios no aparecía**; en consola: `ERR_INCOMPLETE_CHUNKED_ENCODING`.
+- Posible causa: `LazyInitializationException` al acceder a `ejercicio.grupos` o `ejercicio.imagen` en Thymeleaf con la sesión de Hibernate cerrada.
+
+#### Solución
+- **ExerciseService:** `findEjerciciosDisponiblesParaProfesorWithImages(Long profesorId)` ahora es `@Transactional(readOnly = true)` y, dentro de la transacción, se inicializa la colección `grupos` con `e.getGrupos().size()` para cada ejercicio. Así imagen y grupos quedan cargados antes de devolver la lista y la vista no provoca lazy load.
+- **ExerciseRepository:** La query `findEjerciciosDisponiblesParaProfesorWithImages` sigue trayendo solo `LEFT JOIN FETCH e.imagen` (no se hace JOIN FETCH de `grupos` en la misma query para evitar problemas de “multiple bag” en Hibernate).
+- **Template `profesor/ejercicios-lista.html`:** Condiciones null-safe: `th:if="${ejercicios == null or ejercicios.empty}"` y `th:unless="${ejercicios == null or ejercicios.empty}"` para no llamar a `.empty` sobre null.
+
+#### Archivos
+- `ExerciseService.java`: método `findEjerciciosDisponiblesParaProfesorWithImages` con `@Transactional(readOnly = true)` e inicialización de `grupos`.
+- `ExerciseRepository.java`: comentario aclarando que los grupos se inicializan en el servicio.
+- `profesor/ejercicios-lista.html`: condiciones con `ejercicios == null or ejercicios.empty`.
+
+---
+
+### ✅ **2. Actualización de imágenes desde carpeta en Mis Ejercicios**
+
+#### Objetivo
+- Permitir al profesor colocar en `uploads/ejercicios/` los archivos 1.webp, 2.webp, … 60.webp (o .gif) y actualizar en masa la relación ejercicio–imagen sin editar uno por uno.
+
+#### Implementación
+- **Backend:** Ya existían `ExerciseCargaDefaultOptimizado.actualizarImagenesDesdeCarpeta()` y POST `/profesor/mis-ejercicios/actualizar-imagenes` en **ProfesorController** (redirige con `?imagenesActualizadas=N`).
+- **Vista:** Se añadió una **tarjeta** arriba de la tabla con el texto “Imágenes desde carpeta” y un **enlace** (no formulario) a `GET /profesor/mis-ejercicios/actualizar-imagenes?confirm=1`. Así se evita usar un `<form>` con `_csrf` en esa parte del template, que en algunas condiciones podía cortar la respuesta y dejar la tabla sin renderizar.
+- **Nuevo endpoint GET:** En **ProfesorController** se añadió `GET /mis-ejercicios/actualizar-imagenes` con parámetro obligatorio `confirm=1`; si falta, redirige a Mis Ejercicios sin ejecutar la actualización. Si `confirm=1`, ejecuta la misma lógica que el POST y redirige con `?imagenesActualizadas=N`.
+- El **mensaje de éxito** (“Se actualizaron las imágenes de N ejercicios…”) se muestra en la misma vista cuando viene el parámetro `imagenesActualizadas`.
+
+#### Archivos
+- `ProfesorController.java`: nuevo método `actualizarImagenesEjerciciosGet(confirm, usuarioActual)` para GET con `confirm=1`; POST se mantiene.
+- `profesor/ejercicios-lista.html`: tarjeta con enlace `th:href="@{/profesor/mis-ejercicios/actualizar-imagenes(confirm=1)}"` y alert de éxito con `imagenesActualizadas`.
+
+---
+
+### ✅ **3. ExerciseController: ABM no usado, redirects a Mis Ejercicios**
+
+- En esta app **no se usa** la vista `abm-ejercicios.html`; la gestión (crear, editar, eliminar, cambiar imagen) se hace desde **Mis Ejercicios** (`/profesor/mis-ejercicios`).
+- **ExerciseController:**  
+  - `GET /exercise/editar` y `GET /ejercicios/abm` ahora solo hacen **redirect** a `/profesor/mis-ejercicios`.  
+  - Tras guardar en `POST /ejercicios/nuevo` se redirige a `/profesor/mis-ejercicios` (antes a `/exercise/lista`).  
+  - Todos los redirects tras modificar, eliminar y cambiar imagen apuntan a `/profesor/mis-ejercicios` (y en algunos casos con `?error=permiso`).  
+- No se eliminaron endpoints que otras vistas o enlaces antiguos puedan usar: `/ejercicios/nuevo`, `/ejercicios/modificar/{id}`, `/ejercicios/eliminar/{id}`, `/ejercicios/cambiar-imagen/{id}`, `/profesor/ejercicios/*` (varios redirigen a Mis Ejercicios).
+
+#### Archivos
+- `ExerciseController.java`: redirects unificados a `/profesor/mis-ejercicios`; sin referencias a `ExerciseCargaDefaultOptimizado` ni a la vista `abm-ejercicios`.
+
+---
+
+### ✅ **4. ImagenController: redirect a placeholder en lugar de 404**
+
+- Cuando la imagen no existe en BD (`ResourceNotFoundException`) o falla la lectura del archivo, en lugar de devolver **404** o **500** se devuelve **302 Redirect** a `/img/not_imagen.png`. Así el navegador no muestra 404 en consola para imágenes de ejercicios faltantes y la vista sigue mostrando el placeholder.
+
+#### Archivos
+- `ImagenController.java`: en los `catch` de `ResourceNotFoundException` y `Exception` se responde `ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/img/not_imagen.png")).build()`. Logs pasan a `logger.debug` / `logger.warn` para no llenar logs en producción.
+
+---
+
+### ✅ **5. Compilación y errores de IDE**
+
+- Se eliminó el uso de `Map`, `LinkedHashMap` y `ArrayList` en `ExerciseService.findEjerciciosDisponiblesParaProfesorWithImages` (queda solo lista + inicialización de grupos). Si el servidor mostraba “Map/LinkedHashMap/ArrayList cannot be resolved”, suele deberse a **clases compiladas viejas** en `target/`. Se recomienda **`mvn clean compile`** antes de ejecutar.
+- Los avisos del IDE tipo “Duplicate method” o “Can't initialize javac processor” suelen venir de **Lombok**; si `mvn clean compile` termina en BUILD SUCCESS, el código compila correctamente.
+
+---
+
+### 📁 **Archivos tocados en este cambio**
+
+| Archivo | Cambios |
+|--------|--------|
+| `ExerciseController.java` | Redirects a `/profesor/mis-ejercicios`; POST nuevo ejercicio redirect igual. |
+| `ExerciseService.java` | `findEjerciciosDisponiblesParaProfesorWithImages`: `@Transactional(readOnly = true)` e inicialización de `grupos`. |
+| `ExerciseRepository.java` | Comentario en query; sin JOIN FETCH de grupos. |
+| `ProfesorController.java` | GET `/mis-ejercicios/actualizar-imagenes?confirm=1`; POST se mantiene. |
+| `ImagenController.java` | 302 a `/img/not_imagen.png` cuando imagen no encontrada o error. |
+| `profesor/ejercicios-lista.html` | Condiciones null-safe para `ejercicios`; tarjeta “Imágenes desde carpeta” con enlace GET; mensaje de éxito `imagenesActualizadas`. |
+
+---
+
 ## [2026-02-09] - Token de sala legible (tv + 6 dígitos) ✅
 
 ### 🎯 **Cambio**
