@@ -53,18 +53,29 @@
             height: calc(100vh - 38px);
             overflow: hidden;
         }
-        /* Columnas se reparten el espacio; si hay menos de 6, cada una ocupa más */
+        /* Columnas: contorno de color por columna (estilo “recuadro Excel”) */
         .sala-columna {
             flex: 1;
             min-width: 0;
             max-width: 100%;
             display: flex;
             flex-direction: column;
-            border-left: 2px solid #30363d;
-            padding-left: 0.75rem;
+            border: 3px solid #30363d;
+            border-radius: 10px;
+            padding: 0.35rem;
+            margin: 0 2px;
         }
-        .sala-columna:first-child { border-left: none; padding-left: 0; }
+        .sala-columna:nth-child(1) { border-color: #f97316; }
+        .sala-columna:nth-child(2) { border-color: #22c55e; }
+        .sala-columna:nth-child(3) { border-color: #eab308; }
+        .sala-columna:nth-child(4) { border-color: #3b82f6; }
+        .sala-columna:nth-child(5) { border-color: #d946ef; }
+        .sala-columna:nth-child(6) { border-color: #06b6d4; }
         .sala-columna-titulo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
             background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
             color: #c9d1d9;
             padding: 0.25rem 0.4rem;
@@ -76,6 +87,18 @@
             flex-shrink: 0;
             border: 1px solid #30363d;
         }
+        .sala-columna-titulo-punto {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sala-columna:nth-child(1) .sala-columna-titulo-punto { background: #f97316; }
+        .sala-columna:nth-child(2) .sala-columna-titulo-punto { background: #22c55e; }
+        .sala-columna:nth-child(3) .sala-columna-titulo-punto { background: #eab308; }
+        .sala-columna:nth-child(4) .sala-columna-titulo-punto { background: #3b82f6; }
+        .sala-columna:nth-child(5) .sala-columna-titulo-punto { background: #d946ef; }
+        .sala-columna:nth-child(6) .sala-columna-titulo-punto { background: #06b6d4; }
         .sala-columna-items {
             display: flex;
             flex-direction: column;
@@ -168,7 +191,7 @@
 <div class="sala-container" id="salaContenido">
     <th:block th:if="${estado != null and estado.columnas != null}">
         <div th:each="col : ${estado.columnas}" class="sala-columna">
-            <div class="sala-columna-titulo" th:text="${col.titulo != null and !col.titulo.isEmpty() ? col.titulo : 'Sin título'}">Título</div>
+            <div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto" th:text="${col.titulo != null and !col.titulo.isEmpty() ? col.titulo : 'Sin título'}">Título</span></div>
             <div class="sala-columna-items">
                 <div th:each="item : ${col.items}" class="sala-item-wrap">
                     <div class="item-titulo" th:text="${item.ejercicioNombre}">Ejercicio</div>
@@ -202,7 +225,7 @@
                 (estado.columnas || []).forEach(col => {
                     const colDiv = document.createElement('div');
                     colDiv.className = 'sala-columna';
-                    colDiv.innerHTML = '<div class="sala-columna-titulo">' + (col.titulo || 'Sin título') + '</div><div class="sala-columna-items"></div>';
+                    colDiv.innerHTML = '<div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto">' + (col.titulo || 'Sin título') + '</span></div><div class="sala-columna-items"></div>';
                     const itemsDiv = colDiv.querySelector('.sala-columna-items');
                     (col.items || []).forEach(item => {
                         const wrapDiv = document.createElement('div');
