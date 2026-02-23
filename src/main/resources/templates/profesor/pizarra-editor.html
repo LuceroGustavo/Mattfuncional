@@ -10,11 +10,11 @@
     <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <style>
         .pizarra-editor { display: flex; gap: 1rem; min-height: 70vh; }
-        .ejercicios-panel { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; }
+        .ejercicios-panel { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; border: 2px solid #0d6efd; border-radius: 12px; padding: 0.75rem; background: #f8f9fa; }
         .ejercicios-panel .ejercicio-draggable { cursor: grab; margin-bottom: 0.5rem; }
         .ejercicios-panel .ejercicio-draggable:active { cursor: grabbing; }
-        .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; }
-        .pizarra-columna { min-width: 200px; flex: 1; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
+        .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; min-width: 0; }
+        .pizarra-columna { min-width: 160px; flex: 0 0 auto; width: 160px; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
         .pizarra-columna.drag-over { border-color: #0d6efd; background: #e7f1ff; }
         .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; display: flex; align-items: center; gap: 0.35rem; }
         .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; flex: 1; min-width: 0; font-weight: 700; }
