@@ -79,21 +79,45 @@
         .sala-columna-items {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0;
             flex: 1;
             min-height: 0;
             overflow: hidden;
         }
-        /* Tarjeta: imagen a tamaño completo, datos en recuadros encima (sin columna negra) */
-        .sala-item {
+        /* Bloque por ejercicio: título arriba + tarjeta debajo */
+        .sala-item-wrap {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Título del ejercicio: arriba de la tarjeta, letras blancas sobre fondo negro */
+        .sala-item-wrap .item-titulo {
+            flex-shrink: 0;
+            background: #000;
+            color: #fff;
+            font-size: clamp(0.6rem, 1.1vw, 0.75rem);
+            font-weight: 700;
+            padding: 0.2rem 0.4rem;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        /* Tarjeta: solo imagen + peso/reps (sin nombre dentro) */
+        .sala-item-wrap .sala-item {
             flex: 1;
             min-height: 0;
             position: relative;
-            border-radius: 12px;
+            border-radius: 0 0 12px 12px;
             overflow: hidden;
             border: 1px solid #30363d;
+            border-top: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
+        .sala-item-wrap:first-child .item-titulo { border-radius: 6px 6px 0 0; }
+        .sala-item-wrap:first-child .sala-item { border-radius: 0 0 12px 12px; }
+        .sala-item-wrap:not(:first-child) .sala-item { border-radius: 12px; border-top: 1px solid #30363d; }
         /* Imagen llena todo el contenedor (fondo blanco de la ilustración visible) */
         .sala-item .item-imagen-wrap {
             position: absolute;
@@ -106,7 +130,7 @@
             object-fit: contain;
             object-position: left center;
         }
-        /* Zona derecha: solo recuadros, sin fondo (se ve el blanco del contenedor) */
+        /* Zona derecha: peso arriba, reps abajo */
         .sala-item .item-datos {
             position: absolute;
             right: 0;
@@ -120,24 +144,7 @@
             pointer-events: none;
         }
         .sala-item .item-datos > * { pointer-events: auto; }
-        /* Nombre en recuadro con puntas redondeadas, texto a la derecha */
-        .sala-item .item-nombre {
-            font-size: clamp(0.6rem, 1.1vw, 0.75rem);
-            font-weight: 700;
-            color: #1a1a1a;
-            padding: 0.25rem 0.5rem;
-            line-height: 1.2;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            border-radius: 10px;
-            text-align: right;
-        }
-        /* Peso y reps/tiempo: verde con sombreado negro, recuadro justo al contenido (~3 caracteres) */
+        /* Peso: arriba a la derecha. Reps: abajo a la derecha */
         .sala-item .item-peso,
         .sala-item .item-reps {
             font-size: clamp(0.65rem, 1.1vw, 0.8rem);
@@ -150,8 +157,7 @@
             width: fit-content;
             align-self: flex-end;
         }
-        .sala-item .item-peso { margin-top: 0.15rem; }
-        .sala-item .item-reps { margin-top: 0.15rem; }
+        .sala-item .item-reps { margin-top: auto; }
     </style>
 </head>
 <body>
@@ -164,15 +170,17 @@
         <div th:each="col : ${estado.columnas}" class="sala-columna">
             <div class="sala-columna-titulo" th:text="${col.titulo != null and !col.titulo.isEmpty() ? col.titulo : 'Sin título'}">Título</div>
             <div class="sala-columna-items">
-                <div th:each="item : ${col.items}" class="sala-item">
-                    <div class="item-imagen-wrap">
-                        <img th:if="${item.imagenUrl != null}" th:src="${item.imagenUrl}" alt="" onerror="this.src='/img/not_imagen.png'">
-                        <img th:if="${item.imagenUrl == null}" src="/img/not_imagen.png" alt="">
-                    </div>
-                    <div class="item-datos">
-                        <div class="item-nombre" th:text="${item.ejercicioNombre}">Ejercicio</div>
-                        <div class="item-peso" th:if="${item.peso != null}" th:text="${item.peso + 'K'}">12K</div>
-                        <div class="item-reps" th:text="${item.repeticiones != null ? (item.unidad != null and (item.unidad == 'seg' or item.unidad == 's') ? item.repeticiones + 's' : (item.unidad == 'min' ? item.repeticiones + 'm' : item.repeticiones + 'r')) : '-'}">-</div>
+                <div th:each="item : ${col.items}" class="sala-item-wrap">
+                    <div class="item-titulo" th:text="${item.ejercicioNombre}">Ejercicio</div>
+                    <div class="sala-item">
+                        <div class="item-imagen-wrap">
+                            <img th:if="${item.imagenUrl != null}" th:src="${item.imagenUrl}" alt="" onerror="this.src='/img/not_imagen.png'">
+                            <img th:if="${item.imagenUrl == null}" src="/img/not_imagen.png" alt="">
+                        </div>
+                        <div class="item-datos">
+                            <div class="item-peso" th:if="${item.peso != null}" th:text="${item.peso + 'K'}">12K</div>
+                            <div class="item-reps" th:text="${item.repeticiones != null ? (item.unidad != null and (item.unidad == 'seg' or item.unidad == 's') ? item.repeticiones + 's' : (item.unidad == 'min' ? item.repeticiones + 'm' : item.repeticiones + 'r')) : '-'}">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -197,8 +205,8 @@
                     colDiv.innerHTML = '<div class="sala-columna-titulo">' + (col.titulo || 'Sin título') + '</div><div class="sala-columna-items"></div>';
                     const itemsDiv = colDiv.querySelector('.sala-columna-items');
                     (col.items || []).forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'sala-item';
+                        const wrapDiv = document.createElement('div');
+                        wrapDiv.className = 'sala-item-wrap';
                         const u = (item.unidad || 'reps').toLowerCase();
                         let repsText = '-';
                         if (item.repeticiones != null) {
@@ -207,15 +215,16 @@
                             else repsText = item.repeticiones + 'r';
                         }
                         const pesoHtml = item.peso != null ? '<div class="item-peso">' + item.peso + 'K</div>' : '';
-                        itemDiv.innerHTML =
+                        wrapDiv.innerHTML =
+                            '<div class="item-titulo">' + (item.ejercicioNombre || '') + '</div>' +
+                            '<div class="sala-item">' +
                             '<div class="item-imagen-wrap">' +
                             '<img src="' + (item.imagenUrl || '/img/not_imagen.png') + '" alt="" onerror="this.src=\'/img/not_imagen.png\'">' +
                             '</div>' +
                             '<div class="item-datos">' +
-                            '<div class="item-nombre">' + (item.ejercicioNombre || '') + '</div>' +
                             pesoHtml +
-                            '<div class="item-reps">' + repsText + '</div></div>';
-                        itemsDiv.appendChild(itemDiv);
+                            '<div class="item-reps">' + repsText + '</div></div></div>';
+                        itemsDiv.appendChild(wrapDiv);
                     });
                     cont.appendChild(colDiv);
                 });
