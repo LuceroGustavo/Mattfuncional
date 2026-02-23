@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -250,21 +249,29 @@ public class PizarraService {
     }
 
     /**
-     * Actualiza nombre y títulos de columnas.
+     * Actualiza nombre, títulos y vueltas de columnas.
      */
-    public Pizarra actualizarBasico(Long id, String nombre, List<String> titulos, Long profesorId) {
+    public Pizarra actualizarBasico(Long id, String nombre, List<String> titulos, List<Integer> vueltas, Long profesorId) {
         Pizarra p = pizarraRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pizarra no encontrada"));
         if (!p.getProfesor().getId().equals(profesorId)) {
             throw new RuntimeException("No tiene permisos para editar esta pizarra");
         }
         if (nombre != null) p.setNombre(nombre.trim());
+        List<PizarraColumna> cols = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
         if (titulos != null && !titulos.isEmpty()) {
-            List<PizarraColumna> cols = columnaRepository.findByPizarraIdOrderByOrdenAsc(p.getId());
             for (int i = 0; i < Math.min(titulos.size(), cols.size()); i++) {
                 String titulo = titulos.get(i);
                 cols.get(i).setTitulo(titulo != null ? titulo.trim() : "");
             }
+        }
+        if (vueltas != null) {
+            for (int i = 0; i < Math.min(vueltas.size(), cols.size()); i++) {
+                Integer v = vueltas.get(i);
+                cols.get(i).setVueltas(v != null && v >= 1 && v <= 9 ? v : null);
+            }
+        }
+        if (cols != null && !cols.isEmpty()) {
             columnaRepository.saveAll(cols);
         }
         return pizarraRepository.save(p);
@@ -384,6 +391,7 @@ public class PizarraService {
             PizarraEstadoDTO.ColumnaDTO colDto = new PizarraEstadoDTO.ColumnaDTO();
             colDto.setId(col.getId());
             colDto.setTitulo(col.getTitulo());
+            colDto.setVueltas(col.getVueltas());
             colDto.setOrden(col.getOrden());
             List<PizarraItem> items = itemRepository.findByColumnaIdOrderByOrdenAsc(col.getId());
             for (PizarraItem it : items) {

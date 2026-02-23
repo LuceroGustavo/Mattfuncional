@@ -99,6 +99,13 @@
         .sala-columna:nth-child(4) .sala-columna-titulo-punto { background: #3b82f6; }
         .sala-columna:nth-child(5) .sala-columna-titulo-punto { background: #d946ef; }
         .sala-columna:nth-child(6) .sala-columna-titulo-punto { background: #06b6d4; }
+        .sala-columna-titulo-vueltas {
+            margin-left: auto;
+            color: #f97316;
+            font-weight: 700;
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            white-space: nowrap;
+        }
         .sala-columna-items {
             display: flex;
             flex-direction: column;
@@ -191,7 +198,7 @@
 <div class="sala-container" id="salaContenido">
     <th:block th:if="${estado != null and estado.columnas != null}">
         <div th:each="col : ${estado.columnas}" class="sala-columna">
-            <div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto" th:text="${col.titulo != null and !col.titulo.isEmpty() ? col.titulo : 'Sin título'}">Título</span></div>
+            <div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto" th:text="${col.titulo != null and !col.titulo.isEmpty() ? col.titulo : 'Sin título'}">Título</span><span class="sala-columna-titulo-vueltas" th:if="${col.vueltas != null and col.vueltas >= 1}" th:text="${col.vueltas + ' Vueltas'}">3 Vueltas</span></div>
             <div class="sala-columna-items">
                 <div th:each="item : ${col.items}" class="sala-item-wrap">
                     <div class="item-titulo" th:text="${item.ejercicioNombre}">Ejercicio</div>
@@ -225,7 +232,8 @@
                 (estado.columnas || []).forEach(col => {
                     const colDiv = document.createElement('div');
                     colDiv.className = 'sala-columna';
-                    colDiv.innerHTML = '<div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto">' + (col.titulo || 'Sin título') + '</span></div><div class="sala-columna-items"></div>';
+                    var vueltasHtml = (col.vueltas != null && col.vueltas >= 1) ? '<span class="sala-columna-titulo-vueltas">' + col.vueltas + ' Vueltas</span>' : '';
+                    colDiv.innerHTML = '<div class="sala-columna-titulo"><span class="sala-columna-titulo-punto"></span><span class="sala-columna-titulo-texto">' + (col.titulo || 'Sin título') + '</span>' + vueltasHtml + '</div><div class="sala-columna-items"></div>';
                     const itemsDiv = colDiv.querySelector('.sala-columna-items');
                     (col.items || []).forEach(item => {
                         const wrapDiv = document.createElement('div');

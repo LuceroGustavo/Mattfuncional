@@ -15,6 +15,9 @@ public class PizarraColumna {
 
     private String titulo = "";
 
+    /** Cantidad de vueltas/pasadas (1-9). Null = no mostrar en TV. */
+    private Integer vueltas;
+
     @Column(nullable = false)
     private int orden = 0;
 
@@ -32,6 +35,9 @@ public class PizarraColumna {
 
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo != null ? titulo : ""; }
+
+    public Integer getVueltas() { return vueltas; }
+    public void setVueltas(Integer vueltas) { this.vueltas = vueltas; }
 
     public int getOrden() { return orden; }
     public void setOrden(int orden) { this.orden = orden; }

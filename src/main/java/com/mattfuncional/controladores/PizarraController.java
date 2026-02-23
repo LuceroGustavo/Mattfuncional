@@ -161,7 +161,22 @@ public class PizarraController {
                 titulos.add(t != null ? t.toString().trim() : "");
             }
         }
-        pizarraService.actualizarBasico(id, nombre, titulos, profesor.getId());
+        List<Integer> vueltas = new ArrayList<>();
+        Object vueltasObj = body.get("vueltas");
+        if (vueltasObj instanceof List<?> list) {
+            for (Object v : list) {
+                if (v == null || v.toString().trim().isEmpty()) {
+                    vueltas.add(null);
+                } else {
+                    try {
+                        vueltas.add(Integer.valueOf(v.toString().trim()));
+                    } catch (NumberFormatException e) {
+                        vueltas.add(null);
+                    }
+                }
+            }
+        }
+        pizarraService.actualizarBasico(id, nombre, titulos, vueltas.isEmpty() ? null : vueltas, profesor.getId());
         return ResponseEntity.ok().build();
     }
 

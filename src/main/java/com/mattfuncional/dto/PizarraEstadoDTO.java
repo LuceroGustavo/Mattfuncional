@@ -15,6 +15,7 @@ public class PizarraEstadoDTO {
     public static class ColumnaDTO {
         private Long id;
         private String titulo;
+        private Integer vueltas; // 1-9, null = no mostrar
         private int orden;
         private List<ItemDTO> items = new ArrayList<>();
 
@@ -22,6 +23,8 @@ public class PizarraEstadoDTO {
         public void setId(Long id) { this.id = id; }
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
+        public Integer getVueltas() { return vueltas; }
+        public void setVueltas(Integer vueltas) { this.vueltas = vueltas; }
         public int getOrden() { return orden; }
         public void setOrden(int orden) { this.orden = orden; }
         public List<ItemDTO> getItems() { return items; }

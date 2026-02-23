@@ -16,8 +16,11 @@
         .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; }
         .pizarra-columna { min-width: 200px; flex: 1; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
         .pizarra-columna.drag-over { border-color: #0d6efd; background: #e7f1ff; }
-        .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; display: flex; align-items: center; gap: 0.25rem; }
+        .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; display: flex; align-items: center; gap: 0.35rem; }
         .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; flex: 1; min-width: 0; font-weight: 700; }
+        .columna-titulo .col-vueltas-wrap { display: flex; align-items: center; gap: 0.2rem; flex-shrink: 0; }
+        .columna-titulo .col-vueltas-wrap label { font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 0; white-space: nowrap; }
+        .columna-titulo .col-vueltas-select { font-size: 0.75rem; padding: 0.15rem 0.25rem; width: auto; min-width: 2.5rem; background: #444; color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; }
         .columna-titulo .btn-quitar-col { padding: 0.15rem 0.35rem; font-size: 0.75rem; color: #fff; border-color: rgba(255,255,255,0.6); }
         .columna-titulo .btn-quitar-col:hover { background: rgba(255,255,255,0.2); color: #fff; }
         .pizarra-item { background: #fff; border-radius: 10px; padding: 0.5rem; margin-bottom: 0.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: move; }
@@ -176,6 +179,13 @@
                 <div class="columna-titulo">
                     <input type="text" th:value="${col.titulo}" placeholder="Título" class="col-titulo-input"
                            th:attr="data-col-id=${col.id}">
+                    <div class="col-vueltas-wrap">
+                        <label for="col-vueltas-${col.id}" class="visually-hidden">Vueltas</label>
+                        <select class="col-vueltas-select" th:attr="data-col-id=${col.id}" id="col-vueltas-${col.id}" title="Vueltas (pasadas)">
+                            <option value="">—</option>
+                            <option th:each="n : ${#numbers.sequence(1, 9)}" th:value="${n}" th:text="${n}" th:selected="${col.vueltas != null and col.vueltas == n}"></option>
+                        </select>
+                    </div>
                     <button type="button" class="btn btn-outline-light btn-quitar-col btn-quitar-columna"
                             th:attr="data-columna-id=${col.id}"
                             th:if="${pizarra.columnas.size() > 1}"
@@ -238,12 +248,14 @@
         if (!nombre) { alert('Escribí un nombre para la nueva pizarra.'); return; }
         var titulos = [];
         document.querySelectorAll('.col-titulo-input').forEach(function(inp) { titulos.push(inp.value.trim()); });
+        var vueltas = [];
+        document.querySelectorAll('.col-vueltas-select').forEach(function(sel) { var v = sel.value.trim(); vueltas.push(v === '' ? null : parseInt(v, 10)); });
         var nombreActual = document.getElementById('pizarraNombre').value.trim();
         // Primero sincronizar el estado actual del panel al servidor
         fetch('/profesor/pizarra/actualizar-basico', {
             method: 'POST',
             headers: postHeaders(),
-            body: JSON.stringify({ id: pizarraId, nombre: nombreActual || 'Panel en vivo', titulos: titulos })
+            body: JSON.stringify({ id: pizarraId, nombre: nombreActual || 'Panel en vivo', titulos: titulos, vueltas: vueltas })
         }).then(function(r1) {
             if (!r1.ok) { alert('Error al sincronizar.'); return; }
             // Luego crear una nueva pizarra con el nombre indicado (copia del contenido actual)
@@ -327,10 +339,12 @@
         const nombre = document.getElementById('pizarraNombre').value.trim();
         const titulos = [];
         document.querySelectorAll('.col-titulo-input').forEach(inp => titulos.push(inp.value.trim()));
+        const vueltas = [];
+        document.querySelectorAll('.col-vueltas-select').forEach(sel => { const v = sel.value.trim(); vueltas.push(v === '' ? null : parseInt(v, 10)); });
         return fetch('/profesor/pizarra/actualizar-basico', {
             method: 'POST',
             headers: postHeaders(),
-            body: JSON.stringify({ id: pizarraId, nombre, titulos })
+            body: JSON.stringify({ id: pizarraId, nombre, titulos, vueltas })
         });
     }
 
@@ -348,6 +362,9 @@
     document.querySelectorAll('.col-titulo-input').forEach(inp => {
         inp.addEventListener('blur', function() { guardarNombreYTitulos(); });
         inp.addEventListener('input', programarGuardadoNombreYTitulos);
+    });
+    document.querySelectorAll('.col-vueltas-select').forEach(sel => {
+        sel.addEventListener('change', function() { guardarNombreYTitulos(); });
     });
 
     // Agregar columna (máx. 6)

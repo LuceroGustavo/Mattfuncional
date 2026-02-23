@@ -538,3 +538,66 @@ Mejoras en el diseño de las tarjetas de ejercicio en la vista TV (`sala.html`):
 | Archivo | Cambio |
 |---------|--------|
 | `templates/sala/sala.html` | Estilos: nombre con recuadro redondeado y text-align right; peso y reps en columna, verde con fondo oscuro, fit-content y padding reducido. HTML/Thymeleaf y JS con formato 12K, 12m, 15s, 25r. |
+
+---
+
+## 16. Vista TV: título arriba, contorno por columna, vueltas; login y sesión (Feb 2026)
+
+Cambios en la vista TV (nombre como título, colores por columna, cantidad de vueltas), configuración de sesión y login personalizado, y correcciones en PizarraColumna/PizarraService.
+
+### 16.1 Nombre del ejercicio como título (arriba de la tarjeta)
+
+- **Antes:** El nombre del ejercicio iba dentro de la tarjeta (recuadro blanco a la derecha).
+- **Ahora:** El nombre va **arriba de la tarjeta**, como título: texto **blanco sobre fondo negro** (`.item-titulo`), en una sola línea con ellipsis si es largo. La tarjeta (`.sala-item`) solo muestra imagen, peso y reps.
+- **Estructura:** Cada ejercicio es un `.sala-item-wrap` con `.item-titulo` + `.sala-item` (imagen + `.item-datos` con peso y reps).
+
+### 16.2 Sin espacio entre tarjetas y peso arriba a la derecha
+
+- **Columnas:** En `.sala-columna-items` se puso `gap: 0` para quitar el espacio entre tarjetas dentro de cada columna.
+- **Peso:** El dato de peso se muestra **arriba a la derecha** de la tarjeta; las repeticiones/tiempo siguen **abajo a la derecha** (`.item-datos` con `justify-content: space-between` y `margin-top: auto` en reps).
+
+### 16.3 Contorno y punto de color por columna
+
+- Cada columna tiene un **borde de color** (estilo “recuadro Excel”): columna 1 naranja, 2 verde, 3 amarillo, 4 azul, 5 fucsia, 6 cyan. Clases por `:nth-child(1)` a `:nth-child(6)`.
+- En el **título de la columna** (nombre del usuario) se añadió un **punto** (círculo) del mismo color a la izquierda del texto (`.sala-columna-titulo-punto`), para identificar cada usuario por color.
+
+### 16.4 Cantidad de vueltas por columna
+
+- **Backend:** Campo `Integer vueltas` (nullable, 1–9) en `PizarraColumna`. En `PizarraEstadoDTO.ColumnaDTO` se añade `vueltas`. `PizarraService.actualizarBasico` acepta `List<Integer> vueltas` y persiste por columna; `construirEstadoDesdePizarra` incluye `vueltas` en cada columna del JSON. `PizarraController.actualizarBasico` lee `vueltas` del body.
+- **Editor:** En el título de cada columna del panel de pizarra hay un **selector de vueltas** (opciones vacío “—” o 1 a 9). Al cambiar o al guardar nombre/títulos se envían también las vueltas en `actualizar-basico`. Si no se elige nada, no se muestra en la TV.
+- **Vista TV:** En el contenedor del título de la columna, **a la derecha**, si la columna tiene vueltas (1–9) se muestra **“X Vueltas”** en **naranja** (`.sala-columna-titulo-vueltas`). Si no hay valor, no se muestra.
+
+### 16.5 Sesión: tiempo de expiración
+
+- En `application.properties` se usa **`server.servlet.session.timeout=30m`** (antes `spring.session.timeout=30m`) para que el cierre de sesión por inactividad lo gestione correctamente el servidor embebido (30 minutos sin actividad).
+
+### 16.6 Login: plantilla personalizada siempre
+
+- **Problema:** En `/login` a veces se mostraba la página por defecto de Spring Security (“Please sign in”) en lugar de la plantilla “Iniciar Sesión”.
+- **Solución:** Se creó **`config/WebMvcConfig.java`** con `addViewController("/login").setViewName("login")` para que GET `/login` resuelva siempre a la vista `login`. Se eliminó el método `login()` de `PortalControlador` para evitar dos manejadores para la misma ruta.
+
+### 16.7 Correcciones PizarraColumna y PizarraService
+
+- **PizarraColumna:** Se quitaron las anotaciones Lombok `@Getter`/`@Setter` del campo `vueltas` y se añadieron **getter y setter manuales** (`getVueltas()`, `setVueltas(Integer)`), para que el proyecto compile aunque Lombok no procese la clase en el IDE.
+- **PizarraService:** Se eliminó el import no usado `java.util.ArrayList`. Antes de `columnaRepository.saveAll(cols)` se añadió la condición `if (cols != null && !cols.isEmpty())` para evitar avisos de null-safety.
+
+### 16.8 Archivos tocados
+
+| Archivo | Cambio |
+|---------|--------|
+| `templates/sala/sala.html` | Nombre como título arriba (blanco/negro); gap 0; peso arriba a la derecha; contorno y punto de color por columna; “X Vueltas” en naranja a la derecha del título. |
+| `templates/profesor/pizarra-editor.html` | Selector de vueltas (1–9 o vacío) en el título de cada columna; envío de `vueltas` en actualizar-basico. |
+| `entidades/PizarraColumna.java` | Campo `vueltas` (Integer); getter/setter manuales (sin Lombok para vueltas). |
+| `dto/PizarraEstadoDTO.java` | `ColumnaDTO.vueltas`. |
+| `servicios/PizarraService.java` | `actualizarBasico` con `vueltas`; `construirEstadoDesdePizarra` con `colDto.setVueltas`; condición antes de `saveAll(cols)`; import ArrayList eliminado. |
+| `controladores/PizarraController.java` | `actualizarBasico`: parseo de `vueltas` del body. |
+| `config/WebMvcConfig.java` | Nuevo: ViewController GET `/login` → vista `login`. |
+| `controladores/PortalControlador.java` | Eliminado método `login()`. |
+| `resources/application.properties` | `server.servlet.session.timeout=30m`. |
+
+### 16.9 Sugerencia de commit
+
+**Título corto:**  
+`feat(pizarra): título arriba en TV, colores por columna, vueltas; login y sesión`
+
+**Descripción sugerida:** ver archivo `Documentacion/COMMIT_MSG_PIZARRA_VUELTAS_LOGIN_FEB2026.txt`.

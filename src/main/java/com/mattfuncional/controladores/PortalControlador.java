@@ -63,10 +63,7 @@ public class PortalControlador {
         return "index";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+    /* GET /login lo maneja WebMvcConfig (view "login") para mostrar siempre la plantilla Iniciar Sesión. */
 
     @GetMapping("/demo")
     public String demo() {
