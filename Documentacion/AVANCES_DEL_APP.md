@@ -122,7 +122,7 @@
 
 ---
 
-## 11. Pizarra (Fase 7 – Pantalla de sala)
+## 11. Pizarra (Fase 7 – Pantalla de sala) — **Completada**
 
 - **Objetivo:** Reemplazar la pizarra física por una pizarra digital mostrada en TV. Flujo: profesor edita desde el notebook; el monitor solo comparte la vista TV y los cambios se ven en pocos segundos.
 - **Panel profesor:** Lista de pizarras, crear nueva (1-6 columnas), editor con drag and drop de ejercicios. **Agregar columna** (hasta 6) y **Quitar columna** (mínimo 1) desde el editor, con botones en la interfaz.

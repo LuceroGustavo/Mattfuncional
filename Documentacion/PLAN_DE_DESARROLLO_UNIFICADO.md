@@ -63,7 +63,7 @@
 | **Fase 4 – Rutinas y asignación** | ABM rutinas basadas en series, asignación rutina → alumno, token, hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp, modificar rutina con series, orden de series, tabs dashboard, logo. | Completado |
 | **Fase 5 – Vista rutina por enlace** | Página pública (sin login) con token que muestre la rutina en HTML. Hoja en `/rutinas/hoja/{token}` implementada; opcional: reforzar permitAll en SecurityConfig. | Pendiente / parcial |
 | **Fase 6 – Alumnos sin login** | Alumno solo como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo (gran parte ya hecha). UserDetailsService excluye ALUMNO del login. | Completado |
-| **Fase 7 – Pantalla de sala** | Modo sala para TV: ruta de solo lectura, control desde panel profesor, vista fullscreen. Ruta tipo `/sala/{token}` o `/sala?token=xxx`. | Pendiente |
+| **Fase 7 – Pantalla de sala** | Modo sala para TV: ruta de solo lectura, control desde panel profesor, vista fullscreen. Ruta tipo `/sala/{token}` o `/sala?token=xxx`. | **Completado** |
 | **Fase 8 – Página pública** | Sitio institucional: presentación, servicios, horarios, contacto, promociones, productos. Rutas públicas bajo `/public` o raíz. | Pendiente |
 
 ---

@@ -48,7 +48,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 |------|-----------|--------|
 | **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | **Implementado (backend).** Falta pulir frontend |
 | **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO del login. | **Completado** |
-| **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). Pizarra digital con columnas, títulos, peso/reps, agregar/quitar columnas (máx. 6), polling 2,5 s. | **En desarrollo (mejorado)** |
+| **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). Pizarra digital con columnas, títulos, peso/reps, agregar/quitar columnas (máx. 6), polling 2,5 s. | **Completada** |
 | **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | Pendiente |
 
 ### Checklist general (ítems sin marcar)

@@ -3,8 +3,10 @@
 **Para contexto del proyecto:** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).  
 **Plan de desarrollo:** [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
-**Estado:** En desarrollo (panel de trabajo y conexión global implementados)  
+**Estado:** **Completada**  
 **Última actualización:** Febrero 2026
+
+La Fase 7 se considera **completa**: editor de pizarra con panel de ejercicios, columnas (1–6), arrastrar y soltar, peso/reps/unidad (reps, seg, min), persistencia, vista TV con polling, transmisión por token/código opcional, y ajustes de UI (logo circular en navbar, tarjetas en dos filas, scroll horizontal de columnas).
 
 ---
 
