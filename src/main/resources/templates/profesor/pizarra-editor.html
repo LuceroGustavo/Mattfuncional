@@ -9,12 +9,14 @@
     <meta name="_csrf" th:content="${_csrf?.token}">
     <meta name="_csrf_header" th:content="${_csrf?.headerName}">
     <style>
-        .pizarra-editor { display: flex; gap: 1rem; min-height: 70vh; }
-        .ejercicios-panel { width: 280px; flex-shrink: 0; max-height: 70vh; overflow-y: auto; border: 2px solid #0d6efd; border-radius: 12px; padding: 0.75rem; background: #f8f9fa; }
+        .pizarra-editor { display: flex; gap: 1rem; min-height: 140vh; }
+        .ejercicios-panel { width: 220px; flex-shrink: 0; max-height: 140vh; overflow-y: auto; border: 2px solid #0d6efd; border-radius: 12px; padding: 0.75rem; background: #f8f9fa; }
         .ejercicios-panel .ejercicio-draggable { cursor: grab; margin-bottom: 0.5rem; }
         .ejercicios-panel .ejercicio-draggable:active { cursor: grabbing; }
+        .ejercicios-panel .ejercicio-mini .p-2 { overflow: hidden; min-width: 0; }
+        .ejercicios-panel .ejercicio-mini .p-2 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
         .columnas-panel { flex: 1; display: flex; gap: 0.5rem; overflow-x: auto; min-width: 0; }
-        .pizarra-columna { min-width: 160px; flex: 0 0 auto; width: 160px; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
+        .pizarra-columna { min-width: 200px; flex: 0 0 auto; width: 200px; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 2px dashed #dee2e6; }
         .pizarra-columna.drag-over { border-color: #0d6efd; background: #e7f1ff; }
         .columna-titulo { font-weight: 700; margin-bottom: 0.75rem; background: #333; color: #fff; padding: 0.5rem; border-radius: 8px; text-align: center; display: flex; align-items: center; gap: 0.35rem; }
         .columna-titulo input { background: transparent; border: none; color: #fff; text-align: center; flex: 1; min-width: 0; font-weight: 700; }
@@ -27,9 +29,10 @@
         .pizarra-item .grupo-badge { font-size: 0.7rem; background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.4rem; border-radius: 4px; }
         .pizarra-item img { width: 100%; height: 80px; object-fit: contain; }
         .pizarra-item .item-nombre { font-size: 0.85rem; font-weight: 600; }
-        .pizarra-item .item-peso-reps { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.3rem; align-items: center; }
-        .pizarra-item .item-peso-reps input { width: 48px; font-size: 0.8rem; padding: 0.2rem; }
-        .pizarra-item .item-peso-reps select.item-unidad { font-size: 0.75rem; padding: 0.2rem 0.25rem; width: auto; max-width: 70px; }
+        .pizarra-item .item-peso-reps { font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; align-items: center; }
+        .pizarra-item .item-peso-reps input { width: 56px; font-size: 0.9rem; padding: 0.3rem; }
+        .pizarra-item .item-peso-reps select.item-unidad { font-size: 0.85rem; padding: 0.3rem 0.35rem; width: auto; max-width: 76px; }
+        .pizarra-item .item-peso-reps .btn-eliminar-item { margin-left: auto; }
         .pizarra-item.dragging { opacity: 0.6; }
         .pizarra-item.drag-over-item { border: 2px dashed #0d6efd; }
         .btn-group-orden-item .btn { font-size: 0.65rem; }
@@ -167,7 +170,7 @@
                     <img th:if="${ej.imagen == null}" src="/img/not_imagen.png" alt="">
                     <div class="p-2">
                         <small class="d-block text-muted" th:text="${ej.grupos != null ? #strings.listJoin(ej.grupos.![nombre], ', ') : ''}"></small>
-                        <strong th:text="${ej.name}"></strong>
+                        <strong th:text="${ej.name}" th:attr="title=${ej.name}"></strong>
                     </div>
                 </div>
             </div>
