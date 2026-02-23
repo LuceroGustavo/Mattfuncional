@@ -24,18 +24,32 @@
         .sala-header {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.2rem 0.5rem;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.35rem 0.75rem;
             flex-shrink: 0;
             background: #161b22;
             border-bottom: 1px solid #30363d;
         }
+        .sala-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
         .sala-header-logo {
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             flex-shrink: 0;
+        }
+        .sala-header-marca {
+            color: #fff;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+            margin: 0;
+            letter-spacing: 0.02em;
         }
         .sala-header-titulo {
             flex: 1;
@@ -45,6 +59,14 @@
             text-align: center;
             margin: 0;
             letter-spacing: 0.02em;
+        }
+        .sala-header-fecha {
+            color: #fff;
+            font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+            font-weight: 600;
+            text-align: right;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .sala-container {
             display: flex;
@@ -192,8 +214,12 @@
 </head>
 <body>
 <div class="sala-header">
-    <img class="sala-header-logo" src="/img/logo matt.jpeg" alt="Mattfuncional" onerror="this.style.display='none'">
+    <div class="sala-header-left">
+        <img class="sala-header-logo" src="/img/logo.png" alt="Mattfuncional" onerror="this.src='/img/not_imagen.png'">
+        <span class="sala-header-marca">Mattfuncional</span>
+    </div>
     <h1 class="sala-header-titulo" id="salaNombre" th:text="${estado != null ? estado.nombre : 'Pizarra'}">Pizarra</h1>
+    <div class="sala-header-fecha" id="salaFecha">Lunes - 23 FEB 2026</div>
 </div>
 <div class="sala-container" id="salaContenido">
     <th:block th:if="${estado != null and estado.columnas != null}">
@@ -263,6 +289,14 @@
             .catch(function() {});
     }
 
+    function actualizarFecha() {
+        var now = new Date();
+        var days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+        var months = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+        var el = document.getElementById('salaFecha');
+        if (el) el.textContent = days[now.getDay()] + ' - ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+    }
+    actualizarFecha();
     actualizarDesdeAPI();
     setInterval(actualizarDesdeAPI, 30000);
 </script>
