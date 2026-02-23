@@ -24,8 +24,9 @@
         .pizarra-item .grupo-badge { font-size: 0.7rem; background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.4rem; border-radius: 4px; }
         .pizarra-item img { width: 100%; height: 80px; object-fit: contain; }
         .pizarra-item .item-nombre { font-size: 0.85rem; font-weight: 600; }
-        .pizarra-item .item-peso-reps { font-size: 0.8rem; display: flex; gap: 0.5rem; margin-top: 0.3rem; }
-        .pizarra-item .item-peso-reps input { width: 50px; font-size: 0.8rem; padding: 0.2rem; }
+        .pizarra-item .item-peso-reps { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.3rem; align-items: center; }
+        .pizarra-item .item-peso-reps input { width: 48px; font-size: 0.8rem; padding: 0.2rem; }
+        .pizarra-item .item-peso-reps select.item-unidad { font-size: 0.75rem; padding: 0.2rem 0.25rem; width: auto; max-width: 70px; }
         .pizarra-item.dragging { opacity: 0.6; }
         .pizarra-item.drag-over-item { border: 2px dashed #0d6efd; }
         .btn-group-orden-item .btn { font-size: 0.65rem; }
@@ -193,8 +194,13 @@
                         <img th:if="${item.exercise.imagen == null}" src="/img/not_imagen.png" alt="">
                         <div class="item-nombre" th:text="${item.exercise.name}"></div>
                         <div class="item-peso-reps">
-                            <input type="number" placeholder="kg" th:value="${item.peso}" class="item-peso" min="0" th:attr="data-item-id=${item.id}">
-                            <input type="number" placeholder="reps" th:value="${item.repeticiones}" class="item-reps" min="0" th:attr="data-item-id=${item.id}">
+                            <input type="number" placeholder="kg" th:value="${item.peso}" class="item-peso" min="0" th:attr="data-item-id=${item.id}" title="Peso en kg (dejar vacío si no aplica)">
+                            <input type="number" placeholder="cant." th:value="${item.repeticiones}" class="item-reps" min="0" th:attr="data-item-id=${item.id}" title="Cantidad según la unidad">
+                            <select class="item-unidad form-select form-select-sm" th:attr="data-item-id=${item.id}" title="Repeticiones, segundos o minutos">
+                                <option value="reps" th:selected="${item.unidad == null or item.unidad == 'reps'}">reps</option>
+                                <option value="s" th:selected="${item.unidad == 's' or item.unidad == 'seg'}">seg</option>
+                                <option value="min" th:selected="${item.unidad == 'min'}">min</option>
+                            </select>
                             <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-item" th:attr="data-item-id=${item.id}"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -483,6 +489,8 @@
             const exerciseId = card.dataset.exerciseId || '';
             const peso = card.querySelector('.item-peso') ? card.querySelector('.item-peso').value : '';
             const reps = card.querySelector('.item-reps') ? card.querySelector('.item-reps').value : '';
+            const unidadSel = card.querySelector('.item-unidad');
+            const unidad = unidadSel ? unidadSel.value : 'reps';
             card.classList.add('dragging');
             e.dataTransfer.setData('text/plain', ''); // algunos navegadores exigen algo
             e.dataTransfer.setData('application/json', JSON.stringify({
@@ -491,7 +499,8 @@
                 exerciseId: exerciseId,
                 columnaId: columnaId,
                 peso: peso ? parseInt(peso, 10) : null,
-                reps: reps ? parseInt(reps, 10) : null
+                reps: reps ? parseInt(reps, 10) : null,
+                unidad: unidad
             }));
             e.dataTransfer.effectAllowed = 'copyMove';
         });
@@ -544,7 +553,7 @@
                             }
                         } else {
                             // Copiar a otra columna
-                            agregarItem(Number(columnaId), Number(d.exerciseId), dropZone, draggedElement, d.peso, d.reps);
+                            agregarItem(Number(columnaId), Number(d.exerciseId), dropZone, draggedElement, d.peso, d.reps, d.unidad);
                         }
                         return;
                     }
@@ -552,12 +561,13 @@
             }
             const exerciseId = e.dataTransfer.getData('text/plain');
             if (!exerciseId) return;
-            agregarItem(Number(columnaId), Number(exerciseId), dropZone, draggedElement, null, null);
+            agregarItem(Number(columnaId), Number(exerciseId), dropZone, draggedElement, null, null, 'reps');
         });
     });
 
-    function agregarItem(columnaId, exerciseId, dropZone, draggedEl, peso, reps) {
-        const body = { columnaId, exerciseId, peso: peso != null ? peso : null, repeticiones: reps != null ? reps : null, unidad: 'reps' };
+    function agregarItem(columnaId, exerciseId, dropZone, draggedEl, peso, reps, unidad) {
+        const u = unidad || 'reps';
+        const body = { columnaId, exerciseId, peso: peso != null ? peso : null, repeticiones: reps != null ? reps : null, unidad: u };
         fetch('/profesor/pizarra/agregar-item', {
             method: 'POST',
             headers: postHeaders(),
@@ -567,14 +577,14 @@
             const nombre = (draggedEl && draggedEl.querySelector('.item-nombre')) ? draggedEl.querySelector('.item-nombre').textContent : (draggedEl && draggedEl.querySelector('strong')) ? draggedEl.querySelector('strong').textContent : 'Ejercicio';
             const grupos = (draggedEl && draggedEl.querySelector('.grupo-badge')) ? draggedEl.querySelector('.grupo-badge').textContent : (draggedEl && draggedEl.querySelector('small')) ? draggedEl.querySelector('small').textContent : '';
             const imgSrc = (draggedEl && draggedEl.querySelector('img')) ? draggedEl.querySelector('img').src : '/img/not_imagen.png';
-            const card = crearTarjetaItem(data.id, nombre, grupos, imgSrc, exerciseId, peso, reps);
+            const card = crearTarjetaItem(data.id, nombre, grupos, imgSrc, exerciseId, peso, reps, u);
             dropZone.appendChild(card);
             bindItemEvents(card);
             bindItemDrag(card);
         }).catch(() => alert('Error al agregar'));
     }
 
-    function crearTarjetaItem(itemId, ejercicioNombre, grupoTexto, imgSrc, exerciseId, pesoVal, repsVal) {
+    function crearTarjetaItem(itemId, ejercicioNombre, grupoTexto, imgSrc, exerciseId, pesoVal, repsVal, unidadVal) {
         const div = document.createElement('div');
         div.className = 'pizarra-item';
         div.draggable = true;
@@ -582,6 +592,10 @@
         if (exerciseId) div.setAttribute('data-exercise-id', exerciseId);
         const pv = (pesoVal != null && pesoVal !== '') ? (' value="' + pesoVal + '"') : '';
         const rv = (repsVal != null && repsVal !== '') ? (' value="' + repsVal + '"') : '';
+        const u = unidadVal || 'reps';
+        const selReps = u === 'reps' ? ' selected' : '';
+        const selS = (u === 's' || u === 'seg') ? ' selected' : '';
+        const selMin = u === 'min' ? ' selected' : '';
         div.innerHTML = '<div class="d-flex justify-content-between align-items-start mb-1">' +
             '<span class="grupo-badge">' + (grupoTexto || '').replace(/</g, '&lt;') + '</span>' +
             '<span class="btn-group-orden btn-group-orden-item">' +
@@ -591,8 +605,11 @@
             '<img src="' + (imgSrc || '/img/not_imagen.png') + '" alt="">' +
             '<div class="item-nombre">' + (ejercicioNombre || '').replace(/</g, '&lt;') + '</div>' +
             '<div class="item-peso-reps">' +
-            '<input type="number" placeholder="kg" class="item-peso" min="0" data-item-id="' + itemId + '"' + pv + '>' +
-            '<input type="number" placeholder="reps" class="item-reps" min="0" data-item-id="' + itemId + '"' + rv + '>' +
+            '<input type="number" placeholder="kg" class="item-peso" min="0" data-item-id="' + itemId + '"' + pv + ' title="Peso en kg (vacío si no aplica)">' +
+            '<input type="number" placeholder="cant." class="item-reps" min="0" data-item-id="' + itemId + '"' + rv + ' title="Cantidad">' +
+            '<select class="item-unidad form-select form-select-sm" data-item-id="' + itemId + '" title="reps / seg / min">' +
+            '<option value="reps"' + selReps + '>reps</option><option value="s"' + selS + '>seg</option><option value="min"' + selMin + '>min</option>' +
+            '</select>' +
             '<button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-item" data-item-id="' + itemId + '"><i class="fa-solid fa-trash"></i></button>' +
             '</div>';
         return div;
@@ -607,19 +624,26 @@
         }).catch(() => alert('Error al reordenar'));
     }
 
+    function enviarActualizarItem(card) {
+        const itemId = card.getAttribute('data-item-id');
+        const pesoInp = card.querySelector('.item-peso');
+        const repsInp = card.querySelector('.item-reps');
+        const unidadSel = card.querySelector('.item-unidad');
+        const peso = pesoInp && pesoInp.value ? parseInt(pesoInp.value, 10) : null;
+        const reps = repsInp && repsInp.value ? parseInt(repsInp.value, 10) : null;
+        const unidad = (unidadSel && unidadSel.value) ? unidadSel.value : 'reps';
+        fetch('/profesor/pizarra/actualizar-item', {
+            method: 'POST',
+            headers: postHeaders(),
+            body: JSON.stringify({ itemId, peso, repeticiones: reps, unidad: unidad })
+        });
+    }
+
     function bindItemEvents(card) {
         const itemId = card.getAttribute('data-item-id');
-        card.querySelectorAll('.item-peso, .item-reps').forEach(inp => {
-            inp.addEventListener('change', function() {
-                const c = this.closest('.pizarra-item');
-                const peso = c.querySelector('.item-peso').value ? parseInt(c.querySelector('.item-peso').value, 10) : null;
-                const reps = c.querySelector('.item-reps').value ? parseInt(c.querySelector('.item-reps').value, 10) : null;
-                fetch('/profesor/pizarra/actualizar-item', {
-                    method: 'POST',
-                    headers: postHeaders(),
-                    body: JSON.stringify({ itemId, peso, repeticiones: reps, unidad: 'reps' })
-                });
-            });
+        [card.querySelector('.item-peso'), card.querySelector('.item-reps'), card.querySelector('.item-unidad')].forEach(el => {
+            if (!el) return;
+            el.addEventListener('change', function() { enviarActualizarItem(card); });
         });
         card.querySelector('.btn-eliminar-item').addEventListener('click', function() {
             if (!confirm('¿Eliminar este ejercicio?')) return;

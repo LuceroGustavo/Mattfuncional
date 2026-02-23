@@ -249,6 +249,12 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - `PizarraController.java`: actualizar-basico con titulos como List<String>, agregar-columna, quitar-columna.
 - `PortalControlador.java`: return "login", "index", "demo" (sin .html).
 
+### 9.9 Vista TV – Tarjetas: nombre, peso, reps/tiempo y estilo (Feb 2026)
+- **Nombre:** Recuadro con puntas redondeadas y texto justificado a la derecha.
+- **Orden:** Nombre → Peso (solo "K", ej. 12K) → Reps/tiempo (una letra: 12m, 15s, 25r).
+- **Estilo:** Peso y reps/tiempo en verde con fondo oscuro (sombreado negro); contenedores compactos (`width: fit-content`, padding reducido) para ~3 caracteres.
+- **Archivo:** `sala.html` (estilos, Thymeleaf y JS de actualización desde API). Documentación: FASE_7_PANTALLA_DE_SALA.md sección 15.
+
 ---
 
 ## 10. Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder (Feb 2026)

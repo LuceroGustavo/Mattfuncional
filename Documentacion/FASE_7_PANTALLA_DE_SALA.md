@@ -500,3 +500,41 @@ Esta sección documenta las mejoras en el editor de pizarra: reorden de ejercici
   effectAllowed = 'copyMove' en ítems para que funcione tanto desde panel como entre columnas.
 - Documentación: FASE_7_PANTALLA_DE_SALA.md sección 14.
 ```
+
+---
+
+## 15. Vista TV – Tarjetas: nombre, peso, reps/tiempo y estilo (Feb 2026)
+
+Mejoras en el diseño de las tarjetas de ejercicio en la vista TV (`sala.html`): orden de datos, formato compacto y estilo visual.
+
+### 15.1 Nombre del ejercicio
+
+- **Recuadro con puntas redondeadas:** El nombre va dentro de un recuadro con `border-radius: 10px`, fondo blanco semitransparente y borde sutil.
+- **Texto justificado a la derecha:** `text-align: right` en `.item-nombre`.
+
+### 15.2 Orden de datos en la tarjeta
+
+- **1. Nombre** (arriba, en su recuadro).
+- **2. Peso** (debajo del nombre): solo número + **K** (ej. `12K`), sin "kg".
+- **3. Repeticiones o tiempo** (debajo del peso), formato corto con una letra:
+  - Minutos: `12m`
+  - Segundos: `15s`
+  - Repeticiones: `25r`
+
+### 15.3 Estilo de peso y reps/tiempo
+
+- **Color:** Texto verde (`#7ee787`).
+- **Fondo:** Sombreado negro (`background: rgba(0, 0, 0, 0.65)`), `border-radius: 6px`.
+- **Contenedores compactos:** Los recuadros de peso y reps/tiempo tienen como máximo ~3 caracteres (2 cifras + letra). Se usa `width: fit-content` y `align-self: flex-end` para que el ancho se ajuste al contenido; padding reducido (`0.12rem 0.28rem`) para no dejar espacio sobrante.
+
+### 15.4 Cambios técnicos en sala.html
+
+- **HTML/Thymeleaf:** Estructura en columna: `.item-nombre` → `.item-peso` (si hay peso) → `.item-reps`. Sin fila lateral; peso y reps son bloques independientes.
+- **Formato en servidor:** Peso: `item.peso + 'K'`. Reps/tiempo: según `unidad` → `repeticiones + 's'`, `+ 'm'` o `+ 'r'`.
+- **JavaScript (actualizarDesdeAPI):** Misma estructura y formatos al redibujar desde `GET /sala/api/{token}/estado`.
+
+### 15.5 Archivo modificado
+
+| Archivo | Cambio |
+|---------|--------|
+| `templates/sala/sala.html` | Estilos: nombre con recuadro redondeado y text-align right; peso y reps en columna, verde con fondo oscuro, fit-content y padding reducido. HTML/Thymeleaf y JS con formato 12K, 12m, 15s, 25r. |
