@@ -100,6 +100,8 @@
 - [x] **Calendario semanal y presentismo** (dar presente/ausente desde calendario y vista Mis Alumnos; tres estados; mismo API).
 - [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
+- [ ] **Depuración anual de datos:** Crear método o proceso para depurar/archivar datos antiguos (ej. asistencia con más de 1 año). Plazo anual recomendado: conserva al menos 12 meses para consultas y controla el crecimiento de la base de datos. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- [ ] **Manual del usuario:** Mantener actualizado [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades (pizarra, sala TV, transmisión en TV, etc.). Revisar tras cambios relevantes.
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ---
@@ -110,6 +112,8 @@
 - **Calendario – Acceso al detalle del usuario:** **Resuelto (backend).** Pendiente de mejora visual al final.
 - **Calendario – Día por excepción (recuperar clase):** **Resuelto (backend).** Pendiente de mejora visual al final.
 - **Asistencia – Cron opcional:** **Resuelto (backend on-demand).** Cron nocturno opcional si se desea.
+- **Depuración anual de datos:** Implementar método o tarea programada para archivar o purgar datos antiguos (p. ej. registros de asistencia con más de 1 año). Plazo anual: adecuado para mantener historial reciente y controlar tamaño de la BD.
+- **Manual del usuario:** Actualizar o completar MANUAL-USUARIO.md con todas las funcionalidades actuales (en particular pizarra, sala TV, transmisión en TV).
 
 ---
 

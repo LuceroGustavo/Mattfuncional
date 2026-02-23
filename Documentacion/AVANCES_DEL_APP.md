@@ -143,6 +143,7 @@
 | Grupos musculares (plan e implementación) | `Documentacion/PLAN_GRUPOS_MUSCULARES_ENTIDAD.md` |
 | Changelog detallado Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo) | `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` |
 | Fase 7 – Pizarra / Pantalla de sala | `Documentacion/FASE_7_PANTALLA_DE_SALA.md` |
+| Plan opcional: Insertar serie en pizarra en sala | `Documentacion/PLAN_INSERTAR_SERIE_EN_PIZARRA_SALA.md` |
 
 ---
 

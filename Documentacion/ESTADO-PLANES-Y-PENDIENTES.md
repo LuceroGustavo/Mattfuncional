@@ -58,11 +58,14 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 - [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [x] **Pantalla de entrenamiento en sala** (modo TV, control desde panel). Implementado: pizarra, columnas editables, agregar/quitar columnas, vista TV con polling 2,5 s.
 - [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
+- [ ] **Depuración anual de datos:** Crear método (o proceso) para depurar/archivar datos antiguos (ej. asistencia mayor a 1 año). El plazo anual es adecuado: permite conservar al menos 12 meses para consultas e informes y evita que la base de datos crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- [ ] **Manual del usuario:** Mantener actualizado (o completar) [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades actuales: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV**, usuarios del sistema. Revisar tras cada cambio relevante en la app.
 - [x] Eliminar: panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ### Pendiente inmediato (próxima sesión) según PLAN_DE_DESARROLLO
 
 - **Ficha de detalle del alumno:** Mejorar vista de detalle (organización, legibilidad, accesos rápidos, historial y progreso más claros).
+- **Manual del usuario:** Actualizar o completar MANUAL-USUARIO.md para que incluya todas las pantallas y flujos actuales (en particular pizarra, sala TV, transmisión en TV).
 
 ---
 

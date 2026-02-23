@@ -39,6 +39,17 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
   - Definir modelo de datos si hace falta un estado explícito “ausente” (o si se infiere por “no hay registro de presente”).
 - **Estado:** **Implementado (backend, on-demand).** Falta mejorar frontend al final. Opcional a futuro: cron nocturno.
 
+### Depuración anual de datos
+
+- **Qué falta:** Crear un **método (o proceso programado)** de **depuración anual de datos**: archivar o eliminar datos antiguos para que la base de datos no crezca sin control. El candidato principal es la tabla **asistencia** (registros con más de 1 año). Opcional: revisar si conviene depurar también pizarras muy viejas o logs.
+- **Plazo anual:** Es un buen intervalo: se conservan al menos 12 meses para consultas e informes y se evita acumular años de registros que poco se consultan. Si hace falta más historial, se puede archivar a un export (CSV/backup) antes de purgar.
+- **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md) y checklist en [ESTADO-PLANES-Y-PENDIENTES.md](ESTADO-PLANES-Y-PENDIENTES.md).
+
+### Manual del usuario
+
+- **Qué falta:** Mantener **actualizado** (o completar) el [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades de la app: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV** (editor, transmitir en TV, código opcional, vista en TV), usuarios del sistema. Tras cada cambio relevante en la app conviene revisar si el manual debe actualizarse.
+- **Estado:** El manual existe y tiene varias secciones; falta revisar que pizarra/sala TV y otros flujos recientes estén bien documentados y completos.
+
 ---
 
 *Se irán sumando más ítems a este archivo.*

@@ -603,3 +603,9 @@ Cambios en la vista TV (nombre como título, colores por columna, cantidad de vu
 `feat(pizarra): título arriba en TV, colores por columna, vueltas; login y sesión`
 
 **Descripción sugerida:** ver archivo `Documentacion/COMMIT_MSG_PIZARRA_VUELTAS_LOGIN_FEB2026.txt`.
+
+---
+
+## 17. Mejoras futuras (opcional)
+
+- **Insertar serie en pizarra:** Poder agregar una serie completa (lista de ejercicios con peso/reps) a una columna desde el editor, en lugar de arrastrar ejercicio por ejercicio. Plan de implementación: [PLAN_INSERTAR_SERIE_EN_PIZARRA_SALA.md](PLAN_INSERTAR_SERIE_EN_PIZARRA_SALA.md).
