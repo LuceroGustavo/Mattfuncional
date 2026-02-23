@@ -212,6 +212,7 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 | `mattfuncional` (raíz del proyecto) | Script del menú de gestión (ejecutar como `./mattfuncional`). |
 | `scripts/servidor/iniciar-menu.sh` | Crea la sesión `screen` con el menú; después se entra con `screen -r mattfuncional`. |
 | `src/main/resources/application-donweb.properties` | Perfil Spring para Donweb (puerto por defecto 8081; el menú usa 8080 con `MATT_APP_PORT`). |
+| `Documentacion/servidor/nginx-detodoya.conf` | Configuración Nginx para el dominio detodoya.com.ar (proxy al puerto 8080). Copiar a `/etc/nginx/sites-available/detodoya.com.ar` en el servidor. |
 
 ---
 
@@ -224,6 +225,55 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 5. Opción **5** para despliegue completo.
 6. Abrir en el navegador: **http://149.50.144.53:8080**
 7. Salir del menú sin cerrar: **Ctrl+A**, luego **D**.
+
+---
+
+## 10. Vincular el dominio detodoya.com.ar a la app
+
+El dominio **detodoya.com.ar** en Donweb (DOMINIOS & DNS) ya está apuntando al mismo VPS (`149.50.144.53`). Eso solo hace que, al escribir `detodoya.com.ar` en el navegador, la petición llegue al servidor. Para que **esa petición llegue a Mattfuncional** (y no a otro servicio o a nada), en el **servidor** tenés que tener configurado un **proxy inverso** (Nginx o Apache) que escuche en el puerto 80 (y opcionalmente 443 para HTTPS) y reenvíe las peticiones al puerto donde corre la app (8080 u 8081).
+
+### Qué suele faltar cuando “no se vincula” el dominio
+
+| Qué | Dónde | Comentario |
+|-----|--------|------------|
+| **DNS** | Panel Donweb → DOMINIOS & DNS | Ya está: detodoya.com.ar → 149.50.144.53. |
+| **Proxy inverso (Nginx/Apache)** | **Dentro del VPS** (Ubuntu) | Es lo que suele faltar: que el tráfico a `detodoya.com.ar` se envíe al puerto de la app. |
+| **Puerto de la app** | Menú / variables de entorno | La app debe estar escuchando en un puerto fijo (ej. 8080). El proxy debe apuntar a ese mismo puerto. |
+
+### Ejemplo con Nginx (en el servidor)
+
+En el repo hay un archivo listo para copiar: **`Documentacion/servidor/nginx-detodoya.conf`**.
+
+Si en el servidor usás **Nginx**:
+
+1. Instalar Nginx (si no está):  
+   `apt update && apt install -y nginx`
+
+2. Copiar el sitio al servidor (desde tu PC, con la clave SSH configurada):  
+   `scp -P 5638 Documentacion/servidor/nginx-detodoya.conf root@149.50.144.53:/etc/nginx/sites-available/detodoya.com.ar`
+
+   O crear a mano el archivo `/etc/nginx/sites-available/detodoya.com.ar` con el mismo contenido (proxy a `http://127.0.0.1:8080` y headers `Host`, `X-Real-IP`, etc.).
+
+3. Activar el sitio y recargar Nginx (en el servidor):
+
+   ```bash
+   ln -sf /etc/nginx/sites-available/detodoya.com.ar /etc/nginx/sites-enabled/
+   nginx -t && systemctl reload nginx
+   ```
+
+Después de eso, **http://detodoya.com.ar** debería mostrar la app. (Para HTTPS hace falta después un certificado, por ejemplo con Certbot/Let's Encrypt.)
+
+**Estado (Feb 2026):** Este sitio ya está configurado en el VPS; el dominio detodoya.com.ar apunta a Mattfuncional en el puerto 8080.
+
+### Si usás Apache
+
+Con **Apache** necesitás `mod_proxy` y `mod_proxy_http` habilitados, y un VirtualHost con `ServerName detodoya.com.ar` y `ProxyPass / http://127.0.0.1:8080/`. Si querés, se puede agregar un ejemplo completo en esta misma sección.
+
+### Comprobar en el servidor
+
+- Que la app esté corriendo: `curl -I http://127.0.0.1:8080` (o el puerto que uses).
+- Que Nginx/Apache esté escuchando en 80: `ss -tlnp | grep :80` o `netstat -tlnp | grep :80`.
+- Que el virtual host use `server_name detodoya.com.ar` (Nginx) o `ServerName detodoya.com.ar` (Apache) y que el `proxy_pass` apunte al mismo puerto de la app.
 
 ---
 
