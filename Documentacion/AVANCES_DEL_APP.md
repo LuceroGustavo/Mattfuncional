@@ -142,7 +142,8 @@
 - **Sección “Rasgos que nos caracterizan”:** Fondo oscuro, 3 columnas con imágenes `4.jpg`–`6.jpg` y textos (entrenamiento personalizado, multi-horarios, presencial y virtual). Contacto, footer y **botón flotante WhatsApp** (esquina inferior derecha).
 - **Estilos:** `publica.css` (verde #85CB46, Montserrat, overlay en hero). Assets en `static/img/publica/` (LEEME.txt indica qué copiar). WhatsApp e Instagram son placeholders hasta tener datos reales.
 - **Rutas:** GET `/` y GET `/publica` devuelven la misma vista; SecurityConfig `permitAll` para ambas.
-- **Plan y changelog:** [PLAN_PAGINA_PUBLICA_GIMNASIO.md](PLAN_PAGINA_PUBLICA_GIMNASIO.md), [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §11.
+- **Ajustes (§11.5):** Video escritorio `video-inicial.mp4` (2:1), móvil `video-movil.mp4` (9:16); poster `fondo-inicial.png`; logo `/img/logo.png` en círculo; hero 100vh sin scroll; módulo hero visible a los 5 s; navbar textos blancos, logo + “MATTFUNCIONAL” a la izquierda en móvil; carrusel 6 s entre slides, transición 1,5 s.
+- **Plan y changelog:** [PLAN_PAGINA_PUBLICA_GIMNASIO.md](PLAN_PAGINA_PUBLICA_GIMNASIO.md), [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §11 y §11.5.
 
 ---
 

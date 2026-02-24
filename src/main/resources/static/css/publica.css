@@ -24,24 +24,49 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
 .carousel-indicators { bottom: 1rem; }
 .carousel-indicators [data-bs-target] { border: 2px solid #85CB46; border-radius: 50%; height: 14px; width: 14px; background-color: transparent; }
 .carousel-indicators .active { background-color: #85CB46; }
-.carousel-inner { min-height: 48vh; }
-.carousel-item { position: relative; }
-.carousel-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); pointer-events: none; }
-.carousel-item img, .carousel-item video { position: relative; z-index: 0; }
+/* Transición entre slides más lenta (aprox. 1 s más que por defecto) */
+.carousel-fade .carousel-item { transition: opacity 1.5s ease-in-out; }
+/* Hero fijo al viewport: sin scroll, video/imagen recortados con object-fit: cover */
+#carouselHome { max-height: 100vh; overflow: hidden; }
+.carousel-inner { height: 100vh; }
+.carousel-item { position: relative; height: 100vh; }
+.carousel-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); pointer-events: none; z-index: 1; }
+.carousel-item img, .carousel-item video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+/* Dos videos hero: escritorio 2:1 (>=768px), móvil 9:16 (<768px) */
+.video-hero-desktop { display: none; }
+.video-hero-mobile { display: block; }
+@media (min-width: 768px) {
+  .video-hero-desktop { display: block; }
+  .video-hero-mobile { display: none !important; }
+}
+@media (max-width: 767px) {
+  .video-hero-desktop { display: none !important; }
+  .video-hero-mobile { display: block; }
+}
 .carousel-caption { z-index: 2; }
-.carousel-item img { width: 100%; min-height: 285px; object-fit: cover; }
-.carousel-item video { width: 100%; min-height: 285px; object-fit: cover; }
+/* Retraso 4 s del módulo del primer slide para que se vea la animación del video */
+.hero-caption-delay { transition: opacity 0.6s ease; }
+.hero-indicators-delay { transition: opacity 0.6s ease; }
+body.hero-delay-pending #carouselHome .carousel-item:first-child .hero-caption-delay { opacity: 0; pointer-events: none; }
+body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; pointer-events: none; }
 
 .copy { background-color: #000000; color: #ffffff; padding: 1rem 0; }
 .copy small { font-size: 0.9rem; }
 
 .nav-header { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 24%, rgba(0,0,0,0) 100%); height: 15vh; min-height: 80px; padding: 1rem 2rem; position: absolute; top: 0; width: 100%; z-index: 999; }
-.nav-publica .nav-link { color: #ffffff; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; }
-.nav-publica .nav-link:hover { color: #85CB46; }
-.nav-publica .nav-link:focus, .nav-publica .nav-link:active { color: #85CB46; }
+.nav-header .header-publica { width: 100%; }
+.nav-header .nav-link { color: #ffffff !important; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; }
+.nav-header .nav-link:hover { color: #85CB46 !important; }
+.nav-header .nav-link:focus, .nav-header .nav-link:active { color: #85CB46 !important; }
+.nav-header .nav-link i { color: inherit; }
 .brand-publica { max-width: 180px; height: auto; }
+/* Logo + texto MATTFUNCIONAL siempre visible; en móvil más compacto */
+.nav-brand-text { font-size: 1.2rem; white-space: nowrap; }
+.logo-nav-circle { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); }
+.logo-nav-img { width: 100%; height: 100%; object-fit: cover; }
 .small-header { background-color: #141414 !important; border-bottom: none; height: 70px !important; min-height: 70px; opacity: 0.98; position: fixed; top: 0; left: 0; transition: 0.3s; width: 100%; z-index: 1000; }
 .small-header .brand-publica { max-width: 140px; }
+.small-header .logo-nav-circle { width: 42px; height: 42px; }
 
 .nav-mobile-publica { display: block; position: absolute; top: 1.5rem; right: 1.5rem; }
 .nav-mobile-publica .btn { background-color: #85CB46; border: none; color: #fff; padding: 0.4rem 0.7rem; }
@@ -58,13 +83,17 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
   .about { padding: 3rem; }
   .carousel-description { font-size: 1.2rem; width: 55%; max-width: 500px; }
   .carousel-caption h1 { font-size: 2.5rem; }
-  .carousel-inner { min-height: 80vh; }
-  .carousel-item img, .carousel-item video { min-height: 80vh; }
   .nav-desktop-publica { display: flex !important; }
   .nav-mobile-publica { display: none !important; }
   .nav-header { padding: 1.5rem 4rem; height: 18vh; }
+  .nav-header .header-publica { justify-content: flex-start; }
+  .nav-header .logo-brand-link { margin-right: auto; }
 }
 
 @media (max-width: 767px) {
   .nav-desktop-publica { display: none !important; }
+  /* Logo + texto a la izquierda en móvil (sin centrado) */
+  .nav-header .header-publica { justify-content: flex-start !important; }
+  .nav-header .logo-brand-link { margin-right: 0; max-width: 80%; }
+  .nav-brand-text { font-size: 0.95rem; }
 }

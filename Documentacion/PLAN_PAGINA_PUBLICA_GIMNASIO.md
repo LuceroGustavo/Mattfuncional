@@ -5,6 +5,7 @@
 
 ### Estado de implementación (Feb 2026)
 - **Implementado:** La ruta `/` muestra la landing pública (`index-publica.html`). Hero con carrusel (video + imágenes en `/img/publica/`), navbar flotante con logo, Inicio/Servicios/Contacto e **ícono “Iniciar sesión”** que lleva a `/login`. Sección “Rasgos que nos caracterizan” con 3 columnas, bloque contacto, footer y botón flotante WhatsApp. Estilos en `css/publica.css`. Detalle en `CHANGELOG_UNIFICADO_FEB2026.md` §11.
+- **Ajustes posteriores (§11.5):** Video escritorio `video-inicial.mp4` (2:1), móvil `video-movil.mp4` (9:16); poster `fondo-inicial.png`; logo navbar `/img/logo.png` en círculo; hero fijo 100vh sin scroll; módulo hero visible a los 5 s; navbar con textos blancos, logo + “MATTFUNCIONAL” a la izquierda también en móvil; carrusel 6 s entre slides y transición 1,5 s.
 - **Pendiente (contenido):** Reemplazar placeholders de WhatsApp e Instagram por datos reales; opcional: dirección, horarios, formulario de contacto con backend.
 
 ---

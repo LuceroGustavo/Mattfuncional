@@ -310,6 +310,15 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - **Creados:** `templates/index-publica.html`, `static/css/publica.css`, `static/img/publica/LEEME.txt`.
 - **Modificados:** `PortalControlador.java` (raíz → index-publica, ruta `/publica`), `SecurityConfig.java` (permitAll `/publica`). La plantilla antigua `index.html` se mantiene en el proyecto pero ya no se usa como inicio.
 
+### 11.5 Ajustes y mejoras página pública (videos, navbar, móvil)
+
+- **Videos y assets:** Poster del hero = `fondo-inicial.png`. Video escritorio = `video-inicial.mp4` (recomendado 2:1, ej. 1920×960). Video móvil = `video-movil.mp4` (9:16, ej. 1080×1920); se muestra con `@media (max-width: 767px)`. Logo del navbar = `/img/logo.png` en contenedor circular (`.logo-nav-circle`).
+- **Hero sin scroll:** Carrusel con `max-height: 100vh`; video/imágenes con `position: absolute` + `object-fit: cover` para que no desborden la pantalla.
+- **Retraso del módulo hero:** Título, lista, botón e indicadores del primer slide se ocultan 5 s al cargar (clase `hero-delay-pending` en `body`), luego aparecen con fade-in para dejar ver la animación del video.
+- **Navbar:** Enlaces en blanco (`.nav-header .nav-link` con `color: #ffffff !important`). Eliminado `justify-content-center` del header; en móvil `justify-content: flex-start !important` para que logo + texto queden a la izquierda; texto "MATTFUNCIONAL" visible también en móvil (clase `nav-brand-text`, sin `d-none d-md-inline`), tamaño 0.95rem en móvil.
+- **Carrusel:** `data-bs-interval="6000"` (6 s entre slides). Transición entre slides: `opacity 1.5s` en `.carousel-fade .carousel-item`.
+- **Documentación assets:** `img/publica/LEEME.txt` actualizado con nombres `fondo-inicial.png`, `video-inicial.mp4`, `video-movil.mp4`, `logo.png` y relaciones de aspecto recomendadas.
+
 ---
 
 *Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login.*

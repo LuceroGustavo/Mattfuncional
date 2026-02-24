@@ -11,8 +11,8 @@
 </head>
 <body>
     <header>
-        <div id="carouselHome" class="carousel slide carousel-fade" data-bs-ride="carousel">
-            <div class="carousel-indicators">
+        <div id="carouselHome" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
+            <div class="carousel-indicators hero-indicators-delay">
                 <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
                 <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="1" aria-label="Slide 2"></button>
                 <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="2" aria-label="Slide 3"></button>
@@ -20,14 +20,21 @@
             </div>
 
             <div class="carousel-inner">
-                <!-- Slide 1: Video Matt -->
+                <!-- Slide 1: Video inicial (desktop 2:1 + móvil 9:16) -->
                 <div class="carousel-item active">
-                    <video class="w-100" autoplay muted loop playsinline
-                           poster="/img/publica/fondo%20matt.jpeg"
-                           style="min-height: 285px;">
-                        <source th:src="@{/img/publica/video matt.mp4}" src="/img/publica/video%20matt.mp4" type="video/mp4">
+                    <!-- Escritorio: relación 2:1 (ej. 1920×960) -->
+                    <video class="video-hero video-hero-desktop" autoplay muted loop playsinline
+                           poster="/img/publica/fondo-inicial.png"
+                           aria-hidden="true">
+                        <source th:src="@{/img/publica/video-inicial.mp4}" src="/img/publica/video-inicial.mp4" type="video/mp4">
                     </video>
-                    <div class="carousel-caption container">
+                    <!-- Móvil: relación 9:16 (ej. 1080×1920) -->
+                    <video class="video-hero video-hero-mobile" autoplay muted loop playsinline
+                           poster="/img/publica/fondo-inicial.png"
+                           aria-hidden="true">
+                        <source th:src="@{/img/publica/video-movil.mp4}" src="/img/publica/video-movil.mp4" type="video/mp4">
+                    </video>
+                    <div class="carousel-caption container hero-caption-delay">
                         <h1><strong>Mattfuncional</strong></h1>
                         <ul class="carousel-description">
                             <li><i class="fas fa-check strong"></i> Entrenamiento personalizado</li>
@@ -81,10 +88,12 @@
 
         <!-- Navbar flotante (estilo RedFit) -->
         <div class="nav-header" id="navHeader">
-            <div class="d-flex flex-wrap justify-content-center align-items-center header">
-                <a href="/" class="d-flex align-items-center me-md-auto">
-                    <img th:src="@{/img/logo matt.jpeg}" src="/img/logo%20matt.jpeg" alt="Mattfuncional" class="brand-publica" style="max-height: 50px; width: auto; object-fit: contain;" onerror="this.style.display='none'">
-                    <span class="text-white fw-bold ms-2 d-none d-md-inline" style="font-size: 1.2rem;">MATTFUNCIONAL</span>
+            <div class="d-flex flex-wrap align-items-center header header-publica">
+                <a href="/" class="d-flex align-items-center text-decoration-none logo-brand-link">
+                    <span class="logo-nav-circle">
+                        <img th:src="@{/img/logo.png}" src="/img/logo.png" alt="Mattfuncional" class="logo-nav-img" onerror="this.src='/img/not_imagen.png'">
+                    </span>
+                    <span class="text-white fw-bold ms-2 nav-brand-text">MATTFUNCIONAL</span>
                 </a>
                 <ul class="nav align-items-center nav-desktop-publica" style="display: none;">
                     <li class="nav-item"><a href="/" class="nav-link">Inicio</a></li>
@@ -196,6 +205,11 @@
                     header.classList.toggle('small-header', window.scrollY > 50);
                 });
             }
+            // Módulo del hero (título, textos, botón, indicadores) visible a los 5 s para dejar ver la animación del video
+            document.body.classList.add('hero-delay-pending');
+            setTimeout(function() {
+                document.body.classList.remove('hero-delay-pending');
+            }, 5000);
         })();
     </script>
 </body>
