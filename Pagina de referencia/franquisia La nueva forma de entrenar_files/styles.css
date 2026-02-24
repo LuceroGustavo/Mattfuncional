@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap');
+
+body {font-family:'Montserrat', sans-serif;}
+footer {background-color: #141414; color:#ffffff; margin-top: 3rem; padding: 3rem}
+footer .nav-link {font-size: 0.9rem; font-weight: normal;}
+h2 {font-family:'Montserrat', sans-serif; color: #86CC47; text-transform: uppercase;}
+h3 {font-family:'Montserrat', sans-serif; font-weight: 700; margin: 4rem; text-align: center; text-transform: uppercase;}
+h4 {margin-top: 2rem}
+.active {color:#85CB46!important; font-weight: bold!important}
+.about {background-color: #333333; padding: 2rem}
+.about h2 {font-weight:bold;text-align: center; margin-bottom:3rem}
+.about h1 {color:#86CC47}
+.about img {text-align:center!important;}
+.about p {color: #ffffff; padding: 1rem; text-align: center;}
+.bg333{background-color: #333333}
+.bg-alliances {background: url('/assets/img/hero/alianzas.jpg');}
+.bg-alvarez {background: url('/assets/img/hero/alvarez.jpg');}
+.bg-belgrano {background: url('/assets/img/hero/belgrano.jpg');}
+.bg-belgrano-ii {background: url('/assets/img/hero/belgrano2.jpg');}
+.bg-devoto {background: url('/assets/img/hero/devoto.jpg');}
+.bg-grey {background-color: #DEDEDE; margin:0; padding: 2rem}
+.bg-green {background-color: rgba(133, 203, 70, 0.5)!important}
+.bg-inner {background-size: cover; height: 15vh; padding: 2rem}
+.bg-company {background: url('/assets/img/hero/qs.jpg');}
+.bg-franquicias {background: url('/assets/img/hero/franquicias.jpg');}
+.bg-gym {background: url('/assets/img/hero/sedes.jpg');}
+.bg-liniers {background: url('/assets/img/hero/liniers.jpg');}
+.bg-mitre {background: url('/assets/img/hero/mitre.jpg');}
+.bg-news {background: url('/assets/img/hero/novedades.jpg');}
+.bg-nunez {background: url('/assets/img/hero/nunez.jpg');}
+.bg-palermo {background: url('/assets/img/hero/palermo.jpg');}
+.bg-parque-chacabuco {background: url('/assets/img/hero/chacabuco.jpg');}
+.bg-price {background: url('/assets/img/hero/planes.jpg');}
+.bg-sponsors {background: url('/assets/img/hero/sponsors.jpg');}
+.bg-versailles {background: url('/assets/img/hero/versailles.jpg');}
+.bg-versalles {background: url('/assets/img/hero/versalles.jpg');}
+.bg-villa-madero {background: url('/assets/img/hero/villa-madero.jpg');}
+.bg-work {background: url('/assets/img/hero/trabaja.jpg');}
+.bg-white {background: #ffffff!important;}
+.brand {max-width: 200px}
+.brand-mobile{max-width: 175px; padding: 0.5rem 1rem;}
+.border-green {border: 5px solid #86CC47!important}
+.btn-custom {background-color: #85CB46; border-radius:0; color: #ffffff; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; padding: 0.5rem 1rem; text-transform: uppercase;}
+.btn-custom:hover{background-color: #85CB46; color: #ffffff; transition:background-color .5s}
+.btn-sm {font-size: 0.7rem; padding: 0.3rem 1rem;}
+.c333 {color:#333333!important;}
+.card {border: 1px solid #eeeeee; border-radius: 0}
+.card img {width: 100%}
+.card-body {background-color: #DEDEDE}
+.card-body h4 {color:#85CB46; font-weight: bold; margin-top: 0}
+.card-header {border-bottom: 0}
+.card-header h4 {color: #86CC47; font-weight: bold; text-transform: uppercase;}
+.carousel-caption {bottom: 0;left: 0; text-align: center; top: 35%; right: 0; }
+.carousel-caption h1 {font-size: 1rem; margin-bottom: 1rem; text-shadow: 0 0.2rem 0.9rem rgba(0, 0, 0, .9); text-transform: uppercase; }
+.carousel-description {background-color:rgba(0,0,0,0.5); border-radius: 5px; font-size: 1rem; list-style: none; margin: 0 auto; margin-bottom: 1.5rem; padding: 1rem; width: 100%}
+.carousel-indicators {bottom: 0.5rem}
+.carousel-indicators [data-bs-target] {border: 2px solid #85CB46; border-radius: 50%; height:15px; width:15px }
+.carousel-inner {height: 48vh}
+.carousel-item img {min-height: 285px}
+.collapse-custom {margin-bottom:1rem; width: 100%}
+.copy {background-color: #000000; color: #ffffff}
+.corp {background-color: #020202; color: #ffffff; text-align: center;}
+.corp h4 {color:#ffffff; font-weight: bold; margin-top: 0; padding: 3rem 0 2rem 0; text-align: center; text-transform: uppercase;}
+.corp img {max-width: 300px;}
+.corp .btn-custom {background-color: #333333; border: 1px solid #ffffff;}
+.dropdown-menu {background-color: rgba(133, 203, 70, 0.6); border: none; border-radius: 0; color: #fff;}
+.dropdown-item {border-bottom: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 0.5rem 1rem;}
+.dropdown-item:last-child {border-bottom: none;}
+.dropdown-item:hover, .dropdown-item:focus {background-color: rgba(133, 203, 70, 0.8); color: #fff;}
+.gym {text-align: center; padding-bottom: 2rem}
+.gym-hover {color:#212529;  padding: 1rem 0; text-decoration: none; transition: background-color 0.5s;}
+.gym-hover:hover {/*background-color: rgba(133, 203, 70, 0.5);*/}
+.gym-hover:hover .btn-sm {font-size: 1.1rem; transition: font-size 0.5s ease;}
+.gym-hover .fas {display: none;}
+.gym-hover .far {display: block}
+.gym-hover:hover .fas {display: block;}
+.gym-hover:hover .far {display: none}
+.gym-hover-info {color: #85CB46;font-size: 4rem}
+.gym-hover-info i:hover {font-size: 4rem}
+.headquarters .card {box-shadow: rgba(0, 0, 0, 0) 0px 2px 4px;transition: all .4s ease-in-out;}
+.headquarters .card:hover {box-shadow: rgba(0, 0, 0, 0.55) 0px 19px 43px;transform: translate3d(0px, -4px, 0px);}
+.inner h1 {font-size: 1.8rem; font-weight: bold; margin-bottom: 3rem; text-align: center; text-transform: uppercase;}
+.nav-header {background: linear-gradient(to bottom,rgba(0,0,0,0.95) 24%,rgba(0,0,0,0) 100%); height:15vh; padding: 2rem 8rem; position: absolute; top:0; width: 100%; z-index: 999;}
+.nav-link {color:#ffffff; font-weight: bold; text-transform: uppercase;}
+.nav-link:hover {color: #85CB46}
+.nav-link:focus,.nav-link:active {color: #85CB46;} 
+.nav-desktop {display: none;}
+.nav-mobile {background-color: #85CB46; border-radius: 0.2rem; color: #ffffff; display: block; position: absolute; top: 2.5rem; right: 1.5rem;}
+.news h4 {font-weight:bold; margin: 4rem 0 3rem 0; text-align: center; text-transform: uppercase;}
+.offcanvas-body .btn-custom {font-size: 0.9rem}
+.offcanvas-header{background-color: #141414}
+.offcanvas-header .btn-close {background-color:#85CB46; margin-right:0.5rem}
+.p-sm-3 {padding: 0 3rem;}
+.pricing-card-title {color:#86CC47; font-size: 3rem; font-weight: bold; margin-bottom:1rem; text-align: center; text-transform: uppercase}
+.small-header {background-color:#141414; border-bottom:0px solid #cccccc; height: 95px!important; opacity:90%; position: fixed; top: 0; left: 0; transition: 0.5s; width: 100%; z-index: 1000}
+.small-header img {max-width: 150px!important; transition: width 1s ease}
+.small-header .nav-mobile {top:2.2rem; right:3rem}
+.strong {color:#85CB46; font-weight: bold}
+.strong-title {color:#85CB46!important; font-weight: bold; margin-bottom:0; text-align: center; text-transform: uppercase;}
+.sumate {background-color:#666; padding: 2rem 1rem}
+.sumate input, .sumate select {border-radius: 0; height: 2.5rem; margin-bottom: 1.45rem}
+.text-footer {text-align: left;}
+.text-footer h5 {font-weight:bold; margin: 1rem 0 1rem 0; text-transform: uppercase;}
+.text-success {color: #6AAD2E}
+.trix {height: 15px}
+.wapp {bottom: 10px; height: 61px; position: fixed; right: 3px; width: 60px;}
+.work {background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 72%, rgba(0,0,0,1) 72%);}
+.work .btn-custom {background-color: #CFCFCF; border: 1px solid #999999; color: #666666}
+.work form {width: 90%}
+.work h4 {font-weight:bold;margin-top:0; padding-bottom:2rem; text-align: center;text-transform: uppercase;}
+.work h5 {font-size: 1.2rem; padding: 1rem}
+.work input {background-color:#f2f2f2;border-radius: 0; margin-bottom: 0.5rem}
+.work textarea {background-color:#f2f2f2;border-radius: 0; height: 6rem; margin-bottom: 0.5rem}
+
+@media (max-width: 1300px) {
+  .nav-header {padding: 2rem 2rem;}
+}
+
+
+@media (min-width: 768px) {
+	footer {margin-top: 6rem;}
+
+	.about {padding: 3rem}
+	.about p {text-align: auto;}
+	.bg-grey {margin:3rem 3rem 0 3rem;}
+	.bg-inner {height: 40vh;}
+	.carousel-description {font-size: 1.3rem; width: 50%}
+	.carousel-caption h1 {font-size: 3rem;}
+	.carousel-inner {height: 80vh}
+	.corp {text-align: left;}
+	.corp img {max-width: 400px;}
+	.inner h1 {font-size: 3rem;}
+	.nav-desktop {display: flex;}
+	.nav-header {height:20vh;}
+	.nav-mobile {display: none;}
+	.small-header {top: 0;}
+	.sumate {padding: 3rem 3rem 2rem 3rem}
+	.sumate input, .sumate select {height: 3rem;}
+	.work h5 {font-size: 1.4rem; padding: 1rem 2rem}
+}

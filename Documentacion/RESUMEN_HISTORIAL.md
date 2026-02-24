@@ -45,6 +45,11 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 - **Series:** En crear/editar serie, tabla de ejercicios con Subir/Bajar por fila. Nuevo campo `SerieEjercicio.orden`; al guardar se asigna 0, 1, 2… según la posición. Ver serie y hoja de rutina muestran los ejercicios ordenados.
 - Documento: `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` (sección 2).
 
+### 2.7 Página pública del gimnasio (Fase 8 – Feb 2026)
+- **Inicio reemplazado:** La ruta `/` muestra una landing pública (estilo RedFit): hero con carrusel (video + imágenes en `img/publica/`), navbar flotante con logo y “Iniciar sesión” a `/login`, sección “Rasgos que nos caracterizan”, contacto, footer y botón flotante WhatsApp.
+- **Template:** `index-publica.html`; estilos en `css/publica.css`. La plantilla antigua `index.html` se mantiene pero no se usa como entrada.
+- Documento: `Documentacion/PLAN_PAGINA_PUBLICA_GIMNASIO.md`; changelog: `CHANGELOG_UNIFICADO_FEB2026.md` (sección 11).
+
 ---
 
 ## 3. Decisiones de arquitectura que siguen vigentes
@@ -65,7 +70,7 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 
 ## 5. Pendientes grandes (segun plan)
 - **Hecho (Fase 4):** Rutinas por enlace publico (token, Copiar enlace, WhatsApp), asignacion rutina a alumno, hoja de rutina.
-- Alumnos sin login (solo ficha) – modelo en curso.
-- Pantalla de sala.
-- Pagina publica institucional.
+- **Hecho (Fase 6):** Alumnos sin login (solo ficha).
+- **Hecho (Fase 7):** Pantalla de sala (pizarra digital, vista TV).
+- **Hecho (Fase 8):** Pagina publica institucional (landing estilo RedFit, inicio en `/`, login por ícono arriba).
 

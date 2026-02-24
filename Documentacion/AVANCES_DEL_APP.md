@@ -134,17 +134,30 @@
 
 ---
 
-## 12. Referencias a documentación detallada
+## 12. Página pública (Fase 8) — **Completada**
+
+- **Objetivo:** Quien entra a la app (`/`) ve primero una landing pública del gimnasio; el acceso al panel de gestión es por un ícono “Iniciar sesión” en la barra superior.
+- **Template:** `index-publica.html`. Hero con carrusel: primer slide con video (`/img/publica/video matt.mp4`) y poster `fondo matt.jpeg`; slides 2–4 con imágenes `1.png`–`3.png`. Títulos y listas con checkmarks verdes; botón “Conocé más” / “Contacto”.
+- **Navbar:** Logo Matt + “MATTFUNCIONAL”, enlaces Inicio, Servicios, Contacto, e **ícono “Iniciar sesión”** a `/login`. Barra flotante que al hacer scroll pasa a fija oscura; menú móvil (offcanvas) con las mismas opciones.
+- **Sección “Rasgos que nos caracterizan”:** Fondo oscuro, 3 columnas con imágenes `4.jpg`–`6.jpg` y textos (entrenamiento personalizado, multi-horarios, presencial y virtual). Contacto, footer y **botón flotante WhatsApp** (esquina inferior derecha).
+- **Estilos:** `publica.css` (verde #85CB46, Montserrat, overlay en hero). Assets en `static/img/publica/` (LEEME.txt indica qué copiar). WhatsApp e Instagram son placeholders hasta tener datos reales.
+- **Rutas:** GET `/` y GET `/publica` devuelven la misma vista; SecurityConfig `permitAll` para ambas.
+- **Plan y changelog:** [PLAN_PAGINA_PUBLICA_GIMNASIO.md](PLAN_PAGINA_PUBLICA_GIMNASIO.md), [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §11.
+
+---
+
+## 13. Referencias a documentación detallada
 
 | Tema | Documento |
 |------|-----------|
 | Asistencia calendario + vista alumnos | `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` |
 | Ejercicios predeterminados (imágenes 1–60) | `Documentacion/OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md` |
 | Grupos musculares (plan e implementación) | `Documentacion/PLAN_GRUPOS_MUSCULARES_ENTIDAD.md` |
-| Changelog detallado Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo) | `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` |
+| Changelog detallado Feb 2026 (rutinas, series, progreso, ejercicios, grupos, alumno inactivo, Fase 8) | `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` |
 | Fase 7 – Pizarra / Pantalla de sala | `Documentacion/FASE_7_PANTALLA_DE_SALA.md` |
 | Plan opcional: Insertar serie en pizarra en sala | `Documentacion/PLAN_INSERTAR_SERIE_EN_PIZARRA_SALA.md` |
+| Fase 8 – Página pública del gimnasio (plan e implementación) | `Documentacion/PLAN_PAGINA_PUBLICA_GIMNASIO.md` |
 
 ---
 
-*Todos los avances del app quedan registrados en este archivo. Para pendientes y próximos pasos, ver AYUDA_MEMORIA.md y PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública). Para pendientes y próximos pasos, ver AYUDA_MEMORIA.md y PLAN_DE_DESARROLLO_UNIFICADO.md.*

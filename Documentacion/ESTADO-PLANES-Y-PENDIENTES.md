@@ -49,7 +49,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 | **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | **Implementado (backend).** Falta pulir frontend |
 | **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO del login. | **Completado** |
 | **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). Pizarra digital con columnas, títulos, peso/reps, agregar/quitar columnas (máx. 6), polling 2,5 s. | **Completada** |
-| **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | Pendiente |
+| **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | **Implementado** (landing estilo RedFit en `/`, login por ícono) |
 
 ### Checklist general (ítems sin marcar)
 
@@ -57,7 +57,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md` y `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` fu
 - [x] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. (**Completado**)
 - [ ] **Calendario semanal y presentismo** (marcar como hecho el punto "dar presente/ausente desde calendario y vista alumnos").
 - [x] **Pantalla de entrenamiento en sala** (modo TV, control desde panel). Implementado: pizarra, columnas editables, agregar/quitar columnas, vista TV con polling 2,5 s.
-- [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
+- [x] **Página pública:** presentación, servicios, horarios, contacto (landing en `/`, ícono login; pendiente reemplazar WhatsApp/Instagram por datos reales).
 - [ ] **Depuración anual de datos:** Crear método (o proceso) para depurar/archivar datos antiguos (ej. asistencia mayor a 1 año). El plazo anual es adecuado: permite conservar al menos 12 meses para consultas e informes y evita que la base de datos crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 - [ ] **Manual del usuario:** Mantener actualizado (o completar) [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades actuales: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV**, usuarios del sistema. Revisar tras cada cambio relevante en la app.
 - [x] Eliminar: panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.

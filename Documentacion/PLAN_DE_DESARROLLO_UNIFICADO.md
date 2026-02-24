@@ -77,6 +77,7 @@
 ### 5.2 Página pública del gimnasio (Fase 8)
 
 - Presentación, servicios, horarios, formulario de contacto, promociones, productos. Contenido editable desde el panel (o fijo en una primera etapa).
+- **Plan detallado:** [PLAN_PAGINA_PUBLICA_GIMNASIO.md](PLAN_PAGINA_PUBLICA_GIMNASIO.md) – referencia RedFit, recopilación de datos, puntos a relatar (entrenamiento personalizado, presencial/virtual, etc.), hero con carrusel de imágenes, index como entrada y ícono de login por ahora.
 
 ---
 

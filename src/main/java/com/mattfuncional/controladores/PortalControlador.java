@@ -31,36 +31,24 @@ public class PortalControlador {
     @Autowired
     private ProfesorService profesorService;
 
+    /** Página de inicio: landing pública (estilo RedFit). Acceso a la parte privada por ícono de login arriba. */
     @GetMapping("/")
     public String index(Model model) {
-        // Profesor único (gestor del panel) por correo
-        com.mattfuncional.entidades.Profesor adminProfesor = profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
-        java.util.List<com.mattfuncional.entidades.Exercise> exercises;
-        if (adminProfesor != null) {
-            // Cargar solo 5 ejercicios destacados SIN imágenes para máximo rendimiento
-            exercises = exerciseService.findExercisesByProfesorIdWithoutImages(adminProfesor.getId());
-            // Tomar solo los primeros 5 ejercicios (más rápido que shuffle)
-            java.util.List<com.mattfuncional.entidades.Exercise> ejerciciosDestacados = exercises.stream()
-                    .limit(5)
-                    .collect(java.util.stream.Collectors.toList());
-            model.addAttribute("ejerciciosAleatorios", ejerciciosDestacados);
-        } else {
-            exercises = java.util.Collections.emptyList();
-            model.addAttribute("ejerciciosAleatorios", java.util.Collections.emptyList());
-        }
-        // NO agregar exercises al modelo para evitar cargar imágenes innecesarias
-        
-        // Agregar información del usuario actual si está autenticado
         try {
             com.mattfuncional.entidades.Usuario usuarioActual = usuarioService.getUsuarioActual();
             if (usuarioActual != null) {
                 model.addAttribute("usuarioActual", usuarioActual);
             }
         } catch (Exception e) {
-            // Usuario no autenticado, no hacer nada
+            // Usuario no autenticado
         }
-        
-        return "index";
+        return "index-publica";
+    }
+
+    /** Ruta alternativa que también muestra la misma página pública (por si se enlaza desde algún lado). */
+    @GetMapping("/publica")
+    public String indexPublica(Model model) {
+        return index(model);
     }
 
     /* GET /login lo maneja WebMvcConfig (view "login") para mostrar siempre la plantilla Iniciar Sesión. */

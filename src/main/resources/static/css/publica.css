@@ -1,0 +1,70 @@
+/* Página pública Mattfuncional - Estilo referencia RedFit */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+
+body { font-family: 'Montserrat', sans-serif; margin: 0; }
+footer { background-color: #141414; color: #ffffff; margin-top: 3rem; padding: 3rem; }
+footer .nav-link { font-size: 0.9rem; font-weight: normal; color: rgba(255,255,255,0.9); }
+footer .nav-link:hover { color: #85CB46; }
+
+h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppercase; font-weight: 700; }
+.about { background-color: #333333; padding: 2rem; }
+.about h2 { font-weight: bold; text-align: center; margin-bottom: 3rem; }
+.about img { max-width: 100%; height: auto; border-radius: 4px; }
+.about p { color: #ffffff; padding: 1rem; text-align: center; }
+.strong-title { color: #85CB46 !important; font-weight: bold; margin-bottom: 0; text-align: center; text-transform: uppercase; font-size: 1.1rem; }
+
+.btn-custom { background-color: #85CB46; border-radius: 0; color: #ffffff !important; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; padding: 0.5rem 1.5rem; text-transform: uppercase; border: none; text-decoration: none; display: inline-block; }
+.btn-custom:hover { background-color: #6fb038; color: #ffffff !important; transition: background-color .3s; }
+
+.carousel-caption { bottom: 0; left: 0; text-align: center; top: 35%; right: 0; }
+.carousel-caption h1 { font-size: 1rem; margin-bottom: 1rem; text-shadow: 0 0.2rem 0.9rem rgba(0, 0, 0, .9); text-transform: uppercase; color: #fff; font-weight: 700; }
+.carousel-description { background-color: rgba(0,0,0,0.5); border-radius: 5px; font-size: 1rem; list-style: none; margin: 0 auto; margin-bottom: 1.5rem; padding: 1rem; width: 100%; max-width: 90%; }
+.carousel-description li { color: #fff; margin-bottom: 0.5rem; }
+.carousel-description .strong, .carousel-description i.fa-check { color: #85CB46; }
+.carousel-indicators { bottom: 1rem; }
+.carousel-indicators [data-bs-target] { border: 2px solid #85CB46; border-radius: 50%; height: 14px; width: 14px; background-color: transparent; }
+.carousel-indicators .active { background-color: #85CB46; }
+.carousel-inner { min-height: 48vh; }
+.carousel-item { position: relative; }
+.carousel-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); pointer-events: none; }
+.carousel-item img, .carousel-item video { position: relative; z-index: 0; }
+.carousel-caption { z-index: 2; }
+.carousel-item img { width: 100%; min-height: 285px; object-fit: cover; }
+.carousel-item video { width: 100%; min-height: 285px; object-fit: cover; }
+
+.copy { background-color: #000000; color: #ffffff; padding: 1rem 0; }
+.copy small { font-size: 0.9rem; }
+
+.nav-header { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 24%, rgba(0,0,0,0) 100%); height: 15vh; min-height: 80px; padding: 1rem 2rem; position: absolute; top: 0; width: 100%; z-index: 999; }
+.nav-publica .nav-link { color: #ffffff; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; }
+.nav-publica .nav-link:hover { color: #85CB46; }
+.nav-publica .nav-link:focus, .nav-publica .nav-link:active { color: #85CB46; }
+.brand-publica { max-width: 180px; height: auto; }
+.small-header { background-color: #141414 !important; border-bottom: none; height: 70px !important; min-height: 70px; opacity: 0.98; position: fixed; top: 0; left: 0; transition: 0.3s; width: 100%; z-index: 1000; }
+.small-header .brand-publica { max-width: 140px; }
+
+.nav-mobile-publica { display: block; position: absolute; top: 1.5rem; right: 1.5rem; }
+.nav-mobile-publica .btn { background-color: #85CB46; border: none; color: #fff; padding: 0.4rem 0.7rem; }
+.offcanvas-publica .offcanvas-header { background-color: #141414; }
+.offcanvas-publica .offcanvas-body .btn-custom { text-align: left; margin-bottom: 0.5rem; }
+
+.wapp { bottom: 20px; height: 56px; width: 56px; position: fixed; right: 20px; z-index: 999; }
+.wapp a { display: block; width: 56px; height: 56px; border-radius: 50%; background-color: #25D366; box-shadow: 0 2px 10px rgba(0,0,0,0.3); align-items: center; justify-content: center; text-decoration: none; transition: transform 0.2s; }
+.wapp a:hover { transform: scale(1.08); }
+.wapp img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+
+@media (min-width: 768px) {
+  footer { margin-top: 6rem; }
+  .about { padding: 3rem; }
+  .carousel-description { font-size: 1.2rem; width: 55%; max-width: 500px; }
+  .carousel-caption h1 { font-size: 2.5rem; }
+  .carousel-inner { min-height: 80vh; }
+  .carousel-item img, .carousel-item video { min-height: 80vh; }
+  .nav-desktop-publica { display: flex !important; }
+  .nav-mobile-publica { display: none !important; }
+  .nav-header { padding: 1.5rem 4rem; height: 18vh; }
+}
+
+@media (max-width: 767px) {
+  .nav-desktop-publica { display: none !important; }
+}

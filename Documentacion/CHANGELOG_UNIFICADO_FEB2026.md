@@ -16,6 +16,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 8. [Fase 6 – Alumnos sin login](#8-fase-6--alumnos-sin-login)
 9. [Fase 7 – Pizarra / Pantalla de sala – Mejoras](#9-fase-7--pizarra--pantalla-de-sala--mejoras-feb-2026)
 10. [Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder](#10-mis-ejercicios-vista-lista-actualización-de-imágenes-redirects-y-placeholder-feb-2026)
+11. [Fase 8 – Página pública del gimnasio](#11-fase-8--página-pública-del-gimnasio-feb-2026)
 
 ---
 
@@ -284,4 +285,31 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas.*
+## 11. Fase 8 – Página pública del gimnasio (Feb 2026)
+
+**Resumen:** La página de inicio (`/`) se reemplazó por una landing pública estilo RedFit. Quien entra a la app ve primero esta página; el acceso al panel de gestión es por un ícono “Iniciar sesión” en la barra superior que lleva a `/login`.
+
+### 11.1 Implementación
+- **Template:** `index-publica.html` (nueva). Estructura: hero con carrusel, navbar flotante, sección “Rasgos que nos caracterizan”, contacto, footer, botón flotante WhatsApp.
+- **Hero/carrusel:** Primer slide con video de fondo (`/img/publica/video matt.mp4`) y poster `fondo matt.jpeg`; slides 2–4 con imágenes `1.png`, `2.png`, `3.png`. Títulos y listas con checkmarks verdes; botón “Conocé más” / “Contacto”.
+- **Navbar:** Logo Matt + “MATTFUNCIONAL”, enlaces Inicio, Servicios, Contacto. **Ícono “Iniciar sesión”** (y texto en desktop) que lleva a `/login`. Al hacer scroll, la barra pasa a fija con fondo oscuro (`.small-header`). Menú móvil (offcanvas) con las mismas opciones.
+- **Rasgos que nos caracterizan:** Fondo oscuro (#333), título verde, 3 columnas con imágenes `4.jpg`, `5.jpg`, `6.jpg` y textos (entrenamiento personalizado, multi-horarios, presencial y virtual).
+- **Contacto y footer:** Bloque contacto con enlaces placeholder a WhatsApp e Instagram; footer con nombre y año; **botón flotante WhatsApp** (esquina inferior derecha).
+- **Estilos:** `publica.css` (verde #85CB46, Montserrat, carousel-caption, overlay en hero, navbar, wapp).
+
+### 11.2 Rutas y seguridad
+- **GET `/`:** Devuelve `index-publica` (página de inicio actual).
+- **GET `/publica`:** Misma vista (alternativa por si hay enlaces guardados).
+- **SecurityConfig:** `/publica` y `/` ya estaban en `permitAll`; la raíz ahora sirve la landing pública.
+- **PortalControlador:** `index()` para `/` y `indexPublica()` para `/publica` delegan al mismo método que devuelve `"index-publica"`.
+
+### 11.3 Assets
+- Imágenes y video en `src/main/resources/static/img/publica/`: `fondo matt.jpeg`, `video matt.mp4`, `1.png`–`6.jpg`. Archivo `LEEME.txt` en esa carpeta indica qué copiar. WhatsApp e Instagram son placeholders (número y URL a reemplazar cuando el cliente los pase).
+
+### 11.4 Archivos creados / modificados
+- **Creados:** `templates/index-publica.html`, `static/css/publica.css`, `static/img/publica/LEEME.txt`.
+- **Modificados:** `PortalControlador.java` (raíz → index-publica, ruta `/publica`), `SecurityConfig.java` (permitAll `/publica`). La plantilla antigua `index.html` se mantiene en el proyecto pero ya no se usa como inicio.
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login.*

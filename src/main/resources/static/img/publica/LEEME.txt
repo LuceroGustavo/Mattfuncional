@@ -1,0 +1,13 @@
+Página pública – imágenes y video
+
+Copiar aquí el contenido de la carpeta Publica:
+- fondo matt.jpeg
+- video matt.mp4
+- 1.png, 2.png, 3.png
+- 4.jpg, 5.jpg, 6.jpg
+
+El index usa:
+- Hero: video matt.mp4 (fondo), poster = fondo matt.jpeg
+- Carrusel "Conocé el espacio": 1.png a 6.jpg
+
+Cuando el cliente pase fotos propias del gimnasio, reemplazar estos archivos (mismo nombre) en esta carpeta.
