@@ -93,7 +93,7 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 
 ---
 
-## 4. Opciones del menú (1-11)
+## 4. Opciones del menú (1-14)
 
 | Opción | Acción |
 |--------|--------|
@@ -108,6 +108,9 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 | 9 | Información del proyecto |
 | 10 | Ver espacio en disco |
 | 11 | Salir |
+| 12 | **Ver logs en vivo** (streaming, como `tail -f`) |
+| 13 | Instalar MySQL Workbench (versión de escritorio) |
+| 14 | Ejecutar MySQL Workbench |
 
 ---
 
@@ -274,6 +277,28 @@ Con **Apache** necesitás `mod_proxy` y `mod_proxy_http` habilitados, y un Virtu
 - Que la app esté corriendo: `curl -I http://127.0.0.1:8080` (o el puerto que uses).
 - Que Nginx/Apache esté escuchando en 80: `ss -tlnp | grep :80` o `netstat -tlnp | grep :80`.
 - Que el virtual host use `server_name detodoya.com.ar` (Nginx) o `ServerName detodoya.com.ar` (Apache) y que el `proxy_pass` apunte al mismo puerto de la app.
+
+---
+
+## 11. Solución de problemas
+
+### Error "Query did not return a unique result: 2 results were returned" en el calendario
+
+Si el calendario semanal falla con ese mensaje, suele deberse a registros duplicados en la tabla `slot_config`. El código ya está preparado para manejar duplicados (usa `findFirst`), pero si persiste el error tras actualizar:
+
+1. **Ver logs en vivo** (opción 12 del menú) para confirmar el error.
+2. **Limpiar duplicados** en el servidor:
+   ```bash
+   mysql -u mattfuncional_user -p mattfuncional < /root/mattfuncional/scripts/servidor/limpiar_duplicados_slot_config.sql
+   ```
+3. **Despliegue completo** (opción 5) para aplicar la versión actualizada.
+
+### MySQL Workbench en servidor sin escritorio
+
+MySQL Workbench es una aplicación gráfica. En un VPS sin entorno de escritorio:
+
+- **Opción A:** Conectá por SSH con X11 forwarding: `ssh -X -p 5638 root@149.50.144.53` y ejecutá la opción 14. La ventana se abrirá en tu PC.
+- **Opción B:** Usá la Consola VNC de Donweb con un escritorio instalado (XFCE, etc.) y ejecutá la opción 14 desde ahí.
 
 ---
 

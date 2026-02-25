@@ -189,15 +189,71 @@ view_logs() {
         echo -e "${YELLOW}Últimas 50 líneas de logs:${NC}"
         tail -50 "$LOG_FILE"
         echo ""
-        echo -e "${BLUE}Para ver logs en tiempo real: tail -f $LOG_FILE${NC}"
+        echo -e "${BLUE}Para ver logs en tiempo real: opción 12${NC}"
     elif [ -f "$APP_DIR/nohup.out" ]; then
         echo -e "${YELLOW}Últimas 50 líneas de logs:${NC}"
         tail -50 "$APP_DIR/nohup.out"
         echo ""
-        echo -e "${BLUE}Para ver logs en tiempo real: tail -f $APP_DIR/nohup.out${NC}"
+        echo -e "${BLUE}Para ver logs en tiempo real: opción 12${NC}"
     else
         print_warning "No se encontró archivo de logs"
     fi
+}
+
+view_logs_live() {
+    print_option "1️⃣2️⃣ Ver logs en vivo (streaming)..."
+    local log_to_use="$LOG_FILE"
+    [ ! -f "$log_to_use" ] && log_to_use="$APP_DIR/nohup.out"
+    if [ -f "$log_to_use" ]; then
+        echo -e "${YELLOW}Mostrando logs en tiempo real. Presiona Ctrl+C para volver al menú.${NC}"
+        echo ""
+        tail -f "$log_to_use"
+    else
+        print_warning "No se encontró archivo de logs"
+    fi
+}
+
+install_mysql_workbench() {
+    print_option "1️⃣3️⃣ Instalando MySQL Workbench (versión de escritorio con interfaz gráfica)..."
+    if command -v mysql-workbench >/dev/null 2>&1; then
+        print_success "MySQL Workbench ya está instalado: $(mysql-workbench --version 2>/dev/null || echo 'instalado')"
+        return 0
+    fi
+    echo "Intentando instalar MySQL Workbench..."
+    # Probar snap (común en Ubuntu 24.04)
+    if command -v snap >/dev/null 2>&1 && snap install mysql-workbench-community 2>/dev/null; then
+        print_success "MySQL Workbench instalado vía snap"
+        return 0
+    fi
+    # Probar apt (paquete de Ubuntu)
+    if apt-get update -qq 2>/dev/null && apt-get install -y mysql-workbench 2>/dev/null; then
+        print_success "MySQL Workbench instalado correctamente"
+        return 0
+    fi
+    # Probar mysql-workbench-community si existe el repo MySQL
+    if apt-get install -y mysql-workbench-community 2>/dev/null; then
+        print_success "MySQL Workbench instalado correctamente"
+        return 0
+    fi
+    print_error "No se pudo instalar. Prueba manualmente: snap install mysql-workbench-community"
+    print_warning "En Ubuntu Server sin escritorio, MySQL Workbench requiere X11 forwarding (ssh -X) o sesión VNC con entorno gráfico."
+    return 1
+}
+
+run_mysql_workbench() {
+    print_option "1️⃣4️⃣ Ejecutando MySQL Workbench..."
+    local wb_cmd=""
+    command -v mysql-workbench >/dev/null 2>&1 && wb_cmd="mysql-workbench"
+    [ -z "$wb_cmd" ] && command -v mysql-workbench-community >/dev/null 2>&1 && wb_cmd="mysql-workbench-community"
+    [ -z "$wb_cmd" ] && [ -f /snap/bin/mysql-workbench-community ] && wb_cmd="/snap/bin/mysql-workbench-community"
+    if [ -z "$wb_cmd" ]; then
+        print_warning "MySQL Workbench no está instalado. Ejecutá primero la opción 13."
+        return 1
+    fi
+    echo -e "${YELLOW}Iniciando MySQL Workbench en segundo plano...${NC}"
+    echo "Conexión sugerida: Host 127.0.0.1, Usuario mattfuncional_user, Puerto 3306"
+    $wb_cmd &
+    print_success "MySQL Workbench iniciado. Si usás SSH, necesitás X11 forwarding (ssh -X) para ver la interfaz."
 }
 
 restart_app() {
@@ -273,8 +329,11 @@ while true; do
     echo "9.  Información del proyecto"
     echo "10. Ver espacio en disco"
     echo "11. Salir"
+    echo "12. Ver logs en vivo (streaming)"
+    echo "13. Instalar MySQL Workbench"
+    echo "14. Ejecutar MySQL Workbench"
     echo ""
-    read -p "Ingresa tu opción (1-11): " opcion
+    read -p "Ingresa tu opción (1-14): " opcion
     echo ""
 
     case $opcion in
@@ -292,6 +351,9 @@ while true; do
             print_success "Saliendo del menú..."
             exit 0
             ;;
+        12) view_logs_live ;;
+        13) install_mysql_workbench ;;
+        14) run_mysql_workbench ;;
         *)
             print_error "Opción inválida. Presiona Enter para continuar..."
             read

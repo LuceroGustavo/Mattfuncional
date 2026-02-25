@@ -10,5 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface SlotConfigRepository extends JpaRepository<SlotConfig, Long> {
-    Optional<SlotConfig> findByDiaAndHoraInicio(DiaSemana dia, LocalTime horaInicio);
+    /** Primer slot con ese (dia, horaInicio). Evita "Query did not return a unique result" si hay duplicados en BD. */
+    Optional<SlotConfig> findFirstByDiaAndHoraInicio(DiaSemana dia, LocalTime horaInicio);
 } 

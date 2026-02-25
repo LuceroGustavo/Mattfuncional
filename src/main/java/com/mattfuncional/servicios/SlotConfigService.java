@@ -15,12 +15,12 @@ public class SlotConfigService {
     private SlotConfigRepository slotConfigRepository;
 
     public int getCapacidadMaxima(DiaSemana dia, LocalTime horaInicio, int defaultValue) {
-        Optional<SlotConfig> config = slotConfigRepository.findByDiaAndHoraInicio(dia, horaInicio);
+        Optional<SlotConfig> config = slotConfigRepository.findFirstByDiaAndHoraInicio(dia, horaInicio);
         return config.map(SlotConfig::getCapacidadMaxima).orElse(defaultValue);
     }
 
     public void setCapacidadMaxima(DiaSemana dia, LocalTime horaInicio, int capacidadMaxima) {
-        SlotConfig config = slotConfigRepository.findByDiaAndHoraInicio(dia, horaInicio)
+        SlotConfig config = slotConfigRepository.findFirstByDiaAndHoraInicio(dia, horaInicio)
                 .orElseGet(() -> {
                     SlotConfig nuevo = new SlotConfig();
                     nuevo.setDia(dia);
