@@ -15,9 +15,14 @@ import java.util.Optional;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findByNombre(String nombre);
 
-    Optional<Usuario> findByCorreo(String correo);
+    /**
+     * Busca usuario por correo. Con LIMIT 1 para no fallar si hay duplicados en BD
+     * (evita "Query did not return a unique result" en servidor y local).
+     */
+    @Query(value = "SELECT * FROM usuario WHERE correo = :correo LIMIT 1", nativeQuery = true)
+    Optional<Usuario> findByCorreo(@Param("correo") String correo);
 
-    /** Evita "Query did not return a unique result" cuando hay varios usuarios con el mismo correo. */
+    /** Alias seguro: mismo comportamiento que findByCorreo (un solo resultado). */
     Optional<Usuario> findFirstByCorreo(String correo);
 
     /**
