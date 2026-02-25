@@ -1,7 +1,9 @@
 package com.mattfuncional.servicios;
 
+import com.mattfuncional.entidades.Asistencia;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.repositorios.AsistenciaRepository;
 import com.mattfuncional.repositorios.UsuarioRepository;
 import com.mattfuncional.repositorios.ProfesorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class UsuarioService {
 
     @Autowired
     private ProfesorRepository profesorRepository;
+
+    @Autowired
+    private AsistenciaRepository asistenciaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -83,6 +88,12 @@ public class UsuarioService {
             if (objetivo.getId() != null && objetivo.getId().equals(quienElimina.getId())) return false;
         } else {
             return false;
+        }
+        // Soltar FK en asistencia.registrado_por_id para poder borrar el usuario
+        List<Asistencia> asistenciasDondeRegistro = asistenciaRepository.findByRegistradoPor_Id(usuarioId);
+        for (Asistencia a : asistenciasDondeRegistro) {
+            a.setRegistradoPor(null);
+            asistenciaRepository.save(a);
         }
         usuarioRepository.delete(objetivo);
         return true;

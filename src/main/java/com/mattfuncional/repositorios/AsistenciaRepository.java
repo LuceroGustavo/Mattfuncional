@@ -14,6 +14,9 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<Asistencia> findByUsuarioAndFecha(Usuario usuario, LocalDate fecha);
     List<Asistencia> findByFechaBetween(LocalDate inicio, LocalDate fin);
 
+    /** Asistencias donde este usuario figura como "registrado por" (para poder soltar la FK al borrar el usuario). */
+    List<Asistencia> findByRegistradoPor_Id(Long registradoPorId);
+
     /** Carga asistencias con usuario inicializado (evita LazyInitialization al construir el mapa). */
     @Query("SELECT a FROM Asistencia a LEFT JOIN FETCH a.usuario WHERE a.fecha BETWEEN :inicio AND :fin")
     List<Asistencia> findByFechaBetweenWithUsuario(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin);
