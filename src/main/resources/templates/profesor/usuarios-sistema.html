@@ -20,6 +20,8 @@
     <div th:if="${param.error != null}" class="alert alert-danger">Hubo un error. Revisá los datos.</div>
     <div th:if="${param.error == 'developer-locked'}" class="alert alert-warning">No está permitido modificar el usuario developer.</div>
     <div th:if="${param.error == 'notfound'}" class="alert alert-danger">Usuario no encontrado.</div>
+    <div th:if="${param.error == 'no-permitido'}" class="alert alert-danger">No tenés permiso para eliminar ese usuario.</div>
+    <div th:if="${param.ok == 'eliminado'}" class="alert alert-success">Usuario eliminado correctamente.</div>
     <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Error</div>
 
     <div th:if="${correosDuplicados != null && !correosDuplicados.isEmpty()}" class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -89,6 +91,7 @@
                     <th>Actualizar datos</th>
                     <th>Actualizar rol</th>
                     <th>Cambiar contraseña</th>
+                    <th>Eliminar</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -107,7 +110,7 @@
                         </form>
                     </td>
                     <td>
-                        <form th:action="@{/profesor/usuarios-sistema/rol}" method="post" class="d-flex gap-2">
+                        <form th:if="${u.rol != 'DEVELOPER'}" th:action="@{/profesor/usuarios-sistema/rol}" method="post" class="d-flex gap-2">
                             <input type="hidden" name="usuarioId" th:value="${u.id}">
                             <select name="rol" class="form-select form-select-sm w-auto">
                                 <option value="ADMIN" th:selected="${u.rol == 'ADMIN'}">Admin</option>
@@ -115,6 +118,7 @@
                             </select>
                             <button type="submit" class="btn btn-outline-secondary btn-sm">Actualizar</button>
                         </form>
+                        <span th:if="${u.rol == 'DEVELOPER'}" class="text-muted">—</span>
                     </td>
                     <td>
                         <form th:action="@{/profesor/usuarios-sistema/password}" method="post" class="d-flex gap-2">
@@ -123,9 +127,18 @@
                             <button type="submit" class="btn btn-outline-primary btn-sm">Guardar</button>
                         </form>
                     </td>
+                    <td>
+                        <th:block th:with="puedeEliminar=${usuarioActual != null && (usuarioActual.rol == 'DEVELOPER' || (usuarioActual.rol == 'ADMIN' && u.id != usuarioActual.id))}">
+                            <form th:if="${puedeEliminar}" th:action="@{/profesor/usuarios-sistema/eliminar}" method="post" class="d-inline" th:attr="data-nombre=${u.nombre}" onsubmit="return confirm('¿Eliminar a este usuario? No se puede deshacer.');">
+                                <input type="hidden" name="usuarioId" th:value="${u.id}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar usuario"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                            <span th:if="${!puedeEliminar}" class="text-muted">—</span>
+                        </th:block>
+                    </td>
                 </tr>
                 <tr th:if="${usuariosSistema == null || usuariosSistema.isEmpty()}">
-                    <td colspan="6" class="text-center text-muted">Sin usuarios del sistema.</td>
+                    <td colspan="7" class="text-center text-muted">Sin usuarios del sistema.</td>
                 </tr>
                 </tbody>
             </table>

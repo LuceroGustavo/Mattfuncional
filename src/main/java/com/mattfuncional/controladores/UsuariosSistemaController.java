@@ -34,7 +34,7 @@ public class UsuariosSistemaController {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
-        model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
+        model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistemaPara(usuarioActual));
         model.addAttribute("usuarioActual", usuarioActual);
         List<String> correosDuplicados = duplicadosCheckService.getMensajesCorreosDuplicados();
         boolean hayDuplicadosReales = !correosDuplicados.isEmpty();
@@ -68,10 +68,26 @@ public class UsuariosSistemaController {
             return "redirect:/profesor/usuarios-sistema?ok=creado";
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
+            model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistemaPara(usuarioActual));
             model.addAttribute("usuarioActual", usuarioActual);
             return "profesor/usuarios-sistema";
         }
+    }
+
+    @PostMapping("/eliminar")
+    public String eliminarUsuario(@AuthenticationPrincipal Usuario usuarioActual,
+                                  @RequestParam Long usuarioId) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        boolean eliminado = usuarioService.eliminarUsuarioSistema(usuarioId, usuarioActual);
+        if (eliminado) {
+            if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId)) {
+                return "redirect:/login?logout";
+            }
+            return "redirect:/profesor/usuarios-sistema?ok=eliminado";
+        }
+        return "redirect:/profesor/usuarios-sistema?error=no-permitido";
     }
 
     @PostMapping("/rol")

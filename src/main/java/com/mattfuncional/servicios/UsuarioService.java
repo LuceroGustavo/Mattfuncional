@@ -52,6 +52,42 @@ public class UsuarioService {
         return usuarioRepository.findByRolIn(java.util.List.of("ADMIN", "AYUDANTE"));
     }
 
+    /**
+     * Listado para la pantalla "Usuarios del sistema".
+     * Developer ve todos (ADMIN, AYUDANTE, DEVELOPER). Admin solo ve ADMIN y AYUDANTE (no ve developer).
+     */
+    public List<Usuario> getUsuariosSistemaPara(Usuario usuarioActual) {
+        if (usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol())) {
+            return usuarioRepository.findByRolIn(java.util.List.of("ADMIN", "AYUDANTE", "DEVELOPER"));
+        }
+        return usuarioRepository.findByRolIn(java.util.List.of("ADMIN", "AYUDANTE"));
+    }
+
+    /**
+     * Elimina un usuario del sistema (ADMIN/AYUDANTE/DEVELOPER).
+     * Developer puede eliminar a cualquiera. Admin no puede eliminar developer ni a sí mismo.
+     * @return true si se eliminó, false si no tiene permiso o no existe
+     */
+    @CacheEvict(value = "usuarios", allEntries = true)
+    @Transactional
+    public boolean eliminarUsuarioSistema(Long usuarioId, Usuario quienElimina) {
+        if (quienElimina == null || usuarioId == null) return false;
+        Usuario objetivo = usuarioRepository.findById(usuarioId).orElse(null);
+        if (objetivo == null) return false;
+        String rolObjetivo = objetivo.getRol();
+        if (!java.util.Set.of("ADMIN", "AYUDANTE", "DEVELOPER").contains(rolObjetivo)) return false;
+        if ("DEVELOPER".equals(quienElimina.getRol())) {
+            // Developer puede eliminar a todos (incluido otro developer o a sí mismo)
+        } else if ("ADMIN".equals(quienElimina.getRol())) {
+            if ("DEVELOPER".equals(rolObjetivo)) return false;
+            if (objetivo.getId() != null && objetivo.getId().equals(quienElimina.getId())) return false;
+        } else {
+            return false;
+        }
+        usuarioRepository.delete(objetivo);
+        return true;
+    }
+
     @Cacheable(value = "usuarios", key = "'profesor-' + #profesorId")
     public List<Usuario> getAlumnosByProfesorId(Long profesorId) {
         return usuarioRepository.findAlumnosByProfesorIdWithRelations(profesorId);
