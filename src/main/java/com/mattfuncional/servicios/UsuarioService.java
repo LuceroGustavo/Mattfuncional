@@ -290,7 +290,7 @@ public class UsuarioService {
             // Si es un profesor y no tiene la relación cargada, intentar cargarla
             if (usuario != null && "ADMIN".equals(usuario.getRol()) && usuario.getProfesor() == null) {
                 try {
-                    Profesor profesor = profesorRepository.findByCorreo(correo);
+                    Profesor profesor = profesorRepository.findFirstByCorreo(correo).orElse(null);
                     if (profesor != null) {
                         usuario.setProfesor(profesor);
                     }
@@ -336,7 +336,7 @@ public class UsuarioService {
      * Busca un profesor por su correo electrónico
      */
     public Profesor findProfesorByCorreo(String correo) {
-        return profesorRepository.findByCorreo(correo);
+        return profesorRepository.findFirstByCorreo(correo).orElse(null);
     }
 
     /**

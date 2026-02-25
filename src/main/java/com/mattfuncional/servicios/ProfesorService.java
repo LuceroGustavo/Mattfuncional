@@ -52,7 +52,7 @@ public class ProfesorService {
 
     @Cacheable(value = "profesores", key = "'correo-' + #correo")
     public Profesor getProfesorByCorreo(String correo) {
-        return profesorRepository.findByCorreo(correo);
+        return profesorRepository.findFirstByCorreo(correo).orElse(null);
     }
 
     // --- MÉTODOS CON EVICCIÓN DE CACHÉ ---

@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
-    Profesor findByCorreo(String correo); // para validaciones o login futuro
+    /** Primer profesor con ese correo (evita error "unique result" si hay duplicados en BD). */
+    Optional<Profesor> findFirstByCorreo(String correo);
 
     // --- CONSULTAS OPTIMIZADAS PARA FASE 3 ---
 
@@ -16,8 +18,8 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
     @Query("SELECT p FROM Profesor p LEFT JOIN FETCH p.usuarios")
     List<Profesor> findAllWithUsuarios();
 
-    // Obtener profesor específico con todas las relaciones
-    @Query("SELECT p FROM Profesor p LEFT JOIN FETCH p.usuarios WHERE p.id = :id")
+    // Obtener profesor específico con todas las relaciones (DISTINCT evita filas duplicadas por el JOIN)
+    @Query("SELECT DISTINCT p FROM Profesor p LEFT JOIN FETCH p.usuarios WHERE p.id = :id")
     Profesor findByIdWithRelations(@Param("id") Long id);
 
     // Obtener profesores con conteo de alumnos
