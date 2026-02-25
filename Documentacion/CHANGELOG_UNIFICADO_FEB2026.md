@@ -17,6 +17,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 9. [Fase 7 – Pizarra / Pantalla de sala – Mejoras](#9-fase-7--pizarra--pantalla-de-sala--mejoras-feb-2026)
 10. [Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder](#10-mis-ejercicios-vista-lista-actualización-de-imágenes-redirects-y-placeholder-feb-2026)
 11. [Fase 8 – Página pública del gimnasio](#11-fase-8--página-pública-del-gimnasio-feb-2026)
+12. [Reparación calendario – slot_config duplicados y herramientas servidor](#12-reparación-calendario--slot_config-duplicados-y-herramientas-servidor-feb-2026)
 
 ---
 
@@ -321,4 +322,43 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login.*
+## 12. Reparación calendario – slot_config duplicados y herramientas servidor (Feb 2026)
+
+**Resumen:** Error "Query did not return a unique result: 2 results were returned" en el calendario semanal (`/calendario/semanal/profesor/1`). Causa: registros duplicados en la tabla `slot_config` (mismo dia + hora_inicio). Se corrigió el código y se añadieron opciones al menú del servidor.
+
+### 12.1 Corrección del error del calendario
+
+- **Problema:** `SlotConfigRepository.findByDiaAndHoraInicio` esperaba un único resultado; con duplicados en BD lanzaba `NonUniqueResultException`.
+- **Solución lectura:** Cambio a `findFirstByDiaAndHoraInicio` para devolver el primer resultado aunque existan duplicados.
+- **Solución escritura (robusta):** En `SlotConfigService.setCapacidadMaxima`: se usa `findAllByDiaAndHoraInicio`; si hay varios registros, se actualiza el primero y se eliminan los duplicados. Así se evita crear nuevos duplicados y se limpian los existentes al guardar.
+
+### 12.2 Nuevas opciones del menú servidor (`./mattfuncional`)
+
+| Opción | Acción |
+|--------|--------|
+| 12 | Ver logs en vivo (streaming, `tail -f`) |
+| 13 | Instalar MySQL Workbench (versión de escritorio) |
+| 14 | Ejecutar MySQL Workbench |
+
+### 12.3 Archivos modificados / creados
+
+- **SlotConfigRepository.java:** `findFirstByDiaAndHoraInicio`, `findAllByDiaAndHoraInicio`.
+- **SlotConfigService.java:** `setCapacidadMaxima` con lógica anti-duplicados y `@Transactional`.
+- **mattfuncional** (script): funciones `view_logs_live`, `install_mysql_workbench`, `run_mysql_workbench`; opciones 12, 13, 14.
+- **scripts/servidor/limpiar_duplicados_slot_config.sql:** Script SQL para eliminar duplicados en `slot_config` (uso manual si hace falta).
+- **Documentacion/servidor/DESPLIEGUE-SERVIDOR.md:** Opciones 12–14, sección "Solución de problemas".
+- **Documentacion/AYUDA_MEMORIA.md:** Sección "Servidor – Desde mi casa" (Workbench, logs en vivo).
+
+### 12.4 Para commit y continuar desarrollando
+
+```
+git add -A
+git commit -m "Reparación calendario: slot_config duplicados + opciones servidor (logs vivo, Workbench)"
+git push origin main
+```
+
+Luego en el servidor: opción 5 (Despliegue completo) para aplicar los cambios.
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login. Reparación calendario slot_config (Feb 2026): findFirst, setCapacidadMaxima robusto, opciones 12–14 en menú servidor.*

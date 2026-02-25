@@ -7,6 +7,18 @@ Lista de mejoras pendientes para implementar después. Se van agregando aquí pa
 
 ---
 
+## Servidor – Desde mi casa (red sin restricciones)
+
+Cuando trabajo **desde mi casa** (donde la red funciona bien y SSH no está bloqueado), puedo:
+
+- **Instalar MySQL Workbench** en el servidor: opción 13 del menú (`./mattfuncional`). Sirve para ejecutar scripts SQL, revisar o borrar datos de la base, etc.
+- **Ejecutar MySQL Workbench**: opción 14 del menú. Requiere X11 forwarding (`ssh -X -p 5638 root@149.50.144.53`) para ver la interfaz gráfica en mi PC.
+- **Ver logs en vivo**: opción 12 del menú. Muestra los logs de la app en tiempo real (streaming, como `tail -f`). Presionar Ctrl+C para volver al menú.
+
+*Nota: Desde la oficina la red suele bloquear SSH; en ese caso usar Consola VNC de Donweb.*
+
+---
+
 ## Pendientes
 
 ### Creación de rutina – Orden de las series
