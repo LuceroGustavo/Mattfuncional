@@ -71,4 +71,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Método para verificar si hay usuarios sin avatar asignado
     long countByAvatarIsNullOrAvatar(String avatar);
+
+    /** Detecta correos duplicados (varios usuarios con el mismo correo). Para avisos de calidad de datos. */
+    @Query(value = "SELECT correo, COUNT(*) AS cnt FROM usuario GROUP BY correo HAVING COUNT(*) > 1", nativeQuery = true)
+    List<Object[]> findCorreosDuplicados();
 }

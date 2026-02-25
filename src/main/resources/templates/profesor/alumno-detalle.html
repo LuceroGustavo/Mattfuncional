@@ -520,6 +520,14 @@
                                 <label for="progresoFecha" class="form-label">Fecha</label>
                                 <input type="date" id="progresoFecha" name="fecha" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
                             </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="presente" id="progresoPresente" value="true"
+                                           th:checked="${asistenciaHoy != null && asistenciaHoy.presente}">
+                                    <label class="form-check-label" for="progresoPresente">Estuvo presente este día</label>
+                                </div>
+                                <div class="form-text">Si ya marcaste presente desde el calendario, déjalo marcado al guardar el progreso para no perderlo.</div>
+                            </div>
                             <div class="mb-3" th:if="${gruposMusculares != null && !gruposMusculares.isEmpty()}">
                                 <label class="form-label">Grupos musculares trabajados</label>
                                 <div class="border rounded p-2" style="max-height: 180px; overflow-y: auto;">

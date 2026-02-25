@@ -2,6 +2,7 @@ package com.mattfuncional.controladores;
 
 import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.servicios.DuplicadosCheckService;
 import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.servicios.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/profesor/usuarios-sistema")
 public class UsuariosSistemaController {
@@ -23,6 +26,9 @@ public class UsuariosSistemaController {
     @Autowired
     private ProfesorService profesorService;
 
+    @Autowired
+    private DuplicadosCheckService duplicadosCheckService;
+
     @GetMapping
     public String verUsuariosSistema(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
@@ -30,6 +36,14 @@ public class UsuariosSistemaController {
         }
         model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
         model.addAttribute("usuarioActual", usuarioActual);
+        List<String> correosDuplicados = duplicadosCheckService.getMensajesCorreosDuplicados();
+        boolean hayDuplicadosReales = !correosDuplicados.isEmpty();
+        if (hayDuplicadosReales && correosDuplicados.size() == 1 && correosDuplicados.get(0).startsWith("No se pudo verificar")) {
+            hayDuplicadosReales = false;
+        }
+        if (hayDuplicadosReales) {
+            model.addAttribute("correosDuplicados", correosDuplicados);
+        }
         return "profesor/usuarios-sistema";
     }
 

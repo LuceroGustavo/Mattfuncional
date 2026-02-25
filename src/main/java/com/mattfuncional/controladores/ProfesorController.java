@@ -500,7 +500,7 @@ public class ProfesorController {
     @PostMapping("/alumnos/{id}/progreso")
     public String guardarProgreso(@PathVariable Long id,
                                   @RequestParam("fecha") String fechaStr,
-                                  @RequestParam(value = "presente", defaultValue = "false") boolean presente,
+                                  @RequestParam(value = "presente", required = false) Boolean presenteParam,
                                   @RequestParam(value = "grupoIds", required = false) List<Long> grupoIds,
                                   @RequestParam(value = "observaciones", required = false) String observaciones,
                                   @AuthenticationPrincipal Usuario usuarioActual) {
@@ -519,7 +519,7 @@ public class ProfesorController {
             fecha = java.time.LocalDate.now();
         }
         java.util.Set<com.mattfuncional.entidades.GrupoMuscular> grupos = grupoMuscularService.resolveGruposByIds(grupoIds != null ? grupoIds : List.of());
-        asistenciaService.guardarOActualizarProgreso(alumno, fecha, presente, observaciones, grupos, usuarioActual);
+        asistenciaService.guardarOActualizarProgreso(alumno, fecha, presenteParam, observaciones, grupos, usuarioActual);
         return "redirect:/profesor/alumnos/" + id + "?progreso=ok";
     }
 

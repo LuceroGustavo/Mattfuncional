@@ -25,4 +25,8 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
     // Obtener profesores con conteo de alumnos
     @Query("SELECT p, COUNT(u) as alumnoCount FROM Profesor p LEFT JOIN p.usuarios u GROUP BY p")
     List<Object[]> findAllWithAlumnoCount();
+
+    /** Detecta correos duplicados en profesores. Para avisos de calidad de datos. */
+    @Query(value = "SELECT correo, COUNT(*) AS cnt FROM profesor GROUP BY correo HAVING COUNT(*) > 1", nativeQuery = true)
+    List<Object[]> findCorreosDuplicados();
 }

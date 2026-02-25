@@ -22,6 +22,15 @@
     <div th:if="${param.error == 'notfound'}" class="alert alert-danger">Usuario no encontrado.</div>
     <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Error</div>
 
+    <div th:if="${correosDuplicados != null && !correosDuplicados.isEmpty()}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Correos duplicados en la base de datos</strong>
+        <p class="mb-1 mt-2 small">Los siguientes correos tienen más de un registro. Pueden causar errores en el calendario o al iniciar sesión. Conviene unificar o eliminar duplicados en la tabla <code>usuario</code> o <code>profesor</code>.</p>
+        <ul class="mb-0 small">
+            <li th:each="msg : ${correosDuplicados}" th:text="${msg}">Usuario: x@mail.com (2 registros)</li>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
     <div class="card mb-4">
         <div class="card-header"><strong>Mi perfil</strong></div>
         <div class="card-body">

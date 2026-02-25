@@ -56,24 +56,38 @@ public class AsistenciaService {
 
     /**
      * Crea o actualiza el registro de progreso/asistencia para un alumno en una fecha.
-     * Si ya existe registro para ese usuario y fecha, actualiza presente, observaciones y grupos trabajados.
+     * Si ya existe registro, actualiza observaciones y grupos; presente se actualiza solo si viene explícito (no null).
+     * Si presenteParam es null al actualizar, se preserva el valor existente para no pisar "presente" al solo agregar progreso.
      */
     @Transactional
-    public Asistencia guardarOActualizarProgreso(Usuario alumno, LocalDate fecha, boolean presente, String observaciones, Set<GrupoMuscular> gruposTrabajados, Usuario registradoPor) {
+    public Asistencia guardarOActualizarProgreso(Usuario alumno, LocalDate fecha, Boolean presenteParam, String observaciones, Set<GrupoMuscular> gruposTrabajados, Usuario registradoPor) {
         List<Asistencia> existentes = asistenciaRepository.findByUsuarioAndFecha(alumno, fecha);
         Asistencia a;
+        boolean presenteVal;
         if (existentes != null && !existentes.isEmpty()) {
             a = existentes.get(0);
+            presenteVal = presenteParam != null ? presenteParam : a.isPresente();
         } else {
-            a = new Asistencia(fecha, presente, observaciones != null ? observaciones.trim() : null, alumno);
+            presenteVal = presenteParam != null ? presenteParam : false;
+            a = new Asistencia(fecha, presenteVal, observaciones != null ? observaciones.trim() : null, alumno);
         }
-        a.setPresente(presente);
+        a.setPresente(presenteVal);
         a.setObservaciones(observaciones != null && !observaciones.isBlank() ? observaciones.trim() : null);
         a.setGruposTrabajados(gruposTrabajados != null ? gruposTrabajados : new java.util.HashSet<>());
         if (registradoPor != null) {
             a.setRegistradoPor(registradoPor);
         }
         return asistenciaRepository.save(a);
+    }
+
+    public Asistencia guardarOActualizarProgreso(Usuario alumno, LocalDate fecha, Boolean presenteParam, String observaciones, Set<GrupoMuscular> gruposTrabajados) {
+        return guardarOActualizarProgreso(alumno, fecha, presenteParam, observaciones, gruposTrabajados, null);
+    }
+
+    /** Sobrecarga con presente primitivo para llamadas que siempre envían valor (p. ej. calendario API). */
+    @Transactional
+    public Asistencia guardarOActualizarProgreso(Usuario alumno, LocalDate fecha, boolean presente, String observaciones, Set<GrupoMuscular> gruposTrabajados, Usuario registradoPor) {
+        return guardarOActualizarProgreso(alumno, fecha, Boolean.valueOf(presente), observaciones, gruposTrabajados, registradoPor);
     }
 
     public Asistencia guardarOActualizarProgreso(Usuario alumno, LocalDate fecha, boolean presente, String observaciones, Set<GrupoMuscular> gruposTrabajados) {
