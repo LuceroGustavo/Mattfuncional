@@ -34,7 +34,7 @@ public class SecurityConfig {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 // Solo usuarios con login (ADMIN, AYUDANTE, DEVELOPER). Alumnos nunca autentican.
-                return usuarioRepository.findByCorreoParaLogin(username)
+                return usuarioRepository.findFirstByCorreoAndRolIn(username, java.util.List.of("ADMIN", "AYUDANTE", "DEVELOPER"))
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
             }
         };

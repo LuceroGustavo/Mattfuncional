@@ -17,12 +17,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByCorreo(String correo);
 
+    /** Evita "Query did not return a unique result" cuando hay varios usuarios con el mismo correo. */
+    Optional<Usuario> findFirstByCorreo(String correo);
+
     /**
      * Usuarios que pueden iniciar sesión (ADMIN, AYUDANTE, DEVELOPER).
-     * Excluye ALUMNO: los alumnos son solo ficha, sin login.
+     * Excluye ALUMNO. Usa "First" para evitar error si hay duplicados por correo.
      */
-    @Query("SELECT u FROM Usuario u WHERE u.correo = :correo AND u.rol IN ('ADMIN','AYUDANTE','DEVELOPER')")
-    Optional<Usuario> findByCorreoParaLogin(@Param("correo") String correo);
+    Optional<Usuario> findFirstByCorreoAndRolIn(String correo, List<String> roles);
 
     java.util.List<Usuario> findAllByProfesorId(Long profesorId);
 

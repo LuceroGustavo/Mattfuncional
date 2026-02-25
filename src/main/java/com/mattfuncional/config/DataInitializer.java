@@ -77,7 +77,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     private boolean isDataAlreadyInitialized() {
         try {
-            return usuarioRepository.findByCorreo(CORREO_PROFESOR)
+            return usuarioRepository.findFirstByCorreo(CORREO_PROFESOR)
                     .map(u -> u.getAvatar() != null && !u.getAvatar().isEmpty())
                     .orElse(false);
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void createProfesorUsuarioIfNeeded() {
         try {
-            java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findByCorreo(CORREO_PROFESOR);
+            java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findFirstByCorreo(CORREO_PROFESOR);
             if (usuarioExistente.isPresent()) {
                 Usuario usuario = usuarioExistente.get();
                 boolean actualizado = false;
@@ -162,7 +162,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void createDeveloperUsuarioIfNeeded() {
         try {
-            java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findByCorreo(CORREO_DEVELOPER);
+            java.util.Optional<Usuario> usuarioExistente = usuarioRepository.findFirstByCorreo(CORREO_DEVELOPER);
             if (usuarioExistente.isPresent()) {
                 Usuario usuario = usuarioExistente.get();
                 boolean actualizado = false;
@@ -221,7 +221,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void markAsInitialized() {
         try {
-            usuarioRepository.findByCorreo(CORREO_PROFESOR).ifPresent(u -> {
+            usuarioRepository.findFirstByCorreo(CORREO_PROFESOR).ifPresent(u -> {
                 System.out.println("✅ Sistema inicializado correctamente:");
                 System.out.println("   Usuario: " + u.getNombre() + " (" + u.getCorreo() + ")");
                 System.out.println("   Rol: " + u.getRol());

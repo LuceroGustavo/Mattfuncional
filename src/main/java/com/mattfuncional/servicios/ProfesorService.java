@@ -74,7 +74,7 @@ public class ProfesorService {
         
         // 1. Eliminar el usuario asociado al profesor (si existe)
         try {
-            Optional<Usuario> usuarioProfesor = usuarioRepository.findByCorreo(profesor.getCorreo());
+            Optional<Usuario> usuarioProfesor = usuarioRepository.findFirstByCorreo(profesor.getCorreo());
             if (usuarioProfesor.isPresent()) {
                 Usuario usuario = usuarioProfesor.get();
                 // Verificar que el usuario tenga rol ADMIN antes de eliminarlo

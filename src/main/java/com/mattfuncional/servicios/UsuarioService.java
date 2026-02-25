@@ -120,7 +120,7 @@ public class UsuarioService {
         if (!java.util.Set.of("ADMIN", "AYUDANTE").contains(rolNorm)) {
             throw new IllegalArgumentException("Rol inválido");
         }
-        if (usuarioRepository.findByCorreo(correo).isPresent()) {
+        if (usuarioRepository.findFirstByCorreo(correo).isPresent()) {
             throw new IllegalArgumentException("Ya existe un usuario con ese correo");
         }
         Usuario usuario = new Usuario();
@@ -172,7 +172,7 @@ public class UsuarioService {
         }
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        usuarioRepository.findByCorreo(correoNorm).ifPresent(existente -> {
+        usuarioRepository.findFirstByCorreo(correoNorm).ifPresent(existente -> {
             if (!existente.getId().equals(usuarioId)) {
                 throw new IllegalArgumentException("Ya existe un usuario con ese correo");
             }
@@ -285,7 +285,7 @@ public class UsuarioService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String correo = authentication.getName();
-            Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
+            Usuario usuario = usuarioRepository.findFirstByCorreo(correo).orElse(null);
             
             // Si es un profesor y no tiene la relación cargada, intentar cargarla
             if (usuario != null && "ADMIN".equals(usuario.getRol()) && usuario.getProfesor() == null) {
@@ -313,7 +313,7 @@ public class UsuarioService {
             String correo = authentication.getName();
             // Usar la consulta optimizada que carga las relaciones
             return usuarioRepository.findByIdWithAllRelations(
-                usuarioRepository.findByCorreo(correo).map(Usuario::getId).orElse(null)
+                usuarioRepository.findFirstByCorreo(correo).map(Usuario::getId).orElse(null)
             ).orElse(null);
         }
         return null;
