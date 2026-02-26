@@ -41,7 +41,7 @@
                             <li><i class="fas fa-check strong"></i> Múltiples horarios para entrenar</li>
                             <li><i class="fas fa-check strong"></i> Presencial y virtual</li>
                         </ul>
-                        <a href="#servicios" class="btn btn-custom">Conocé más</a>
+                        <a href="/planes" class="btn btn-custom">Conocé más</a>
                     </div>
                 </div>
                 <!-- Slide 2 -->
@@ -54,7 +54,7 @@
                             <li><i class="fas fa-check strong"></i> Rutinas y series personalizadas</li>
                             <li><i class="fas fa-check strong"></i> Seguimiento profesional</li>
                         </ul>
-                        <a href="#servicios" class="btn btn-custom">Conocé más</a>
+                        <a href="/planes" class="btn btn-custom">Conocé más</a>
                     </div>
                 </div>
                 <!-- Slide 3 -->
@@ -67,7 +67,7 @@
                             <li><i class="fas fa-check strong"></i> Distintos planes a tu medida</li>
                             <li><i class="fas fa-check strong"></i> Ambiente grupal y motivador</li>
                         </ul>
-                        <a href="#servicios" class="btn btn-custom">Conocé más</a>
+                        <a href="/planes" class="btn btn-custom">Conocé más</a>
                     </div>
                 </div>
                 <!-- Slide 4 -->
@@ -80,7 +80,7 @@
                             <li><i class="fas fa-check strong"></i> Objetivos claros, resultados reales</li>
                             <li><i class="fas fa-check strong"></i> Consultá por WhatsApp</li>
                         </ul>
-                        <a href="#contacto" class="btn btn-custom">Contacto</a>
+                        <a href="/#contacto" class="btn btn-custom">Contacto</a>
                     </div>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                 </a>
                 <ul class="nav align-items-center nav-desktop-publica" style="display: none;">
                     <li class="nav-item"><a href="/" class="nav-link">Inicio</a></li>
-                    <li class="nav-item"><a href="#servicios" class="nav-link">Servicios</a></li>
+                    <li class="nav-item"><a href="/planes" class="nav-link">Planes</a></li>
                     <li class="nav-item"><a href="#contacto" class="nav-link">Contacto</a></li>
                     <li class="nav-item">
                         <a href="/login" class="nav-link" title="Iniciar sesión - Acceso a la parte de gestión"><i class="fas fa-sign-in-alt me-1"></i><span class="d-none d-lg-inline">Iniciar sesión</span></a>
@@ -119,7 +119,7 @@
             </div>
             <div class="offcanvas-body">
                 <a href="/" class="btn btn-custom w-100 mb-2 text-start">Inicio</a>
-                <a href="#servicios" class="btn btn-custom w-100 mb-2 text-start">Servicios</a>
+                <a href="/planes" class="btn btn-custom w-100 mb-2 text-start">Planes</a>
                 <a href="#contacto" class="btn btn-custom w-100 mb-2 text-start">Contacto</a>
                 <a href="/login" class="btn btn-custom w-100 mb-2 text-start"><i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión</a>
             </div>
@@ -175,18 +175,24 @@
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
                     <span class="fw-bold text-uppercase">Mattfuncional</span>
                     <p class="mb-0 small text-white-50">La nueva forma de entrenar</p>
+                    <p class="mb-0 mt-2 small">
+                        <a href="https://www.google.com/maps/place/Aconcagua+17,+B1704+Ramos+Mej%C3%ADa,+Provincia+de+Buenos+Aires" target="_blank" rel="noopener" class="footer-link text-white-50"><i class="fas fa-map-marker-alt me-1"></i>Aconcagua 17, Ramos Mejía</a>
+                    </p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <a href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" class="text-white me-3"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="text-white" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                    <a href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
     <div class="copy">
-        <div class="container text-center">
-            <small>© <span th:text="${#temporals.createNow().year}">2026</span> <strong>Mattfuncional.</strong> Todos los derechos reservados.</small>
+        <div class="container">
+            <div class="copy-content">
+                <small class="copy-copyright">© <span th:text="${#temporals.createNow().year}">2026</span> <strong>Mattfuncional.</strong> Todos los derechos reservados.</small>
+                <small class="copy-dev">Desarrollado por: Gustavo Lucero</small>
+            </div>
         </div>
     </div>
 

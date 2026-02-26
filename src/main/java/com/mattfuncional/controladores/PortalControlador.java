@@ -1,6 +1,8 @@
 package com.mattfuncional.controladores;
 
 import com.mattfuncional.entidades.Exercise;
+import com.mattfuncional.servicios.ConfiguracionPaginaPublicaService;
+import com.mattfuncional.servicios.PlanPublicoService;
 import com.mattfuncional.servicios.UsuarioService;
 import com.mattfuncional.servicios.ExerciseService;
 import com.mattfuncional.servicios.ProfesorService;
@@ -31,6 +33,12 @@ public class PortalControlador {
     @Autowired
     private ProfesorService profesorService;
 
+    @Autowired
+    private PlanPublicoService planPublicoService;
+
+    @Autowired
+    private ConfiguracionPaginaPublicaService configuracionPaginaPublicaService;
+
     /** Página de inicio: landing pública (estilo RedFit). Acceso a la parte privada por ícono de login arriba. */
     @GetMapping("/")
     public String index(Model model) {
@@ -49,6 +57,26 @@ public class PortalControlador {
     @GetMapping("/publica")
     public String indexPublica(Model model) {
         return index(model);
+    }
+
+    /** Página de planes (pública). Cards con precios, servicios, días/horarios y formulario de consulta. */
+    @GetMapping("/planes")
+    public String planes(Model model) {
+        model.addAttribute("planes", planPublicoService.getPlanesActivosParaPublica());
+        String diasHorarios = configuracionPaginaPublicaService.getDiasHorarios();
+        model.addAttribute("diasHorarios", diasHorarios);
+        String direccion = configuracionPaginaPublicaService.getDireccion();
+        model.addAttribute("direccion", direccion != null ? direccion : "Aconcagua 17, Ramos Mejía");
+        model.addAttribute("direccionUrl", "https://www.google.com/maps/place/Aconcagua+17,+B1704+Ramos+Mej%C3%ADa,+Provincia+de+Buenos+Aires");
+        String whatsapp = configuracionPaginaPublicaService.getWhatsapp();
+        model.addAttribute("whatsappUrl", whatsapp != null && !whatsapp.isEmpty()
+                ? "https://api.whatsapp.com/send?phone=" + whatsapp.replaceAll("[^0-9]", "")
+                : "https://api.whatsapp.com/send?phone=5491112345678");
+        String instagram = configuracionPaginaPublicaService.getInstagram();
+        model.addAttribute("instagramUrl", instagram != null && !instagram.isEmpty() && !"#".equals(instagram)
+                ? (instagram.startsWith("http") ? instagram : "https://instagram.com/" + instagram.replaceAll("^@", ""))
+                : "#");
+        return "planes-publica";
     }
 
     /* GET /login lo maneja WebMvcConfig (view "login") para mostrar siempre la plantilla Iniciar Sesión. */

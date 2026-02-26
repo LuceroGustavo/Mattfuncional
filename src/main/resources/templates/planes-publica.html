@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Planes - Mattfuncional</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/logo matt.jpeg}" href="/img/logo%20matt.jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link th:href="@{/css/publica.css}" rel="stylesheet" href="/css/publica.css">
+</head>
+<body>
+    <header class="planes-header">
+        <div class="planes-hero-bg" aria-hidden="true"></div>
+        <div class="nav-header nav-header-planes" id="navHeader">
+            <div class="d-flex flex-wrap align-items-center header header-publica">
+                <a href="/" class="d-flex align-items-center text-decoration-none logo-brand-link">
+                    <span class="logo-nav-circle">
+                        <img th:src="@{/img/logo.png}" src="/img/logo.png" alt="Mattfuncional" class="logo-nav-img" onerror="this.src='/img/not_imagen.png'">
+                    </span>
+                    <span class="text-white fw-bold ms-2 nav-brand-text">MATTFUNCIONAL</span>
+                </a>
+                <ul class="nav align-items-center nav-desktop-publica" style="display: none;">
+                    <li class="nav-item"><a href="/" class="nav-link">Inicio</a></li>
+                    <li class="nav-item"><a href="/planes" class="nav-link active">Planes</a></li>
+                    <li class="nav-item"><a href="/#contacto" class="nav-link">Contacto</a></li>
+                    <li class="nav-item">
+                        <a href="/login" class="nav-link" title="Iniciar sesión"><i class="fas fa-sign-in-alt me-1"></i><span class="d-none d-lg-inline">Iniciar sesión</span></a>
+                    </li>
+                </ul>
+                <div class="nav-mobile-publica">
+                    <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMobileMenu" aria-controls="offcanvasMobileMenu">
+                        <i class="fas fa-bars text-white"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="offcanvas offcanvas-start offcanvas-publica" tabindex="-1" id="offcanvasMobileMenu">
+            <div class="offcanvas-header">
+                <span class="text-white fw-bold">MATTFUNCIONAL</span>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+            </div>
+            <div class="offcanvas-body">
+                <a href="/" class="btn btn-custom w-100 mb-2 text-start">Inicio</a>
+                <a href="/planes" class="btn btn-custom w-100 mb-2 text-start">Planes</a>
+                <a href="/#contacto" class="btn btn-custom w-100 mb-2 text-start">Contacto</a>
+                <a href="/login" class="btn btn-custom w-100 mb-2 text-start"><i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="about" id="planes">
+            <div class="container">
+                <div th:if="${param.ok != null && param.ok[0] == 'consulta'}" class="alert alert-success">Gracias por tu consulta. Te responderemos a la brevedad.</div>
+                <h1 class="planes-titulo">Planes</h1>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
+                    <div class="col" th:each="plan : ${planes}">
+                        <div class="card plan-card">
+                            <div class="card-header plan-card-header">
+                                <h4 class="plan-nombre" th:text="${plan.nombre}">Plan</h4>
+                            </div>
+                            <div class="card-body plan-card-body">
+                                <div class="plan-precio" th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</div>
+                                <p class="plan-descripcion" th:if="${plan.descripcion}" th:text="${plan.descripcion}">Descripción</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-lg-5 mb-4">
+                        <h4 class="text-white mb-3">Servicios</h4>
+                        <ul class="list-unstyled text-white">
+                            <li><i class="fas fa-check strong me-2"></i>Entrenamiento personalizado</li>
+                            <li><i class="fas fa-check strong me-2"></i>Multi-horarios y flexibilidad</li>
+                            <li><i class="fas fa-check strong me-2"></i>Presencial y virtual</li>
+                            <li><i class="fas fa-check strong me-2"></i>Rutinas y series a tu medida</li>
+                        </ul>
+                        <h4 class="text-white mt-4 mb-2">Días y horarios</h4>
+                        <p class="text-white-50" th:text="${diasHorarios != null ? diasHorarios : 'Consultar'}">Lunes a Viernes 7:00–21:00</p>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="bg-grey-planes p-4">
+                            <h4 class="mb-3">Consultanos</h4>
+                            <p class="text-muted mb-3">¿Tenés alguna duda acerca de nuestros planes?</p>
+                            <form th:action="@{/public/consulta}" method="post" class="form-consulta">
+                                <div class="mb-2">
+                                    <input class="form-control" name="nombre" placeholder="Nombre" type="text" required>
+                                </div>
+                                <div class="mb-2">
+                                    <input class="form-control" name="email" placeholder="Email" type="email" required>
+                                </div>
+                                <div class="mb-2">
+                                    <textarea class="form-control" name="mensaje" placeholder="Mensaje" rows="4"></textarea>
+                                </div>
+                                <button class="btn btn-custom" type="submit">ENVIAR</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <span class="fw-bold text-uppercase">Mattfuncional</span>
+                    <p class="mb-0 small text-white-50">La nueva forma de entrenar</p>
+                    <p class="mb-0 mt-2 small">
+                        <a th:href="${direccionUrl}" href="https://www.google.com/maps/place/Aconcagua+17,+B1704+Ramos+Mej%C3%ADa,+Provincia+de+Buenos+Aires" target="_blank" rel="noopener" class="footer-link text-white-50"><i class="fas fa-map-marker-alt me-1"></i><span th:text="${direccion}">Aconcagua 17, Ramos Mejía</span></a>
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
+                    <a th:href="${instagramUrl}" href="#" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="copy">
+        <div class="container">
+            <div class="copy-content">
+                <small class="copy-copyright">© <span th:text="${#temporals.createNow().year}">2026</span> <strong>Mattfuncional.</strong> Todos los derechos reservados.</small>
+                <small class="copy-dev">Desarrollado por: Gustavo Lucero</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="wapp">
+        <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; justify-content: center; background-color: #25D366;">
+            <i class="fab fa-whatsapp text-white fa-2x"></i>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            var header = document.getElementById('navHeader');
+            if (header) {
+                window.addEventListener('scroll', function() {
+                    header.classList.toggle('small-header', window.scrollY > 50);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

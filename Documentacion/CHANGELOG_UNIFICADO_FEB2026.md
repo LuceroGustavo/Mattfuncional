@@ -18,6 +18,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 10. [Mis Ejercicios: vista lista, actualización de imágenes, redirects y placeholder](#10-mis-ejercicios-vista-lista-actualización-de-imágenes-redirects-y-placeholder-feb-2026)
 11. [Fase 8 – Página pública del gimnasio](#11-fase-8--página-pública-del-gimnasio-feb-2026)
 12. [Reparación calendario – slot_config duplicados y herramientas servidor](#12-reparación-calendario--slot_config-duplicados-y-herramientas-servidor-feb-2026)
+13. [Página Planes y administración pública](#13-página-planes-y-administración-pública-feb-2026)
 
 ---
 
@@ -361,4 +362,40 @@ Luego en el servidor: opción 5 (Despliegue completo) para aplicar los cambios.
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login. Reparación calendario slot_config (Feb 2026): findFirst, setCapacidadMaxima robusto, opciones 12–14 en menú servidor.*
+## 13. Página Planes y administración pública (Feb 2026)
+
+**Resumen:** Nueva página `/planes` con cards de planes, servicios, días/horarios y formulario de consulta. Panel de administración en `/profesor/pagina-publica` para que el profesor edite precios, planes y datos de contacto sin intervención de developer. Imagen de fondo en header de Planes.
+
+### 13.1 Backend
+
+- **Entidad `PlanPublico`:** nombre, descripcion, precio, vecesPorSemana, orden, activo.
+- **Entidad `ConfiguracionPaginaPublica`:** clave-valor (whatsapp, instagram, direccion, dias_horarios, telefono).
+- **Repositorios y servicios:** PlanPublicoService, ConfiguracionPaginaPublicaService.
+- **Seed inicial:** 4 planes (1x, 2x, 3x, opción libre) y config con placeholders. Se ejecuta en DataInitializer.
+
+### 13.2 Página pública Planes
+
+- **Navbar:** "Servicios" reemplazado por "Planes" (index y planes).
+- **Ruta `/planes`:** Cards de planes desde BD, sección servicios, días/horarios desde config, formulario de consulta (POST `/public/consulta`).
+- **Imagen de fondo:** `contacto 2 .png` detrás del navbar (estilo RedFit, larga y poco alta).
+- **SecurityConfig:** `/planes` y `/public/**` permitAll.
+
+### 13.3 Panel de administración
+
+- **Enlace** en `/profesor/usuarios-sistema`: "Administrar página pública".
+- **Ruta `/profesor/pagina-publica`:** Editar configuración (WhatsApp, Instagram, dirección, días/horarios) y planes (crear, editar, eliminar).
+- **Acceso:** ADMIN y DEVELOPER.
+
+### 13.4 Archivos creados / modificados
+
+- **Creados:** PlanPublico.java, ConfiguracionPaginaPublica.java, PlanPublicoRepository, ConfiguracionPaginaPublicaRepository, PlanPublicoService, ConfiguracionPaginaPublicaService, planes-publica.html, pagina-publica-admin.html, PaginaPublicaAdminController, PublicoController.
+- **Modificados:** index-publica.html (navbar Planes, enlaces), DataInitializer (seed planes y config), PortalControlador (GET /planes), SecurityConfig, usuarios-sistema.html (card Administrar página pública), publica.css (estilos planes, imagen fondo).
+- **Imagen:** `img/publica/contacto 2 .png` usada como fondo del header en Planes.
+
+### 13.5 Nota
+
+La configuración editada en el panel afecta **solo la página Planes** por ahora. El index (footer, contacto, botón flotante) sigue con valores hardcodeados. Opcional: integrar config en index en una fase posterior.
+
+---
+
+*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login. Reparación calendario slot_config (Feb 2026): findFirst, setCapacidadMaxima robusto, opciones 12–14 en menú servidor. Página Planes (Feb 2026): /planes, panel administración, PlanPublico, ConfiguracionPaginaPublica, imagen fondo.*

@@ -1,4 +1,4 @@
-/* Página pública Mattfuncional - Estilo referencia RedFit */
+/* P?gina p?blica Mattfuncional - Estilo referencia RedFit */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
 body { font-family: 'Montserrat', sans-serif; margin: 0; }
@@ -24,7 +24,7 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
 .carousel-indicators { bottom: 1rem; }
 .carousel-indicators [data-bs-target] { border: 2px solid #85CB46; border-radius: 50%; height: 14px; width: 14px; background-color: transparent; }
 .carousel-indicators .active { background-color: #85CB46; }
-/* Transición entre slides más lenta (aprox. 1 s más que por defecto) */
+/* Transici?n entre slides m?s lenta (aprox. 1 s m?s que por defecto) */
 .carousel-fade .carousel-item { transition: opacity 1.5s ease-in-out; }
 /* Hero fijo al viewport: sin scroll, video/imagen recortados con object-fit: cover */
 #carouselHome { max-height: 100vh; overflow: hidden; }
@@ -32,7 +32,7 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
 .carousel-item { position: relative; height: 100vh; }
 .carousel-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); pointer-events: none; z-index: 1; }
 .carousel-item img, .carousel-item video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-/* Dos videos hero: escritorio 2:1 (>=768px), móvil 9:16 (<768px) */
+/* Dos videos hero: escritorio 2:1 (>=768px), m?vil 9:16 (<768px) */
 .video-hero-desktop { display: none; }
 .video-hero-mobile { display: block; }
 @media (min-width: 768px) {
@@ -44,7 +44,7 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
   .video-hero-mobile { display: block; }
 }
 .carousel-caption { z-index: 2; }
-/* Retraso 4 s del módulo del primer slide para que se vea la animación del video */
+/* Retraso 4 s del m?dulo del primer slide para que se vea la animaci?n del video */
 .hero-caption-delay { transition: opacity 0.6s ease; }
 .hero-indicators-delay { transition: opacity 0.6s ease; }
 body.hero-delay-pending #carouselHome .carousel-item:first-child .hero-caption-delay { opacity: 0; pointer-events: none; }
@@ -52,6 +52,17 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
 
 .copy { background-color: #000000; color: #ffffff; padding: 1rem 0; }
 .copy small { font-size: 0.9rem; }
+.copy-content { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+.copy-copyright { text-align: center; }
+.copy-dev { text-align: right; width: 100%; }
+@media (max-width: 575px) {
+  .copy-dev { text-align: center; }
+}
+/* Footer: ubicaci?n y iconos m?s grandes */
+footer .footer-link { text-decoration: none; transition: color 0.2s; }
+footer .footer-link:hover { color: #85CB46 !important; }
+footer .footer-icon { font-size: 1.5rem; transition: transform 0.2s; }
+footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 
 .nav-header { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 24%, rgba(0,0,0,0) 100%); height: 15vh; min-height: 80px; padding: 1rem 2rem; position: absolute; top: 0; width: 100%; z-index: 999; }
 .nav-header .header-publica { width: 100%; }
@@ -60,7 +71,7 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
 .nav-header .nav-link:focus, .nav-header .nav-link:active { color: #85CB46 !important; }
 .nav-header .nav-link i { color: inherit; }
 .brand-publica { max-width: 180px; height: auto; }
-/* Logo + texto MATTFUNCIONAL siempre visible; en móvil más compacto */
+/* Logo + texto MATTFUNCIONAL siempre visible; en m?vil m?s compacto */
 .nav-brand-text { font-size: 1.2rem; white-space: nowrap; }
 .logo-nav-circle { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); }
 .logo-nav-img { width: 100%; height: 100%; object-fit: cover; }
@@ -73,7 +84,7 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
 .offcanvas-publica .offcanvas-header { background-color: #141414; }
 .offcanvas-publica .offcanvas-body .btn-custom { text-align: left; margin-bottom: 0.5rem; }
 
-/* Botones de contacto: flex con wrap para evitar superposición en pantallas chicas */
+/* Botones de contacto: flex con wrap para evitar superposici?n en pantallas chicas */
 .contacto-botones {
   display: flex;
   flex-wrap: wrap;
@@ -85,7 +96,7 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
   flex-shrink: 0;
   white-space: nowrap;
 }
-/* Pantallas muy chicas: botones apilados verticalmente para evitar cualquier superposición */
+/* Pantallas muy chicas: botones apilados verticalmente para evitar cualquier superposici?n */
 @media (max-width: 380px) {
   .contacto-botones {
     flex-direction: column;
@@ -114,9 +125,42 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
   .nav-header .logo-brand-link { margin-right: auto; }
 }
 
+/* P?gina Planes: imagen de fondo detr?s del navbar (estilo RedFit) */
+.planes-header { position: relative; min-height: 18vh; }
+.planes-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 18vh;
+  background-image: url('/img/publica/contacto%202%20.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+.planes-header .nav-header-planes {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%);
+  padding: 1.5rem 2rem;
+  min-height: 80px;
+}
+.planes-header .nav-header-planes.small-header { background: rgba(20,20,20,0.98); }
+.planes-header main { padding-top: 1rem; }
+.plan-card { border: 1px solid #eee; border-radius: 0; }
+.plan-card-header { background-color: #333; border-bottom: none; }
+.plan-card-header .plan-nombre { color: #86CC47; font-weight: bold; text-transform: uppercase; margin: 0; }
+.plan-card-body { background-color: #DEDEDE; }
+.plan-precio { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; }
+.plan-descripcion { color: #333; font-size: 0.9rem; margin-bottom: 0; }
+.bg-grey-planes { background-color: #DEDEDE; border-radius: 4px; }
+.bg-grey-planes .form-control { border-radius: 0; margin-bottom: 0.5rem; }
+.planes-titulo { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 2rem; text-transform: uppercase; }
+
 @media (max-width: 767px) {
   .nav-desktop-publica { display: none !important; }
-  /* Logo + texto a la izquierda en móvil (sin centrado) */
+  /* Logo + texto a la izquierda en m?vil (sin centrado) */
   .nav-header .header-publica { justify-content: flex-start !important; }
   .nav-header .logo-brand-link { margin-right: 0; max-width: 80%; }
   .nav-brand-text { font-size: 0.95rem; }

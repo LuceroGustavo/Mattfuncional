@@ -1,16 +1,80 @@
 # Plan – Página pública del gimnasio (Fase 8)
 
 **Referencia de estilo:** [RedFit](https://redfit.com.ar/) – diseño sencillo y vistoso, imágenes de fondo en carrusel, header oscuro, botón flotante de WhatsApp.  
-**Objetivo:** Página de inicio pública (index) para Mattfuncional: promoción del gimnasio, servicios, contacto y redes. Quien entra a la app ve primero esta página; el acceso al login del profesor queda por ahora en un ícono/ruedita que después se puede quitar.
+**Referencia página Planes:** `Pagina de referencia/Plan.htm` – cards de planes con precios, formulario de consulta, sección "Consultanos".  
+**Objetivo:** Página de inicio pública (index) para Mattfuncional: promoción del gimnasio, planes, contacto y redes. Quien entra a la app ve primero esta página; el acceso al login del profesor queda por ahora en un ícono/ruedita que después se puede quitar.
 
 ### Estado de implementación (Feb 2026)
 - **Implementado:** La ruta `/` muestra la landing pública (`index-publica.html`). Hero con carrusel (video + imágenes en `/img/publica/`), navbar flotante con logo, Inicio/Servicios/Contacto e **ícono “Iniciar sesión”** que lleva a `/login`. Sección “Rasgos que nos caracterizan” con 3 columnas, bloque contacto, footer y botón flotante WhatsApp. Estilos en `css/publica.css`. Detalle en `CHANGELOG_UNIFICADO_FEB2026.md` §11.
 - **Ajustes posteriores (§11.5):** Video escritorio `video-inicial.mp4` (2:1), móvil `video-movil.mp4` (9:16); poster `fondo-inicial.png`; logo navbar `/img/logo.png` en círculo; hero fijo 100vh sin scroll; módulo hero visible a los 5 s; navbar con textos blancos, logo + “MATTFUNCIONAL” a la izquierda también en móvil; carrusel 6 s entre slides y transición 1,5 s.
-- **Pendiente (contenido):** Reemplazar placeholders de WhatsApp e Instagram por datos reales; opcional: dirección, horarios, formulario de contacto con backend.
+- **Pendiente (contenido):** Reemplazar placeholders de WhatsApp e Instagram por datos reales.
+- **Implementado (Feb 2026):** Página Planes (`/planes`), administración desde panel (`/profesor/pagina-publica`), backend con entidades `PlanPublico` y `ConfiguracionPaginaPublica`. Navbar: "Servicios" reemplazado por "Planes". Imagen de fondo `contacto 2 .png` en header de Planes (estilo RedFit). Ver §13 en CHANGELOG_UNIFICADO_FEB2026.md.
 
 ---
 
-## 1. Referencia: RedFit y puntos a tener en cuenta
+## 0. Nueva fase: Página Planes y administración pública
+
+### 0.1 Cambio en el navbar ✅
+
+- **Reemplazar "Servicios" por "Planes"** en el navbar de la página pública.
+- El enlace lleva a `/planes` (nueva ruta pública).
+
+### 0.2 Nueva página Planes (`/planes`) ✅
+
+Estructura inspirada en `Pagina de referencia/Plan.htm`, adaptada a Mattfuncional. Imagen de fondo `contacto 2 .png` detrás del navbar (larga, poco alto).
+
+| Sección | Contenido |
+|---------|------------|
+| **Planes (cards)** | Tarjetas con nombre del plan, precio, descripción. Por defecto: 4 planes semanales (1 vez/semana, 2 veces, 3 veces, opción libre). El profesor puede agregar más desde el panel. |
+| **Servicios** | Resumen de lo que ofrece el gimnasio (entrenamiento personalizado, presencial/virtual, etc.). |
+| **Días y horarios** | Texto o lista editable desde el panel (ej. "Lunes a Viernes 7:00–21:00"). |
+| **Formulario de consulta** | Nombre, email, mensaje. Envía a endpoint público; opcional: guardar en BD o enviar mail. |
+
+### 0.3 Administración desde el panel (sin developer) ✅
+
+**Objetivo:** El profesor puede cambiar precios, planes, datos de contacto, etc., sin necesidad de que un developer modifique código.
+
+**Ubicación en el panel:** En `/profesor/usuarios-sistema` (Administración de usuarios del sistema) hay:
+- Mi perfil
+- Crear usuario
+- Listado de usuarios
+- **Backups y descargas** (pendiente de implementar)
+
+Se agrega una nueva sección: **"Administrar página pública"** (o nombre similar), que puede ir junto a Backups o como card separada.
+
+**Datos editables desde el panel:**
+
+| Dato | Uso | Origen |
+|------|-----|--------|
+| Teléfono / WhatsApp | Enlaces wa.me, footer, botón flotante | BD o config |
+| Instagram | URL del perfil | BD o config |
+| Dirección | Footer, sección contacto | BD o config (ya tenemos Aconcagua 17) |
+| Días y horarios | Texto en página Planes | BD |
+| Planes | Nombre, precio, descripción, veces/semana | BD (entidad `PlanPublico` o similar) |
+
+### 0.4 Modelo de datos para planes
+
+**Entidad `PlanPublico` (o `PlanPaginaPublica`):**
+- id, nombre (ej. "1 vez por semana"), descripcion (opcional), precio, vecesPorSemana (1, 2, 3, null=libre), orden (para ordenar las cards), activo.
+
+**Entidad `ConfiguracionPaginaPublica` (o tabla clave-valor):**
+- Claves: `whatsapp`, `instagram`, `direccion`, `dias_horarios`, `telefono`.
+- Valores: texto libre. Se consultan desde la página pública.
+
+### 0.5 Información solicitada al gimnasio
+
+| Dato | Estado | Uso |
+|------|--------|-----|
+| Teléfono de contacto | Pendiente | WhatsApp, footer |
+| Instagram | Pendiente | Enlaces, footer |
+| Dirección | ✅ Aconcagua 17, Ramos Mejía | Footer, Google Maps |
+| Días y horarios | Pendiente | Página Planes |
+| Tipo de planes | Mensuales, semanales, anuales | Clasificación de planes |
+| Planes: veces/semana + precio | Pendiente (4 iniciales: 1x, 2x, 3x, libre) | Cards en /planes |
+
+**Nota:** Se puede empezar el desarrollo con datos placeholder; el gimnasio completa después y se actualizan desde el panel.
+
+---
 
 Ideas tomadas de la página de referencia [redfit.com.ar](https://redfit.com.ar/):
 
@@ -151,6 +215,63 @@ Estos puntos se llevan a **bloques o cards** en la sección “Servicios” o �
 
 7. **Ajustes responsive y contenido final**  
    Reemplazar placeholders por fotos y datos reales cuando estén; revisar en distintos dispositivos.
+
+---
+
+---
+
+## 8. Plan de desarrollo – Página Planes y administración
+
+### Fase A: Backend y modelo de datos (se puede empezar ya)
+
+| # | Tarea | Dependencias |
+|---|--------|---------------|
+| A1 | Crear entidad `PlanPublico` (id, nombre, descripcion, precio, vecesPorSemana, orden, activo) | Ninguna |
+| A2 | Crear entidad/tabla `ConfiguracionPaginaPublica` (clave, valor) para whatsapp, instagram, direccion, dias_horarios, telefono | Ninguna |
+| A3 | Crear `PlanPublicoRepository`, `ConfiguracionPaginaPublicaRepository` | A1, A2 |
+| A4 | Crear `PlanPublicoService`, `ConfiguracionPaginaPublicaService` | A3 |
+| A5 | Seed inicial: 4 planes (1x, 2x, 3x, libre) con precios placeholder | A4 |
+| A6 | Seed inicial: config con direccion actual, placeholders para whatsapp/instagram | A4 |
+
+### Fase B: Panel de administración
+
+| # | Tarea | Dependencias |
+|---|--------|---------------|
+| B1 | En `usuarios-sistema.html`: agregar card "Administrar página pública" (o sección junto a Backups) | Ninguna |
+| B2 | Crear `PaginaPublicaController` (o extender existente) con rutas `/profesor/pagina-publica` | A4 |
+| B3 | Vista para editar planes: listar, crear, editar, eliminar (orden, nombre, precio, descripción) | B1, B2 |
+| B4 | Vista para editar configuración: WhatsApp, Instagram, dirección, días y horarios, teléfono | B1, B2 |
+
+### Fase C: Página pública Planes
+
+| # | Tarea | Dependencias |
+|---|--------|---------------|
+| C1 | Cambiar navbar: "Servicios" → "Planes", enlace a `/planes` | Ninguna |
+| C2 | Crear `planes-publica.html` (o `planes.html`) con estructura de `Plan.htm` | A4 |
+| C3 | Sección cards de planes: iterar desde BD con `PlanPublicoService` | C2, A4 |
+| C4 | Sección servicios: texto resumen (puede ser estático o desde config) | C2 |
+| C5 | Sección días y horarios: texto desde `ConfiguracionPaginaPublica` | C2, A4 |
+| C6 | Formulario de consulta: POST a `/public/consulta` (guardar en BD o solo mensaje de éxito) | C2 |
+| C7 | `PortalControlador` o `PublicoController`: GET `/planes` que devuelve la vista con datos | C2 |
+| C8 | SecurityConfig: permitir `/planes` y `/public/**` sin autenticación | C7 |
+
+### Fase D: Integración y datos reales
+
+| # | Tarea | Dependencias |
+|---|--------|---------------|
+| D1 | Reemplazar en index-publica y planes los enlaces hardcodeados por datos de `ConfiguracionPaginaPublica` | B4, C2 |
+| D2 | El profesor completa WhatsApp, Instagram, días/horarios desde el panel | B4 |
+| D3 | El profesor ajusta precios de planes desde el panel | B3 |
+
+### ¿Se puede empezar aunque falten datos?
+
+**Sí.** Se puede arrancar con:
+- Planes con precios placeholder (ej. $X, $Y) que el profesor cambia después.
+- Config con placeholders para WhatsApp e Instagram.
+- Dirección ya tenemos (Aconcagua 17).
+- Días y horarios: texto genérico hasta que el gimnasio lo complete.
+
+Orden sugerido para empezar: **A1 → A2 → A3 → A4 → A5 → A6** (backend y seed), luego **C1 → C2 → C7 → C8** (página Planes básica con datos de BD), y después **B1 → B2 → B3 → B4** (panel de administración).
 
 ---
 
