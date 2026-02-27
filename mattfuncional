@@ -10,8 +10,9 @@ LOG_FILE="$APP_DIR/logs/mattfuncional.log"
 PID_FILE="$APP_DIR/mattfuncional.pid"
 APP_PORT="${MATT_APP_PORT:-8080}"
 SPRING_PROFILE="donweb"
-# Cargar variables de BD (ej. MATT_DB_PASSWORD) desde .bashrc para que la app arranque con contraseña
+# Cargar variables de BD: .bashrc (sesión interactiva) o archivo .matt_db_password en el proyecto (servidor)
 [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+[ -z "$MATT_DB_PASSWORD" ] && [ -f "$APP_DIR/.matt_db_password" ] && export MATT_DB_PASSWORD=$(cat "$APP_DIR/.matt_db_password" | tr -d '\n\r')
 JAVA_DB_OPTS=""
 [ -n "$MATT_DB_USER" ] && JAVA_DB_OPTS="$JAVA_DB_OPTS -Dspring.datasource.username=$MATT_DB_USER"
 [ -n "$MATT_DB_PASSWORD" ] && JAVA_DB_OPTS="$JAVA_DB_OPTS -Dspring.datasource.password=$MATT_DB_PASSWORD"

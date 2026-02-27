@@ -38,6 +38,9 @@ Thumbs.db
 application-local.properties
 application-local.yml
 
+# Contraseña BD en servidor (no versionar)
+.matt_db_password
+
 # No subir binarios pesados de uploads (opcional: quitar si querés versionar imágenes)
 # uploads/ejercicios/*.webp
 # uploads/ejercicios/*.gif
