@@ -75,6 +75,18 @@ public class PaginaPublicaAdminController {
         return "redirect:/profesor/pagina-publica";
     }
 
+    @PostMapping("/consulta/eliminar")
+    public String eliminarConsulta(@AuthenticationPrincipal Usuario usuarioActual,
+                                   @RequestParam Long id,
+                                   RedirectAttributes ra) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        consultaService.eliminar(id);
+        ra.addFlashAttribute("ok", "Consulta eliminada");
+        return "redirect:/profesor/pagina-publica";
+    }
+
     @PostMapping("/config")
     public String guardarConfig(@AuthenticationPrincipal Usuario usuarioActual,
                                 @RequestParam(required = false) String whatsapp,

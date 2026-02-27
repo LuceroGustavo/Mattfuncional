@@ -63,6 +63,7 @@
                         <th>Email</th>
                         <th>Teléfono</th>
                         <th>Mensaje</th>
+                        <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -73,9 +74,15 @@
                         <td th:if="${c.email == null || c.email.isEmpty()}" class="text-muted">-</td>
                         <td th:text="${c.telefono != null && !c.telefono.isEmpty() ? c.telefono : '-'}">-</td>
                         <td><span class="small text-muted" th:text="${c.mensaje != null && !c.mensaje.isEmpty() ? c.mensaje : '-'}">-</span></td>
+                        <td>
+                            <form th:action="@{/profesor/pagina-publica/consulta/eliminar}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta consulta?');">
+                                <input type="hidden" name="id" th:value="${c.id}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                        </td>
                     </tr>
                     <tr th:if="${consultas == null || consultas.isEmpty()}">
-                        <td colspan="5" class="text-center text-muted">Sin consultas aún.</td>
+                        <td colspan="6" class="text-center text-muted">Sin consultas aún.</td>
                     </tr>
                     </tbody>
                 </table>

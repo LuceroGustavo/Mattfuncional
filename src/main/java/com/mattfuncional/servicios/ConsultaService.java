@@ -30,4 +30,11 @@ public class ConsultaService {
                 .limit(limite)
                 .toList();
     }
+
+    @Transactional
+    public void eliminar(Long id) {
+        if (id != null && consultaRepository.existsById(id)) {
+            consultaRepository.deleteById(id);
+        }
+    }
 }

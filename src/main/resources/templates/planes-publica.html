@@ -145,7 +145,12 @@
         <div class="container">
             <div class="copy-content">
                 <small class="copy-copyright">© <span th:text="${#temporals.createNow().year}">2026</span> <strong>Mattfuncional.</strong> Todos los derechos reservados.</small>
-                <small class="copy-dev">Desarrollado por: Gustavo Lucero</small>
+                <small class="copy-dev d-flex align-items-center justify-content-center justify-content-md-end gap-2">
+                    Desarrollado por: Gustavo Lucero
+                    <span class="copy-dev-logo" aria-hidden="true">
+                        <img th:src="@{/img/publica/Logo footer sin fondo .png}" src="/img/publica/Logo%20footer%20sin%20fondo%20.png" alt="Gustavo Lucero" class="copy-dev-logo-img" onerror="this.style.display='none'">
+                    </span>
+                </small>
             </div>
         </div>
     </div>

@@ -55,8 +55,10 @@ body.hero-delay-pending #carouselHome .hero-indicators-delay { opacity: 0; point
 .copy-content { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
 .copy-copyright { text-align: center; }
 .copy-dev { text-align: right; width: 100%; }
+.copy-dev-logo { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); }
+.copy-dev-logo-img { width: 100%; height: 100%; object-fit: contain; }
 @media (max-width: 575px) {
-  .copy-dev { text-align: center; }
+  .copy-dev { text-align: center; justify-content: center !important; }
 }
 /* Footer: ubicaci?n y iconos m?s grandes */
 footer .footer-link { text-decoration: none; transition: color 0.2s; }
