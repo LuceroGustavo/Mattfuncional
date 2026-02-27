@@ -93,7 +93,7 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 
 ---
 
-## 4. Opciones del menú (1-14)
+## 4. Opciones del menú (1-11)
 
 | Opción | Acción |
 |--------|--------|
@@ -108,9 +108,8 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 | 9 | Información del proyecto |
 | 10 | Ver espacio en disco |
 | 11 | Salir |
-| 12 | **Ver logs en vivo** (streaming, como `tail -f`) |
-| 13 | Instalar MySQL Workbench (versión de escritorio) |
-| 14 | Ejecutar MySQL Workbench |
+
+*Nota: No se modificará por ahora el menú del servidor (sin instalación de Workbench ni scripts adicionales).*
 
 ---
 
@@ -297,13 +296,6 @@ Puede deberse a **duplicados en `slot_config`** o a **varios usuarios con el mis
    ```
    En la app, en **Usuarios del sistema** (logueado como developer) se muestra un aviso amarillo si hay correos duplicados. Resolver desde la interfaz (eliminar o unificar) o en BD con cuidado.
 4. **Despliegue completo** (opción 5) para aplicar la versión actualizada.
-
-### MySQL Workbench en servidor sin escritorio
-
-MySQL Workbench es una aplicación gráfica. En un VPS sin entorno de escritorio:
-
-- **Opción A:** Conectá por SSH con X11 forwarding: `ssh -X -p 5638 root@149.50.144.53` y ejecutá la opción 14. La ventana se abrirá en tu PC.
-- **Opción B:** Usá la Consola VNC de Donweb con un escritorio instalado (XFCE, etc.) y ejecutá la opción 14 desde ahí.
 
 ---
 

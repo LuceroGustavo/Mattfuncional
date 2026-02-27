@@ -11,7 +11,7 @@
 
 - **Proyecto:** Mattfuncional (evolución de MiGym).
 - **Panel único:** Profesor (roles DEVELOPER, ADMIN y AYUDANTE; no hay panel alumno ni panel admin separado).
-- Este documento concentra **todos los avances**; los planes de desarrollo y pendientes están en [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md). La lista de mejoras concretas (por implementar / implementado) está en [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
+- Este documento concentra **todos los avances**; los planes de desarrollo y pendientes detallados están en [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
 ---
 
@@ -161,4 +161,4 @@
 
 ---
 
-*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública). Para pendientes y próximos pasos, ver AYUDA_MEMORIA.md y PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md.*

@@ -113,7 +113,7 @@ Con **4,95 GB usados de 25 GB** actualmente, sumando este uso **no deberías ten
 **Recomendaciones para evitar inconvenientes a futuro:**
 
 1. **Logs:** Configurar rotación por tamaño o por tiempo para que no llenen el disco (p. ej. Logback con política por tamaño/antigüedad).
-2. **Base de datos:** Cada tanto revisar el tamaño de la BD; el mayor crecimiento vendrá de **asistencia**. Está previsto en el plan de desarrollo implementar un **método de depuración anual de datos** (archivar o purgar asistencia y eventualmente otros datos con más de 1 año). Ver checklist en [ESTADO-PLANES-Y-PENDIENTES.md](ESTADO-PLANES-Y-PENDIENTES.md) y [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
+2. **Base de datos:** Cada tanto revisar el tamaño de la BD; el mayor crecimiento vendrá de **asistencia**. Está previsto en el plan de desarrollo implementar un **método de depuración anual de datos** (archivar o purgar asistencia y eventualmente otros datos con más de 1 año). Ver checklist en [ESTADO-PLANES-Y-PENDIENTES.md](ESTADO-PLANES-Y-PENDIENTES.md) y [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 3. **Imágenes:** Mantener ejercicios con imágenes optimizadas (WebP/JPEG comprimido) para no disparar el almacenamiento ni la transferencia.
 4. **RAM:** Si en el futuro sumás más usuarios concurrentes o notás lentitud, el primer escalado razonable es **subir a 4 GB RAM** antes de tocar CPU.
 

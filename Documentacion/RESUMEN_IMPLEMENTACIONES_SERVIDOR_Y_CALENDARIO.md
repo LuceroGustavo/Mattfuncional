@@ -1,18 +1,12 @@
 # Resumen: implementaciones servidor y calendario
 
-Referencia rápida de lo que está implementado y qué scripts usar. Para más detalle: [DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md), [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
+Referencia rápida de lo que está implementado y qué scripts usar. Para más detalle: [DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md), [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
 ---
 
 ## Menú del servidor (`./mattfuncional`)
 
-| Opción | Acción | Estado |
-|--------|--------|--------|
-| **12** | Ver logs en vivo (streaming, `tail -f`) | ✅ Implementado |
-| **13** | Instalar MySQL Workbench | ✅ Implementado |
-| **14** | Ejecutar MySQL Workbench (requiere X11 si es remoto) | ✅ Implementado |
-
-Desde casa (SSH sin restricciones): opción 12 para logs; 13 para instalar Workbench; 14 para abrir Workbench (con `ssh -X` si querés la ventana en tu PC).
+Opciones 1–11: parar, actualizar, compilar, iniciar, despliegue completo, estado, logs, reiniciar, información, espacio en disco, salir. Ver [DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) para la lista completa. *No se modificará por ahora el menú (sin Workbench ni scripts adicionales).*
 
 ---
 

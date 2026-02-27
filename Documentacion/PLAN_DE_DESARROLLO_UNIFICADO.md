@@ -3,8 +3,8 @@
 **Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
 
 **Última actualización:** Febrero 2026  
-**Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO y PLAN_MODIFICACIONES (ya eliminados); referencias a PLAN_GRUPOS_MUSCULARES_ENTIDAD.md.  
-**Uso:** Un solo documento con la visión del proyecto, fases, lo que se elimina, lo que falta y checklist. Los avances implementados están en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md). Las tareas concretas por implementar están en [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
+**Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO, PLAN_MODIFICACIONES y AYUDA_MEMORIA (ya eliminados).  
+**Uso:** Un solo documento con la visión del proyecto, fases, checklist y pendientes detallados (ítem por ítem). Los avances implementados están en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md).
 
 ---
 
@@ -118,12 +118,53 @@
 
 ---
 
-## 9. Documentos de referencia
+## 9. Pendientes detallados (ítem por ítem)
+
+Lista de mejoras para implementar o ya implementadas. Se van agregando aquí para no olvidarlas.
+
+### Creación de rutina – Orden de las series
+
+- **Qué falta:** En la creación/edición de rutina, poder **cambiar el orden** de las series (reordenar).
+- **Estado:** **Implementado.** En crear rutina: lista "Series seleccionadas" con botones Subir/Bajar. En editar rutina: botones Subir/Bajar en cada serie. El campo `orden` en `Serie` se persiste.
+
+### Calendario semanal – Dar presente / falta desde el calendario
+
+- **Qué falta:** Poder **dar el presente** (o marcar falta) al usuario directamente desde el calendario semanal.
+- **Estado:** **Implementado.** Puntos verde/rojo/gris por alumno y slot; clic alterna presente/ausente vía API. Vista Mis Alumnos unificada. Ver `CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md`.
+
+### Calendario semanal – Acceso al detalle del usuario desde el botón del usuario
+
+- **Qué falta:** Desde el **botón del usuario** en cada celda del calendario, poder **ingresar al detalle del usuario** (ficha del alumno).
+- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
+
+### Calendario semanal – Día por excepción para un alumno (recuperar clase)
+
+- **Qué falta:** Que el profesor pueda **agregar a un alumno un día por excepción** (ej. recuperar clase) en un día/horario que no es su horario habitual.
+- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
+
+### Asistencia – Marcar ausente automáticamente si pasó el horario sin presente
+
+- **Qué falta:** Si pasó el día y horario sin que el alumno tenga presente, registrar como **ausente** de forma automática.
+- **Estado:** **Implementado (backend, on-demand).** Opcional a futuro: cron nocturno.
+
+### Depuración anual de datos
+
+- **Qué falta:** Crear un **método o proceso programado** de **depuración anual de datos**: archivar o eliminar datos antiguos (ej. asistencia con más de 1 año).
+- **Plazo anual:** Conservar al menos 12 meses; archivar a export antes de purgar si hace falta.
+- **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+
+### Manual del usuario
+
+- **Qué falta:** Mantener **actualizado** [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV**, usuarios del sistema.
+- **Estado:** El manual existe; falta revisar que pizarra/sala TV y otros flujos recientes estén bien documentados.
+
+---
+
+## 10. Documentos de referencia
 
 | Documento | Contenido |
 |----------|------------|
 | [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md) | Todo lo implementado hasta la fecha. |
-| [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) | Lista de mejoras (ítem por ítem, estado implementado / por implementar). |
 | [PLAN_GRUPOS_MUSCULARES_ENTIDAD.md](PLAN_GRUPOS_MUSCULARES_ENTIDAD.md) | Plan e implementación de grupos musculares (ya hecho). |
 | [OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md](OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md) | Imágenes 1–60 en `uploads/ejercicios/`. |
 | `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
@@ -131,4 +172,4 @@
 
 ---
 
-*Este plan unificado reemplaza el uso de los planes dispersos para la planificación. Se puede ir actualizando en cada iteración.*
+*Este plan unificado reemplaza el uso de los planes dispersos y de AYUDA_MEMORIA. Se puede ir actualizando en cada iteración.*

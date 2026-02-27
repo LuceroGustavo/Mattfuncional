@@ -333,28 +333,21 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 - **Solución lectura:** Cambio a `findFirstByDiaAndHoraInicio` para devolver el primer resultado aunque existan duplicados.
 - **Solución escritura (robusta):** En `SlotConfigService.setCapacidadMaxima`: se usa `findAllByDiaAndHoraInicio`; si hay varios registros, se actualiza el primero y se eliminan los duplicados. Así se evita crear nuevos duplicados y se limpian los existentes al guardar.
 
-### 12.2 Nuevas opciones del menú servidor (`./mattfuncional`)
+### 12.2 Menú del servidor
 
-| Opción | Acción |
-|--------|--------|
-| 12 | Ver logs en vivo (streaming, `tail -f`) |
-| 13 | Instalar MySQL Workbench (versión de escritorio) |
-| 14 | Ejecutar MySQL Workbench |
+El menú `./mattfuncional` tiene opciones 1–11 (parar, actualizar, compilar, iniciar, despliegue completo, estado, logs, reiniciar, información, espacio en disco, salir). *Nota (Feb 2026): No se modificará por ahora el menú del servidor; se descartó la instalación de Workbench y scripts adicionales.*
 
 ### 12.3 Archivos modificados / creados
 
 - **SlotConfigRepository.java:** `findFirstByDiaAndHoraInicio`, `findAllByDiaAndHoraInicio`.
 - **SlotConfigService.java:** `setCapacidadMaxima` con lógica anti-duplicados y `@Transactional`.
-- **mattfuncional** (script): funciones `view_logs_live`, `install_mysql_workbench`, `run_mysql_workbench`; opciones 12, 13, 14.
 - **scripts/servidor/limpiar_duplicados_slot_config.sql:** Script SQL para eliminar duplicados en `slot_config` (uso manual si hace falta).
-- **Documentacion/servidor/DESPLIEGUE-SERVIDOR.md:** Opciones 12–14, sección "Solución de problemas".
-- **Documentacion/AYUDA_MEMORIA.md:** Sección "Servidor – Desde mi casa" (Workbench, logs en vivo).
 
 ### 12.4 Para commit y continuar desarrollando
 
 ```
 git add -A
-git commit -m "Reparación calendario: slot_config duplicados + opciones servidor (logs vivo, Workbench)"
+git commit -m "Reparación calendario: slot_config duplicados"
 git push origin main
 ```
 
@@ -398,4 +391,4 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 
 ---
 
-*Changelog unificado – Febrero 2026. Sustituye a los documentos individuales CHANGELOG_*_FEB2026.md. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada – inicio reemplazado por landing estilo RedFit con ícono de login. Reparación calendario slot_config (Feb 2026): findFirst, setCapacidadMaxima robusto, opciones 12–14 en menú servidor. Página Planes (Feb 2026): /planes, panel administración, PlanPublico, ConfiguracionPaginaPublica, imagen fondo.*
+*Changelog unificado – Febrero 2026. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada. Reparación calendario slot_config: findFirst, setCapacidadMaxima robusto. Menú servidor: sin modificaciones (Workbench descartado). Página Planes: /planes, panel administración, PlanPublico, ConfiguracionPaginaPublica. Documentación: AYUDA_MEMORIA y PLAN_DE_DESARROLLO unificados.*

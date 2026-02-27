@@ -1,7 +1,7 @@
 # Manual del usuario – Mattfuncional
 
 Manual para quien usa el sistema a diario: **profesor**, **administrador** o **ayudante**.  
-Para contexto técnico del proyecto ver [LEEME_PRIMERO.md](LEEME_PRIMERO.md). Para mejoras pendientes ver [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md).
+Para contexto técnico del proyecto ver [LEEME_PRIMERO.md](LEEME_PRIMERO.md). Para mejoras pendientes ver [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md) (sección 9).
 
 ---
 
