@@ -156,7 +156,27 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .plan-card-body .plan-descripcion { color: #000 !important; font-size: 0.9rem; margin-bottom: 0; }
 .bg-grey-planes { background-color: #DEDEDE; border-radius: 4px; }
 .bg-grey-planes .form-control { border-radius: 0; margin-bottom: 0.5rem; }
+.dias-horarios-multilinea { white-space: pre-line; }
+/* Días y horarios: alineado a la izquierda con los ítems de Servicios (icono + me-2) */
+.dias-horarios-lista { padding-left: 0; }
+.dias-horarios-lista li { padding-left: 1.75rem; text-align: left; }
 .planes-titulo { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 2rem; text-transform: uppercase; }
+
+/* Alertas públicas (éxito/error) - estilo Mattfuncional */
+.alert-publica { padding: 1rem 1.25rem; border-radius: 0; margin-bottom: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; }
+/* Éxito: verde brillante para contraste sobre fondo oscuro (#333) */
+.alert-publica-success { background-color: rgba(0, 0, 0, 0.5); border-left: 4px solid #4ade80; color: #86efac; }
+.alert-publica-success i { color: #86efac; }
+/* Error: rojo brillante para contraste sobre fondo oscuro (#333) */
+.alert-publica-error { background-color: rgba(0, 0, 0, 0.5); border-left: 4px solid #ff5252; color: #ff6b6b; }
+.alert-publica-error i { color: #ff6b6b; }
+
+/* Formulario consulta - estilo consistente */
+.form-consulta-box { border: 1px solid #ccc; }
+.form-consulta-titulo { color: #333; font-weight: 700; text-transform: uppercase; }
+.form-consulta .form-control:focus { border-color: #86CC47; box-shadow: 0 0 0 0.2rem rgba(134, 204, 71, 0.25); }
+.form-consulta .form-text { font-size: 0.8rem; margin-top: 0.25rem; }
+.btn-consulta-submit { margin-top: 0.25rem; }
 
 @media (max-width: 767px) {
   .nav-desktop-publica { display: none !important; }
@@ -164,4 +184,11 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
   .nav-header .header-publica { justify-content: flex-start !important; }
   .nav-header .logo-brand-link { margin-right: 0; max-width: 80%; }
   .nav-brand-text { font-size: 0.95rem; }
+  /* Formulario consulta en m?vil: m?s padding, bot?n full-width */
+  .form-consulta-box { padding: 1.25rem !important; }
+  .btn-consulta-submit { width: 100%; }
+}
+
+@media (min-width: 768px) {
+  .form-consulta-box { min-height: 280px; }
 }

@@ -20,7 +20,7 @@
                     </span>
                     <span class="text-white fw-bold ms-2 nav-brand-text">MATTFUNCIONAL</span>
                 </a>
-                <ul class="nav align-items-center nav-desktop-publica" style="display: none;">
+                <ul class="nav align-items-center nav-desktop-publica">
                     <li class="nav-item"><a href="/" class="nav-link">Inicio</a></li>
                     <li class="nav-item"><a href="/planes" class="nav-link active">Planes</a></li>
                     <li class="nav-item"><a href="/#contacto" class="nav-link">Contacto</a></li>
@@ -53,7 +53,6 @@
     <main>
         <section class="about" id="planes">
             <div class="container">
-                <div th:if="${param.ok != null && param.ok[0] == 'consulta'}" class="alert alert-success">Gracias por tu consulta. Te responderemos a la brevedad.</div>
                 <h1 class="planes-titulo">Planes</h1>
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
                     <div class="col" th:each="plan : ${planes}">
@@ -79,23 +78,43 @@
                             <li><i class="fas fa-check strong me-2"></i>Rutinas y series a tu medida</li>
                         </ul>
                         <h4 class="text-white mt-4 mb-2">Días y horarios</h4>
-                        <p class="text-white-50" th:text="${diasHorarios != null ? diasHorarios : 'Consultar'}">Lunes a Viernes 7:00–21:00</p>
+                        <ul class="list-unstyled text-white-50 dias-horarios-lista" th:if="${!diasHorariosLineas.isEmpty()}">
+                            <li th:each="linea : ${diasHorariosLineas}" th:text="${linea}">Lunes a Viernes 7:00–21:00</li>
+                        </ul>
+                        <p class="text-white-50 mb-0" th:if="${diasHorariosLineas.isEmpty()}" th:text="${diasHorarios != null ? diasHorarios : 'Consultar'}">Consultar</p>
                     </div>
-                    <div class="col-lg-7">
-                        <div class="bg-grey-planes p-4">
-                            <h4 class="mb-3">Consultanos</h4>
-                            <p class="text-muted mb-3">¿Tenés alguna duda acerca de nuestros planes?</p>
-                            <form th:action="@{/public/consulta}" method="post" class="form-consulta">
-                                <div class="mb-2">
-                                    <input class="form-control" name="nombre" placeholder="Nombre" type="text" required>
+                    <div class="col-lg-7" id="consultanos">
+                        <div th:if="${consultaOk}" class="alert-publica alert-publica-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>Gracias por tu consulta. Te responderemos a la brevedad.
+                        </div>
+                        <div th:if="${errorConsulta}" class="alert-publica alert-publica-error" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorConsulta}">Error al enviar la consulta.</span>
+                        </div>
+                        <div id="validacionError" class="alert-publica alert-publica-error" role="alert" style="display: none;">
+                            <i class="fas fa-exclamation-circle me-2"></i><span id="validacionErrorTexto"></span>
+                        </div>
+                        <div class="bg-grey-planes p-4 form-consulta-box">
+                            <h4 class="mb-3 form-consulta-titulo">Consultanos</h4>
+                            <p class="text-muted mb-3">¿Tenés alguna duda acerca de nuestros planes? Dejanos tu mensaje y te respondemos a la brevedad.</p>
+                            <form th:action="@{/public/consulta}" method="post" class="form-consulta" id="formConsulta" novalidate>
+                                <div class="mb-3">
+                                    <label for="consulta-nombre" class="form-label visually-hidden">Nombre</label>
+                                    <input id="consulta-nombre" class="form-control" name="nombre" placeholder="Nombre *" type="text" maxlength="150" required aria-required="true">
                                 </div>
-                                <div class="mb-2">
-                                    <input class="form-control" name="email" placeholder="Email" type="email" required>
+                                <div class="mb-3">
+                                    <label for="consulta-email" class="form-label visually-hidden">Email</label>
+                                    <input id="consulta-email" class="form-control" name="email" placeholder="Email" type="email" maxlength="150">
                                 </div>
-                                <div class="mb-2">
-                                    <textarea class="form-control" name="mensaje" placeholder="Mensaje" rows="4"></textarea>
+                                <div class="mb-3">
+                                    <label for="consulta-telefono" class="form-label visually-hidden">Teléfono</label>
+                                    <input id="consulta-telefono" class="form-control" name="telefono" placeholder="Teléfono (todo junto sin separaciones)" type="tel" maxlength="50">
                                 </div>
-                                <button class="btn btn-custom" type="submit">ENVIAR</button>
+                                <div class="mb-3">
+                                    <label for="consulta-mensaje" class="form-label visually-hidden">Mensaje</label>
+                                    <textarea id="consulta-mensaje" class="form-control" name="mensaje" placeholder="Mensaje (opcional)" rows="4" maxlength="2000" aria-describedby="consulta-mensaje-help"></textarea>
+                                    <small id="consulta-mensaje-help" class="form-text text-muted">Máximo 2000 caracteres.</small>
+                                </div>
+                                <button class="btn btn-custom btn-consulta-submit" type="submit">ENVIAR</button>
                             </form>
                         </div>
                     </div>
@@ -144,6 +163,55 @@
             if (header) {
                 window.addEventListener('scroll', function() {
                     header.classList.toggle('small-header', window.scrollY > 50);
+                });
+            }
+            /* Si hay error de consulta, hacer scroll al formulario */
+            if (window.location.hash === '#consultanos' || document.querySelector('.alert-publica-error')) {
+                var formSection = document.getElementById('consultanos');
+                if (formSection) {
+                    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            /* Validación: al menos email o teléfono, y formatos correctos */
+            var form = document.getElementById('formConsulta');
+            var validacionError = document.getElementById('validacionError');
+            var validacionErrorTexto = document.getElementById('validacionErrorTexto');
+            function mostrarErrorValidacion(mensaje) {
+                if (validacionError && validacionErrorTexto) {
+                    validacionErrorTexto.textContent = mensaje;
+                    validacionError.style.display = '';
+                    validacionError.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            function ocultarErrorValidacion() {
+                if (validacionError) validacionError.style.display = 'none';
+            }
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    ocultarErrorValidacion();
+                    var email = (document.getElementById('consulta-email').value || '').trim();
+                    var telefono = (document.getElementById('consulta-telefono').value || '').trim();
+                    if (email === '' && telefono === '') {
+                        e.preventDefault();
+                        mostrarErrorValidacion('Ingresá tu email o teléfono para que podamos contactarte.');
+                        return false;
+                    }
+                    if (email !== '') {
+                        var emailRe = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        if (!emailRe.test(email)) {
+                            e.preventDefault();
+                            mostrarErrorValidacion('El formato del email no es válido.');
+                            return false;
+                        }
+                    }
+                    if (telefono !== '') {
+                        var soloDigitos = telefono.replace(/\D/g, '');
+                        if (soloDigitos.length < 10) {
+                            e.preventDefault();
+                            mostrarErrorValidacion('El teléfono debe tener al menos 10 dígitos.');
+                            return false;
+                        }
+                    }
                 });
             }
         })();

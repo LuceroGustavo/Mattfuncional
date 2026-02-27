@@ -4,6 +4,7 @@ import com.mattfuncional.entidades.ConfiguracionPaginaPublica;
 import com.mattfuncional.entidades.PlanPublico;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.servicios.ConfiguracionPaginaPublicaService;
+import com.mattfuncional.servicios.ConsultaService;
 import com.mattfuncional.servicios.PlanPublicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +24,9 @@ public class PaginaPublicaAdminController {
     @Autowired
     private ConfiguracionPaginaPublicaService configuracionPaginaPublicaService;
 
+    @Autowired
+    private ConsultaService consultaService;
+
     @GetMapping
     public String verPaginaPublica(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
@@ -30,6 +34,7 @@ public class PaginaPublicaAdminController {
         }
         model.addAttribute("planes", planPublicoService.getAllPlanes());
         model.addAttribute("config", configuracionPaginaPublicaService.getAllConfig());
+        model.addAttribute("consultas", consultaService.getUltimasConsultas(20));
         return "profesor/pagina-publica-admin";
     }
 

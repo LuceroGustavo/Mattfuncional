@@ -115,6 +115,8 @@
 - **Asistencia – Cron opcional:** **Resuelto (backend on-demand).** Cron nocturno opcional si se desea.
 - **Depuración anual de datos:** Implementar método o tarea programada para archivar o purgar datos antiguos (p. ej. registros de asistencia con más de 1 año). Plazo anual: adecuado para mantener historial reciente y controlar tamaño de la BD.
 - **Manual del usuario:** Actualizar o completar MANUAL-USUARIO.md con todas las funcionalidades actuales (en particular pizarra, sala TV, transmisión en TV).
+- **Script en base del servidor:** Ejecutar `scripts/servidor/alter_consulta_email_nullable.sql` en la BD del servidor (Donweb) para que el formulario de consulta en `/planes` funcione con solo teléfono en producción.
+- **Script borrar base entera:** Crear un script que elimine la base de datos completa para que, al reiniciar la app, Hibernate la pueda recrear desde cero (útil para desarrollo o reset total).
 
 ---
 

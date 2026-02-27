@@ -144,6 +144,7 @@
 - **Rutas:** GET `/` y GET `/publica` devuelven la misma vista; SecurityConfig `permitAll` para ambas.
 - **Ajustes (§11.5):** Video escritorio `video-inicial.mp4` (2:1), móvil `video-movil.mp4` (9:16); poster `fondo-inicial.png`; logo `/img/logo.png` en círculo; hero 100vh sin scroll; módulo hero visible a los 5 s; navbar textos blancos, logo + “MATTFUNCIONAL” a la izquierda en móvil; carrusel 6 s entre slides, transición 1,5 s.
 - **Plan y changelog:** [PLAN_PAGINA_PUBLICA_GIMNASIO.md](PLAN_PAGINA_PUBLICA_GIMNASIO.md), [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §11 y §11.5.
+- **Página Planes (`/planes`):** Cards de planes desde BD, servicios, días/horarios, formulario de consulta. Panel de administración en `/profesor/pagina-publica` (config, planes, consultas recibidas). **Desarrollo HTML: TERMINADO** (validación en rojo sin alert, mensaje éxito con flash, días/horarios multilínea con alineación). Ver CHANGELOG §13, §14, §15.
 
 ---
 
@@ -161,4 +162,4 @@
 
 ---
 
-*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública; Planes y formulario HTML terminado). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md.*

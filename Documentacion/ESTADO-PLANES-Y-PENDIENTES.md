@@ -2,6 +2,8 @@
 
 **Contexto:** Para entrar en tema del proyecto ver [LEEME_PRIMERO.md](LEEME_PRIMERO.md). Todo lo implementado está en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md).
 
+**Estado página Planes (Feb 2026):** El desarrollo del HTML de la página `/planes` y del formulario de consulta está **terminado**. Incluye: validación en rojo (sin alert), mensaje de éxito con flash, días/horarios multilínea con alineación. Ver [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) sección 15.
+
 ---
 
 ## Estructura actual (reorganizada)
@@ -46,7 +48,7 @@ Los antiguos `PLAN_DE_DESARROLLO.md`, `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` y `
 | **Fase 5** | Vista rutina por enlace (página pública con token). Hoja en `/rutinas/hoja/{token}` ya existe; falta/opcional: `permitAll` en SecurityConfig para acceso anónimo. | **Implementado (backend).** Falta pulir frontend |
 | **Fase 6** | Alumnos sin login: alumno solo como ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO del login. | **Completado** |
 | **Fase 7** | Pantalla de entrenamiento en sala (modo TV, solo lectura, control desde panel). Pizarra digital con columnas, títulos, peso/reps, agregar/quitar columnas (máx. 6), polling 2,5 s. | **Completada** |
-| **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | **Implementado** (landing estilo RedFit en `/`, login por ícono) |
+| **Fase 8** | Página pública del gimnasio: presentación, servicios, horarios, contacto, promociones, productos. | **Implementado** (landing estilo RedFit en `/`, login por ícono). **Desarrollo HTML de Planes y formulario: TERMINADO** (ver CHANGELOG sección 15). |
 
 ### Checklist general (ítems sin marcar)
 
@@ -63,6 +65,8 @@ Los antiguos `PLAN_DE_DESARROLLO.md`, `PLAN_MODIFICACIONES_MATTFUNCIONAL.md` y `
 
 - **Ficha de detalle del alumno:** Mejorar vista de detalle (organización, legibilidad, accesos rápidos, historial y progreso más claros).
 - **Manual del usuario:** Actualizar o completar MANUAL-USUARIO.md para que incluya todas las pantallas y flujos actuales (en particular pizarra, sala TV, transmisión en TV).
+- **Script en base del servidor:** Ejecutar `scripts/servidor/alter_consulta_email_nullable.sql` en la base de datos del servidor (Donweb) para que el formulario de consulta en `/planes` funcione con solo teléfono (sin email) en producción.
+- **Script borrar base entera:** Crear un script que elimine la base de datos completa para que, al reiniciar la app, Hibernate la pueda recrear desde cero (útil para desarrollo o reset total).
 
 ---
 

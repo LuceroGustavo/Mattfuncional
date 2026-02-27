@@ -19,6 +19,8 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 11. [Fase 8 – Página pública del gimnasio](#11-fase-8--página-pública-del-gimnasio-feb-2026)
 12. [Reparación calendario – slot_config duplicados y herramientas servidor](#12-reparación-calendario--slot_config-duplicados-y-herramientas-servidor-feb-2026)
 13. [Página Planes y administración pública](#13-página-planes-y-administración-pública-feb-2026)
+14. [Formulario de consulta – Email opcional y script BD](#14-formulario-de-consulta--email-opcional-y-script-bd-feb-2026)
+15. [Página Planes y formulario – Cierre de desarrollo HTML](#15-página-planes-y-formulario--cierre-de-desarrollo-html-feb-2026)
 
 ---
 
@@ -391,4 +393,53 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 
 ---
 
-*Changelog unificado – Febrero 2026. Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada. Reparación calendario slot_config: findFirst, setCapacidadMaxima robusto. Menú servidor: sin modificaciones (Workbench descartado). Página Planes: /planes, panel administración, PlanPublico, ConfiguracionPaginaPublica. Documentación: AYUDA_MEMORIA y PLAN_DE_DESARROLLO unificados.*
+## 14. Formulario de consulta – Email opcional y script BD (Feb 2026)
+
+**Resumen:** El formulario de contacto en `/planes` permitía solo email o solo teléfono según validación, pero la columna `email` en la tabla `consulta` era NOT NULL. Al enviar con solo teléfono (sin email) fallaba con `Column 'email' cannot be null`. Se corrigió con un script SQL y se documentaron pendientes de servidor.
+
+### 14.1 Mejoras realizadas
+
+- **Entidad `Consulta`:** `email` ya estaba definido como nullable (`@Column(length = 150)` sin `nullable = false`). La tabla en BD se había creado antes con NOT NULL.
+- **Script SQL:** `scripts/servidor/alter_consulta_email_nullable.sql` para permitir `email` NULL en la tabla `consulta`.
+- **Validación:** El formulario exige al menos uno de los dos (email o teléfono). Si el usuario completa solo teléfono, se guarda con `email = null`.
+- **Ejecución local:** El script se ejecutó contra la BD local (MySQL) para corregir el error de inmediato.
+
+### 14.2 Archivos creados
+
+- **scripts/servidor/alter_consulta_email_nullable.sql:** `ALTER TABLE consulta MODIFY COLUMN email VARCHAR(150) NULL;`
+
+### 14.3 Pendientes documentados (ver PLAN_DE_DESARROLLO_UNIFICADO y ESTADO-PLANES-Y-PENDIENTES)
+
+- **Actualizar script en servidor:** Ejecutar `alter_consulta_email_nullable.sql` en la base de datos del servidor (Donweb) para que el formulario funcione con solo teléfono en producción.
+- **Script borrar base entera:** Crear un script que elimine la base de datos completa para que, al reiniciar la app con `ddl-auto=create` o similar, Hibernate la recree desde cero. Útil para entornos de desarrollo o reset completo.
+
+---
+
+## 15. Página Planes y formulario – Cierre de desarrollo HTML (Feb 2026)
+
+**Resumen:** El desarrollo del HTML de la página Planes (`/planes`) y del formulario de consulta se considera **terminado**. Incluye mensajes de validación en rojo (sin alert), mensaje de éxito con flash (no persiste al refrescar), días y horarios multilínea con alineación correcta.
+
+### 15.1 Mejoras documentadas
+
+| Mejora | Descripción |
+|--------|-------------|
+| **Validación sin alert** | Los mensajes de validación del formulario (email/teléfono requerido, formato email, dígitos teléfono) se muestran en un bloque rojo (`alert-publica-error`) igual que los errores del servidor, en lugar de `alert()` nativo. |
+| **Mensaje de éxito con flash** | El mensaje verde "Gracias por tu consulta" usa `addFlashAttribute("consultaOk")` en lugar de `?ok=consulta` en la URL; así no persiste al refrescar (F5). |
+| **Días y horarios multilínea** | En el panel de administración, el campo "Días y horarios" pasó de input a **textarea** (4 filas); cada línea se guarda y se muestra debajo de la otra en la página pública. |
+| **Alineación días y horarios** | Los horarios en la página pública se muestran en lista (`<ul><li>`) con `padding-left: 1.75rem` para alinearse al margen izquierdo de los ítems de Servicios (Entrenamiento personalizado, etc.). |
+
+### 15.2 Archivos modificados
+
+- **planes-publica.html:** Div de validación cliente, mensaje éxito por `consultaOk`, días y horarios como lista con `diasHorariosLineas`.
+- **pagina-publica-admin.html:** Textarea para días/horarios, texto de ayuda.
+- **PublicoController.java:** `addFlashAttribute("consultaOk")` en lugar de `?ok=consulta`.
+- **PortalControlador.java:** `diasHorariosLineas` (lista de líneas) para la vista pública.
+- **publica.css:** `.dias-horarios-lista`, `.dias-horarios-multilinea`.
+
+### 15.3 Estado
+
+**Desarrollo HTML de página Planes y formulario de consulta: TERMINADO.** Las mejoras de contenido (textos, imágenes, datos de contacto) se gestionan desde el panel de administración sin cambios de código.
+
+---
+
+*Changelog unificado – Febrero 2026. Página Planes y formulario: desarrollo HTML terminado. Calendario y presentismo: cerrado. Fase 8 (página pública): implementada.* Calendario y presentismo: cerrado por ahora. Fase 6 (alumnos sin login): completada. Fase 7 (pizarra/sala): mejoras documentadas. Fase 8 (página pública): implementada. Reparación calendario slot_config: findFirst, setCapacidadMaxima robusto. Menú servidor: sin modificaciones (Workbench descartado). Página Planes: /planes, panel administración, PlanPublico, ConfiguracionPaginaPublica. Documentación: AYUDA_MEMORIA y PLAN_DE_DESARROLLO unificados.*

@@ -295,7 +295,11 @@ Puede deberse a **duplicados en `slot_config`** o a **varios usuarios con el mis
    mysql -u mattfuncional_user -p mattfuncional < /root/mattfuncional/scripts/servidor/consultar_duplicados_usuario.sql
    ```
    En la app, en **Usuarios del sistema** (logueado como developer) se muestra un aviso amarillo si hay correos duplicados. Resolver desde la interfaz (eliminar o unificar) o en BD con cuidado.
-4. **Despliegue completo** (opción 5) para aplicar la versión actualizada.
+4. **Error "Column 'email' cannot be null" en formulario de consulta (/planes):** La tabla `consulta` requiere que `email` permita NULL (para consultas solo con teléfono). Ejecutar:
+   ```bash
+   mysql -u mattfuncional_user -p mattfuncional < /root/mattfuncional/scripts/servidor/alter_consulta_email_nullable.sql
+   ```
+5. **Despliegue completo** (opción 5) para aplicar la versión actualizada.
 
 ---
 

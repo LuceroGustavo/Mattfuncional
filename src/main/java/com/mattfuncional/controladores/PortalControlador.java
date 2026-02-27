@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -65,6 +66,15 @@ public class PortalControlador {
         model.addAttribute("planes", planPublicoService.getPlanesActivosParaPublica());
         String diasHorarios = configuracionPaginaPublicaService.getDiasHorarios();
         model.addAttribute("diasHorarios", diasHorarios);
+        List<String> diasHorariosLineas = new ArrayList<>();
+        if (diasHorarios != null && !diasHorarios.isEmpty()) {
+            for (String linea : diasHorarios.split("\\r?\\n|\\r")) {
+                if (linea != null && !linea.trim().isEmpty()) {
+                    diasHorariosLineas.add(linea.trim());
+                }
+            }
+        }
+        model.addAttribute("diasHorariosLineas", diasHorariosLineas);
         String direccion = configuracionPaginaPublicaService.getDireccion();
         model.addAttribute("direccion", direccion != null ? direccion : "Aconcagua 17, Ramos Mejía");
         model.addAttribute("direccionUrl", "https://www.google.com/maps/place/Aconcagua+17,+B1704+Ramos+Mej%C3%ADa,+Provincia+de+Buenos+Aires");

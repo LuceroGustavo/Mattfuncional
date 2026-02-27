@@ -34,9 +34,10 @@
                     <label class="form-label">Dirección</label>
                     <input type="text" name="direccion" class="form-control" th:value="${config != null ? config.get('direccion') : ''}" placeholder="Aconcagua 17, Ramos Mejía">
                 </div>
-                <div class="col-md-6">
+                <div class="col-12">
                     <label class="form-label">Días y horarios</label>
-                    <input type="text" name="dias_horarios" class="form-control" th:value="${config != null ? config.get('dias_horarios') : ''}" placeholder="Lunes a Viernes 7:00–21:00">
+                    <textarea name="dias_horarios" class="form-control" rows="4" placeholder="Una línea por horario, ej.:&#10;Lunes a Viernes 7:00 a 12:00 y 14:00 a 21:00&#10;Sábados 8:00 a 14:00" th:text="${(config != null && config.get('dias_horarios') != null) ? config.get('dias_horarios') : ''}"></textarea>
+                    <small class="form-text text-muted">Cada línea se mostrará debajo de la otra en la página pública.</small>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Teléfono</label>
@@ -46,6 +47,39 @@
                     <button type="submit" class="btn btn-primary">Guardar configuración</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><strong>Consultas recibidas</strong></div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">Últimas consultas del formulario de contacto en la página pública.</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Mensaje</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${consultas}">
+                        <td class="small" th:text="${#temporals.format(c.fechaCreacion, 'dd/MM/yyyy HH:mm')}">-</td>
+                        <td th:text="${c.nombre}">-</td>
+                        <td th:if="${c.email != null && !c.email.isEmpty()}"><a th:href="'mailto:' + ${c.email}" th:text="${c.email}">-</a></td>
+                        <td th:if="${c.email == null || c.email.isEmpty()}" class="text-muted">-</td>
+                        <td th:text="${c.telefono != null && !c.telefono.isEmpty() ? c.telefono : '-'}">-</td>
+                        <td><span class="small text-muted" th:text="${c.mensaje != null && !c.mensaje.isEmpty() ? c.mensaje : '-'}">-</span></td>
+                    </tr>
+                    <tr th:if="${consultas == null || consultas.isEmpty()}">
+                        <td colspan="5" class="text-center text-muted">Sin consultas aún.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
