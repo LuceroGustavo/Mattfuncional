@@ -253,6 +253,18 @@ disk_space() {
     du -h --max-depth=1 /root 2>/dev/null | sort -hr | head -10 | awk '{printf "  %-50s %s\n", $2, $1}'
 }
 
+reset_database() {
+    print_option "🗑️ Borrar base de datos mattfuncional..."
+    if [ -f "$APP_DIR/scripts/servidor/reset_db_mattfuncional.sh" ]; then
+        bash "$APP_DIR/scripts/servidor/reset_db_mattfuncional.sh"
+        echo ""
+        print_warning "Reinicia la aplicación (opción 8) para que Hibernate cree las tablas."
+    else
+        print_error "No se encontró scripts/servidor/reset_db_mattfuncional.sh"
+        echo "Puedes ejecutar manualmente: mysql -u \${MATT_DB_USER:-mattfuncional_user} -p -e \"DROP DATABASE IF EXISTS mattfuncional; CREATE DATABASE mattfuncional;\""
+    fi
+}
+
 # Menú principal
 while true; do
     clear
@@ -272,9 +284,10 @@ while true; do
     echo "8.  Reiniciar aplicación Mattfuncional"
     echo "9.  Información del proyecto"
     echo "10. Ver espacio en disco"
-    echo "11. Salir"
+    echo "11. Borrar base de datos"
+    echo "12. Salir del sistema"
     echo ""
-    read -p "Ingresa tu opción (1-11): " opcion
+    read -p "Ingresa tu opción (1-12): " opcion
     echo ""
 
     case $opcion in
@@ -288,7 +301,8 @@ while true; do
         8) restart_app ;;
         9) project_info ;;
         10) disk_space ;;
-        11)
+        11) reset_database ;;
+        12)
             print_success "Saliendo del menú..."
             exit 0
             ;;
