@@ -65,6 +65,13 @@ public class CalendarioController {
             @RequestParam(required = false) String fecha,
             @AuthenticationPrincipal Usuario usuarioActual,
             Model model) {
+        // Solo el profesor correspondiente (o developer con profesor por defecto) puede ver este calendario
+        if (usuarioActual != null) {
+            Profesor profesorAcceso = getProfesorAcceso(usuarioActual);
+            if (profesorAcceso != null && !profesorAcceso.getId().equals(profesorId)) {
+                return "redirect:/profesor/dashboard";
+            }
+        }
 
         LocalDate fechaCalendario = fecha != null ? LocalDate.parse(fecha) : LocalDate.now();
 
@@ -237,5 +244,15 @@ public class CalendarioController {
             }
         }
         return "redirect:/calendario/semanal/profesor/" + profesorId;
+    }
+
+    /** Profesor con el que trabaja el usuario actual (developer usa profesor por defecto). */
+    private Profesor getProfesorAcceso(Usuario usuario) {
+        if (usuario == null) return null;
+        if ("DEVELOPER".equals(usuario.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
+        if (usuario.getProfesor() != null) return usuario.getProfesor();
+        return profesorService.getProfesorByCorreo(usuario.getCorreo());
     }
 }

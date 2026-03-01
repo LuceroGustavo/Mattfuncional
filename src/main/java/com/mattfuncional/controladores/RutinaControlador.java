@@ -65,10 +65,15 @@ public class RutinaControlador {
     public String crearRutinaPlantilla(@RequestParam String nombre,
             @RequestParam(required = false) String descripcion,
             @RequestParam String categoria,
-            @RequestParam Long profesorId,
             @RequestParam(required = false) List<Long> selectedSeries,
             @RequestParam Map<String, String> allParams,
             Model model) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) {
+            return "redirect:/login";
+        }
+        Long profesorId = profesor.getId();
         try {
             Rutina rutina = rutinaService.crearRutinaPlantilla(profesorId, nombre, descripcion, categoria);
 
@@ -170,6 +175,20 @@ public class RutinaControlador {
             @RequestParam(required = false) List<Long> nuevasSeriesIds,
             @RequestParam(required = false) List<Integer> repeticionesNuevas,
             Model model) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) {
+            return "redirect:/login";
+        }
+        Rutina rutina;
+        try {
+            rutina = rutinaService.obtenerRutinaPorId(id);
+        } catch (ResourceNotFoundException e) {
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina+no+encontrada";
+        }
+        if (!isDeveloper(usuarioActual) && (rutina.getProfesor() == null || !rutina.getProfesor().getId().equals(profesor.getId()))) {
+            return "redirect:/profesor/dashboard?tab=rutinas&error=No+tiene+permiso+para+editar+esta+rutina";
+        }
         try {
             // Actualiza la información básica de la rutina
             rutinaService.actualizarInformacionBasicaRutina(id, nombre, descripcion, categoria);
@@ -187,12 +206,25 @@ public class RutinaControlador {
     // GET: Eliminar rutina
     @GetMapping("/eliminar/{id}")
     public String eliminarRutina(@PathVariable Long id) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) {
+            return "redirect:/login";
+        }
+        Rutina rutina;
+        try {
+            rutina = rutinaService.obtenerRutinaPorId(id);
+        } catch (ResourceNotFoundException e) {
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina+no+encontrada";
+        }
+        if (!isDeveloper(usuarioActual) && (rutina.getProfesor() == null || !rutina.getProfesor().getId().equals(profesor.getId()))) {
+            return "redirect:/profesor/dashboard?tab=rutinas&error=No+tiene+permiso+para+eliminar+esta+rutina";
+        }
         try {
             rutinaService.eliminarRutina(id);
-
-            return "redirect:/profesor/dashboard?tab=rutinas&success=Rutina eliminada exitosamente";
+            return "redirect:/profesor/dashboard?tab=rutinas&success=Rutina+eliminada+exitosamente";
         } catch (ResourceNotFoundException e) {
-            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina no encontrada";
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina+no+encontrada";
         }
     }
 
