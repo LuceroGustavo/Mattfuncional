@@ -95,6 +95,41 @@ public class PaginaPublicaAdminController {
         return "redirect:/profesor/pagina-publica";
     }
 
+    @PostMapping("/consulta/eliminar/{id}")
+    public String eliminarConsulta(@AuthenticationPrincipal Usuario usuarioActual,
+                                   @PathVariable Long id,
+                                   RedirectAttributes ra) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        consultaService.eliminar(id);
+        ra.addFlashAttribute("ok", "Consulta eliminada");
+        return "redirect:/profesor/pagina-publica";
+    }
+
+    @PostMapping("/consulta/marcar-visto/{id}")
+    public String marcarConsultaVistoPost(@AuthenticationPrincipal Usuario usuarioActual,
+                                          @PathVariable Long id,
+                                          RedirectAttributes ra) {
+        return marcarConsultaVisto(usuarioActual, id, ra);
+    }
+
+    @GetMapping("/consulta/marcar-visto/{id}")
+    public String marcarConsultaVistoGet(@AuthenticationPrincipal Usuario usuarioActual,
+                                         @PathVariable Long id,
+                                         RedirectAttributes ra) {
+        return marcarConsultaVisto(usuarioActual, id, ra);
+    }
+
+    private String marcarConsultaVisto(Usuario usuarioActual, Long id, RedirectAttributes ra) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        consultaService.marcarComoVisto(id);
+        ra.addFlashAttribute("ok", "Consulta marcada como vista");
+        return "redirect:/profesor/pagina-publica";
+    }
+
     private boolean isAdminOrDeveloper(Usuario u) {
         return u != null && ("ADMIN".equals(u.getRol()) || "DEVELOPER".equals(u.getRol()));
     }

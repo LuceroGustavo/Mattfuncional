@@ -126,22 +126,51 @@
             padding: 2rem 1.5rem 1.5rem 1.5rem;
         }
         .tabs-section .nav-tabs .nav-link {
-            color: #5e35b1;
             border-color: transparent;
+            font-weight: 500;
         }
-        .tabs-section .nav-tabs .nav-link:hover {
-            color: #7e57c2;
-            border-color: #e1bee7;
+        /* Inactivos: tonalidad suave de cada sección */
+        .tabs-section .nav-tabs #alumnos-tab { color: #2e7d32; }
+        .tabs-section .nav-tabs #alumnos-tab:hover { background: #e8f5e9; border-color: #c8e6c9; color: #1b5e20; }
+        .tabs-section .nav-tabs #series-tab { color: #5e35b1; }
+        .tabs-section .nav-tabs #series-tab:hover { background: #f3e5f5; border-color: #e1bee7; color: #4a148c; }
+        .tabs-section .nav-tabs #rutinas-tab { color: #e65100; }
+        .tabs-section .nav-tabs #rutinas-tab:hover { background: #fff8e1; border-color: #ffe082; color: #ef6c00; }
+        .tabs-section .nav-tabs #asignaciones-tab { color: #1565c0; }
+        .tabs-section .nav-tabs #asignaciones-tab:hover { background: #e3f2fd; border-color: #bbdefb; color: #0d47a1; }
+        /* Activos: mismo color que la tarjeta de cada módulo */
+        .tabs-section .nav-tabs #alumnos-tab.active {
+            background: #c8e6c9;
+            color: #1b5e20;
+            border-color: #a5d6a7 #a5d6a7 #fff;
+            font-weight: 600;
         }
-        .tabs-section .nav-tabs .nav-link.active {
-            background: #f3e5f5;
+        .tabs-section .nav-tabs #series-tab.active {
+            background: #e1bee7;
             color: #4a148c;
-            border-color: #e1bee7 #e1bee7 #fff;
+            border-color: #ce93d8 #ce93d8 #fff;
+            font-weight: 600;
+        }
+        .tabs-section .nav-tabs #rutinas-tab.active {
+            background: #fff9c4;
+            color: #e65100;
+            border-color: #ffe082 #ffe082 #fff;
+            font-weight: 600;
+        }
+        .tabs-section .nav-tabs #asignaciones-tab.active {
+            background: #bbdefb;
+            color: #0d47a1;
+            border-color: #90caf9 #90caf9 #fff;
             font-weight: 600;
         }
         .tab-content {
             min-height: 120px;
         }
+        /* Títulos de sección: misma tonalidad que la tarjeta y pestaña */
+        #alumnos h3, #alumnos h3 i { color: #1b5e20 !important; }
+        #series h3, #series h3 i { color: #4a148c !important; }
+        #rutinas h3, #rutinas h3 i { color: #e65100 !important; }
+        #asignaciones h3, #asignaciones h3 i { color: #0d47a1 !important; }
         /* Tablas – cabeceras pastel */
         .tabs-section .table-primary { background: #e3f2fd !important; color: #0d47a1; }
         .tabs-section .table-success { background: #e8f5e9 !important; color: #1b5e20; }

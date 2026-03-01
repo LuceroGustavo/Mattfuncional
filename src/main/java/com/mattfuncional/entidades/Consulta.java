@@ -30,6 +30,9 @@ public class Consulta {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
+    @Column(name = "visto", nullable = false)
+    private boolean visto = false;
+
     public Consulta() {
     }
 
@@ -86,5 +89,13 @@ public class Consulta {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public boolean isVisto() {
+        return visto;
+    }
+
+    public void setVisto(boolean visto) {
+        this.visto = visto;
     }
 }

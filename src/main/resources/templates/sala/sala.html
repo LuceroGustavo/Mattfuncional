@@ -230,8 +230,8 @@
                     <div class="item-titulo" th:text="${item.ejercicioNombre}">Ejercicio</div>
                     <div class="sala-item">
                         <div class="item-imagen-wrap">
-                            <img th:if="${item.imagenUrl != null}" th:src="${item.imagenUrl}" alt="" onerror="this.src='/img/not_imagen.png'">
-                            <img th:if="${item.imagenUrl == null}" src="/img/not_imagen.png" alt="">
+                    <img th:if="${item.imagenUrl != null}" th:src="${item.imagenUrl}" alt="" onerror="this.src='/img/not_imagen.png'">
+                    <img th:if="${item.imagenUrl == null}" src="/img/not_imagen.png" alt="">
                         </div>
                         <div class="item-datos">
                             <div class="item-peso" th:if="${item.peso != null}" th:text="${item.peso + 'K'}">12K</div>

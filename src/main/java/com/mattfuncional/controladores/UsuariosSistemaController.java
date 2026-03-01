@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +46,35 @@ public class UsuariosSistemaController {
             model.addAttribute("correosDuplicados", correosDuplicados);
         }
         return "profesor/usuarios-sistema";
+    }
+
+    @GetMapping("/crear")
+    public String formularioCrearUsuario(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        model.addAttribute("usuario", new Usuario());
+        model.addAttribute("usuarioActual", usuarioActual);
+        model.addAttribute("editMode", false);
+        return "profesor/usuario-sistema-form";
+    }
+
+    @GetMapping("/editar/{id}")
+    public String formularioEditarUsuario(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioActual, Model model) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        Usuario usuario = usuarioService.getUsuarioById(id);
+        if (usuario == null) {
+            return "redirect:/profesor/usuarios-sistema?error=notfound";
+        }
+        if (isDeveloper(usuario) && !isDeveloper(usuarioActual)) {
+            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+        }
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("usuarioActual", usuarioActual);
+        model.addAttribute("editMode", true);
+        return "profesor/usuario-sistema-form";
     }
 
     @PostMapping("/crear")
@@ -144,7 +174,9 @@ public class UsuariosSistemaController {
     public String actualizarUsuarioSistema(@AuthenticationPrincipal Usuario usuarioActual,
                                            @RequestParam Long usuarioId,
                                            @RequestParam String nombre,
-                                           @RequestParam String correo) {
+                                           @RequestParam String correo,
+                                           @RequestParam(required = false) String rol,
+                                           @RequestParam(required = false) String password) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
@@ -156,6 +188,15 @@ public class UsuariosSistemaController {
             return "redirect:/profesor/usuarios-sistema?error=developer-locked";
         }
         usuarioService.actualizarDatosUsuarioSistema(usuarioId, nombre, correo);
+        if (rol != null && !rol.isBlank() && !isDeveloper(objetivo)) {
+            if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId) && !"ADMIN".equalsIgnoreCase(rol)) {
+                return "redirect:/profesor/usuarios-sistema?error=self-rol";
+            }
+            usuarioService.actualizarRolUsuario(usuarioId, rol);
+        }
+        if (password != null && !password.isBlank()) {
+            usuarioService.cambiarPasswordUsuario(usuarioId, password);
+        }
         return "redirect:/profesor/usuarios-sistema?ok=datos";
     }
 

@@ -23,7 +23,11 @@
                 <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'AYUDANTE' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-navbar me-3">
                     <i class="fas fa-tachometer-alt me-1"></i> Ir a mi Panel
                 </a>
-                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/usuarios-sistema}" class="btn btn-outline-navbar me-3" title="Administrar usuarios del sistema">
+                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/pagina-publica}" class="btn btn-outline-navbar me-3 position-relative" title="Consultas recibidas">
+                    <i class="fas fa-envelope"></i>
+                    <span th:if="${cantidadConsultas != null && cantidadConsultas > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" th:text="${cantidadConsultas}">0</span>
+                </a>
+                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/administracion}" class="btn btn-outline-navbar me-3" title="Administración del sistema">
                     <i class="fas fa-gear"></i>
                 </a>
 
