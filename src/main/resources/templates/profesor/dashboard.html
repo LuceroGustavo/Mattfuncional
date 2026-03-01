@@ -31,10 +31,44 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.15s;
+            position: relative;
         }
         .card-module:hover {
             transform: translateY(-6px) scale(1.03);
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .card-module .card-module-add {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 1.68rem;
+            height: 1.68rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.9);
+            color: #5e35b1;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            transition: background 0.2s, color 0.2s;
+            font-size: 0.75rem;
+        }
+        .card-module .card-module-add i {
+            font-size: 0.75rem !important;
+            margin: 0;
+            line-height: 1;
+        }
+        .card-module .card-module-add:hover {
+            background: #7e57c2;
+            color: #fff;
+        }
+        .card-module.card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .card-module.card-link:hover {
+            color: inherit;
         }
         .card-alumnos { background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); }
         .card-series { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
@@ -152,52 +186,41 @@
                 <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#9575cd;"></i>
                 <h1 class="fw-bold mb-0">Panel del Profesor</h1>
             </div>
-            <div class="fs-5 text-secondary">
-                <span th:if="${profesor != null}" th:text="'Bienvenido, ' + ${profesor.nombre}"></span>
-                <span th:if="${profesor == null}">Bienvenido, Profesor</span>
-            </div>
         </div>
 
         <!-- Tarjetas de módulos -->
         <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-4 mb-4" style="margin-top:2rem;">
             <div class="card-module card-alumnos" style="min-width:260px; min-height:160px;">
+                <a th:href="@{/profesor/alumnos/nuevo}" class="card-module-add" title="Nuevo alumno"><i class="fa-solid fa-user-plus"></i></a>
                 <i class="fa-solid fa-users"></i>
                 <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
                 <div class="label">Alumnos</div>
             </div>
             <div class="card-module card-series" style="min-width:260px; min-height:160px;">
+                <a href="/series/crear" class="card-module-add" title="Crear serie"><i class="fa-solid fa-plus"></i></a>
                 <i class="fa-solid fa-dumbbell"></i>
                 <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
                 <div class="label">Series</div>
             </div>
             <div class="card-module card-rutinas" style="min-width:260px; min-height:160px;">
+                <a th:href="@{/rutinas/crear}" class="card-module-add" title="Crear rutina"><i class="fa-solid fa-plus"></i></a>
                 <i class="fa-solid fa-list-check"></i>
                 <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
                 <div class="label">Rutinas</div>
             </div>
-            <div class="card-module card-asignadas" style="min-width:260px; min-height:160px;">
-                <i class="fa-solid fa-clipboard-list"></i>
-                <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
-                <div class="label">Asignadas</div>
-            </div>
+            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="card-module card-asignadas card-link" style="min-width:260px; min-height:160px;" target="_blank" rel="noopener noreferrer" title="Calendario Semanal">
+                <i class="fa-solid fa-calendar-week"></i>
+                <div class="label">Calendario Semanal</div>
+            </a>
         </div>
 
         <!-- Botones principales -->
         <div class="main-actions d-flex flex-wrap justify-content-center mb-4">
-            <a href="/series/crear" class="btn btn-alumnos mx-1">
-                <i class="fa-solid fa-user-plus me-2"></i>Crear Serie
-            </a>
-            <a href="/rutinas/crear" class="btn btn-series mx-1">
-                <i class="fa-solid fa-plus me-2"></i>Crear Rutina
-            </a>
             <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-rutinas mx-1">
                 <i class="fa-solid fa-dumbbell me-2"></i>Ver Ejercicios
             </a>
             <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-secondary mx-1">
                 <i class="fa-solid fa-layer-group me-2"></i>Grupos Musculares
-            </a>
-            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1" target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal
             </a>
             <a th:href="@{/profesor/pizarra}" class="btn btn-pizarra mx-1">
                 <i class="fa-solid fa-tv me-2"></i>Pizarra
@@ -233,9 +256,6 @@
                 <div class="tab-pane fade show active" id="alumnos" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3><i class="fa-solid fa-users me-2"></i>Mis Alumnos</h3>
-                        <a th:href="@{/profesor/alumnos/nuevo}" class="btn btn-alumnos">
-                            <i class="fa-solid fa-user-plus me-1"></i>Nuevo Alumno
-                        </a>
                     </div>
 
                     <div class="card mb-3">
