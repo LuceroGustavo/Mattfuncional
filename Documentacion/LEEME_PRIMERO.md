@@ -60,8 +60,8 @@
 
 ## 4. Resumen rápido de estado (para la IA)
 
-- **Implementado:** Ejercicios predeterminados (auto-asegurar 60), ABM ejercicios/series/rutinas, grupos musculares como entidad, asignación rutina→alumno, enlace público por token, hoja `/rutinas/hoja/{token}` (permitAll), Copiar enlace y WhatsApp desde ficha, **calendario y presentismo (cerrado por ahora):** calendario semanal con tres estados (pendiente/presente/ausente) por defecto pendiente sin ausente automático, excepciones por día/hora, columna Presente en Mis Alumnos con ciclo de 3 estados, historial y modal “Resumen mensual” sincronizados con el calendario vía API, calendario abre en nueva pestaña desde el panel; modal de progreso unificado, alumno inactivo (acciones deshabilitadas), filtros alumnos persistentes, orden de series y ejercicios.
-- **Pendiente (próximos pasos):** Clic en alumno en calendario → ficha; día por excepción (recuperar clase); opcional cron para ausentes; Fase 5–8 (acceso anónimo reforzado, alumnos sin login, pantalla sala, página pública); mejorar ficha alumno.
+- **Implementado (la mayoría):** Ejercicios predeterminados (1–60), ABM ejercicios/series/rutinas, grupos musculares, asignación rutina→alumno, hoja `/rutinas/hoja/{token}`, Copiar enlace y WhatsApp; **calendario completo:** presente/ausente/pendiente, clic en alumno a ficha, día por excepción (recuperar clase), columna Presente, historial y modal “Resumen mensual” ; **pizarra y sala TV**; **página pública** (landing, Planes, consultas, administración); ficha alumno mejorada; usuarios del sistema, administración. Ver AVANCES_DEL_APP.md.
+- **Pendiente (lo que realmente falta):** **Manual del usuario** (actualizar MANUAL-USUARIO.md); **gestión de backup** (backups y descargas en el panel); **depuración de datos antiguos** (eliminar/archivar asistencia o presente de años anteriores, conservar al menos 12 meses). Ver ESTADO-PLANES-Y-PENDIENTES.md.
 
 ---
 
