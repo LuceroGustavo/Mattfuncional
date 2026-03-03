@@ -247,7 +247,7 @@ public class RutinaControlador {
 
     // HOJA DE RUTINA VISUAL (link público con token)
     @GetMapping("/hoja/{tokenPublico}")
-    public String verHojaRutina(@PathVariable String tokenPublico, Model model) {
+    public String verHojaRutina(@PathVariable String tokenPublico, Model model, jakarta.servlet.http.HttpServletRequest request) {
         try {
             Rutina rutina = rutinaService.obtenerRutinaPorToken(tokenPublico);
             model.addAttribute("rutina", rutina);
@@ -261,6 +261,12 @@ public class RutinaControlador {
             } else {
                 model.addAttribute("fechaFormateada", "");
             }
+            // URLs absolutas para Open Graph / WhatsApp (Thymeleaf 3.1 no expone #request por defecto)
+            int port = request.getServerPort();
+            String baseUrl = request.getScheme() + "://" + request.getServerName()
+                    + (port != 80 && port != 443 ? ":" + port : "");
+            model.addAttribute("ogImageUrl", baseUrl + "/img/logo.png");
+            model.addAttribute("ogPageUrl", baseUrl + "/rutinas/hoja/" + rutina.getTokenPublico());
             return "rutinas/verRutina";
         } catch (ResourceNotFoundException e) {
             model.addAttribute("mensajeError", "El enlace de la rutina no es válido o ha expirado.");

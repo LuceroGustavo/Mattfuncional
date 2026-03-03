@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <title>Hoja de Rutina - Mattfuncional</title>
+    <!-- Open Graph / WhatsApp: preview al compartir enlace -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Mattfuncional te ha enviado una rutina">
+    <meta property="og:description" content="Tu profesor te ha compartido una rutina de entrenamiento. Ábrela para ver los ejercicios.">
+    <meta property="og:image" th:content="${ogImageUrl}">
+    <meta property="og:url" th:content="${ogPageUrl}">
+    <meta property="og:locale" content="es_AR">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Mattfuncional te ha enviado una rutina">
+    <meta name="twitter:description" content="Tu profesor te ha compartido una rutina de entrenamiento. Ábrela para ver los ejercicios.">
+    <meta name="twitter:image" th:content="${ogImageUrl}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -242,6 +253,7 @@
 
             function closeZoom() { overlay.style.display = 'none'; modal.innerHTML = ''; }
             overlay.addEventListener('click', function(e) { if (e.target === overlay) closeZoom(); });
+            modal.addEventListener('click', function(e) { if (e.target === modal) closeZoom(); });
             document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeZoom(); });
 
             document.querySelectorAll('.sala-item-wrap').forEach(card => {
@@ -263,47 +275,53 @@
                     closeBtn.addEventListener('click', closeZoom);
                     modal.appendChild(closeBtn);
 
-                    if (imgClone) {
-                        imgClone.style.cssText = 'width:100%;height:min(72vh, 520px);object-fit:contain;background:#fff;border-radius:16px 16px 0 0;display:block';
-                        imgClone.alt = nombre;
-                        modal.appendChild(imgClone);
-                    }
-                    const body = document.createElement('div');
-                    body.style.cssText = 'padding:1.25rem 1.5rem;flex:1';
-                    const nombreDiv = document.createElement('h2');
+                    const content = document.createElement('div');
+                    content.style.cssText = 'padding:1.25rem 1.5rem;flex:1;display:flex;flex-direction:column';
+
+                    var nombreDiv = document.createElement('h2');
                     nombreDiv.textContent = nombre;
-                    nombreDiv.style.cssText = 'font-weight:700;font-size:clamp(1.4rem, 4vw, 1.8rem);margin:0 0 0.75rem 0;color:#fff';
-                    body.appendChild(nombreDiv);
+                    nombreDiv.style.cssText = 'font-weight:700;font-size:clamp(1.4rem, 4vw, 1.8rem);margin:0 0 0.75rem 0;color:#fff;order:1';
+                    content.appendChild(nombreDiv);
+
+                    var imgWrap = document.createElement('div');
+                    imgWrap.style.cssText = 'position:relative;width:100%;background:#fff;border-radius:12px;overflow:hidden;order:2';
+                    if (imgClone) {
+                        imgClone.style.cssText = 'width:100%;height:min(72vh, 520px);object-fit:contain;display:block';
+                        imgClone.alt = nombre;
+                        imgWrap.appendChild(imgClone);
+                    }
+                    var badgeStyle = 'position:absolute;right:0.5rem;padding:0.4rem 0.65rem;border-radius:8px;font-weight:700;font-size:clamp(1.1rem, 2.8vw, 1.4rem);color:#7ee787;background:rgba(0,0,0,0.75);pointer-events:none';
+                    var esTiempo = (reps || '').toLowerCase().includes(' min') || (reps || '').toLowerCase().includes(' seg');
+                    var repsText = reps && reps !== '—' ? ((esTiempo ? 'Tiempo: ' : 'Reps: ') + reps) : ((esTiempo ? 'Tiempo: —' : 'Reps: —'));
+                    var pesoText = (peso && peso !== '—') ? ('Peso: ' + peso) : '';
+                    if (pesoText) {
+                        var pesoSpan = document.createElement('span');
+                        pesoSpan.style.cssText = badgeStyle + ';top:0.5rem;';
+                        pesoSpan.textContent = pesoText;
+                        imgWrap.appendChild(pesoSpan);
+                    }
+                    var repsSpan = document.createElement('span');
+                    repsSpan.style.cssText = badgeStyle + ';bottom:0.5rem;';
+                    repsSpan.textContent = repsText;
+                    imgWrap.appendChild(repsSpan);
+                    content.appendChild(imgWrap);
+
                     if (desc) {
-                        const descDiv = document.createElement('p');
+                        var descDiv = document.createElement('p');
                         descDiv.textContent = desc;
-                        descDiv.style.cssText = 'color:#8b949e;font-size:clamp(1rem, 2.5vw, 1.15rem);margin:0 0 1rem 0;line-height:1.4';
-                        body.appendChild(descDiv);
+                        descDiv.style.cssText = 'color:#8b949e;font-size:clamp(1rem, 2.5vw, 1.15rem);margin:0.75rem 0 0 0;line-height:1.4;order:3';
+                        content.appendChild(descDiv);
                     }
-                    const datosDiv = document.createElement('div');
-                    datosDiv.style.cssText = 'display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center';
-                    const repsSpan = document.createElement('span');
-                    repsSpan.style.cssText = 'background:rgba(0,0,0,0.5);color:#7ee787;padding:0.5rem 0.85rem;border-radius:10px;font-weight:700;font-size:clamp(1.2rem, 3vw, 1.5rem)';
-                    const esTiempo = (reps || '').trim().toLowerCase().endsWith('s') || (reps || '').trim().toLowerCase().endsWith('m');
-                    repsSpan.textContent = reps && reps !== '—' ? ((esTiempo ? 'Tiempo: ' : 'Reps: ') + reps) : ((esTiempo ? 'Tiempo: —' : 'Reps: —'));
-                    datosDiv.appendChild(repsSpan);
-                    if (peso && peso !== '—') {
-                        const pesoSpan = document.createElement('span');
-                        pesoSpan.style.cssText = 'background:rgba(0,0,0,0.5);color:#7ee787;padding:0.5rem 0.85rem;border-radius:10px;font-weight:700;font-size:clamp(1.2rem, 3vw, 1.5rem)';
-                        pesoSpan.textContent = 'Peso: ' + peso;
-                        datosDiv.appendChild(pesoSpan);
-                    }
-                    body.appendChild(datosDiv);
                     const videoUrl = card.getAttribute('data-video-url');
                     if (videoUrl) {
-                        const a = document.createElement('a');
+                        var a = document.createElement('a');
                         a.href = videoUrl;
                         a.target = '_blank';
                         a.innerHTML = '<i class="fas fa-play-circle"></i> Ver video';
-                        a.style.cssText = 'display:inline-block;margin-top:1.25rem;color:#58a6ff;font-weight:600;font-size:clamp(1.1rem, 2.5vw, 1.3rem)';
-                        body.appendChild(a);
+                        a.style.cssText = 'display:inline-block;margin-top:0.75rem;color:#58a6ff;font-weight:600;font-size:clamp(1.1rem, 2.5vw, 1.3rem);order:4';
+                        content.appendChild(a);
                     }
-                    modal.appendChild(body);
+                    modal.appendChild(content);
                     overlay.style.display = 'flex';
                 });
             });
@@ -361,7 +379,7 @@
         <div class="ejercicios-grid">
             <div th:each="serieEjercicio : ${serie.serieEjercicios}" class="sala-item-wrap"
                  th:attr="data-desc=${serieEjercicio.exercise.description}, data-video-url=${serieEjercicio.exercise.videoUrl}"
-                 th:with="repsDisplay=${serieEjercicio.valor != null and (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' or (#strings.toLowerCase(serieEjercicio.unidad) != 'min' and #strings.toLowerCase(serieEjercicio.unidad) != 'seg' and #strings.toLowerCase(serieEjercicio.unidad) != 's')) ? serieEjercicio.valor + ' rep.' : 'n/a'}">
+                 th:with="repsDisplay=${serieEjercicio.valor != null ? (serieEjercicio.valor + ' ' + (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' ? 'rep.' : #strings.toLowerCase(serieEjercicio.unidad) == 'min' ? 'min' : #strings.toLowerCase(serieEjercicio.unidad) == 'seg' or #strings.toLowerCase(serieEjercicio.unidad) == 's' ? 'seg' : (serieEjercicio.unidad != null ? serieEjercicio.unidad : 'rep.'))) : '—'}">
                 <div class="item-titulo" th:text="${serieEjercicio.exercise.name}">Ejercicio</div>
                 <div class="sala-item">
                     <div class="item-imagen-wrap">

@@ -121,7 +121,7 @@
             <div class="ejercicio-body">
                 <div class="ejercicio-nombre" th:text="${serieEjercicio.exercise.name}">Nombre Ejercicio</div>
                 <div class="ejercicio-desc" th:text="${serieEjercicio.exercise.description}">Descripción</div>
-                <div class="repeticiones-box" th:text="${serieEjercicio.valor} + ' ' + ${serieEjercicio.unidad}">10 reps</div>
+                <div class="repeticiones-box" th:with="valorUnidad=${serieEjercicio.valor != null ? (serieEjercicio.valor + ' ' + (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' ? 'rep.' : #strings.toLowerCase(serieEjercicio.unidad) == 'min' ? 'min' : #strings.toLowerCase(serieEjercicio.unidad) == 'seg' or #strings.toLowerCase(serieEjercicio.unidad) == 's' ? 'seg' : (serieEjercicio.unidad != null ? serieEjercicio.unidad : 'rep.'))) : '—'}" th:text="${valorUnidad}">10 rep.</div>
                 <div class="repeticiones-box" th:if="${serieEjercicio.peso != null}" th:text="${serieEjercicio.peso} + ' kg'">10 kg</div>
                 <div class="repeticiones-box" th:if="${serieEjercicio.peso == null}">Sin peso</div>
             </div>
