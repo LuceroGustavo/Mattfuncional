@@ -2,6 +2,58 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - Peso en hoja pública de rutina y acción Eliminar en Asignaciones ✅
+
+### 🎯 **Resumen**
+- **Hoja pública de rutina:** Al agregar una serie (plantilla) a una rutina asignada, el **peso** de cada ejercicio no se copiaba; en la hoja pública (`/rutinas/hoja/{token}`) aparecía "Sin peso" aunque la serie tuviera peso. Se corrige copiando `peso` y `orden` al crear la copia de la serie en la rutina.
+- **Asignaciones:** En la pestaña **Asignaciones** del panel del profesor (tabla "Rutinas Asignadas") se añade la acción **Eliminar rutina**, con confirmación y redirección a la misma pestaña tras eliminar.
+
+---
+
+### ✅ **1. Peso en hoja pública al agregar serie a rutina**
+
+#### Problema
+- En la hoja pública de la rutina los ejercicios mostraban "Sin peso" aunque la serie plantilla tuviera peso (ej. 25 kg). La vista de serie (`/series/ver/{id}`) y "Modificar Serie" sí mostraban el peso.
+
+#### Causa
+- En `RutinaService.agregarSerieARutina` al copiar los ejercicios de la serie plantilla a la nueva serie asignada solo se copiaban `valor`, `unidad` y `exercise`; no se copiaban `peso` ni `orden`.
+
+#### Solución
+- En el bucle que crea cada `SerieEjercicio` al agregar una serie a una rutina se añade:
+  - `nuevoSe.setPeso(seOriginal.getPeso())`
+  - Orden: se ordenan los ejercicios de la plantilla por `orden` y se asigna `nuevoSe.setOrden(i)`.
+- Las rutinas ya creadas antes de este cambio siguen con `peso = null` en BD; para ver peso hay que crear una nueva rutina y agregar de nuevo la serie desde la plantilla.
+
+#### Archivos
+- `RutinaService.java`: en `agregarSerieARutina`, copia de peso y orden al crear cada `SerieEjercicio`.
+
+---
+
+### ✅ **2. Acción Eliminar rutina en la vista Asignaciones**
+
+#### Objetivo
+- En la tabla "Rutinas Asignadas" (pestaña Asignaciones del panel profesor) disponer de un botón **Eliminar** además de Ver y Editar.
+
+#### Implementación
+- **Vista:** En `profesor/dashboard.html`, en la columna Acciones de la tabla de asignaciones se añade un botón rojo "Eliminar" con icono de papelera que enlaza a `/rutinas/eliminar/{id}?tab=asignaciones`, con `onclick="return confirm('...')"` para evitar borrados accidentales.
+- **Controlador:** En `RutinaControlador.eliminarRutina` se añade el parámetro opcional `@RequestParam(required = false) String tab`. Si `tab=asignaciones`, la redirección tras eliminar (éxito o error) es a `/profesor/dashboard?tab=asignaciones`; en caso contrario se mantiene `tab=rutinas`.
+
+#### Archivos
+- `profesor/dashboard.html`: botón Eliminar en la tabla de rutinas asignadas.
+- `RutinaControlador.java`: parámetro `tab` en `eliminarRutina` y redirect según su valor.
+
+---
+
+### 📁 **Archivos tocados en este cambio**
+
+| Archivo | Cambios |
+|--------|--------|
+| `RutinaService.java` | En `agregarSerieARutina`, copiar `peso` y `orden` al crear cada SerieEjercicio desde la plantilla. |
+| `profesor/dashboard.html` | Botón "Eliminar" en columna Acciones de la tabla Rutinas Asignadas (pestaña Asignaciones). |
+| `RutinaControlador.java` | Parámetro opcional `tab` en `eliminarRutina`; redirect a `tab=asignaciones` o `tab=rutinas`. |
+
+---
+
 ## [2026-02-22] - Mis Ejercicios: vista lista, actualización de imágenes y ajustes ABM ✅
 
 ### 🎯 **Resumen**

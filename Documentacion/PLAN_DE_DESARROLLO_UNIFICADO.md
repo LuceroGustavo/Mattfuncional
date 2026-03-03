@@ -101,7 +101,7 @@
 - [x] **Calendario semanal y presentismo** (dar presente/ausente, clic en alumno → ficha, día por excepción / recuperar clase).
 - [x] **Pantalla de entrenamiento en sala** (pizarra digital, modo TV, control desde panel, polling).
 - [x] **Página pública:** landing, Planes, formulario de consulta, administración desde panel.
-- [ ] **Manual del usuario:** Mantener actualizado [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades (login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, pizarra y sala TV, usuarios del sistema, página pública).
+- [x] **Manual del usuario:** Implementado. Página HTML en `/profesor/manual` accesible desde el panel (botón "Manual del usuario"); cubre acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso, pizarra, usuarios del sistema, administración y resumen. MANUAL-USUARIO.md sigue como referencia.
 - [ ] **Gestión de backup:** Backups y descargas desde el panel de administración (listar, descargar, importar si aplica).
 - [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
@@ -112,7 +112,7 @@
 
 La mayoría del desarrollo está completada (calendario, pizarra, página pública, ficha alumno, etc.). Quedan por implementar o completar:
 
-- **Manual del usuario:** Actualizar o completar [MANUAL-USUARIO.md](MANUAL-USUARIO.md) con todas las funcionalidades actuales: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, pizarra y sala TV, usuarios del sistema, administración, página pública.
+- **Manual del usuario:** **Completado.** Página HTML en `/profesor/manual` (botón en panel); cubre todas las funcionalidades. MANUAL-USUARIO.md se mantiene como referencia en documentación.
 - **Gestión de backup:** Implementar en el panel de administración la sección de backups y descargas (listar backups, descargar, importar si aplica).
 - **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 
@@ -165,8 +165,8 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 
 ### Manual del usuario
 
-- **Qué falta:** Mantener **actualizado** [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV**, usuarios del sistema, administración, página pública.
-- **Estado:** Por completar/actualizar.
+- **Qué falta:** Manual de uso del panel para profesor/admin accesible desde la app.
+- **Estado:** **Implementado.** Página HTML `profesor/manual-usuario.html` en ruta `/profesor/manual`, accesible desde el botón "Manual del usuario" en el panel. Incluye: acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso del alumno, pizarra en sala, usuarios del sistema, administración y página pública, resumen rápido. [MANUAL-USUARIO.md](MANUAL-USUARIO.md) se mantiene como referencia en documentación.
 
 ### Gestión de backup
 

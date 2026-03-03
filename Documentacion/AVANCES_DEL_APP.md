@@ -148,7 +148,17 @@
 
 ---
 
-## 13. Referencias a documentación detallada
+## 13. Manual del usuario (HTML) — **Completado**
+
+- **Objetivo:** Manual de uso del panel accesible desde la app para profesores, administradores y ayudantes.
+- **Ruta:** `GET /profesor/manual` → plantilla `profesor/manual-usuario.html`.
+- **Acceso:** Botón **"Manual del usuario"** en el panel del profesor (junto a Ver Ejercicios, Administrar sistema, Pizarra).
+- **Contenido:** Secciones con navegación interna: acceso al sistema, panel del profesor, alumnos (lista, crear, editar, ficha), ejercicios, grupos musculares, series, rutinas, calendario semanal, presentismo, progreso del alumno, pizarra en sala (TV), usuarios del sistema, administración y página pública, resumen rápido (tabla Quiero… / Dónde).
+- **Referencia en documentación:** [MANUAL-USUARIO.md](MANUAL-USUARIO.md) se mantiene como documento de referencia.
+
+---
+
+## 14. Referencias a documentación detallada
 
 | Tema | Documento |
 |------|-----------|
@@ -162,4 +172,4 @@
 
 ---
 
-*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública; Planes y formulario HTML terminado). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Manual del usuario HTML en /profesor/manual; Fase 8 – página pública; Planes y formulario HTML terminado). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md y ESTADO-PLANES-Y-PENDIENTES.md.*

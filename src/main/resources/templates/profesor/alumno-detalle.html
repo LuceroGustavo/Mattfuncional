@@ -277,6 +277,14 @@
             Progreso guardado correctamente.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
+        <div th:if="${param.success != null && param.success[0] == 'rutina_asignada'}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Rutina asignada correctamente. Podés copiar el enlace o enviarla por WhatsApp desde la tabla de abajo.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        <div th:if="${param.nota_actualizada != null && param.nota_actualizada[0] == 'ok'}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Reseña actualizada. El alumno verá el nuevo mensaje al abrir el enlace de la rutina.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
         <!-- Header: volver, Progreso, Editar, Eliminar -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <a th:href="@{/profesor/{id}(id=${alumno.profesor.id})}" class="btn btn-volver">
@@ -586,6 +594,7 @@
                                 <th>Rutina</th>
                                 <th>Categoría</th>
                                 <th>Series</th>
+                                <th>Reseña</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -599,7 +608,15 @@
                                 <td>
                                     <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
                                 </td>
-                                <td class="d-flex gap-2">
+                                <td class="small">
+                                    <span th:if="${rutina.notaParaAlumno != null && !#strings.isEmpty(rutina.notaParaAlumno)}" th:text="${#strings.abbreviate(rutina.notaParaAlumno, 40)}" class="text-muted">Nota</span>
+                                    <span th:if="${rutina.notaParaAlumno == null || #strings.isEmpty(rutina.notaParaAlumno)}" class="text-muted fst-italic">—</span>
+                                    <button th:if="${!alumnoInactivo}" type="button" class="btn btn-link btn-sm p-0 ms-1 editar-nota-rutina" title="Editar reseña para el alumno"
+                                            th:attr="data-rutina-id=${rutina.id}, data-nota=${rutina.notaParaAlumno}, data-rutina-nombre=${rutina.nombre}">
+                                        <i class="fas fa-pencil-alt small"></i>
+                                    </button>
+                                </td>
+                                <td class="d-flex flex-wrap gap-2">
                                     <a th:if="${!alumnoInactivo}" th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
                                         <i class="fas fa-eye me-1"></i>Ver
                                     </a>
@@ -621,6 +638,29 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar reseña de rutina -->
+        <div class="modal fade" id="modalEditarNotaRutina" tabindex="-1" aria-labelledby="modalEditarNotaRutinaLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarNotaRutinaLabel"><i class="fas fa-comment-dots me-2"></i>Reseña para el alumno</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form id="formEditarNotaRutina" method="post" action="">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="modal-body">
+                            <p class="small text-muted mb-2">El alumno verá este texto al abrir el enlace de la rutina.</p>
+                            <textarea name="nota" id="modalNotaRutinaTexto" class="form-control" rows="4" maxlength="2000" placeholder="Ej: Enfocate en la técnica esta semana."></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -679,6 +719,24 @@
             const phone = rawPhone.replace(/[^\d]/g, '');
             link.href = phone ? `https://wa.me/${phone}?text=${mensaje}` : `https://wa.me/?text=${mensaje}`;
         });
+
+        // Modal editar nota/reseña de rutina asignada
+        const modalNotaRutina = document.getElementById('modalEditarNotaRutina');
+        const formNotaRutina = document.getElementById('formEditarNotaRutina');
+        const textareaNotaRutina = document.getElementById('modalNotaRutinaTexto');
+        if (modalNotaRutina && formNotaRutina && textareaNotaRutina) {
+            document.querySelectorAll('.editar-nota-rutina').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rutinaId = this.getAttribute('data-rutina-id');
+                    const nota = this.getAttribute('data-nota') || '';
+                    const nombre = this.getAttribute('data-rutina-nombre') || 'Rutina';
+                    formNotaRutina.action = '/profesor/rutinas/' + rutinaId + '/nota';
+                    textareaNotaRutina.value = nota;
+                    document.getElementById('modalEditarNotaRutinaLabel').innerHTML = '<i class="fas fa-comment-dots me-2"></i>Reseña: ' + nombre;
+                    new bootstrap.Modal(modalNotaRutina).show();
+                });
+            });
+        }
 
         // Si se llegó con openModal=progreso (p. ej. desde el botón Progreso del dashboard), abrir el modal al cargar
         (function() {

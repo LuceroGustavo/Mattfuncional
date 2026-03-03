@@ -50,6 +50,11 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 - **Template:** `index-publica.html`; estilos en `css/publica.css`. La plantilla antigua `index.html` se mantiene pero no se usa como entrada.
 - Documento: `Documentacion/PLAN_PAGINA_PUBLICA_GIMNASIO.md`; changelog: `CHANGELOG_UNIFICADO_FEB2026.md` (sección 11).
 
+### 2.8 Peso en hoja pública y Eliminar rutina en Asignaciones (Feb 2026)
+- **Peso en hoja pública:** Al agregar una serie a una rutina asignada se copian ahora `peso` y `orden` de cada ejercicio; la hoja pública (`/rutinas/hoja/{token}`) muestra correctamente el peso (ej. "25 kg"). Cambio en `RutinaService.agregarSerieARutina`.
+- **Asignaciones:** En la pestaña Asignaciones del panel profesor, la tabla "Rutinas Asignadas" tiene botón **Eliminar** (con confirmación); tras eliminar se redirige a la misma pestaña. `RutinaControlador.eliminarRutina` acepta parámetro `tab` para el redirect.
+- Documento: `CHANGELOG.md` y `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` (sección 16).
+
 ---
 
 ## 3. Decisiones de arquitectura que siguen vigentes

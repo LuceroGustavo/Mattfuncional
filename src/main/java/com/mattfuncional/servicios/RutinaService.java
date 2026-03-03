@@ -90,10 +90,16 @@ public class RutinaService {
         return rutina;
     }
 
+    /** Carga la rutina por token con series, serieEjercicios y exercise (igual que en creación/ver serie) para la hoja pública. */
     public Rutina obtenerRutinaPorToken(String tokenPublico) {
-        Rutina rutina = rutinaRepository.findByTokenPublico(tokenPublico)
+        Rutina rutina = rutinaRepository.findByTokenPublicoWithSeries(tokenPublico)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con token: " + tokenPublico));
-        if (rutina.getSeries() != null) {
+        if (rutina.getSeries() != null && !rutina.getSeries().isEmpty()) {
+            List<Long> seriesIds = rutina.getSeries().stream().map(Serie::getId).toList();
+            List<Serie> seriesConEjercicios = serieRepository.findByIdInWithSerieEjercicios(seriesIds);
+            seriesConEjercicios.forEach(s -> s.setRutina(rutina));
+            rutina.getSeries().clear();
+            rutina.getSeries().addAll(seriesConEjercicios);
             rutina.getSeries().sort(Comparator.comparingInt(Serie::getOrden));
             for (Serie s : rutina.getSeries()) {
                 if (s.getSerieEjercicios() != null) {
@@ -210,7 +216,7 @@ public class RutinaService {
     }
 
     // Asignar rutina plantilla a un usuario (crear copia)
-    public Rutina asignarRutinaPlantillaAUsuario(Long rutinaPlantillaId, Long usuarioId, Long profesorId) {
+    public Rutina asignarRutinaPlantillaAUsuario(Long rutinaPlantillaId, Long usuarioId, Long profesorId, String notaParaAlumno) {
         Rutina rutinaPlantilla = obtenerRutinaPorId(rutinaPlantillaId);
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
@@ -227,6 +233,7 @@ public class RutinaService {
         nuevaRutina.setEsPlantilla(false); // No es plantilla, es asignada
         nuevaRutina.setEstado("ACTIVA");
         nuevaRutina.setTokenPublico(generarTokenUnico());
+        nuevaRutina.setNotaParaAlumno(notaParaAlumno != null && !notaParaAlumno.isBlank() ? notaParaAlumno.trim() : null);
 
         Rutina rutinaGuardada = rutinaRepository.save(nuevaRutina);
 
@@ -335,6 +342,19 @@ public class RutinaService {
         }
     }
 
+    /** Actualiza la nota/reseña para el alumno de una rutina asignada. Solo si la rutina pertenece al profesor y no es plantilla. */
+    public void actualizarNotaParaAlumno(Long rutinaId, Long profesorId, String nota) {
+        Rutina rutina = obtenerRutinaPorId(rutinaId);
+        if (rutina.getProfesor() == null || !rutina.getProfesor().getId().equals(profesorId)) {
+            throw new ResourceNotFoundException("No tiene permiso para editar esta rutina.");
+        }
+        if (rutina.isEsPlantilla()) {
+            throw new IllegalArgumentException("Solo se puede editar la nota de rutinas asignadas a un alumno.");
+        }
+        rutina.setNotaParaAlumno(nota != null && !nota.isBlank() ? nota.trim() : null);
+        rutinaRepository.save(rutina);
+    }
+
     // Agregar serie a una rutina con repeticiones específicas
     public void agregarSerieARutina(Long rutinaId, Long seriePlantillaId, int repeticiones) {
         Rutina rutina = obtenerRutinaPorId(rutinaId);
@@ -356,14 +376,19 @@ public class RutinaService {
         // Guardar la nueva serie
         Serie serieGuardada = serieRepository.save(nuevaSerie);
 
-        // Copiar los ejercicios de la serie plantilla
+        // Copiar los ejercicios de la serie plantilla (incluyendo peso y orden)
         if (seriePlantilla.getSerieEjercicios() != null) {
-            for (SerieEjercicio seOriginal : seriePlantilla.getSerieEjercicios()) {
+            List<SerieEjercicio> originalOrdenados = new ArrayList<>(seriePlantilla.getSerieEjercicios());
+            originalOrdenados.sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+            for (int i = 0; i < originalOrdenados.size(); i++) {
+                SerieEjercicio seOriginal = originalOrdenados.get(i);
                 SerieEjercicio nuevoSe = new SerieEjercicio();
                 nuevoSe.setSerie(serieGuardada);
                 nuevoSe.setExercise(seOriginal.getExercise());
                 nuevoSe.setValor(seOriginal.getValor());
                 nuevoSe.setUnidad(seOriginal.getUnidad());
+                nuevoSe.setPeso(seOriginal.getPeso());
+                nuevoSe.setOrden(i);
                 serieEjercicioRepository.save(nuevoSe);
             }
         }

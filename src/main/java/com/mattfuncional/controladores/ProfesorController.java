@@ -92,6 +92,11 @@ public class ProfesorController {
         return "redirect:/profesor/" + profesor.getId() + (query != null && !query.isEmpty() ? "?" + query : "");
     }
 
+    @GetMapping("/manual")
+    public String manualUsuario() {
+        return "profesor/manual-usuario";
+    }
+
     @GetMapping("/{id}")
     public String dashboardProfesorPorId(@PathVariable Long id, Model model) {
         Profesor profesor = profesorService.getProfesorById(id);
@@ -1017,8 +1022,9 @@ public class ProfesorController {
 
     // POST: ASIGNAR RUTINA A ALUMNO
     @PostMapping("/asignar-rutina/{id}")
-    public String asignarRutinaAAlumnoPost(@PathVariable Long id, 
+    public String asignarRutinaAAlumnoPost(@PathVariable Long id,
                                           @RequestParam Long rutinaPlantillaId,
+                                          @RequestParam(required = false) String notaParaAlumno,
                                           @AuthenticationPrincipal Usuario usuarioActual,
                                           Model model) {
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
@@ -1027,22 +1033,37 @@ public class ProfesorController {
         }
 
         try {
-            // Verificar que el alumno pertenezca al profesor
             Usuario alumno = usuarioService.getUsuarioById(id);
             if (alumno == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
                 model.addAttribute("errorMessage", "No tienes permisos para asignar rutinas a este alumno.");
                 return "redirect:/profesor/" + profesor.getId();
             }
 
-            // Asignar la rutina plantilla al alumno (crear copia)
-            rutinaService.asignarRutinaPlantillaAUsuario(rutinaPlantillaId, id, profesor.getId());
-            
-            return "redirect:/profesor/" + profesor.getId() + "?tab=asignaciones&success=rutina_asignada&alumno=" + alumno.getNombre();
-            
+            rutinaService.asignarRutinaPlantillaAUsuario(rutinaPlantillaId, id, profesor.getId(), notaParaAlumno);
+            return "redirect:/profesor/alumnos/" + id + "?success=rutina_asignada";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error al asignar la rutina: " + e.getMessage());
             return "redirect:/profesor/asignar-rutina/" + id;
         }
+    }
+
+    // POST: Actualizar nota/reseña para el alumno (rutina asignada)
+    @PostMapping("/rutinas/{rutinaId}/nota")
+    public String actualizarNotaRutina(@PathVariable Long rutinaId, @RequestParam(required = false) String nota,
+                                      @AuthenticationPrincipal Usuario usuarioActual) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (profesor == null) return "redirect:/login";
+        try {
+            rutinaService.actualizarNotaParaAlumno(rutinaId, profesor.getId(), nota);
+            com.mattfuncional.entidades.Rutina r = rutinaService.obtenerRutinaPorId(rutinaId);
+            Long alumnoId = r.getUsuario() != null ? r.getUsuario().getId() : null;
+            if (alumnoId != null) {
+                return "redirect:/profesor/alumnos/" + alumnoId + "?nota_actualizada=ok";
+            }
+        } catch (Exception e) {
+            // redirigir al panel si falla
+        }
+        return "redirect:/profesor/dashboard";
     }
 
     /**

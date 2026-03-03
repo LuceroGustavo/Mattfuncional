@@ -24,6 +24,7 @@
 - **Página pública:** Landing en `/`, página Planes, formulario de consulta, administración desde panel.
 - **Ficha alumno:** Detalle mejorado (organización, historial, progreso, accesos rápidos).
 - **Resto:** Ejercicios, series, rutinas, grupos musculares, alumnos sin login, hoja de rutina por token, usuarios del sistema, consultas recibidas, etc. Ver AVANCES_DEL_APP.md.
+- **Manual del usuario:** Implementado. Página HTML de manual accesible desde el panel del profesor (botón "Manual del usuario" → `/profesor/manual`). Incluye todas las secciones: acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso del alumno, pizarra en sala, usuarios del sistema, administración y página pública, resumen rápido. El archivo [MANUAL-USUARIO.md](MANUAL-USUARIO.md) sigue como referencia en documentación.
 
 ---
 
@@ -31,7 +32,6 @@
 
 | Ítem | Descripción |
 |------|-------------|
-| **Manual del usuario** | Actualizar o completar [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, pizarra y sala TV, usuarios del sistema, administración, página pública. |
 | **Gestión de backup** | En el panel de administración: sección de backups y descargas (listar, descargar, opcionalmente importar). |
 | **Depuración / eliminar datos viejos** | Método o proceso para archivar o eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md). |
 
@@ -41,6 +41,5 @@ Opcional / operativo: script en servidor para `alter_consulta_email_nullable.sql
 
 ## Resumen: prioridad de lo pendiente
 
-1. **Manual del usuario** – Documentar todo lo que ya existe para el profesor/admin.
-2. **Gestión de backup** – Backups y descargas desde el panel.
-3. **Depuración de datos antiguos** – Eliminar o archivar presente/asistencia de años anteriores (mantener al menos 12 meses).
+1. **Gestión de backup** – Backups y descargas desde el panel de administración.
+2. **Depuración de datos antiguos** – Eliminar o archivar presente/asistencia de años anteriores (mantener al menos 12 meses).

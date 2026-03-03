@@ -23,6 +23,10 @@ public class Rutina {
     @Column(unique = true, length = 32)
     private String tokenPublico;
 
+    /** Nota o reseña del profesor para el alumno (solo en rutinas asignadas, no plantillas). Visible en la hoja pública. */
+    @Column(length = 2000)
+    private String notaParaAlumno;
+
     @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Serie> series;
 
@@ -136,6 +140,14 @@ public class Rutina {
 
     public void setTokenPublico(String tokenPublico) {
         this.tokenPublico = tokenPublico;
+    }
+
+    public String getNotaParaAlumno() {
+        return notaParaAlumno;
+    }
+
+    public void setNotaParaAlumno(String notaParaAlumno) {
+        this.notaParaAlumno = notaParaAlumno;
     }
 
     public List<Serie> getSeries() {

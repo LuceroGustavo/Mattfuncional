@@ -254,6 +254,9 @@
             <a th:href="@{/profesor/pizarra}" class="btn btn-pizarra mx-1">
                 <i class="fa-solid fa-tv me-2"></i>Pizarra
             </a>
+            <a th:href="@{/profesor/manual}" class="btn btn-outline-secondary mx-1" title="Manual de uso del panel">
+                <i class="fa-solid fa-book me-2"></i>Manual del usuario
+            </a>
         </div>
 
         <!-- Tabs y contenido -->
@@ -553,6 +556,11 @@
                                         </a>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                        <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm"
+                                           onclick="return confirm('¿Eliminar esta rutina asignada? Se borrará la asignación y no podrá recuperarse.');"
+                                           title="Eliminar rutina">
+                                            <i class="fa-solid fa-trash me-1"></i>Eliminar
                                         </a>
                                     </td>
                                 </tr>
