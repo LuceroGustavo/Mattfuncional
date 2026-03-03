@@ -250,6 +250,14 @@ public class RutinaControlador {
     public String verHojaRutina(@PathVariable String tokenPublico, Model model, jakarta.servlet.http.HttpServletRequest request) {
         try {
             Rutina rutina = rutinaService.obtenerRutinaPorToken(tokenPublico);
+            if (rutina.getUsuario() == null) {
+                model.addAttribute("mensajeError", "Este enlace no es válido. Solo las rutinas asignadas a un alumno pueden verse aquí.");
+                return "rutinas/hoja-no-encontrada";
+            }
+            if (rutina.getEstado() != null && "INACTIVA".equalsIgnoreCase(rutina.getEstado().trim())) {
+                model.addAttribute("mensajeError", "Esta rutina ya no está activa.");
+                return "rutinas/hoja-inactiva";
+            }
             model.addAttribute("rutina", rutina);
             if (rutina.getFechaCreacion() != null) {
                 Locale es = Locale.forLanguageTag("es");
@@ -279,5 +287,33 @@ public class RutinaControlador {
     public String redirigirVerHojaRutina(@PathVariable Long rutinaId) {
         Rutina rutina = rutinaService.obtenerRutinaPorId(rutinaId);
         return "redirect:/rutinas/hoja/" + rutina.getTokenPublico();
+    }
+
+    /** Cambiar estado de una rutina asignada (ACTIVA / INACTIVA). Si tab=alumno y alumnoId está presente, redirige al detalle del alumno. */
+    @GetMapping("/cambiar-estado-asignacion/{id}")
+    public String cambiarEstadoAsignacion(@PathVariable Long id, @RequestParam String estado,
+                                         @RequestParam(required = false) String tab,
+                                         @RequestParam(required = false) Long alumnoId) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual();
+        com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(usuarioActual);
+        if (profesor == null) return "redirect:/login";
+        boolean redirectToAlumno = alumnoId != null || "alumno".equalsIgnoreCase(tab);
+        String tabRedirect = "asignaciones".equalsIgnoreCase(tab) ? "asignaciones" : "rutinas";
+        try {
+            Rutina rutina = rutinaService.obtenerRutinaPorId(id);
+            if (!isDeveloper(usuarioActual) && (rutina.getProfesor() == null || !rutina.getProfesor().getId().equals(profesor.getId()))) {
+                if (redirectToAlumno && alumnoId != null) return "redirect:/profesor/alumnos/" + alumnoId + "?error=No+tiene+permiso";
+                return "redirect:/profesor/dashboard?tab=" + tabRedirect + "&error=No+tiene+permiso";
+            }
+            String nuevoEstado = (estado != null && estado.toUpperCase().trim().equals("INACTIVA")) ? "INACTIVA" : "ACTIVA";
+            rutinaService.cambiarEstadoRutina(id, nuevoEstado);
+            if (redirectToAlumno && alumnoId != null) {
+                return "redirect:/profesor/alumnos/" + alumnoId + "?success=Estado+actualizado";
+            }
+            return "redirect:/profesor/dashboard?tab=" + tabRedirect + "&success=Estado+actualizado";
+        } catch (ResourceNotFoundException e) {
+            if (redirectToAlumno && alumnoId != null) return "redirect:/profesor/alumnos/" + alumnoId + "?error=Rutina+no+encontrada";
+            return "redirect:/profesor/dashboard?tab=" + tabRedirect + "&error=Rutina+no+encontrada";
+        }
     }
 }

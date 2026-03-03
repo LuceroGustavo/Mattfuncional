@@ -22,6 +22,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 14. [Formulario de consulta – Email opcional y script BD](#14-formulario-de-consulta--email-opcional-y-script-bd-feb-2026)
 15. [Página Planes y formulario – Cierre de desarrollo HTML](#15-página-planes-y-formulario--cierre-de-desarrollo-html-feb-2026)
 16. [Peso en hoja pública de rutina y acción Eliminar en Asignaciones](#16-peso-en-hoja-pública-de-rutina-y-acción-eliminar-en-asignaciones-feb-2026)
+17. [Botón WhatsApp en detalle del alumno](#17-botón-whatsapp-en-detalle-del-alumno-feb-2026)
 
 ---
 
@@ -465,6 +466,28 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 | `RutinaService.java` | En `agregarSerieARutina`, copiar `peso` y `orden` al crear cada `SerieEjercicio` desde la plantilla. |
 | `profesor/dashboard.html` | Botón "Eliminar" en Acciones de la tabla Rutinas Asignadas. |
 | `RutinaControlador.java` | Parámetro `tab` en `eliminarRutina`; redirect según `tab` (asignaciones / rutinas). |
+
+---
+
+## 17. Botón WhatsApp en detalle del alumno (Feb 2026)
+
+**Resumen:** En el detalle del alumno, en "Rutinas del Alumno", el botón **WhatsApp** por cada rutina abre WhatsApp con el mensaje "Rutina: [enlace a la hoja]". Si el alumno tiene celular guardado, el enlace usa `wa.me/{número}?text=...` para pre-seleccionar el contacto; si no, abre WhatsApp con el mensaje listo para elegir destinatario. Se documenta el comportamiento y se mejoran la plantilla (evitar `data-phone="null"`, título del botón según haya o no teléfono).
+
+### 17.1 Comportamiento
+
+- **Ubicación:** Columna Acciones de la tabla "Rutinas del Alumno" en `/profesor/alumnos/{id}` (solo si el alumno no está inactivo).
+- **Al hacer clic:** Nueva pestaña con `https://wa.me/{teléfono}?text=Rutina:%20{url}`; si no hay teléfono: `https://wa.me/?text=...`. El número se normaliza a solo dígitos para `wa.me`.
+
+### 17.2 Cambios en la plantilla
+
+- **data-phone:** `data-phone=${alumno.celular != null ? alumno.celular : ''}` para no enviar la cadena `"null"` cuando no hay celular.
+- **title:** Con celular: "Abrir WhatsApp para enviar la rutina al alumno". Sin celular: "Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)".
+
+### 17.3 Archivos
+
+| Archivo | Cambios |
+|--------|--------|
+| `profesor/alumno-detalle.html` | `data-phone` con fallback a vacío cuando `alumno.celular` es null; atributo `title` condicional. |
 
 ---
 

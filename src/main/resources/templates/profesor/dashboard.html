@@ -511,7 +511,7 @@
                                     </td>
                                     <td th:text="${rutina.descripcion}">Descripción</td>
                                     <td>
-                                        <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                        <a th:href="@{/profesor/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener" title="Ver (solo con sesión)">
                                             <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-warning btn-sm">
@@ -565,6 +565,12 @@
                                         </button>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm" title="Editar">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
+                                        </a>
+                                        <a th:if="${rutinaAsignada.estado == null || rutinaAsignada.estado != 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='INACTIVA', tab='asignaciones')}" class="btn btn-outline-secondary btn-sm" title="Inactivar rutina (el enlace dejará de mostrar la hoja)">
+                                            <i class="fa-solid fa-pause me-1"></i>Inactivar
+                                        </a>
+                                        <a th:if="${rutinaAsignada.estado == 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='ACTIVA', tab='asignaciones')}" class="btn btn-outline-success btn-sm" title="Activar rutina">
+                                            <i class="fa-solid fa-play me-1"></i>Activar
                                         </a>
                                         <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm"
                                            onclick="return confirm('¿Eliminar esta rutina asignada? Se borrará la asignación y no podrá recuperarse.');"

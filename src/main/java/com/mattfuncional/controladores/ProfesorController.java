@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -413,6 +414,18 @@ public class ProfesorController {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         }
         return "profesor/alumno-detalle";
+    }
+
+    /** Inactiva todas las rutinas asignadas al alumno. Solo si el alumno pertenece al profesor. */
+    @GetMapping("/alumnos/{id}/rutinas/inactivar-todas")
+    public String inactivarTodasRutinasDelAlumno(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioActual) {
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (alumno == null || profesor == null || alumno.getProfesor() == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
+            return "redirect:/profesor/dashboard?error=No+tiene+permiso";
+        }
+        int inactivadas = rutinaService.inactivarTodasRutinasDelAlumno(id);
+        return "redirect:/profesor/alumnos/" + id + "?success=" + (inactivadas > 0 ? "Rutinas+inactivadas" : "Sin+rutinas+activas");
     }
 
     /** API: lista de asistencias del alumno (para actualizar modal e historial sin recargar la página). */
@@ -1064,6 +1077,39 @@ public class ProfesorController {
             // redirigir al panel si falla
         }
         return "redirect:/profesor/dashboard";
+    }
+
+    /** Vista privada de una rutina (requiere sesión). Usado desde Mis Rutinas; no expone el enlace público. */
+    @GetMapping("/rutinas/ver/{id}")
+    public String verRutinaPrivada(@PathVariable Long id, Model model, @AuthenticationPrincipal Usuario usuarioActual,
+                                  jakarta.servlet.http.HttpServletRequest request) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        if (profesor == null) return "redirect:/login";
+        try {
+            com.mattfuncional.entidades.Rutina rutina = rutinaService.obtenerRutinaPorIdParaVista(id);
+            if (rutina.getProfesor() == null || !rutina.getProfesor().getId().equals(profesor.getId())) {
+                return "redirect:/profesor/dashboard?tab=rutinas&error=No+tiene+permiso+para+ver+esta+rutina";
+            }
+            model.addAttribute("rutina", rutina);
+            if (rutina.getFechaCreacion() != null) {
+                Locale es = Locale.forLanguageTag("es");
+                String dia = rutina.getFechaCreacion().format(DateTimeFormatter.ofPattern("EEEE", es));
+                String mes = rutina.getFechaCreacion().format(DateTimeFormatter.ofPattern("MMM", es)).toUpperCase();
+                String fechaFormateada = (dia.substring(0, 1).toUpperCase() + dia.substring(1)) + " - "
+                        + rutina.getFechaCreacion().getDayOfMonth() + " " + mes + " " + rutina.getFechaCreacion().getYear();
+                model.addAttribute("fechaFormateada", fechaFormateada);
+            } else {
+                model.addAttribute("fechaFormateada", "");
+            }
+            int port = request.getServerPort();
+            String baseUrl = request.getScheme() + "://" + request.getServerName()
+                    + (port != 80 && port != 443 ? ":" + port : "");
+            model.addAttribute("ogImageUrl", baseUrl + "/img/logo.png");
+            model.addAttribute("ogPageUrl", baseUrl + "/profesor/rutinas/ver/" + id);
+            return "rutinas/verRutina";
+        } catch (com.mattfuncional.excepciones.ResourceNotFoundException e) {
+            return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina+no+encontrada";
+        }
     }
 
     /**

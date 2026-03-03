@@ -285,6 +285,14 @@
             Reseña actualizada. El alumno verá el nuevo mensaje al abrir el enlace de la rutina.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
+        <div th:if="${param.success != null && param.success[0] != 'rutina_asignada'}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${param.success[0]}">Mensaje</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        <div th:if="${param.error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${param.error[0]}">Error</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
         <!-- Header: volver, Progreso, Editar, Eliminar -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <a th:href="@{/profesor/{id}(id=${alumno.profesor.id})}" class="btn btn-volver">
@@ -575,10 +583,15 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <span class="text-muted">Historial de rutinas asignadas</span>
-                    <a th:if="${!alumnoInactivo}" th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-success btn-sm">
-                        <i class="fas fa-dumbbell me-1"></i>Asignar rutina
-                    </a>
-                    <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled">Asignar rutina (activa al alumno)</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:if="${rutinasAsignadas != null && !rutinasAsignadas.isEmpty() && !alumnoInactivo}" th:href="@{/profesor/alumnos/{id}/rutinas/inactivar-todas(id=${alumno.id})}" class="btn btn-outline-warning btn-sm" onclick="return confirm('¿Inactivar todas las rutinas de este alumno? Los enlaces dejarán de mostrar la hoja hasta que las reactives.');" title="Inactivar todas las rutinas asignadas">
+                            <i class="fas fa-pause-circle me-1"></i>Inactivar todas las rutinas
+                        </a>
+                        <a th:if="${!alumnoInactivo}" th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="btn btn-success btn-sm">
+                            <i class="fas fa-dumbbell me-1"></i>Asignar rutina
+                        </a>
+                        <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled">Asignar rutina (activa al alumno)</span>
+                    </div>
                 </div>
 
                 <div th:if="${rutinasAsignadas == null || rutinasAsignadas.isEmpty()}" class="text-center text-muted py-5">
@@ -594,6 +607,7 @@
                                 <th>Rutina</th>
                                 <th>Categoría</th>
                                 <th>Series</th>
+                                <th>Estado</th>
                                 <th>Reseña</th>
                                 <th>Acciones</th>
                             </tr>
@@ -607,6 +621,9 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="${rutina.estado == 'ACTIVA' ? 'bg-success' : 'bg-secondary'}" th:text="${rutina.estado != null ? rutina.estado : 'ACTIVA'}">Estado</span>
                                 </td>
                                 <td class="small">
                                     <span th:if="${rutina.notaParaAlumno != null && !#strings.isEmpty(rutina.notaParaAlumno)}" th:text="${#strings.abbreviate(rutina.notaParaAlumno, 40)}" class="text-muted">Nota</span>
@@ -629,8 +646,14 @@
                                     <button th:if="${alumnoInactivo}" type="button" class="btn btn-outline-dark btn-sm btn-disabled-inactivo disabled">
                                         <i class="fas fa-link me-1"></i>Copiar enlace
                                     </button>
+                                    <a th:if="${!alumnoInactivo && (rutina.estado == null || rutina.estado != 'INACTIVA')}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutina.id}, estado='INACTIVA', tab='alumno', alumnoId=${alumno.id})}" class="btn btn-outline-secondary btn-sm" title="Inactivar esta rutina">
+                                        <i class="fas fa-pause me-1"></i>Inactivar
+                                    </a>
+                                    <a th:if="${!alumnoInactivo && rutina.estado == 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutina.id}, estado='ACTIVA', tab='alumno', alumnoId=${alumno.id})}" class="btn btn-outline-success btn-sm" title="Activar esta rutina">
+                                        <i class="fas fa-play me-1"></i>Activar
+                                    </a>
                                     <a th:if="${!alumnoInactivo}" href="#" class="btn btn-success btn-sm compartir-whatsapp" target="_blank" rel="noopener"
-                                       th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-phone=${alumno.celular}">
+                                       th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-phone=${alumno.celular != null ? alumno.celular : ''},title=${alumno.celular != null && !#strings.isEmpty(alumno.celular)} ? 'Abrir WhatsApp para enviar la rutina al alumno' : 'Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)'">
                                         <i class="fab fa-whatsapp me-1"></i>WhatsApp
                                     </a>
                                     <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled"><i class="fab fa-whatsapp me-1"></i>WhatsApp</span>

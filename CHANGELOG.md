@@ -2,6 +2,33 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - Botón WhatsApp en detalle del alumno (verificación y mejoras) ✅
+
+### 🎯 **Resumen**
+- En el **detalle del alumno**, en la sección "Rutinas del Alumno", el botón **WhatsApp** por cada rutina está activo y cumple lo esperado: abre WhatsApp (web o app) con el mensaje "Rutina: [enlace a la hoja]". Si el alumno tiene **celular guardado** en la ficha, el enlace pre-selecciona ese número (`wa.me/{número}?text=...`); si no tiene celular, abre WhatsApp con el mensaje listo para elegir el contacto manualmente.
+- Se documenta el comportamiento y se aplican pequeñas mejoras en la plantilla: evitar que `data-phone` sea la cadena `"null"` cuando el alumno no tiene celular, y añadir un **title** al botón según haya o no teléfono (para guiar al usuario).
+
+---
+
+### ✅ **Comportamiento del botón WhatsApp**
+
+- **Ubicación:** Columna "Acciones" de la tabla "Rutinas del Alumno" en `/profesor/alumnos/{id}` (solo si el alumno no está inactivo).
+- **Al hacer clic:** Se abre en nueva pestaña `https://wa.me/{teléfono}?text=Rutina:%20{url}` (teléfono solo dígitos, sin espacios/guiones). Si no hay teléfono guardado, se usa `https://wa.me/?text=...` (mismo mensaje, sin número).
+- **Implementación:** Cada enlace tiene `data-url` (ruta de la hoja de la rutina) y `data-phone` (celular del alumno). Un script al cargar la página construye el `href` final; el número se normaliza con `replace(/[^\d]/g, '')` para cumplir con el formato que espera `wa.me`.
+
+### ✅ **Cambios en la plantilla**
+
+- **data-phone:** Se usa `data-phone=${alumno.celular != null ? alumno.celular : ''}` para que, si el alumno no tiene celular, el atributo quede vacío y no se envíe la cadena `"null"` al enlace.
+- **title del botón:** Con celular: *"Abrir WhatsApp para enviar la rutina al alumno"*. Sin celular: *"Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)"*.
+
+### 📁 **Archivos tocados**
+
+| Archivo | Cambios |
+|--------|--------|
+| `profesor/alumno-detalle.html` | `data-phone` con fallback a cadena vacía cuando `alumno.celular` es null; atributo `title` condicional según exista o no celular. |
+
+---
+
 ## [2026-02-09] - Peso en hoja pública de rutina y acción Eliminar en Asignaciones ✅
 
 ### 🎯 **Resumen**

@@ -55,6 +55,10 @@ Este archivo resume lo importante de `historial/` para poder borrar esa carpeta 
 - **Asignaciones:** En la pestaña Asignaciones del panel profesor, la tabla "Rutinas Asignadas" tiene botón **Eliminar** (con confirmación); tras eliminar se redirige a la misma pestaña. `RutinaControlador.eliminarRutina` acepta parámetro `tab` para el redirect.
 - Documento: `CHANGELOG.md` y `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` (sección 16).
 
+### 2.9 Botón WhatsApp en detalle del alumno (Feb 2026)
+- En la ficha del alumno, en "Rutinas del Alumno", el botón **WhatsApp** por rutina abre WhatsApp con el mensaje "Rutina: [enlace a la hoja]". Si el alumno tiene celular guardado, se usa ese número en `wa.me`; si no, se abre WhatsApp con el mensaje listo para elegir contacto. Mejoras en plantilla: `data-phone` vacío cuando no hay celular (evitar "null"); título del botón según haya o no teléfono.
+- Documento: `CHANGELOG.md` y `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md` (sección 17).
+
 ---
 
 ## 3. Decisiones de arquitectura que siguen vigentes

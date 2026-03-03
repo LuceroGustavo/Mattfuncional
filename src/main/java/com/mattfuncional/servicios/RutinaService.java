@@ -94,6 +94,19 @@ public class RutinaService {
     public Rutina obtenerRutinaPorToken(String tokenPublico) {
         Rutina rutina = rutinaRepository.findByTokenPublicoWithSeries(tokenPublico)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con token: " + tokenPublico));
+        cargarSeriesConEjercicios(rutina);
+        return rutina;
+    }
+
+    /** Carga la rutina por ID con series y serieEjercicios para vista privada (panel profesor, requiere sesión). */
+    public Rutina obtenerRutinaPorIdParaVista(Long id) {
+        Rutina rutina = rutinaRepository.findByIdWithSeries(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada con id: " + id));
+        cargarSeriesConEjercicios(rutina);
+        return rutina;
+    }
+
+    private void cargarSeriesConEjercicios(Rutina rutina) {
         if (rutina.getSeries() != null && !rutina.getSeries().isEmpty()) {
             List<Long> seriesIds = rutina.getSeries().stream().map(Serie::getId).toList();
             List<Serie> seriesConEjercicios = serieRepository.findByIdInWithSerieEjercicios(seriesIds);
@@ -107,7 +120,6 @@ public class RutinaService {
                 }
             }
         }
-        return rutina;
     }
 
     // Obtener rutinas por usuario
@@ -167,6 +179,20 @@ public class RutinaService {
     // Obtener rutinas completadas por usuario
     public List<Rutina> obtenerRutinasCompletadasPorUsuario(Long usuarioId) {
         return rutinaRepository.findByUsuarioIdAndEstado(usuarioId, "COMPLETADA");
+    }
+
+    /** Inactiva todas las rutinas asignadas a un alumno (usuarioId). Devuelve la cantidad inactivadas. */
+    public int inactivarTodasRutinasDelAlumno(Long usuarioId) {
+        List<Rutina> rutinas = rutinaRepository.findByUsuarioIdAndEsPlantillaFalse(usuarioId);
+        int count = 0;
+        for (Rutina r : rutinas) {
+            if (r.getEstado() == null || !"INACTIVA".equalsIgnoreCase(r.getEstado().trim())) {
+                r.setEstado("INACTIVA");
+                rutinaRepository.save(r);
+                count++;
+            }
+        }
+        return count;
     }
 
     // Marcar rutina como completada
