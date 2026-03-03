@@ -87,7 +87,7 @@
                 <h3>Editar alumno</h3>
                 <p>Desde la lista, <strong>Editar</strong>. Podés cambiar datos personales, estado (Activo/Inactivo), fechas de alta/baja, horarios y detalle de asistencia.</p>
                 <h3>Ficha del alumno (detalle)</h3>
-                <p>Al hacer clic en <strong>Ver</strong> se abre la ficha con: datos personales y estado, <strong>historial de asistencia</strong>, <strong>resumen mensual de asistencias</strong> (modal por mes), <strong>progreso</strong> (observaciones, grupos trabajados, marcar presente/ausente para una fecha), y <strong>rutinas asignadas</strong> con Copiar enlace y WhatsApp. Desde la ficha también podés <strong>Asignar rutina</strong>.</p>
+                <p>Al hacer clic en <strong>Ver</strong> se abre la ficha con: datos personales y estado, <strong>historial de asistencia</strong>, <strong>resumen mensual de asistencias</strong> (modal por mes), <strong>progreso</strong> (observaciones, grupos trabajados, marcar presente/ausente para una fecha), y <strong>Rutinas del alumno</strong> (tabla con fecha, rutina, categoría, series, estado ACTIVA/INACTIVA, reseña y acciones: Ver, Copiar enlace, Inactivar/Activar, WhatsApp). Botón <strong>Inactivar todas las rutinas</strong> para pasar todas a INACTIVA. Solo las rutinas asignadas tienen enlace público; si están inactivas, la hoja muestra "Rutina inactiva". Desde la ficha también podés <strong>Asignar rutina</strong>.</p>
             </div>
 
             <div class="card-section" id="ejercicios">
@@ -116,11 +116,23 @@
 
             <div class="card-section" id="rutinas">
                 <h2>7. Rutinas</h2>
-                <p><strong>Mis Rutinas</strong> muestra la lista de rutinas. Una rutina se arma con <strong>una o más series</strong>.</p>
+                <p><strong>Mis Rutinas</strong> muestra la lista de rutinas (plantillas). Una rutina se arma con <strong>una o más series</strong>. Desde aquí solo podés <strong>Ver</strong> (vista privada, con sesión), <strong>Editar</strong> y <strong>Eliminar</strong>. Las rutinas de Mis Rutinas <strong>no tienen enlace público</strong>: son plantillas que primero hay que <strong>asignar</strong> a un alumno.</p>
                 <p><strong>Crear rutina:</strong> Nombre y descripción; elegís series (por clic en tarjetas). La lista “Series seleccionadas” permite <strong>subir/bajar</strong> para definir el orden antes de guardar.</p>
                 <p><strong>Editar rutina:</strong> Podés cambiar detalles, agregar o quitar series y reordenar con Subir/Bajar.</p>
-                <p><strong>Asignar rutina a un alumno:</strong> Desde la ficha del alumno, <strong>Asignar rutina</strong>; elegís la rutina y se genera un <strong>enlace único</strong>. Ese enlace se puede <strong>copiar</strong> o enviar por <strong>WhatsApp</strong> (abre el chat con el celular del alumno y el enlace).</p>
-                <p><strong>Hoja de rutina:</strong> El enlace abre una <strong>hoja pública</strong> (sin login) para que el alumno la vea en el celular o en papel.</p>
+                <p><strong>Asignaciones (enlace público):</strong> Las <strong>únicas</strong> rutinas que se pueden enviar por enlace o WhatsApp son las <strong>asignadas</strong> a un alumno. Primero asignás la rutina desde la <strong>ficha del alumno</strong> (Asignar rutina) o desde la pestaña <strong>Asignaciones</strong> del panel; esa asignación genera un <strong>enlace único</strong> (hoja pública). Ese enlace se puede <strong>Copiar</strong> o enviar por <strong>WhatsApp</strong> (abre WhatsApp con el celular del alumno si está cargado y el mensaje con el enlace). Si intentás abrir el enlace de una rutina que no fue asignada, no se mostrará la hoja.</p>
+                <p><strong>Hoja de rutina:</strong> El enlace de una <strong>asignación</strong> abre una <strong>hoja pública</strong> (sin login) para que el alumno la vea en el celular o en papel. Si la asignación está <strong>inactiva</strong>, la hoja muestra el mensaje "Rutina inactiva" en lugar del contenido.</p>
+                <h3>7.1 Estado de la asignación (ACTIVA / INACTIVA)</h3>
+                <p>Cada rutina <strong>asignada</strong> a un alumno tiene un estado: <strong>ACTIVA</strong> o <strong>INACTIVA</strong>.</p>
+                <ul>
+                    <li><strong>ACTIVA:</strong> El enlace de la hoja muestra la rutina completa. El alumno puede verla y usarla.</li>
+                    <li><strong>INACTIVA:</strong> El enlace de la hoja muestra la pantalla "Rutina inactiva" (sin contenido). Sirve para dejar de dar acceso sin borrar el historial de la asignación.</li>
+                </ul>
+                <p><strong>Dónde gestionar el estado:</strong></p>
+                <ul>
+                    <li><strong>En la ficha del alumno</strong>, en la tabla "Rutinas del Alumno": por cada rutina tenés <strong>Inactivar</strong> o <strong>Activar</strong> (según el estado actual). También hay un botón <strong>Inactivar todas las rutinas</strong> para pasar todas las rutinas de ese alumno a INACTIVA de una vez.</li>
+                    <li><strong>En la pestaña Asignaciones</strong> del panel: en la tabla "Rutinas Asignadas" cada fila tiene <strong>Inactivar</strong> o <strong>Activar</strong> (y Ver, Copiar enlace, Eliminar). Podés filtrar por nombre de alumno.</li>
+                </ul>
+                <p><em>Resumen: solo las rutinas asignadas tienen enlace público; ese enlace puede estar ACTIVO (muestra la hoja) o INACTIVO (muestra "Rutina inactiva").</em></p>
             </div>
 
             <div class="card-section" id="calendario">
@@ -193,8 +205,10 @@
                         <tr><td>Crear o editar ejercicios</td><td>Ver Ejercicios / Mis Ejercicios</td></tr>
                         <tr><td>Gestionar grupos musculares</td><td>Mis Ejercicios → Crear grupo musculares</td></tr>
                         <tr><td>Armar series o rutinas</td><td>Mis Series, Mis Rutinas</td></tr>
-                        <tr><td>Asignar rutina a un alumno</td><td>Ficha del alumno → Asignar rutina</td></tr>
-                        <tr><td>Compartir rutina</td><td>En la ficha: Copiar enlace o WhatsApp</td></tr>
+                        <tr><td>Asignar rutina a un alumno</td><td>Ficha del alumno → Asignar rutina (o pestaña Asignaciones)</td></tr>
+                        <tr><td>Compartir rutina (enlace público)</td><td>Solo rutinas asignadas: en la ficha del alumno o en Asignaciones → Copiar enlace o WhatsApp</td></tr>
+                        <tr><td>Inactivar o activar una rutina asignada</td><td>Ficha del alumno (tabla Rutinas del alumno) o Asignaciones → Inactivar / Activar</td></tr>
+                        <tr><td>Inactivar todas las rutinas de un alumno</td><td>Ficha del alumno → Inactivar todas las rutinas</td></tr>
                         <tr><td>Marcar semana en calendario</td><td>Calendario semanal (puntos verde/rojo/gris)</td></tr>
                         <tr><td>Ver ficha de un alumno desde el calendario</td><td>Clic en el nombre del alumno en la celda</td></tr>
                         <tr><td>Recuperar clase (día por excepción)</td><td>Calendario semanal → botón “+” en la celda</td></tr>

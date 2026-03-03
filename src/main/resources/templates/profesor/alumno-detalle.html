@@ -653,7 +653,7 @@
                                         <i class="fas fa-play me-1"></i>Activar
                                     </a>
                                     <a th:if="${!alumnoInactivo}" href="#" class="btn btn-success btn-sm compartir-whatsapp" target="_blank" rel="noopener"
-                                       th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-phone=${alumno.celular != null ? alumno.celular : ''},title=${alumno.celular != null && !#strings.isEmpty(alumno.celular)} ? 'Abrir WhatsApp para enviar la rutina al alumno' : 'Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)'">
+                                       th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},data-token=${rutina.tokenPublico},data-phone=${alumno.celular != null ? alumno.celular : ''},title=${alumno.celular != null && !#strings.isEmpty(alumno.celular)} ? 'Abrir WhatsApp para enviar la rutina al alumno' : 'Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)'">
                                         <i class="fab fa-whatsapp me-1"></i>WhatsApp
                                     </a>
                                     <span th:if="${alumnoInactivo}" class="btn btn-success btn-sm btn-disabled-inactivo disabled"><i class="fab fa-whatsapp me-1"></i>WhatsApp</span>
@@ -715,37 +715,73 @@
         ];
     </script>
     <script>
-        document.addEventListener('click', async function(e) {
-            const btn = e.target.closest('.copiar-enlace-rutina');
-            if (!btn || btn.disabled) return;
-            e.preventDefault();
-            let fullUrl = btn.getAttribute('data-url') || '';
-            if (fullUrl.indexOf('http') !== 0) fullUrl = window.location.origin + (fullUrl.startsWith('/') ? fullUrl : '/' + fullUrl);
-            const token = btn.getAttribute('data-token');
-            if (!fullUrl && token) fullUrl = window.location.origin + '/rutinas/hoja/' + token;
-            if (!fullUrl) return;
-            try {
-                await navigator.clipboard.writeText(fullUrl);
-                alert('Enlace copiado.');
-            } catch (err) {
-                const tempInput = document.createElement('input');
-                tempInput.value = fullUrl;
+        (function() {
+            function buildFullHojaUrl(pathOrEmpty, token) {
+                var origin = window.location.origin;
+                if (pathOrEmpty && pathOrEmpty.indexOf('http') === 0) return pathOrEmpty;
+                if (pathOrEmpty && pathOrEmpty.charAt(0) === '/') return origin + pathOrEmpty;
+                if (token) return origin + '/rutinas/hoja/' + token;
+                return '';
+            }
+
+            function initCopiarEnlace() {
+                document.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.copiar-enlace-rutina');
+                    if (!btn || btn.disabled) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var dataUrl = btn.getAttribute('data-url') || '';
+                    var token = btn.getAttribute('data-token') || '';
+                    var fullUrl = buildFullHojaUrl(dataUrl, token);
+                    if (!fullUrl) return;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(fullUrl).then(function() { alert('Enlace copiado.'); }).catch(function() {
+                            fallbackCopy(fullUrl);
+                        });
+                    } else {
+                        fallbackCopy(fullUrl);
+                    }
+                });
+            }
+
+            function fallbackCopy(text) {
+                var tempInput = document.createElement('input');
+                tempInput.value = text;
+                tempInput.setAttribute('readonly', '');
+                tempInput.style.position = 'absolute';
+                tempInput.style.left = '-9999px';
                 document.body.appendChild(tempInput);
                 tempInput.select();
-                document.execCommand('copy');
-                tempInput.remove();
-                alert('Enlace copiado.');
+                try {
+                    document.execCommand('copy');
+                    alert('Enlace copiado.');
+                } catch (err) {}
+                document.body.removeChild(tempInput);
             }
-        });
 
-        document.querySelectorAll('.compartir-whatsapp').forEach(link => {
-            const relativeUrl = link.getAttribute('data-url') || '';
-            const fullUrl = new URL(relativeUrl, window.location.origin).toString();
-            const mensaje = encodeURIComponent('Rutina: ' + fullUrl);
-            const rawPhone = link.getAttribute('data-phone') || '';
-            const phone = rawPhone.replace(/[^\d]/g, '');
-            link.href = phone ? `https://wa.me/${phone}?text=${mensaje}` : `https://wa.me/?text=${mensaje}`;
-        });
+            function initWhatsApp() {
+                document.querySelectorAll('.compartir-whatsapp').forEach(function(link) {
+                    var dataUrl = link.getAttribute('data-url') || '';
+                    var token = link.getAttribute('data-token') || '';
+                    var fullUrl = buildFullHojaUrl(dataUrl, token);
+                    if (!fullUrl) try { fullUrl = new URL(dataUrl, window.location.origin).href; } catch (e) {}
+                    var mensaje = encodeURIComponent('Rutina: ' + (fullUrl || ''));
+                    var rawPhone = link.getAttribute('data-phone') || '';
+                    var phone = (rawPhone + '').replace(/[^\d]/g, '');
+                    link.href = phone ? ('https://wa.me/' + phone + '?text=' + mensaje) : ('https://wa.me/?text=' + mensaje);
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    initCopiarEnlace();
+                    initWhatsApp();
+                });
+            } else {
+                initCopiarEnlace();
+                initWhatsApp();
+            }
+        })();
 
         // Modal editar nota/reseña de rutina asignada
         const modalNotaRutina = document.getElementById('modalEditarNotaRutina');
