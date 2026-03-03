@@ -326,30 +326,11 @@
                 });
             });
 
-            const copiarBtn = document.getElementById('copiarEnlaceRutina');
-            if (copiarBtn) {
-                copiarBtn.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    const url = copiarBtn.getAttribute('data-url') ? new URL(copiarBtn.getAttribute('data-url'), window.location.origin).toString() : window.location.href;
-                    try {
-                        await navigator.clipboard.writeText(url);
-                        alert('Enlace copiado.');
-                    } catch (err) {
-                        const inp = document.createElement('input');
-                        inp.value = url;
-                        document.body.appendChild(inp);
-                        inp.select();
-                        document.execCommand('copy');
-                        inp.remove();
-                        alert('Enlace copiado.');
-                    }
-                });
-            }
         });
     </script>
 </head>
 <body>
-<!-- Timbre: logo, Mattfuncional, nombre rutina, fecha y copiar enlace (sin Volver ni Iniciar sesión) -->
+<!-- Timbre: logo, Mattfuncional, nombre rutina, fecha (sin Copiar enlace en vista alumno) -->
 <header class="hoja-header">
     <div class="hoja-header-left">
         <img class="hoja-header-logo" src="/img/logo.png" alt="Mattfuncional" onerror="this.src='/img/not_imagen.png'">
@@ -358,7 +339,6 @@
     <h1 class="hoja-header-titulo" th:text="${rutina.nombre}">Nombre rutina</h1>
     <div class="hoja-header-right">
         <span class="hoja-header-fecha" th:text="${fechaFormateada}">Fecha</span>
-        <a id="copiarEnlaceRutina" href="#" class="hoja-copiar" th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})}"><i class="fas fa-link"></i> Copiar enlace</a>
     </div>
 </header>
 

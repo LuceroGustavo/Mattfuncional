@@ -528,11 +528,15 @@
                 </div>
                 <!-- Pestaña Asignaciones -->
                 <div class="tab-pane fade" id="asignaciones" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3><i class="fa-solid fa-clipboard-list me-2"></i>Rutinas Asignadas</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h3 class="mb-0"><i class="fa-solid fa-clipboard-list me-2"></i>Rutinas Asignadas</h3>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 small text-muted">Filtrar por alumno:</label>
+                            <input type="text" id="filtroAsignacionesAlumno" class="form-control form-control-sm" placeholder="Nombre del alumno..." style="max-width: 220px;">
+                        </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" id="tablaAsignaciones">
                             <thead class="table-primary text-center">
                                 <tr>
                                     <th>Usuario</th>
@@ -543,18 +547,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="rutinaAsignada : ${rutinasAsignadas}" class="text-center">
-                                    <td th:text="${rutinaAsignada.usuario.nombre}">Usuario</td>
+                                <tr th:each="rutinaAsignada : ${rutinasAsignadas}" class="text-center fila-asignacion"
+                                    th:attr="data-usuario=${rutinaAsignada.usuario != null ? rutinaAsignada.usuario.nombre : ''}">
+                                    <td th:text="${rutinaAsignada.usuario != null ? rutinaAsignada.usuario.nombre : '—'}">Usuario</td>
                                     <td th:text="${rutinaAsignada.nombre}">Rutina</td>
                                     <td>
                                         <span class="badge" th:classappend="${rutinaAsignada.estado == 'ACTIVA' ? 'bg-success' : 'bg-secondary'}" th:text="${rutinaAsignada.estado}">Estado</span>
                                     </td>
                                     <td th:text="${#temporals.format(rutinaAsignada.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
                                     <td>
-                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener" title="Ver rutina">
                                             <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
-                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm">
+                                        <button type="button" class="btn btn-outline-dark btn-sm copiar-enlace-asignacion" title="Copiar enlace"
+                                                th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutinaAsignada.tokenPublico})},data-token=${rutinaAsignada.tokenPublico}">
+                                            <i class="fa-solid fa-link me-1"></i>Copiar enlace
+                                        </button>
+                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm" title="Editar">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
                                         <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm"
@@ -592,6 +601,45 @@
             if (tabEl) {
                 const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
                 bsTab.show();
+            }
+        })();
+
+        // Copiar enlace de rutina en pestaña Asignaciones
+        document.addEventListener('click', async function(e) {
+            const btn = e.target.closest('.copiar-enlace-asignacion');
+            if (!btn) return;
+            e.preventDefault();
+            let fullUrl = btn.getAttribute('data-url') || '';
+            if (fullUrl && fullUrl.indexOf('http') !== 0) fullUrl = window.location.origin + (fullUrl.startsWith('/') ? fullUrl : '/' + fullUrl);
+            const token = btn.getAttribute('data-token');
+            if (!fullUrl && token) fullUrl = window.location.origin + '/rutinas/hoja/' + token;
+            if (!fullUrl) return;
+            try {
+                await navigator.clipboard.writeText(fullUrl);
+                alert('Enlace copiado.');
+            } catch (err) {
+                var inp = document.createElement('input');
+                inp.value = fullUrl;
+                document.body.appendChild(inp);
+                inp.select();
+                document.execCommand('copy');
+                inp.remove();
+                alert('Enlace copiado.');
+            }
+        });
+
+        // Filtro por nombre de alumno en Asignaciones
+        (function() {
+            const filtroAsig = document.getElementById('filtroAsignacionesAlumno');
+            const tablaAsig = document.getElementById('tablaAsignaciones');
+            if (filtroAsig && tablaAsig) {
+                filtroAsig.addEventListener('input', function() {
+                    const texto = (this.value || '').trim().toLowerCase();
+                    tablaAsig.querySelectorAll('tbody tr.fila-asignacion').forEach(function(tr) {
+                        var nombre = (tr.getAttribute('data-usuario') || '').toLowerCase();
+                        tr.style.display = texto === '' || nombre.indexOf(texto) !== -1 ? '' : 'none';
+                    });
+                });
             }
         })();
 
