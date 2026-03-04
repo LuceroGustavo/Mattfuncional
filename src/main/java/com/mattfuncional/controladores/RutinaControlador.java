@@ -172,6 +172,7 @@ public class RutinaControlador {
             @RequestParam String nombre,
             @RequestParam(required = false) String descripcion,
             @RequestParam String categoria,
+            @RequestParam(required = false) String notaParaAlumno,
             @RequestParam(required = false) List<Long> seriesIds,
             @RequestParam(required = false) List<Integer> repeticionesExistentes,
             @RequestParam(required = false) List<Long> nuevasSeriesIds,
@@ -194,6 +195,11 @@ public class RutinaControlador {
         try {
             // Actualiza la información básica de la rutina
             rutinaService.actualizarInformacionBasicaRutina(id, nombre, descripcion, categoria);
+
+            // Si es rutina asignada (no plantilla), actualizar nota para el alumno
+            if (!rutina.isEsPlantilla() && rutina.getProfesor() != null && rutina.getProfesor().getId().equals(profesor.getId())) {
+                rutinaService.actualizarNotaParaAlumno(id, profesor.getId(), notaParaAlumno);
+            }
 
             // Lógica para actualizar las series de la rutina
             rutinaService.actualizarSeriesDeRutina(id, seriesIds, repeticionesExistentes, nuevasSeriesIds,

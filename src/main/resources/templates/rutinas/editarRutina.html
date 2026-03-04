@@ -55,6 +55,13 @@
                             <label for="descripcion" class="form-label fw-bold">Descripción:</label>
                             <textarea class="form-control" id="descripcion" name="descripcion" rows="3" th:text="${rutina.descripcion}"></textarea>
                         </div>
+                        <!-- Nota para el alumno: solo en rutinas asignadas (link público). La plantilla no lleva nota. -->
+                        <div th:if="${!rutina.esPlantilla}" class="mb-3">
+                            <label for="notaParaAlumno" class="form-label fw-bold">Nota para el alumno (reseña):</label>
+                            <textarea class="form-control" id="notaParaAlumno" name="notaParaAlumno" rows="3" maxlength="2000" placeholder="Mensaje que verá el alumno al abrir el enlace de la rutina (opcional)"
+                                th:text="${rutina.notaParaAlumno}"></textarea>
+                            <div class="form-text">Solo aplica a rutinas asignadas a un alumno. El alumno ve este texto en la hoja pública. Máx. 2000 caracteres.</div>
+                        </div>
                     </div>
                 </div>
             </div>

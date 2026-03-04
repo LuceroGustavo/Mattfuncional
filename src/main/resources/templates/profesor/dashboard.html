@@ -563,7 +563,7 @@
                                                 th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutinaAsignada.tokenPublico})},data-token=${rutinaAsignada.tokenPublico}">
                                             <i class="fa-solid fa-link me-1"></i>Copiar enlace
                                         </button>
-                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm" title="Editar">
+                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm" title="Editar rutina (incluye nota para el alumno si está asignada)">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
                                         <a th:if="${rutinaAsignada.estado == null || rutinaAsignada.estado != 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='INACTIVA', tab='asignaciones')}" class="btn btn-outline-secondary btn-sm" title="Inactivar rutina (el enlace dejará de mostrar la hoja)">

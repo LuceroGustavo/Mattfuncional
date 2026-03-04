@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,7 +31,6 @@ import com.mattfuncional.entidades.DiaHorarioAsistencia;
 import java.time.format.DateTimeParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.HashSet;
 import org.springframework.validation.BindingResult;
@@ -392,13 +392,20 @@ public class ProfesorController {
         if (alumno == null) {
             return "redirect:/profesor/dashboard";
         }
+        if (alumno.getProfesor() == null) {
+            return "redirect:/profesor/dashboard?error=alumno_sin_profesor";
+        }
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         model.addAttribute("alumno", alumno);
         model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistema());
         model.addAttribute("historialEstadoFormateado", formatearFechasEnHistorialEstado(alumno.getHistorialEstado()));
         model.addAttribute("medicionesFisicas", medicionFisicaService.obtenerMedicionesPorUsuario(id));
+        // Solo las últimas 5 asistencias/ausencias; para ver más se usa el modal "Consultar asistencias".
         java.util.List<com.mattfuncional.dto.AsistenciaVistaDTO> historialAsistencia = asistenciaService.obtenerAsistenciasVistaParaAlumno(alumno);
-        model.addAttribute("historialAsistencia", historialAsistencia);
+        if (historialAsistencia != null && historialAsistencia.size() > 5) {
+            historialAsistencia = new java.util.ArrayList<>(historialAsistencia.subList(0, 5));
+        }
+        model.addAttribute("historialAsistencia", historialAsistencia != null ? historialAsistencia : java.util.Collections.emptyList());
         // Asistencia de hoy (para pre-rellenar el modal Progreso si ya se dio presente desde el panel)
         java.util.List<Asistencia> asistenciasHoy = asistenciaService.obtenerAsistenciaPorUsuarioYFecha(alumno, java.time.LocalDate.now());
         model.addAttribute("asistenciaHoy", (asistenciasHoy != null && !asistenciasHoy.isEmpty()) ? asistenciasHoy.get(0) : null);
@@ -408,10 +415,13 @@ public class ProfesorController {
                         .comparing(com.mattfuncional.entidades.Rutina::getFechaCreacion,
                                 java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
                         .reversed())
+                .limit(3)
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("rutinasAsignadas", rutinasAsignadas);
         if (profesor != null) {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
+        } else {
+            model.addAttribute("gruposMusculares", java.util.Collections.emptyList());
         }
         return "profesor/alumno-detalle";
     }
@@ -439,6 +449,9 @@ public class ProfesorController {
             return ResponseEntity.notFound().build();
         }
         java.util.List<com.mattfuncional.dto.AsistenciaVistaDTO> list = asistenciaService.obtenerAsistenciasVistaParaAlumno(alumno);
+        if (list != null && list.size() > 5) {
+            list = new java.util.ArrayList<>(list.subList(0, 5));
+        }
         List<Map<String, Object>> out = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter fmtShow = DateTimeFormatter.ofPattern("dd/MM/yyyy");
