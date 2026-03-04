@@ -178,6 +178,29 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 - **Qué falta:** Método o proceso para **archivar o eliminar datos antiguos** (ej. asistencia/presente de años anteriores). Conservar al menos 12 meses.
 - **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 
+### Mejoras post-modales (detalle alumno, rutinas, formularios)
+
+Pendientes agregados tras resolver los modales en la ficha del alumno. Ver también [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) – "Para mañana".
+
+1. **Alumno inactivo → inactivar rutinas:** Al cambiar el estado del alumno a inactivo, inactivar automáticamente todas las rutinas asignadas a ese alumno.
+2. **Detalle alumno – Vista rutinas:** Mejorar la vista de las rutinas en el detalle del alumno: textos muy largos, reemplazar por iconos donde sea posible.
+3. **Volver al origen tras guardar rutina:** Tras modificar rutina y guardar, redirigir según el origen: si se entró desde el detalle del alumno, volver al detalle del alumno; si no, al panel de rutinas.
+4. **Modal de progreso:** Quitar del modal de progreso el bloque/sistema de asistencia.
+5. **Formulario modificar rutina:** Mejorar la vista (diseño/legibilidad) del formulario de modificar rutina.
+6. **Vista alumnos – Botón crear:** Agregar botón "Crear alumno" en el título de la vista de alumnos, como en las demás vistas (ej. ejercicios, series, rutinas).
+7. **Lista rutinas asignadas:** Mejorar la vista de la lista de rutinas asignadas (textos largos → acortar o iconos).
+
+**Estado:** Por implementar.
+
+### Después de los métodos de backup
+
+Cuando esté implementada la gestión de backup (listar, descargar, importar si aplica), pendientes operativos:
+
+1. **Estilos de excepciones (avisos):** Dar estilos consistentes a las pantallas de excepciones/avisos/errores que muestra la aplicación.
+2. **Archivo para migración y despliegue:** Preparar un archivo (o documento) con todos los datos e instrucciones necesarios para la migración y el despliegue al servidor que compre el cliente (datos, scripts, pasos, variables, etc.).
+
+**Estado:** Por implementar / preparar una vez completado el backup.
+
 ---
 
 ## 10. Documentos de referencia
