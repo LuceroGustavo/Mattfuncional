@@ -209,16 +209,16 @@
                                             </a>
                                         </div>
                                         
-                                        <!-- Input de repeticiones movido al final de la tarjeta -->
+                                        <!-- Input de vueltas (veces que se repite la serie) -->
                                         <div class="repeticiones-input-wrapper">
-                                            <label class="form-label mb-0">Reps:</label>
+                                            <label class="form-label mb-0">Vueltas:</label>
                                             <input type="number" 
                                                    class="form-control form-control-sm repeticiones-input" 
                                                    th:name="'repeticiones_' + ${serie.id}"
                                                    th:value="${serie.repeticionesSerie}" 
                                                    min="1" 
                                                    max="10"
-                                                   title="Repeticiones de la serie">
+                                                   title="Vueltas de la serie">
                                         </div>
                                         
                                         <input type="checkbox" th:value="${serie.id}" class="d-none serie-checkbox" aria-hidden="true">
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         li.className = 'list-group-item d-flex align-items-center gap-2 py-2';
         li.dataset.serieId = id;
         li.innerHTML = '<span class="flex-grow-1 fw-bold">' + nombre + '</span>' +
-            '<label class="mb-0 small">Reps:</label>' +
+            '<label class="mb-0 small">Vueltas:</label>' +
             '<input type="number" class="form-control form-control-sm" name="repeticiones_' + id + '" value="' + reps + '" min="1" max="10" style="width:70px">' +
             '<input type="hidden" name="selectedSeries" value="' + id + '">' +
             '<div class="btn-group btn-group-sm">' +

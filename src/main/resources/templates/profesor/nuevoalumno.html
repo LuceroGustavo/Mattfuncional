@@ -123,8 +123,8 @@
                         <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label for="correo" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
+                        <label for="correo" class="form-label">Correo Electrónico <span class="text-muted small">(opcional)</span></label>
+                        <input type="email" class="form-control" id="correo" th:field="*{correo}" placeholder="Ej: alumno@ejemplo.com">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="celular" class="form-label">Celular</label>

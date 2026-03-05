@@ -148,7 +148,17 @@
 
 ---
 
-## 13. Referencias a documentación detallada
+## 13. Manual del usuario (HTML) — **Completado**
+
+- **Objetivo:** Manual de uso del panel accesible desde la app para profesores, administradores y ayudantes.
+- **Ruta:** `GET /profesor/manual` → plantilla `profesor/manual-usuario.html`.
+- **Acceso:** Botón **"Manual del usuario"** en el panel del profesor (junto a Ver Ejercicios, Administrar sistema, Pizarra).
+- **Contenido:** Secciones con navegación interna: acceso al sistema, panel del profesor, alumnos (lista, crear, editar, ficha), ejercicios, grupos musculares, series, rutinas, calendario semanal, presentismo, progreso del alumno, pizarra en sala (TV), usuarios del sistema, administración y página pública, resumen rápido (tabla Quiero… / Dónde).
+- **Referencia en documentación:** [MANUAL-USUARIO.md](MANUAL-USUARIO.md) se mantiene como documento de referencia.
+
+---
+
+## 14. Referencias a documentación detallada
 
 | Tema | Documento |
 |------|-----------|
@@ -162,4 +172,22 @@
 
 ---
 
-*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Fase 8 – página pública; Planes y formulario HTML terminado). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md.*
+## 15. Mejoras AYUDA_MEMORIA – Panel profesor y rutinas (Feb 2026)
+
+**Estado:** Completado. Los 8 ítems de la lista "Para mañana" del AYUDA_MEMORIA fueron implementados:
+
+1. **Correo opcional** en crear/editar alumno; script `alter_usuario_correo_nullable.sql`.
+2. **Alumno inactivo** → inactivar automáticamente todas las rutinas asignadas.
+3. **Detalle alumno – Rutinas:** iconos, reseña con texto truncado (50 chars), acciones centradas.
+4. **Volver al origen** tras guardar rutina (detalle alumno o panel rutinas/asignaciones).
+5. **Modal de progreso:** checkbox asistencia eliminado; asistencia en panel/calendario.
+6. **Formulario modificar rutina:** nuevo layout (Series a seleccionar izq | Series seleccionadas der | Detalles abajo); 2 tarjetas por fila.
+7. **Botón "Crear alumno"** en título de Mis Alumnos.
+8. **Lista rutinas asignadas:** textos abreviados, iconos estado, acciones centradas.
+
+**Tarjetas dashboard:** clic en tarjeta (no en +) activa tab y hace scroll a la sección de listas.  
+**Referencia:** [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §18.
+
+---
+
+*Todos los avances del app quedan registrados en este archivo. Última actualización: Feb 2026 (Mejoras AYUDA_MEMORIA: correo opcional, alumno inactivo→rutinas, vistas rutinas, volver al origen, modal progreso, botón Crear alumno, formulario modificar rutina). Para pendientes y próximos pasos, ver PLAN_DE_DESARROLLO_UNIFICADO.md y ESTADO-PLANES-Y-PENDIENTES.md.*

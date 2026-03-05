@@ -21,6 +21,9 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 13. [Página Planes y administración pública](#13-página-planes-y-administración-pública-feb-2026)
 14. [Formulario de consulta – Email opcional y script BD](#14-formulario-de-consulta--email-opcional-y-script-bd-feb-2026)
 15. [Página Planes y formulario – Cierre de desarrollo HTML](#15-página-planes-y-formulario--cierre-de-desarrollo-html-feb-2026)
+16. [Peso en hoja pública de rutina y acción Eliminar en Asignaciones](#16-peso-en-hoja-pública-de-rutina-y-acción-eliminar-en-asignaciones-feb-2026)
+17. [Botón WhatsApp en detalle del alumno](#17-botón-whatsapp-en-detalle-del-alumno-feb-2026)
+18. [Mejoras AYUDA_MEMORIA – Panel profesor y rutinas](#18-mejoras-ayuda_memoria--panel-profesor-y-rutinas-feb-2026)
 
 ---
 
@@ -439,6 +442,83 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 ### 15.3 Estado
 
 **Desarrollo HTML de página Planes y formulario de consulta: TERMINADO.** Las mejoras de contenido (textos, imágenes, datos de contacto) se gestionan desde el panel de administración sin cambios de código.
+
+---
+
+## 16. Peso en hoja pública de rutina y acción Eliminar en Asignaciones (Feb 2026)
+
+**Resumen:** (1) Al agregar una serie plantilla a una rutina asignada ahora se copian **peso** y **orden** de cada ejercicio, por lo que la hoja pública (`/rutinas/hoja/{token}`) muestra correctamente el peso (ej. "25 kg"). (2) En la pestaña **Asignaciones** del panel del profesor se añade el botón **Eliminar rutina** en la tabla "Rutinas Asignadas", con confirmación y redirección a la misma pestaña.
+
+### 16.1 Peso en hoja pública
+
+- **Problema:** En la hoja pública de la rutina los ejercicios mostraban "Sin peso" aunque la serie tuviera peso; en Ver serie y Modificar Serie sí se veía.
+- **Causa:** En `RutinaService.agregarSerieARutina` al copiar los ejercicios de la serie plantilla solo se copiaban `valor`, `unidad` y `exercise`; no `peso` ni `orden`.
+- **Solución:** En el bucle que crea cada `SerieEjercicio` se añade `setPeso(seOriginal.getPeso())` y se mantiene el orden (lista ordenada por `orden`, `setOrden(i)`). Archivo: `RutinaService.java`.
+
+### 16.2 Acción Eliminar en Asignaciones
+
+- **Vista:** En `profesor/dashboard.html`, columna Acciones de la tabla Rutinas Asignadas: botón rojo "Eliminar" con icono papelera, enlace a `/rutinas/eliminar/{id}?tab=asignaciones`, con `confirm()` antes de enviar.
+- **Controlador:** `RutinaControlador.eliminarRutina` acepta `@RequestParam(required = false) String tab`. Si `tab=asignaciones`, el redirect tras eliminar es a `dashboard?tab=asignaciones`; si no, a `tab=rutinas`.
+
+### 16.3 Archivos
+
+| Archivo | Cambios |
+|--------|--------|
+| `RutinaService.java` | En `agregarSerieARutina`, copiar `peso` y `orden` al crear cada `SerieEjercicio` desde la plantilla. |
+| `profesor/dashboard.html` | Botón "Eliminar" en Acciones de la tabla Rutinas Asignadas. |
+| `RutinaControlador.java` | Parámetro `tab` en `eliminarRutina`; redirect según `tab` (asignaciones / rutinas). |
+
+---
+
+## 17. Botón WhatsApp en detalle del alumno (Feb 2026)
+
+**Resumen:** En el detalle del alumno, en "Rutinas del Alumno", el botón **WhatsApp** por cada rutina abre WhatsApp con el mensaje "Rutina: [enlace a la hoja]". Si el alumno tiene celular guardado, el enlace usa `wa.me/{número}?text=...` para pre-seleccionar el contacto; si no, abre WhatsApp con el mensaje listo para elegir destinatario. Se documenta el comportamiento y se mejoran la plantilla (evitar `data-phone="null"`, título del botón según haya o no teléfono).
+
+### 17.1 Comportamiento
+
+- **Ubicación:** Columna Acciones de la tabla "Rutinas del Alumno" en `/profesor/alumnos/{id}` (solo si el alumno no está inactivo).
+- **Al hacer clic:** Nueva pestaña con `https://wa.me/{teléfono}?text=Rutina:%20{url}`; si no hay teléfono: `https://wa.me/?text=...`. El número se normaliza a solo dígitos para `wa.me`.
+
+### 17.2 Cambios en la plantilla
+
+- **data-phone:** `data-phone=${alumno.celular != null ? alumno.celular : ''}` para no enviar la cadena `"null"` cuando no hay celular.
+- **title:** Con celular: "Abrir WhatsApp para enviar la rutina al alumno". Sin celular: "Abrir WhatsApp (agrega el celular del alumno para pre-seleccionar el contacto)".
+
+### 17.3 Archivos
+
+| Archivo | Cambios |
+|--------|--------|
+| `profesor/alumno-detalle.html` | `data-phone` con fallback a vacío cuando `alumno.celular` es null; atributo `title` condicional. |
+
+---
+
+## 18. Mejoras AYUDA_MEMORIA – Panel profesor y rutinas (Feb 2026)
+
+**Resumen:** Implementación completa de los 8 ítems de la lista "Para mañana" del AYUDA_MEMORIA: correo opcional en alumno, inactivar rutinas al dar de baja alumno, mejoras en vistas de rutinas (iconos, textos abreviados), volver al origen tras guardar rutina, quitar asistencia del modal de progreso, botón Crear alumno, mejoras en lista de asignaciones y formulario de modificar rutina.
+
+### 18.1 Cambios implementados
+
+| Ítem | Descripción | Archivos principales |
+|------|-------------|----------------------|
+| 1 | **Correo opcional** en formulario crear/editar alumno | `Usuario.java`, `nuevoalumno.html`, `ProfesorController.java`, `UsuarioRepository.java`, `alumno-detalle.html`, `alter_usuario_correo_nullable.sql` |
+| 2 | **Alumno inactivo** → inactivar todas las rutinas asignadas automáticamente | `UsuarioService.java` (inyección `RutinaService`, llamada a `inactivarTodasRutinasDelAlumno`) |
+| 3 | **Detalle alumno – Rutinas:** textos largos → iconos; reseña con texto truncado; acciones centradas | `alumno-detalle.html` |
+| 4 | **Volver al origen** tras guardar rutina (detalle alumno o panel rutinas/asignaciones) | `RutinaControlador.java`, `editarRutina.html`, `alumno-detalle.html`, `dashboard.html` |
+| 5 | **Modal de progreso:** quitar checkbox "Estuvo presente" (asistencia se gestiona en panel/calendario) | `alumno-detalle.html` |
+| 6 | **Formulario modificar rutina:** nuevo layout (Series a seleccionar izq, Series seleccionadas der, Detalles abajo); 2 tarjetas por fila; estilos mejorados | `editarRutina.html` |
+| 7 | **Botón "Crear alumno"** en título de vista Mis Alumnos | `dashboard.html` |
+| 8 | **Lista rutinas asignadas:** textos abreviados, estado con iconos, acciones centradas con solo iconos | `dashboard.html` |
+
+### 18.2 Detalles técnicos
+
+- **Tarjetas dashboard:** clic en tarjeta (no en +) activa tab y hace scroll a la sección de listas.
+- **Correo alumno:** `@NotBlank` eliminado de `Usuario.correo`; validación de duplicados solo cuando correo no es null; query duplicados excluye NULL.
+- **Rutina editar:** parámetros `alumnoId` y `returnTab` en GET/POST; hidden inputs en formulario.
+- **Modal progreso:** meta tags no-cache en `alumno-detalle.html` para evitar caché.
+
+### 18.3 Archivos modificados
+
+`Usuario.java`, `ProfesorController.java`, `UsuarioService.java`, `UsuarioRepository.java`, `RutinaControlador.java`, `profesor/nuevoalumno.html`, `profesor/alumno-detalle.html`, `profesor/dashboard.html`, `rutinas/editarRutina.html`, `scripts/servidor/alter_usuario_correo_nullable.sql`.
 
 ---
 

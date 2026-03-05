@@ -31,10 +31,47 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.15s;
+            position: relative;
         }
         .card-module:hover {
             transform: translateY(-6px) scale(1.03);
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .card-module .card-module-add {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 1.68rem;
+            height: 1.68rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.9);
+            color: #5e35b1;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            transition: background 0.2s, color 0.2s;
+            font-size: 0.75rem;
+        }
+        .card-module .card-module-add i {
+            font-size: 0.75rem !important;
+            margin: 0;
+            line-height: 1;
+        }
+        .card-module .card-module-add:hover {
+            background: #7e57c2;
+            color: #fff;
+        }
+        .card-module.card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .card-module.card-link:hover {
+            color: inherit;
+        }
+        .card-module.card-scroll-tab {
+            cursor: pointer;
         }
         .card-alumnos { background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); }
         .card-series { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
@@ -92,22 +129,51 @@
             padding: 2rem 1.5rem 1.5rem 1.5rem;
         }
         .tabs-section .nav-tabs .nav-link {
-            color: #5e35b1;
             border-color: transparent;
+            font-weight: 500;
         }
-        .tabs-section .nav-tabs .nav-link:hover {
-            color: #7e57c2;
-            border-color: #e1bee7;
+        /* Inactivos: tonalidad suave de cada sección */
+        .tabs-section .nav-tabs #alumnos-tab { color: #2e7d32; }
+        .tabs-section .nav-tabs #alumnos-tab:hover { background: #e8f5e9; border-color: #c8e6c9; color: #1b5e20; }
+        .tabs-section .nav-tabs #series-tab { color: #5e35b1; }
+        .tabs-section .nav-tabs #series-tab:hover { background: #f3e5f5; border-color: #e1bee7; color: #4a148c; }
+        .tabs-section .nav-tabs #rutinas-tab { color: #e65100; }
+        .tabs-section .nav-tabs #rutinas-tab:hover { background: #fff8e1; border-color: #ffe082; color: #ef6c00; }
+        .tabs-section .nav-tabs #asignaciones-tab { color: #1565c0; }
+        .tabs-section .nav-tabs #asignaciones-tab:hover { background: #e3f2fd; border-color: #bbdefb; color: #0d47a1; }
+        /* Activos: mismo color que la tarjeta de cada módulo */
+        .tabs-section .nav-tabs #alumnos-tab.active {
+            background: #c8e6c9;
+            color: #1b5e20;
+            border-color: #a5d6a7 #a5d6a7 #fff;
+            font-weight: 600;
         }
-        .tabs-section .nav-tabs .nav-link.active {
-            background: #f3e5f5;
+        .tabs-section .nav-tabs #series-tab.active {
+            background: #e1bee7;
             color: #4a148c;
-            border-color: #e1bee7 #e1bee7 #fff;
+            border-color: #ce93d8 #ce93d8 #fff;
+            font-weight: 600;
+        }
+        .tabs-section .nav-tabs #rutinas-tab.active {
+            background: #fff9c4;
+            color: #e65100;
+            border-color: #ffe082 #ffe082 #fff;
+            font-weight: 600;
+        }
+        .tabs-section .nav-tabs #asignaciones-tab.active {
+            background: #bbdefb;
+            color: #0d47a1;
+            border-color: #90caf9 #90caf9 #fff;
             font-weight: 600;
         }
         .tab-content {
             min-height: 120px;
         }
+        /* Títulos de sección: misma tonalidad que la tarjeta y pestaña */
+        #alumnos h3, #alumnos h3 i { color: #1b5e20 !important; }
+        #series h3, #series h3 i { color: #4a148c !important; }
+        #rutinas h3, #rutinas h3 i { color: #e65100 !important; }
+        #asignaciones h3, #asignaciones h3 i { color: #0d47a1 !important; }
         /* Tablas – cabeceras pastel */
         .tabs-section .table-primary { background: #e3f2fd !important; color: #0d47a1; }
         .tabs-section .table-success { background: #e8f5e9 !important; color: #1b5e20; }
@@ -152,60 +218,52 @@
                 <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#9575cd;"></i>
                 <h1 class="fw-bold mb-0">Panel del Profesor</h1>
             </div>
-            <div class="fs-5 text-secondary">
-                <span th:if="${profesor != null}" th:text="'Bienvenido, ' + ${profesor.nombre}"></span>
-                <span th:if="${profesor == null}">Bienvenido, Profesor</span>
-            </div>
         </div>
 
         <!-- Tarjetas de módulos -->
         <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-4 mb-4" style="margin-top:2rem;">
-            <div class="card-module card-alumnos" style="min-width:260px; min-height:160px;">
+            <div class="card-module card-alumnos card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="alumnos" role="button" tabindex="0" title="Ver lista de alumnos">
+                <a th:href="@{/profesor/alumnos/nuevo}" class="card-module-add" title="Nuevo alumno"><i class="fa-solid fa-user-plus"></i></a>
                 <i class="fa-solid fa-users"></i>
                 <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
                 <div class="label">Alumnos</div>
             </div>
-            <div class="card-module card-series" style="min-width:260px; min-height:160px;">
+            <div class="card-module card-series card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="series" role="button" tabindex="0" title="Ver lista de series">
+                <a href="/series/crear" class="card-module-add" title="Crear serie"><i class="fa-solid fa-plus"></i></a>
                 <i class="fa-solid fa-dumbbell"></i>
                 <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
                 <div class="label">Series</div>
             </div>
-            <div class="card-module card-rutinas" style="min-width:260px; min-height:160px;">
+            <div class="card-module card-rutinas card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="rutinas" role="button" tabindex="0" title="Ver lista de rutinas">
+                <a th:href="@{/rutinas/crear}" class="card-module-add" title="Crear rutina"><i class="fa-solid fa-plus"></i></a>
                 <i class="fa-solid fa-list-check"></i>
                 <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
                 <div class="label">Rutinas</div>
             </div>
-            <div class="card-module card-asignadas" style="min-width:260px; min-height:160px;">
-                <i class="fa-solid fa-clipboard-list"></i>
-                <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
-                <div class="label">Asignadas</div>
-            </div>
+            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="card-module card-asignadas card-link" style="min-width:260px; min-height:160px;" target="_blank" rel="noopener noreferrer" title="Calendario Semanal">
+                <i class="fa-solid fa-calendar-week"></i>
+                <div class="label">Calendario Semanal</div>
+            </a>
         </div>
 
         <!-- Botones principales -->
         <div class="main-actions d-flex flex-wrap justify-content-center mb-4">
-            <a href="/series/crear" class="btn btn-alumnos mx-1">
-                <i class="fa-solid fa-user-plus me-2"></i>Crear Serie
-            </a>
-            <a href="/rutinas/crear" class="btn btn-series mx-1">
-                <i class="fa-solid fa-plus me-2"></i>Crear Rutina
-            </a>
             <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-rutinas mx-1">
                 <i class="fa-solid fa-dumbbell me-2"></i>Ver Ejercicios
             </a>
-            <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-secondary mx-1">
-                <i class="fa-solid fa-layer-group me-2"></i>Grupos Musculares
-            </a>
-            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="btn btn-calendario mx-1" target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-calendar-week me-2"></i>Calendario Semanal
+            <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary mx-1">
+                <i class="fa-solid fa-cogs me-2"></i>Administrar sistema
             </a>
             <a th:href="@{/profesor/pizarra}" class="btn btn-pizarra mx-1">
                 <i class="fa-solid fa-tv me-2"></i>Pizarra
             </a>
+            <a th:href="@{/profesor/manual}" class="btn btn-outline-secondary mx-1" title="Manual de uso del panel">
+                <i class="fa-solid fa-book me-2"></i>Manual del usuario
+            </a>
         </div>
 
         <!-- Tabs y contenido -->
-        <div class="tabs-section">
+        <div class="tabs-section" id="tabsSection">
             <ul class="nav nav-tabs mb-3" id="profTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="alumnos-tab" data-bs-toggle="tab" data-bs-target="#alumnos" type="button" role="tab">
@@ -234,7 +292,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3><i class="fa-solid fa-users me-2"></i>Mis Alumnos</h3>
                         <a th:href="@{/profesor/alumnos/nuevo}" class="btn btn-alumnos">
-                            <i class="fa-solid fa-user-plus me-1"></i>Nuevo Alumno
+                            <i class="fa-solid fa-plus me-1"></i>Crear alumno
                         </a>
                     </div>
 
@@ -459,7 +517,7 @@
                                     </td>
                                     <td th:text="${rutina.descripcion}">Descripción</td>
                                     <td>
-                                        <a th:href="@{/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
+                                        <a th:href="@{/profesor/rutinas/ver/{id}(id=${rutina.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener" title="Ver (solo con sesión)">
                                             <i class="fa-solid fa-eye me-1"></i>Ver
                                         </a>
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-warning btn-sm">
@@ -476,35 +534,58 @@
                 </div>
                 <!-- Pestaña Asignaciones -->
                 <div class="tab-pane fade" id="asignaciones" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3><i class="fa-solid fa-clipboard-list me-2"></i>Rutinas Asignadas</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h3 class="mb-0"><i class="fa-solid fa-clipboard-list me-2"></i>Rutinas Asignadas</h3>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 small text-muted">Filtrar por alumno:</label>
+                            <input type="text" id="filtroAsignacionesAlumno" class="form-control form-control-sm" placeholder="Nombre del alumno..." style="max-width: 220px;">
+                        </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" id="tablaAsignaciones">
                             <thead class="table-primary text-center">
                                 <tr>
                                     <th>Usuario</th>
                                     <th>Rutina</th>
                                     <th>Estado</th>
-                                    <th>Fecha Asignación</th>
-                                    <th>Acciones</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="rutinaAsignada : ${rutinasAsignadas}" class="text-center">
-                                    <td th:text="${rutinaAsignada.usuario.nombre}">Usuario</td>
-                                    <td th:text="${rutinaAsignada.nombre}">Rutina</td>
+                                <tr th:each="rutinaAsignada : ${rutinasAsignadas}" class="text-center fila-asignacion"
+                                    th:attr="data-usuario=${rutinaAsignada.usuario != null ? rutinaAsignada.usuario.nombre : ''}">
+                                    <td><span th:attr="title=${rutinaAsignada.usuario != null ? rutinaAsignada.usuario.nombre : ''}" th:text="${rutinaAsignada.usuario != null ? #strings.abbreviate(rutinaAsignada.usuario.nombre, 22) : '—'}">—</span></td>
+                                    <td><span th:attr="title=${rutinaAsignada.nombre}" th:text="${#strings.abbreviate(rutinaAsignada.nombre, 22)}">Rutina</span></td>
                                     <td>
-                                        <span class="badge" th:classappend="${rutinaAsignada.estado == 'ACTIVA' ? 'bg-success' : 'bg-secondary'}" th:text="${rutinaAsignada.estado}">Estado</span>
+                                        <i th:if="${rutinaAsignada.estado == 'ACTIVA' || rutinaAsignada.estado == null}" class="fa-solid fa-circle-check text-success" title="Activa"></i>
+                                        <i th:if="${rutinaAsignada.estado == 'INACTIVA'}" class="fa-solid fa-pause-circle text-secondary" title="Inactiva"></i>
                                     </td>
                                     <td th:text="${#temporals.format(rutinaAsignada.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
-                                    <td>
-                                        <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm" target="_blank" rel="noopener">
-                                            <i class="fa-solid fa-eye me-1"></i>Ver
-                                        </a>
-                                        <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id})}" class="btn btn-warning btn-sm">
-                                            <i class="fa-solid fa-edit me-1"></i>Editar
-                                        </a>
+                                    <td class="text-center">
+                                        <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                            <a th:href="@{/rutinas/ver/{id}(id=${rutinaAsignada.id})}" class="btn btn-info btn-sm py-1 px-2" target="_blank" rel="noopener" title="Ver rutina">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-dark btn-sm py-1 px-2 copiar-enlace-asignacion" title="Copiar enlace"
+                                                    th:attr="data-url=@{/rutinas/hoja/{token}(token=${rutinaAsignada.tokenPublico})},data-token=${rutinaAsignada.tokenPublico}">
+                                                <i class="fa-solid fa-link"></i>
+                                            </button>
+                                            <a th:href="@{/rutinas/editar/{id}(id=${rutinaAsignada.id}, returnTab='asignaciones')}" class="btn btn-warning btn-sm py-1 px-2" title="Editar rutina">
+                                                <i class="fa-solid fa-edit"></i>
+                                            </a>
+                                            <a th:if="${rutinaAsignada.estado == null || rutinaAsignada.estado != 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='INACTIVA', tab='asignaciones')}" class="btn btn-outline-secondary btn-sm py-1 px-2" title="Inactivar rutina">
+                                                <i class="fa-solid fa-pause"></i>
+                                            </a>
+                                            <a th:if="${rutinaAsignada.estado == 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='ACTIVA', tab='asignaciones')}" class="btn btn-outline-success btn-sm py-1 px-2" title="Activar rutina">
+                                                <i class="fa-solid fa-play"></i>
+                                            </a>
+                                            <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm py-1 px-2"
+                                               onclick="return confirm('¿Eliminar esta rutina asignada? Se borrará la asignación y no podrá recuperarse.');"
+                                               title="Eliminar rutina">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -535,6 +616,77 @@
             if (tabEl) {
                 const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
                 bsTab.show();
+            }
+        })();
+
+        // Clic en tarjetas (Alumnos, Series, Rutinas): activar tab y hacer scroll a la sección de listas
+        document.querySelectorAll('.card-module.card-scroll-tab').forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.card-module-add')) return;
+                const tabId = card.getAttribute('data-scroll-tab');
+                if (!tabId) return;
+                const tabButtonId = tabId + '-tab';
+                const tabEl = document.getElementById(tabButtonId);
+                const section = document.getElementById('tabsSection');
+                if (tabEl && section) {
+                    const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
+                    bsTab.show();
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+            card.addEventListener('keydown', function(e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                if (e.target.closest('.card-module-add')) return;
+                e.preventDefault();
+                const tabId = card.getAttribute('data-scroll-tab');
+                if (!tabId) return;
+                const tabButtonId = tabId + '-tab';
+                const tabEl = document.getElementById(tabButtonId);
+                const section = document.getElementById('tabsSection');
+                if (tabEl && section) {
+                    const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
+                    bsTab.show();
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Copiar enlace de rutina en pestaña Asignaciones
+        document.addEventListener('click', async function(e) {
+            const btn = e.target.closest('.copiar-enlace-asignacion');
+            if (!btn) return;
+            e.preventDefault();
+            let fullUrl = btn.getAttribute('data-url') || '';
+            if (fullUrl && fullUrl.indexOf('http') !== 0) fullUrl = window.location.origin + (fullUrl.startsWith('/') ? fullUrl : '/' + fullUrl);
+            const token = btn.getAttribute('data-token');
+            if (!fullUrl && token) fullUrl = window.location.origin + '/rutinas/hoja/' + token;
+            if (!fullUrl) return;
+            try {
+                await navigator.clipboard.writeText(fullUrl);
+                alert('Enlace copiado.');
+            } catch (err) {
+                var inp = document.createElement('input');
+                inp.value = fullUrl;
+                document.body.appendChild(inp);
+                inp.select();
+                document.execCommand('copy');
+                inp.remove();
+                alert('Enlace copiado.');
+            }
+        });
+
+        // Filtro por nombre de alumno en Asignaciones
+        (function() {
+            const filtroAsig = document.getElementById('filtroAsignacionesAlumno');
+            const tablaAsig = document.getElementById('tablaAsignaciones');
+            if (filtroAsig && tablaAsig) {
+                filtroAsig.addEventListener('input', function() {
+                    const texto = (this.value || '').trim().toLowerCase();
+                    tablaAsig.querySelectorAll('tbody tr.fila-asignacion').forEach(function(tr) {
+                        var nombre = (tr.getAttribute('data-usuario') || '').toLowerCase();
+                        tr.style.display = texto === '' || nombre.indexOf(texto) !== -1 ? '' : 'none';
+                    });
+                });
             }
         })();
 

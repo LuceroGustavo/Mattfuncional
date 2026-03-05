@@ -36,6 +36,9 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RutinaService rutinaService;
+
     // --- MÉTODOS CON CACHÉ PARA FASE 3 ---
 
     @Cacheable(value = "usuarios", key = "#id")
@@ -263,6 +266,7 @@ public class UsuarioService {
             if ("INACTIVO".equalsIgnoreCase(nuevoEstado)) {
                 usuarioExistente.setFechaBaja(java.time.LocalDate.now());
                 appendHistorialEstado(usuarioExistente, "BAJA");
+                rutinaService.inactivarTodasRutinasDelAlumno(usuarioExistente.getId());
             } else if ("ACTIVO".equalsIgnoreCase(nuevoEstado)) {
                 usuarioExistente.setFechaBaja(null);
                 appendHistorialEstado(usuarioExistente, "REACTIVADO");

@@ -18,6 +18,10 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
     @Query("SELECT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.id = :id")
     Optional<Serie> findByIdWithSerieEjercicios(@Param("id") Long id);
 
+    /** Carga varias series por id con serieEjercicios y exercise (para hoja pública de rutina). */
+    @Query("SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.id IN :ids")
+    List<Serie> findByIdInWithSerieEjercicios(@Param("ids") List<Long> ids);
+
     // Buscar series por rutina ordenadas por orden
     List<Serie> findByRutinaIdOrderByOrdenAsc(Long rutinaId);
 

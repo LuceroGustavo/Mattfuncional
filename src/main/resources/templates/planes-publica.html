@@ -134,8 +134,8 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
-                    <a th:href="${instagramUrl}" href="#" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                    <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491164842554" target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
+                    <a th:href="${instagramUrl}" href="https://www.instagram.com/matt_funcional/" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@
     </div>
 
     <div class="wapp">
-        <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491112345678" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; justify-content: center; background-color: #25D366;">
+        <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491164842554" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; justify-content: center; background-color: #25D366;">
             <i class="fab fa-whatsapp text-white fa-2x"></i>
         </a>
     </div>
@@ -170,8 +170,12 @@
                     header.classList.toggle('small-header', window.scrollY > 50);
                 });
             }
-            /* Si hay error de consulta, hacer scroll al formulario */
-            if (window.location.hash === '#consultanos' || document.querySelector('.alert-publica-error')) {
+            /* Al entrar a /planes, mostrar arriba los planes (no bajar al formulario) */
+            if (!window.location.hash || window.location.hash === '#planes') {
+                window.scrollTo(0, 0);
+            }
+            /* Solo bajar al formulario si la URL trae #consultanos (ej. después de enviar la consulta) */
+            if (window.location.hash === '#consultanos') {
                 var formSection = document.getElementById('consultanos');
                 if (formSection) {
                     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });

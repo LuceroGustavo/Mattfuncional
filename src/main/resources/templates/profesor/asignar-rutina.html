@@ -238,13 +238,23 @@
                          </div>
                      </div>
                     
-                    <!-- Botón de asignación (solo visible si hay rutina seleccionada) -->
-                    <div id="botonAsignacion" class="text-center mt-4" style="display: none;">
-                        <form th:action="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" method="post" class="d-inline">
+                    <!-- Nota para el alumno y botón de asignación (visible cuando hay rutina seleccionada) -->
+                    <div id="botonAsignacion" class="mt-4 p-3 border rounded bg-light" style="display: none;">
+                        <form th:action="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" method="post">
                             <input type="hidden" id="serieSeleccionada" name="rutinaPlantillaId" value="">
-                            <button type="submit" class="btn btn-asignar btn-lg">
-                                <i class="fas fa-dumbbell me-2"></i>Asignar Rutina Seleccionada
-                            </button>
+                            <div class="mb-3">
+                                <label for="notaParaAlumno" class="form-label fw-bold">
+                                    <i class="fas fa-comment-dots me-1"></i>Nota o reseña para el alumno <span class="text-muted fw-normal">(opcional)</span>
+                                </label>
+                                <textarea id="notaParaAlumno" name="notaParaAlumno" class="form-control" rows="3" maxlength="2000"
+                                          placeholder="Ej: Enfocate en la técnica esta semana. Cualquier duda escribime."></textarea>
+                                <small class="text-muted">El alumno verá este mensaje al abrir el enlace de la rutina. Podés cambiarla después desde la ficha del alumno.</small>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-asignar btn-lg">
+                                    <i class="fas fa-dumbbell me-2"></i>Asignar Rutina Seleccionada
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

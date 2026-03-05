@@ -61,10 +61,10 @@
 | **Fase 2 – Un solo panel** | Redirigir login al panel del profesor. Quitar referencias a panel admin/alumno y lista de profesores. | Completado |
 | **Fase 3 – Ejercicios y series** | Ejercicios con asegurar predeterminados. ABM de ejercicios y ABM de series en panel profesor. | Completado |
 | **Fase 4 – Rutinas y asignación** | ABM rutinas basadas en series, asignación rutina → alumno, token, hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp, modificar rutina con series, orden de series, tabs dashboard, logo. | Completado |
-| **Fase 5 – Vista rutina por enlace** | Página pública (sin login) con token que muestre la rutina en HTML. Hoja en `/rutinas/hoja/{token}` implementada; opcional: reforzar permitAll en SecurityConfig. | Pendiente / parcial |
-| **Fase 6 – Alumnos sin login** | Alumno solo como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo (gran parte ya hecha). UserDetailsService excluye ALUMNO del login. | Completado |
-| **Fase 7 – Pantalla de sala** | Modo sala para TV: ruta de solo lectura, control desde panel profesor, vista fullscreen. Ruta tipo `/sala/{token}` o `/sala?token=xxx`. | **Completado** |
-| **Fase 8 – Página pública** | Sitio institucional: presentación, servicios, horarios, contacto, promociones, productos. Rutas públicas bajo `/public` o raíz. | Pendiente |
+| **Fase 5 – Vista rutina por enlace** | Página pública (sin login) con token que muestre la rutina en HTML. Hoja en `/rutinas/hoja/{token}` con permitAll. | **Completado** |
+| **Fase 6 – Alumnos sin login** | Alumno solo como ficha (física + online), sin usuario/contraseña. Calendario semanal y presentismo. UserDetailsService excluye ALUMNO del login. | **Completado** |
+| **Fase 7 – Pantalla de sala** | Modo sala para TV: ruta de solo lectura, control desde panel profesor, pizarra digital, columnas, vista TV con polling. | **Completado** |
+| **Fase 8 – Página pública** | Sitio institucional: landing en `/`, página Planes, formulario de consulta, administración desde panel. | **Completado** |
 
 ---
 
@@ -98,25 +98,28 @@
 - [x] **Series y rutinas:** ABM y rutinas basadas en series (crear, editar, orden de series).
 - [x] **Alumnos:** solo ficha (física + online), sin usuario/contraseña. UserDetailsService excluye ALUMNO.
 - [x] **Asignación de rutinas** + **enlace para WhatsApp** + **vista HTML de rutina** (hoja en `/rutinas/hoja/{token}`).
-- [x] **Calendario semanal y presentismo** (dar presente/ausente desde calendario y vista Mis Alumnos; tres estados; mismo API).
-- [ ] **Pantalla de entrenamiento en sala** (modo TV, control desde panel).
-- [ ] **Página pública:** presentación, servicios, horarios, contacto, promociones, productos.
-- [ ] **Depuración anual de datos:** Crear método o proceso para depurar/archivar datos antiguos (ej. asistencia con más de 1 año). Plazo anual recomendado: conserva al menos 12 meses para consultas y controla el crecimiento de la base de datos. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
-- [ ] **Manual del usuario:** Mantener actualizado [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades (pizarra, sala TV, transmisión en TV, etc.). Revisar tras cambios relevantes.
+- [x] **Calendario semanal y presentismo** (dar presente/ausente, clic en alumno → ficha, día por excepción / recuperar clase).
+- [x] **Pantalla de entrenamiento en sala** (pizarra digital, modo TV, control desde panel, polling).
+- [x] **Página pública:** landing, Planes, formulario de consulta, administración desde panel.
+- [x] **Manual del usuario:** Implementado. Página HTML en `/profesor/manual` accesible desde el panel (botón "Manual del usuario"); cubre acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso, pizarra, usuarios del sistema, administración y resumen. MANUAL-USUARIO.md sigue como referencia.
+- [ ] **Gestión de backup:** Backups y descargas desde el panel de administración (listar, descargar, importar si aplica).
+- [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ---
 
-## 8. Pendientes inmediatos (próximas sesiones)
+## 8. Pendientes (lo que realmente falta)
 
-- **Ficha del detalle de alumno:** Mejorar vista de detalle (organización, legibilidad, accesos rápidos, historial y progreso más claros).
-- **Calendario – Acceso al detalle del usuario:** **Resuelto (backend).** Pendiente de mejora visual al final.
-- **Calendario – Día por excepción (recuperar clase):** **Resuelto (backend).** Pendiente de mejora visual al final.
-- **Asistencia – Cron opcional:** **Resuelto (backend on-demand).** Cron nocturno opcional si se desea.
-- **Depuración anual de datos:** Implementar método o tarea programada para archivar o purgar datos antiguos (p. ej. registros de asistencia con más de 1 año). Plazo anual: adecuado para mantener historial reciente y controlar tamaño de la BD.
-- **Manual del usuario:** Actualizar o completar MANUAL-USUARIO.md con todas las funcionalidades actuales (en particular pizarra, sala TV, transmisión en TV).
+La mayoría del desarrollo está completada (calendario, pizarra, página pública, ficha alumno, etc.). Quedan por implementar o completar:
+
+- **Manual del usuario:** **Completado.** Página HTML en `/profesor/manual` (botón en panel); cubre todas las funcionalidades. MANUAL-USUARIO.md se mantiene como referencia en documentación.
+- **Gestión de backup:** Implementar en el panel de administración la sección de backups y descargas (listar backups, descargar, importar si aplica).
+- **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+
+Opcional / operativo:
+
 - **Script en base del servidor:** Ejecutar `scripts/servidor/alter_consulta_email_nullable.sql` en la BD del servidor (Donweb) para que el formulario de consulta en `/planes` funcione con solo teléfono en producción.
-- **Script borrar base entera:** Crear un script que elimine la base de datos completa para que, al reiniciar la app, Hibernate la pueda recrear desde cero (útil para desarrollo o reset total).
+- **Script borrar base entera:** Ya existe opción en menú; mantener documentado para desarrollo o reset total.
 
 ---
 
@@ -137,12 +140,17 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 ### Calendario semanal – Acceso al detalle del usuario desde el botón del usuario
 
 - **Qué falta:** Desde el **botón del usuario** en cada celda del calendario, poder **ingresar al detalle del usuario** (ficha del alumno).
-- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
+- **Estado:** **Implementado.** Clic en alumno en la celda abre `/profesor/alumnos/{id}`.
 
 ### Calendario semanal – Día por excepción para un alumno (recuperar clase)
 
 - **Qué falta:** Que el profesor pueda **agregar a un alumno un día por excepción** (ej. recuperar clase) en un día/horario que no es su horario habitual.
-- **Estado:** **Implementado (backend).** Falta mejorar el frontend al final.
+- **Estado:** **Implementado.** Frontend y backend completados; se ve en el calendario y se puede gestionar desde la interfaz.
+
+### Ficha del alumno – Mejoras de detalle y usabilidad
+
+- **Qué falta:** Mejorar vista de detalle del alumno (organización, legibilidad, accesos rápidos, historial y progreso más claros).
+- **Estado:** **Implementado.**
 
 ### Asistencia – Marcar ausente automáticamente si pasó el horario sin presente
 
@@ -157,8 +165,42 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 
 ### Manual del usuario
 
-- **Qué falta:** Mantener **actualizado** [MANUAL-USUARIO.md](MANUAL-USUARIO.md) para que refleje todas las funcionalidades: login, panel, alumnos, ejercicios, series, rutinas, calendario, asistencia, **pizarra y sala TV**, usuarios del sistema.
-- **Estado:** El manual existe; falta revisar que pizarra/sala TV y otros flujos recientes estén bien documentados.
+- **Qué falta:** Manual de uso del panel para profesor/admin accesible desde la app.
+- **Estado:** **Implementado.** Página HTML `profesor/manual-usuario.html` en ruta `/profesor/manual`, accesible desde el botón "Manual del usuario" en el panel. Incluye: acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso del alumno, pizarra en sala, usuarios del sistema, administración y página pública, resumen rápido. [MANUAL-USUARIO.md](MANUAL-USUARIO.md) se mantiene como referencia en documentación.
+
+### Gestión de backup
+
+- **Qué falta:** En el panel de administración, sección de **backups y descargas**: listar backups disponibles, descargar, opcionalmente importar.
+- **Estado:** Por implementar.
+
+### Depuración anual de datos (eliminar datos viejos)
+
+- **Qué falta:** Método o proceso para **archivar o eliminar datos antiguos** (ej. asistencia/presente de años anteriores). Conservar al menos 12 meses.
+- **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+
+### Mejoras post-modales (detalle alumno, rutinas, formularios)
+
+Pendientes agregados tras resolver los modales en la ficha del alumno. Ver también [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) – "Para mañana".
+
+1. ~~**Formulario crear alumno – Correo opcional:**~~ **Implementado.** Campo correo opcional; script `alter_usuario_correo_nullable.sql`.
+2. ~~**Alumno inactivo → inactivar rutinas:**~~ **Implementado.** UsuarioService llama a RutinaService.inactivarTodasRutinasDelAlumno al cambiar a INACTIVO.
+3. ~~**Detalle alumno – Vista rutinas:**~~ **Implementado.** Iconos, reseña con texto truncado (50 chars), acciones centradas.
+4. ~~**Volver al origen tras guardar rutina:**~~ **Implementado.** Parámetros `alumnoId` y `returnTab` en GET/POST editar rutina.
+5. ~~**Modal de progreso:**~~ **Implementado.** Checkbox "Estuvo presente" eliminado; asistencia en panel/calendario.
+6. ~~**Formulario modificar rutina:**~~ **Implementado.** Layout: Series a seleccionar (izq, 2 tarjetas/fila) | Series seleccionadas (der) | Detalles abajo.
+7. ~~**Vista alumnos – Botón crear:**~~ **Implementado.** Botón "Crear alumno" en título de Mis Alumnos.
+8. ~~**Lista rutinas asignadas:**~~ **Implementado.** Textos abreviados, estado con iconos, acciones centradas.
+
+**Estado:** **Completado** (Feb 2026). Ver [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §18.
+
+### Después de los métodos de backup
+
+Cuando esté implementada la gestión de backup (listar, descargar, importar si aplica), pendientes operativos:
+
+1. **Estilos de excepciones (avisos):** Dar estilos consistentes a las pantallas de excepciones/avisos/errores que muestra la aplicación.
+2. **Archivo para migración y despliegue:** Preparar un archivo (o documento) con todos los datos e instrucciones necesarios para la migración y el despliegue al servidor que compre el cliente (datos, scripts, pasos, variables, etc.).
+
+**Estado:** Por implementar / preparar una vez completado el backup.
 
 ---
 

@@ -11,53 +11,49 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .hero-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s ease;
+        /* Tarjetas mismo tamaño que panel administrador / dashboard */
+        .ejercicios-module-card {
             border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            min-width: 200px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #37474f;
+            transition: transform 0.15s;
         }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        .ejercicios-module-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        
-        .stats-card .stats-number {
-            font-size: 2.5rem;
-            font-weight: 700;
+        .ejercicios-module-card.card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .ejercicios-module-card.card-link:hover {
+            color: inherit;
+        }
+        .ejercicios-module-card i {
+            font-size: 2.8rem;
             margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            color: #5e35b1;
         }
-        
-        .stats-card .stats-label {
+        .ejercicios-module-card .stat {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #37474f;
+        }
+        .ejercicios-module-card .label {
             font-size: 1rem;
-            font-weight: 600;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 500;
+            color: #546e7a;
         }
+        .card-ejercicios-total { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
+        .card-ejercicios-grupos { background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); }
+        .card-ejercicios-crear { background: linear-gradient(135deg, #fff9c4 60%, #ffe082 100%); }
         
         .btn-nuevo {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -148,7 +144,15 @@
 <!-- Navbar fragment -->
 <div th:replace="fragments/navbar :: navbar"></div>
 
-<div class="container mt-4">
+<div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
+    <!-- Título sin tarjeta (estilo panel del profesor) -->
+    <div class="text-center mb-4">
+        <div class="d-flex justify-content-center align-items-center mb-2">
+            <i class="fa-solid fa-dumbbell fa-2x me-2" style="color:#9575cd;"></i>
+            <h1 class="fw-bold mb-0">Mis Ejercicios</h1>
+        </div>
+    </div>
+
     <!-- Mensajes de éxito/error -->
     <div th:if="${param.success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="fas fa-check-circle me-2"></i>
@@ -168,66 +172,22 @@
         <span th:if="${param.error[0] == 'error_eliminar'}">Error al eliminar el ejercicio. Por favor, intenta nuevamente.</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    
-    <!-- Header Section -->
-    <div class="hero-section mb-4">
-        <div class="d-flex justify-content-between align-items-center px-3 flex-wrap gap-2">
-            <a th:href="@{/profesor/{id}(id=${profesor.id})}" class="btn btn-outline-light">
-                <i class="fas fa-arrow-left me-2"></i>Volver al Panel
-            </a>
-            <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-layer-group me-2"></i>Grupos Musculares
-            </a>
-        </div>
-        <h1 class="hero-title">
-            <i class="fas fa-dumbbell me-2"></i>Mis Ejercicios
-        </h1>
-        <p class="mb-0">Gestiona tu biblioteca de ejercicios personalizada</p>
-    </div>
 
-    <!-- Estadísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stats-card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-dumbbell fa-2x mb-2"></i>
-                    <h4 class="card-title" th:text="${totalEjercicios}">0</h4>
-                    <p class="card-text">Total Disponibles</p>
-                    <small class="text-white-50">Predeterminados + Propios</small>
-                </div>
-            </div>
+    <!-- Tarjetas: mismo tamaño que panel administrador -->
+    <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-4 mb-4">
+        <div class="ejercicios-module-card card-ejercicios-total" style="min-width: 260px; min-height: 160px;">
+            <i class="fas fa-dumbbell"></i>
+            <div class="stat" th:text="${totalEjercicios}">0</div>
+            <div class="label">Total disponibles</div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stats-card h-100" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
-                <div class="card-body text-center">
-                    <i class="fas fa-star fa-2x mb-2"></i>
-                    <h4 class="card-title" th:text="${ejerciciosPredeterminados}">0</h4>
-                    <p class="card-text">Predeterminados</p>
-                    <small class="text-white-50">Editables</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stats-card h-100" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-edit fa-2x mb-2"></i>
-                    <h4 class="card-title" th:text="${totalEjerciciosPropios}">0</h4>
-                    <p class="card-text">Mis Ejercicios</p>
-                    <small class="text-white-50">Personalizados</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <a href="/profesor/mis-ejercicios/nuevo" class="text-decoration-none">
-                <div class="card stats-card h-100" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); cursor: pointer;">
-                    <div class="card-body text-center">
-                        <i class="fas fa-plus fa-2x mb-2"></i>
-                        <h4 class="card-title">Crear</h4>
-                        <p class="card-text">Nuevo Ejercicio</p>
-                    </div>
-                </div>
-            </a>
-        </div>
+        <a th:href="@{/profesor/mis-grupos-musculares}" class="ejercicios-module-card card-ejercicios-grupos card-link" style="min-width: 260px; min-height: 160px;" title="Grupos musculares">
+            <i class="fas fa-layer-group"></i>
+            <div class="label">Crear grupo musculares</div>
+        </a>
+        <a th:href="@{/profesor/mis-ejercicios/nuevo}" class="ejercicios-module-card card-ejercicios-crear card-link" style="min-width: 260px; min-height: 160px;" title="Crear ejercicio">
+            <i class="fas fa-plus"></i>
+            <div class="label">Crear ejercicios</div>
+        </a>
     </div>
 
     <!-- Search and Filter Section -->

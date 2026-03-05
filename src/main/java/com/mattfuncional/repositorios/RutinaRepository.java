@@ -49,5 +49,9 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
     Optional<Rutina> findByTokenPublico(String tokenPublico);
 
+    /** Carga la rutina por token con sus series (sin serieEjercicios, para combinar con carga por serie). */
+    @Query("SELECT DISTINCT r FROM Rutina r LEFT JOIN FETCH r.series WHERE r.tokenPublico = :token")
+    Optional<Rutina> findByTokenPublicoWithSeries(@Param("token") String tokenPublico);
+
     boolean existsByTokenPublico(String tokenPublico);
 }

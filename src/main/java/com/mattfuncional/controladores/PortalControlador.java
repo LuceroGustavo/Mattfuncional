@@ -81,11 +81,11 @@ public class PortalControlador {
         String whatsapp = configuracionPaginaPublicaService.getWhatsapp();
         model.addAttribute("whatsappUrl", whatsapp != null && !whatsapp.isEmpty()
                 ? "https://api.whatsapp.com/send?phone=" + whatsapp.replaceAll("[^0-9]", "")
-                : "https://api.whatsapp.com/send?phone=5491112345678");
+                : "https://api.whatsapp.com/send?phone=5491164842554");
         String instagram = configuracionPaginaPublicaService.getInstagram();
         model.addAttribute("instagramUrl", instagram != null && !instagram.isEmpty() && !"#".equals(instagram)
-                ? (instagram.startsWith("http") ? instagram : "https://instagram.com/" + instagram.replaceAll("^@", ""))
-                : "#");
+                ? (instagram.startsWith("http") ? instagram : "https://www.instagram.com/" + instagram.replaceAll("^@", "").trim() + "/")
+                : "https://www.instagram.com/matt_funcional/");
         return "planes-publica";
     }
 

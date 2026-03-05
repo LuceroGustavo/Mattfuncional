@@ -8,7 +8,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CascadeType;
@@ -43,7 +42,6 @@ public class Usuario implements UserDetails {
     private String avatar;
 
     @Email(message = "Debe ingresar un correo válido")
-    @NotBlank(message = "El correo es obligatorio")
     @Column(unique = true)
     private String correo;
 

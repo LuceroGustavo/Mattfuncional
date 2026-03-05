@@ -192,8 +192,9 @@ public class SerieController {
 
         if (esPropietario) {
             serieService.eliminarSerie(id);
-            if (profesorUsuario != null && profesorUsuario.getProfesor() != null) {
-                return "redirect:/profesor/" + profesorUsuario.getProfesor().getId() + "?tab=series";
+            com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(profesorUsuario);
+            if (profesor != null) {
+                return "redirect:/profesor/" + profesor.getId() + "?tab=series";
             }
             return "redirect:/profesor/dashboard?tab=series";
         } else {

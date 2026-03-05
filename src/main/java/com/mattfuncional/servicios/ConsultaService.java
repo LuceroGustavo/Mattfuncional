@@ -31,10 +31,27 @@ public class ConsultaService {
                 .toList();
     }
 
+    public long contar() {
+        return consultaRepository.count();
+    }
+
+    /** Cuenta solo las consultas no vistas (para el badge del navbar). */
+    public long contarNoVistas() {
+        return consultaRepository.countByVistoFalse();
+    }
+
     @Transactional
     public void eliminar(Long id) {
         if (id != null && consultaRepository.existsById(id)) {
             consultaRepository.deleteById(id);
         }
+    }
+
+    @Transactional
+    public void marcarComoVisto(Long id) {
+        consultaRepository.findById(id).ifPresent(c -> {
+            c.setVisto(true);
+            consultaRepository.save(c);
+        });
     }
 }
