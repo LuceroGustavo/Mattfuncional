@@ -3,7 +3,11 @@ package com.mattfuncional.servicios;
 import com.mattfuncional.entidades.Asistencia;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Profesor;
+import com.mattfuncional.entidades.Rutina;
 import com.mattfuncional.repositorios.AsistenciaRepository;
+import com.mattfuncional.repositorios.CalendarioExcepcionRepository;
+import com.mattfuncional.repositorios.MedicionFisicaRepository;
+import com.mattfuncional.repositorios.RutinaRepository;
 import com.mattfuncional.repositorios.UsuarioRepository;
 import com.mattfuncional.repositorios.ProfesorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,15 @@ public class UsuarioService {
 
     @Autowired
     private AsistenciaRepository asistenciaRepository;
+
+    @Autowired
+    private MedicionFisicaRepository medicionFisicaRepository;
+
+    @Autowired
+    private CalendarioExcepcionRepository calendarioExcepcionRepository;
+
+    @Autowired
+    private RutinaRepository rutinaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -296,8 +309,32 @@ public class UsuarioService {
         }
     }
 
+    /**
+     * Elimina un alumno (usuario con rol ALUMNO). Antes elimina o desasigna todas las
+     * referencias para no violar FKs: asistencia, mediciones físicas, excepciones de
+     * calendario, y desasigna rutinas asignadas.
+     */
     @CacheEvict(value = "usuarios", allEntries = true)
+    @Transactional
     public void eliminarUsuario(Long id) {
+        // 1) Asistencias donde este usuario es el alumno (FK usuario_id)
+        asistenciaRepository.deleteByUsuario_Id(id);
+        // 2) Asistencias donde este usuario figura como "registrado por" (soltar FK)
+        List<Asistencia> asistenciasDondeRegistro = asistenciaRepository.findByRegistradoPor_Id(id);
+        for (Asistencia a : asistenciasDondeRegistro) {
+            a.setRegistradoPor(null);
+            asistenciaRepository.save(a);
+        }
+        // 3) Mediciones físicas del alumno
+        medicionFisicaRepository.deleteByUsuario_Id(id);
+        // 4) Excepciones de calendario (días por excepción)
+        calendarioExcepcionRepository.deleteByUsuario_Id(id);
+        // 5) Desasignar rutinas (dejar rutina sin alumno; no se borran las rutinas)
+        List<Rutina> rutinasDelAlumno = rutinaRepository.findByUsuarioId(id);
+        for (Rutina r : rutinasDelAlumno) {
+            r.setUsuario(null);
+            rutinaRepository.save(r);
+        }
         usuarioRepository.deleteById(id);
     }
 

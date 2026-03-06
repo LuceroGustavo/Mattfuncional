@@ -38,6 +38,7 @@
 - **Estado del alumno:** ACTIVO/INACTIVO, fecha de alta/baja, historial de estado.
 - **Vista de alumnos (panel):** Columnas estado y celular; **filtros** por nombre, estado, tipo (presencial/virtual/semipresencial), día y horario. Filtros persistentes en localStorage.
 - **Acciones:** Ver, Editar, Borrar, Asignar rutina; columna “Presente” separada (ver sección Asistencia). Inactivos: “Asignar rutina” y “Dar presente” deshabilitados con tooltip.
+- **Eliminar alumno:** Al borrar un alumno (`/profesor/alumnos/eliminar/{id}`), el sistema limpia antes todas las referencias para no violar FKs: se eliminan sus registros de **asistencia**, se anula "registrado por" en asistencias donde figuraba, se eliminan **mediciones físicas** y **excepciones de calendario** (días por excepción), y se **desasignan** sus rutinas (usuario = null; las rutinas no se borran). Luego se elimina el usuario. Repositorios: `AsistenciaRepository.deleteByUsuario_Id`, `MedicionFisicaRepository.deleteByUsuario_Id`, `CalendarioExcepcionRepository.deleteByUsuario_Id`; lógica en `UsuarioService.eliminarUsuario`.
 - **Editar alumno:** Estado arriba a la derecha, colores pastel según estado.
 - **Seeds:** Script SQL con alumnos variados en `scripts/seed_alumnos_mattfuncional.sql`.
 

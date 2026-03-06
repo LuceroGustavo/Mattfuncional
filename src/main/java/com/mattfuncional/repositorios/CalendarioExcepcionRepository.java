@@ -12,4 +12,6 @@ public interface CalendarioExcepcionRepository extends JpaRepository<CalendarioE
 
     boolean existsByUsuario_IdAndFechaAndHoraInicioAndHoraFin(Long usuarioId, LocalDate fecha, LocalTime horaInicio,
             LocalTime horaFin);
+
+    void deleteByUsuario_Id(Long usuarioId);
 }

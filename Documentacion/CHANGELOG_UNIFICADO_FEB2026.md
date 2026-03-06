@@ -25,6 +25,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 17. [Botón WhatsApp en detalle del alumno](#17-botón-whatsapp-en-detalle-del-alumno-feb-2026)
 18. [Mejoras AYUDA_MEMORIA – Panel profesor y rutinas](#18-mejoras-ayuda_memoria--panel-profesor-y-rutinas-feb-2026)
 19. [Vista de serie y rutinas – Formato unificado y escritorio](#19-vista-de-serie-y-rutinas--formato-unificado-y-escritorio-feb-2026)
+20. [Eliminar alumno – Fix FK asistencia y referencias](#20-eliminar-alumno--fix-fk-asistencia-y-referencias-mar-2026)
 
 ---
 
@@ -550,6 +551,25 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 | `rutinas/verRutina.html` | Estilos condicionales según `esVistaEscritorio`; clase `vista-escritorio` en body. |
 | `ProfesorController.java` | `model.addAttribute("esVistaEscritorio", true)` en verRutinaPrivada. |
 | `RutinaControlador.java` | `model.addAttribute("esVistaEscritorio", false)` en verHojaRutina. |
+
+---
+
+## 20. Eliminar alumno – Fix FK asistencia y referencias (Mar 2026)
+
+**Resumen:** Al eliminar un alumno desde `/profesor/alumnos/eliminar/{id}` fallaba con error 500 por violación de FK: la tabla `asistencia` (y otras) referencian `usuario.id`. Se corrige eliminando o desasignando antes todas las referencias al usuario.
+
+### Cambios técnicos
+- **UsuarioService.eliminarUsuario(id):** Antes de `usuarioRepository.deleteById(id)` se ejecuta en orden: (1) eliminar asistencias del alumno (`AsistenciaRepository.deleteByUsuario_Id`), (2) anular "registrado por" en asistencias donde el usuario figuraba como quien registró, (3) eliminar mediciones físicas (`MedicionFisicaRepository.deleteByUsuario_Id`), (4) eliminar excepciones de calendario del alumno (`CalendarioExcepcionRepository.deleteByUsuario_Id`), (5) desasignar rutinas (cargar por `RutinaRepository.findByUsuarioId`, set `usuario = null`, guardar; las rutinas no se borran), (6) eliminar el usuario.
+- **Repositorios:** Añadidos `void deleteByUsuario_Id(Long usuarioId)` en `AsistenciaRepository`, `MedicionFisicaRepository` y `CalendarioExcepcionRepository`.
+- **UsuarioService:** Inyección de `MedicionFisicaRepository`, `CalendarioExcepcionRepository` y `RutinaRepository`; imports de `Rutina` y repositorios.
+
+### Archivos modificados
+| Archivo | Cambios |
+|---------|---------|
+| `UsuarioService.java` | Lógica completa en `eliminarUsuario`; nuevos @Autowired y método @Transactional. |
+| `AsistenciaRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
+| `MedicionFisicaRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
+| `CalendarioExcepcionRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
 
 ---
 

@@ -2,6 +2,20 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-06] - fix(alumnos): eliminar alumno sin error de FK (asistencia y demás referencias) ✅
+
+### 🎯 **Resumen**
+Al eliminar un alumno desde `/profesor/alumnos/eliminar/{id}` fallaba con error 500 por violación de FK: la tabla `asistencia` (y otras) referencian `usuario.id`. Se corrige eliminando o desasignando antes todas las referencias al usuario.
+
+### ✅ **Cambios**
+- **UsuarioService.eliminarUsuario(id):** Antes de `deleteById(id)` se ejecuta en orden: (1) eliminar asistencias del alumno (`AsistenciaRepository.deleteByUsuario_Id`), (2) anular "registrado por" en asistencias donde figuraba el usuario, (3) eliminar mediciones físicas (`MedicionFisicaRepository.deleteByUsuario_Id`), (4) eliminar excepciones de calendario (`CalendarioExcepcionRepository.deleteByUsuario_Id`), (5) desasignar rutinas (set usuario = null; no se borran las rutinas), (6) eliminar el usuario.
+- **Repositorios:** Añadidos `deleteByUsuario_Id(Long usuarioId)` en `AsistenciaRepository`, `MedicionFisicaRepository` y `CalendarioExcepcionRepository`. Inyección de `MedicionFisicaRepository`, `CalendarioExcepcionRepository` y `RutinaRepository` en `UsuarioService`.
+
+### 📁 **Archivos modificados**
+`UsuarioService.java`, `AsistenciaRepository.java`, `MedicionFisicaRepository.java`, `CalendarioExcepcionRepository.java`, `Documentacion/AVANCES_DEL_APP.md`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`.
+
+---
+
 ## [2026-02-09] - Vista de serie y rutinas – Formato unificado y escritorio ✅
 
 ### 🎯 **Resumen**
