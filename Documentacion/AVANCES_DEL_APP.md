@@ -53,7 +53,7 @@
 - **Creación de rutinas:** Botón “Crear serie” en selector de series; botón “Modificar” en cada tarjeta de serie (carga ejercicios al editar).
 - **Modificar rutina:** Título “Modificar Rutina”; carga con `findByIdWithSeries`; tres bloques (Detalles, Series en esta Rutina, Añadir más Series); selección por clic en tarjeta (resaltado amarillo); vista previa “Se agregarán al guardar”. **Fix guardado:** `RutinaService.actualizarSeriesDeRutina` resuelve plantillaId y repeticiones antes de borrar y re-añade todas las series.
 - **Orden de series en rutina:** En crear rutina: lista “Series seleccionadas” con Subir/Bajar; en editar: Subir/Bajar por serie. Campo `orden` en `Serie` persistido; hoja y vista al editar muestran ese orden.
-- **Vista de series:** Botón “Ver serie”, vista `series/verSerie.html`; sin columna ID en tabla del dashboard.
+- **Vista de series:** Botón “Ver serie”, vista `series/verSerie.html`; sin columna ID en tabla del dashboard. **Formato unificado (Feb 2026):** mismo formato que rutinas (fondo oscuro, overlays peso/reps); no responsive; peso y repeticiones achicados. **Vista rutina:** `/profesor/rutinas/ver/{id}` → escritorio fijo; `/rutinas/hoja/{token}` → responsive.
 - **Tabs del dashboard:** Parámetro `?tab=series|rutinas|asignaciones` para volver al tab correcto tras guardar.
 - **Logo:** Referencias unificadas a `logo matt.jpeg` en navbar y vistas profesor.
 

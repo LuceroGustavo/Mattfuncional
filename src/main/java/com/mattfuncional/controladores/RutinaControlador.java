@@ -295,6 +295,7 @@ public class RutinaControlador {
                     + (port != 80 && port != 443 ? ":" + port : "");
             model.addAttribute("ogImageUrl", baseUrl + "/img/logo.png");
             model.addAttribute("ogPageUrl", baseUrl + "/rutinas/hoja/" + rutina.getTokenPublico());
+            model.addAttribute("esVistaEscritorio", false); // Responsive: rutina asignada (enlace alumno)
             return "rutinas/verRutina";
         } catch (ResourceNotFoundException e) {
             model.addAttribute("mensajeError", "El enlace de la rutina no es válido o ha expirado.");

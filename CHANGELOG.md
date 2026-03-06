@@ -2,6 +2,18 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - Vista de serie y rutinas – Formato unificado y escritorio ✅
+
+### 🎯 **Resumen**
+- **Vista de serie** (`/series/ver/{id}`): rediseño al formato de rutinas (fondo oscuro, overlays peso/reps). No responsive.
+- **Vista de rutina no asignada** (`/profesor/rutinas/ver/{id}`): flag `esVistaEscritorio` para grid fijo y peso/reps más chicos.
+- **Vista de rutina asignada** (`/rutinas/hoja/{token}`): sigue siendo responsive.
+
+### 📁 **Archivos modificados**
+`series/verSerie.html`, `rutinas/verRutina.html`, `ProfesorController.java`, `RutinaControlador.java`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/AVANCES_DEL_APP.md`.
+
+---
+
 ## [2026-02-09] - Mejoras AYUDA_MEMORIA – Panel profesor y rutinas ✅
 
 ### 🎯 **Resumen**

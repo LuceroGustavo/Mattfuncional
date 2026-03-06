@@ -153,6 +153,16 @@
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 1rem;
         }
+        /* Vista escritorio (rutina no asignada): fijo 3 columnas, no responsive, peso/reps más chicos */
+        body.vista-escritorio .ejercicios-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        body.vista-escritorio .sala-item-wrap .item-peso,
+        body.vista-escritorio .sala-item-wrap .item-reps {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.45rem;
+            min-height: 1.4em;
+        }
         /* Tarjetas verticales (como creación de series): imagen grande, peso/reps superpuestos en esquina derecha */
         .sala-item-wrap {
             display: flex;
@@ -237,6 +247,8 @@
             .hoja-header { flex-wrap: wrap; }
             .hoja-header-titulo { order: 3; width: 100%; text-align: center; }
             .ejercicios-grid { grid-template-columns: 1fr; }
+            /* Vista escritorio: mantener 3 columnas incluso en móvil (no responsive) */
+            body.vista-escritorio .ejercicios-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
     <script>
@@ -329,7 +341,7 @@
         });
     </script>
 </head>
-<body>
+<body th:classappend="${esVistaEscritorio == true} ? 'vista-escritorio' : ''">
 <!-- Timbre: logo, Mattfuncional, nombre rutina, fecha (sin Copiar enlace en vista alumno) -->
 <header class="hoja-header">
     <div class="hoja-header-left">

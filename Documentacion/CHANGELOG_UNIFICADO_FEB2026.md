@@ -24,6 +24,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 16. [Peso en hoja pública de rutina y acción Eliminar en Asignaciones](#16-peso-en-hoja-pública-de-rutina-y-acción-eliminar-en-asignaciones-feb-2026)
 17. [Botón WhatsApp en detalle del alumno](#17-botón-whatsapp-en-detalle-del-alumno-feb-2026)
 18. [Mejoras AYUDA_MEMORIA – Panel profesor y rutinas](#18-mejoras-ayuda_memoria--panel-profesor-y-rutinas-feb-2026)
+19. [Vista de serie y rutinas – Formato unificado y escritorio](#19-vista-de-serie-y-rutinas--formato-unificado-y-escritorio-feb-2026)
 
 ---
 
@@ -519,6 +520,36 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 ### 18.3 Archivos modificados
 
 `Usuario.java`, `ProfesorController.java`, `UsuarioService.java`, `UsuarioRepository.java`, `RutinaControlador.java`, `profesor/nuevoalumno.html`, `profesor/alumno-detalle.html`, `profesor/dashboard.html`, `rutinas/editarRutina.html`, `scripts/servidor/alter_usuario_correo_nullable.sql`.
+
+---
+
+## 19. Vista de serie y rutinas – Formato unificado y escritorio (Feb 2026)
+
+**Resumen:** La vista de serie (`/series/ver/{id}`) y la vista de rutina no asignada (`/profesor/rutinas/ver/{id}`) se unifican para usar el mismo formato visual (oscuro, overlays de peso/reps). Ambas son **no responsive** (solo escritorio). La rutina asignada (`/rutinas/hoja/{token}`) sigue siendo responsive. Se achican los datos de peso y repeticiones en vistas de escritorio.
+
+### 19.1 Cambios en vista de serie
+
+- **Antes:** Fondo verde claro, tarjetas con cajas de repeticiones/peso en la parte inferior.
+- **Ahora:** Mismo formato que rutinas (captura3): fondo oscuro (#0d1117), contenedor con borde naranja (#f97316), tarjetas con título negro, imagen blanca y overlays de peso/reps en verde.
+- **No responsive:** Grid fijo de 3 columnas; `min-width: 800px` para escritorio.
+- **Peso y repeticiones:** Tamaño reducido (`font-size: 0.85rem`, `padding: 0.25rem 0.45rem`).
+
+### 19.2 Cambios en vista de rutina
+
+- **Flag `esVistaEscritorio`:** Se pasa en el modelo para distinguir:
+  - `true` en `/profesor/rutinas/ver/{id}` (rutina no asignada) → vista fija escritorio.
+  - `false` en `/rutinas/hoja/{token}` (rutina asignada) → vista responsive.
+- **Vista escritorio:** Grid fijo de 3 columnas; peso/reps más pequeños.
+- **Vista asignada:** Responsive sin cambios (para móvil del alumno).
+
+### 19.3 Archivos modificados
+
+| Archivo | Cambios |
+|---------|---------|
+| `series/verSerie.html` | Rediseño completo al formato oscuro; grid fijo; overlays peso/reps achicados. |
+| `rutinas/verRutina.html` | Estilos condicionales según `esVistaEscritorio`; clase `vista-escritorio` en body. |
+| `ProfesorController.java` | `model.addAttribute("esVistaEscritorio", true)` en verRutinaPrivada. |
+| `RutinaControlador.java` | `model.addAttribute("esVistaEscritorio", false)` en verHojaRutina. |
 
 ---
 
