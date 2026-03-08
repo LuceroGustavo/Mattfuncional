@@ -16,8 +16,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -851,7 +854,9 @@ public class ProfesorController {
     // ========== MIS GRUPOS MUSCULARES (ABM) ==========
 
     @GetMapping("/mis-grupos-musculares")
-    public String listarGruposMusculares(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+    public String listarGruposMusculares(@AuthenticationPrincipal Usuario usuarioActual,
+                                         @RequestParam(required = false) String returnUrl,
+                                         Model model) {
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
@@ -861,51 +866,61 @@ public class ProfesorController {
         model.addAttribute("gruposSistema", gruposSistema);
         model.addAttribute("misGrupos", misGrupos);
         model.addAttribute("profesor", profesor);
+        if (!model.containsAttribute("grupo")) {
+            model.addAttribute("grupo", new com.mattfuncional.entidades.GrupoMuscular());
+        }
+        if (returnUrl != null && !returnUrl.isBlank() && returnUrl.startsWith("/profesor/")) {
+            model.addAttribute("returnUrl", returnUrl);
+        }
         return "profesor/grupos-musculares-lista";
     }
 
     @GetMapping("/mis-grupos-musculares/nuevo")
-    public String nuevoGrupoMuscularForm(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
-        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
-        if (usuarioActual == null || profesor == null) {
-            return "redirect:/login?error=true";
+    public String nuevoGrupoMuscularForm(@AuthenticationPrincipal Usuario usuarioActual,
+                                         @RequestParam(required = false) String returnUrl) {
+        StringBuilder url = new StringBuilder("redirect:/profesor/mis-grupos-musculares");
+        if (returnUrl != null && !returnUrl.isBlank() && returnUrl.startsWith("/profesor/")) {
+            url.append("?returnUrl=").append(URLEncoder.encode(returnUrl, StandardCharsets.UTF_8));
         }
-        model.addAttribute("grupo", new com.mattfuncional.entidades.GrupoMuscular());
-        model.addAttribute("profesor", profesor);
-        model.addAttribute("esEdicion", false);
-        return "profesor/grupo-muscular-form";
+        return url.toString();
     }
 
     @PostMapping("/mis-grupos-musculares/nuevo")
     public String crearGrupoMuscular(@Valid @ModelAttribute("grupo") com.mattfuncional.entidades.GrupoMuscular grupo,
                                     BindingResult bindingResult,
                                     @AuthenticationPrincipal Usuario usuarioActual,
-                                    Model model) {
+                                    @RequestParam(required = false) String returnUrl,
+                                    RedirectAttributes redirectAttributes) {
         Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
         if (usuarioActual == null || profesor == null) {
             return "redirect:/login?error=true";
         }
+        String redirectList = "redirect:/profesor/mis-grupos-musculares";
+        if (returnUrl != null && !returnUrl.isBlank() && returnUrl.startsWith("/profesor/")) {
+            redirectList += "?returnUrl=" + URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("profesor", profesor);
-            model.addAttribute("esEdicion", false);
-            return "profesor/grupo-muscular-form";
+            redirectAttributes.addFlashAttribute("grupo", grupo);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.grupo", bindingResult);
+            return redirectList;
         }
         String nombre = grupo.getNombre() != null ? grupo.getNombre().trim().toUpperCase() : "";
         if (grupoMuscularService.findByNombreSistema(nombre).isPresent()) {
-            model.addAttribute("errorMessage", "Ya existe un grupo del sistema con ese nombre. Elige otro.");
-            model.addAttribute("profesor", profesor);
-            model.addAttribute("esEdicion", false);
-            return "profesor/grupo-muscular-form";
+            redirectAttributes.addFlashAttribute("grupo", grupo);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ya existe un grupo del sistema con ese nombre. Elige otro.");
+            return redirectList;
         }
         if (grupoMuscularService.existeNombreParaProfesor(nombre, profesor.getId())) {
-            model.addAttribute("errorMessage", "Ya tienes un grupo muscular con ese nombre.");
-            model.addAttribute("profesor", profesor);
-            model.addAttribute("esEdicion", false);
-            return "profesor/grupo-muscular-form";
+            redirectAttributes.addFlashAttribute("grupo", grupo);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ya tienes un grupo muscular con ese nombre.");
+            return redirectList;
         }
         grupo.setNombre(nombre);
         grupo.setProfesor(profesor);
         grupoMuscularService.guardar(grupo);
+        if (returnUrl != null && !returnUrl.isBlank() && returnUrl.startsWith("/profesor/")) {
+            return "redirect:" + returnUrl + (returnUrl.contains("?") ? "&" : "?") + "success=grupo_creado";
+        }
         return "redirect:/profesor/mis-grupos-musculares?success=grupo_creado";
     }
 

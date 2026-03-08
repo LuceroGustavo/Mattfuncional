@@ -212,6 +212,11 @@
                             </div>
                         </div>
                         <div class="form-text">Selecciona todos los grupos musculares que trabaja este ejercicio</div>
+                        <div class="mt-2">
+                            <a th:href="@{/profesor/mis-grupos-musculares(returnUrl=__${'/profesor/mis-ejercicios/editar/' + exercise.id}__)}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Crear grupo muscular
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Imagen actual -->

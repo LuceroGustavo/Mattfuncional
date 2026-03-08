@@ -26,8 +26,8 @@
 
     <div class="hero-section mb-4">
         <div class="d-flex justify-content-between align-items-center px-3">
-            <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-light btn-volver">
-                <i class="fas fa-arrow-left me-2"></i>Volver a Grupos
+            <a th:href="${returnUrl != null} ? ${returnUrl} : @{/profesor/mis-grupos-musculares}" class="btn btn-outline-light btn-volver">
+                <i class="fas fa-arrow-left me-2"></i><span th:text="${returnUrl != null} ? 'Volver al ejercicio' : 'Volver a Grupos'">Volver a Grupos</span>
             </a>
         </div>
         <h1 class="hero-title">
@@ -42,6 +42,7 @@
                 <div class="card-body p-4">
                     <form th:action="${esEdicion} ? @{/profesor/mis-grupos-musculares/editar/{id}(id=${grupo.id})} : @{/profesor/mis-grupos-musculares/nuevo}"
                           th:object="${grupo}" method="post">
+                        <input type="hidden" name="returnUrl" th:value="${returnUrl}" th:if="${returnUrl != null}">
                         <div class="mb-3">
                             <label for="nombre" class="form-label fw-bold">Nombre del grupo</label>
                             <input type="text" id="nombre" th:field="*{nombre}" class="form-control form-control-lg" 
@@ -51,7 +52,7 @@
                             <div class="form-text">Se guardará en mayúsculas. No puede repetirse con otro grupo tuyo ni con los del sistema.</div>
                         </div>
                         <div class="d-flex gap-2 justify-content-end mt-4">
-                            <a th:href="@{/profesor/mis-grupos-musculares}" class="btn btn-outline-secondary">Cancelar</a>
+                            <a th:href="${returnUrl != null} ? ${returnUrl} : @{/profesor/mis-grupos-musculares}" class="btn btn-outline-secondary">Cancelar</a>
                             <button type="submit" class="btn btn-guardar">
                                 <i class="fas fa-save me-2"></i>
                                 <span th:text="${esEdicion} ? 'Guardar cambios' : 'Crear grupo'">Guardar</span>
