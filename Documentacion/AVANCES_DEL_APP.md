@@ -2,7 +2,7 @@
 
 **Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
 
-**Última actualización:** Febrero 2026  
+**Última actualización:** Marzo 2026  
 **Uso:** Referencia única de todo lo implementado hasta la fecha.
 
 ---
@@ -38,7 +38,7 @@
 - **Estado del alumno:** ACTIVO/INACTIVO, fecha de alta/baja, historial de estado.
 - **Vista de alumnos (panel):** Columnas estado y celular; **filtros** por nombre, estado, tipo (presencial/virtual/semipresencial), día y horario. Filtros persistentes en localStorage.
 - **Acciones:** Ver, Editar, Borrar, Asignar rutina; columna “Presente” separada (ver sección Asistencia). Inactivos: “Asignar rutina” y “Dar presente” deshabilitados con tooltip.
-- **Eliminar alumno:** Al borrar un alumno (`/profesor/alumnos/eliminar/{id}`), el sistema limpia antes todas las referencias para no violar FKs: se eliminan sus registros de **asistencia**, se anula "registrado por" en asistencias donde figuraba, se eliminan **mediciones físicas** y **excepciones de calendario** (días por excepción), y se **desasignan** sus rutinas (usuario = null; las rutinas no se borran). Luego se elimina el usuario. Repositorios: `AsistenciaRepository.deleteByUsuario_Id`, `MedicionFisicaRepository.deleteByUsuario_Id`, `CalendarioExcepcionRepository.deleteByUsuario_Id`; lógica en `UsuarioService.eliminarUsuario`.
+- **Eliminar alumno:** Al borrar un alumno (`/profesor/alumnos/eliminar/{id}`), el sistema elimina antes todas las referencias: asistencias del alumno, anula "registrado por" en asistencias, elimina **mediciones físicas** y **excepciones de calendario**, y **elimina todas sus rutinas asignadas** (activas e inactivas) con `rutinaService.eliminarRutina`, para que no queden rutinas huérfanas en "Rutinas asignadas". Luego se elimina el usuario. Repositorios: `AsistenciaRepository.deleteByUsuario_Id`, `MedicionFisicaRepository.deleteByUsuario_Id`, `CalendarioExcepcionRepository.deleteByUsuario_Id`; lógica en `UsuarioService.eliminarUsuario`.
 - **Editar alumno:** Estado arriba a la derecha, colores pastel según estado.
 - **Seeds:** Script SQL con alumnos variados en `scripts/seed_alumnos_mattfuncional.sql`.
 
@@ -98,8 +98,8 @@
 
 ## 8. Panel Mis Ejercicios y hoja pública
 
-- **Mis Ejercicios:** Predeterminados editables y eliminables; indicador “predeterminado” (estrellita azul + leyenda); botones Ver (modal)/Editar/Eliminar; Ver abre modal en la misma página (fondo gris, clic fuera cierra).
-- **Hoja de rutina pública:** Acceso sin login a `/rutinas/hoja/**` para enlace compartido.
+- **Mis Ejercicios:** Predeterminados editables y eliminables; indicador “predeterminado” (estrellita azul + leyenda); botones Ver (modal)/Editar/Eliminar. **Formularios crear y editar ejercicio (Mar 2026):** título compacto (estilo “crear serie”), ancho completo (max-width 1200px), cabecera con gradiente violeta “Datos del ejercicio” (#764ba2 → #667eea), mismo criterio visual que series/rutinas. **Modal “Ver ejercicio”:** cabecera con mismo gradiente, botón cerrar (X), imagen en contenedor con bordes redondeados, badge grupos musculares en lavanda/violeta (#e1bee7, #5e35b1), hint “Clic fuera o Escape para cerrar”. **Permisos editar:** DEVELOPER y ADMIN pueden editar cualquier ejercicio (incl. predeterminados); AYUDANTE solo ejercicios propios; mensaje claro en lista cuando `error=sin_permisos_editar`.
+- **Hoja de rutina pública:** Acceso sin login a `/rutinas/hoja/**` para enlace compartido. **Modal ejercicio en hoja:** el botón “Ver video” solo se muestra si el ejercicio tiene URL de video cargada (`data-video-url` condicional y comprobación en JS).
 - **Ficha alumno (seed):** Carga con horarios de asistencia para que alumnos del script muestren ficha completa.
 
 ---

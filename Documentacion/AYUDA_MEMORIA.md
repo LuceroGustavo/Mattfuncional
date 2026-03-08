@@ -24,10 +24,9 @@ Para ver la lista de mejoras pendientes e implementadas (ítem por ítem), el ch
 ## Pendientes – Ejercicios y vistas
 
 1. **Mejorar HTML crear y modificar ejercicios:**
-   - Dejar los formularios de **crear ejercicio** y **modificar ejercicio** acordes al resto de HTML de creaciones (misma estructura, estilos y convenciones).
-   - Respetar **colores por módulo** según la interpretación ya usada en el proyecto (ej.: revisar qué color tiene asignado "rutina" en los parámetros/tabs con los que se trabaja y aplicar esa lógica; los HTML de ejercicios deben usar los colores del módulo ejercicios).
-   - En la **creación de ejercicios**, incluir un **acceso directo** a la creación de grupos musculares (enlace o botón a `/profesor/mis-grupos-musculares/nuevo` o similar).
-2. **Mejorar modal que muestra el ejercicio** en las vistas de ejercicios (lista/ver ejercicios): diseño y contenido del modal más claros y alineados con el resto de la interfaz.
+   - ~~Formularios acordes al resto de creaciones (estructura, estilos).~~ ✅ **Hecho (Mar 2026):** título compacto, ancho completo, cabecera gradiente "Datos del ejercicio", mismo criterio que crear serie. Colores por módulo ejercicios (violeta #764ba2/#667eea) aplicados.
+   - **Pendiente:** En la **creación de ejercicios**, incluir un **acceso directo** a la creación de grupos musculares (enlace o botón a `/profesor/mis-grupos-musculares/nuevo` o similar).
+2. **Mejorar modal que muestra el ejercicio:** ~~En la lista de Mis Ejercicios.~~ ✅ **Hecho (Mar 2026):** modal con cabecera gradiente, botón cerrar, badge lavanda/violeta, imagen en contenedor redondeado, alineado con series y rutinas. En la hoja de rutina (alumno): botón "Ver video" solo si hay URL. Pendiente si hay otro modal de ejercicio en otras vistas por revisar.
 
 ---
 

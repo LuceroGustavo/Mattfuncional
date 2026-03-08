@@ -26,6 +26,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 18. [Mejoras AYUDA_MEMORIA – Panel profesor y rutinas](#18-mejoras-ayuda_memoria--panel-profesor-y-rutinas-feb-2026)
 19. [Vista de serie y rutinas – Formato unificado y escritorio](#19-vista-de-serie-y-rutinas--formato-unificado-y-escritorio-feb-2026)
 20. [Eliminar alumno – Fix FK asistencia y referencias](#20-eliminar-alumno--fix-fk-asistencia-y-referencias-mar-2026)
+21. [Ejercicios: formularios, modal Ver ejercicio, permisos y hoja rutina](#21-ejercicios-formularios-modal-ver-ejercicio-permisos-y-hoja-rutina-mar-2026)
 
 ---
 
@@ -559,7 +560,7 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 **Resumen:** Al eliminar un alumno desde `/profesor/alumnos/eliminar/{id}` fallaba con error 500 por violación de FK: la tabla `asistencia` (y otras) referencian `usuario.id`. Se corrige eliminando o desasignando antes todas las referencias al usuario.
 
 ### Cambios técnicos
-- **UsuarioService.eliminarUsuario(id):** Antes de `usuarioRepository.deleteById(id)` se ejecuta en orden: (1) eliminar asistencias del alumno (`AsistenciaRepository.deleteByUsuario_Id`), (2) anular "registrado por" en asistencias donde el usuario figuraba como quien registró, (3) eliminar mediciones físicas (`MedicionFisicaRepository.deleteByUsuario_Id`), (4) eliminar excepciones de calendario del alumno (`CalendarioExcepcionRepository.deleteByUsuario_Id`), (5) desasignar rutinas (cargar por `RutinaRepository.findByUsuarioId`, set `usuario = null`, guardar; las rutinas no se borran), (6) eliminar el usuario.
+- **UsuarioService.eliminarUsuario(id):** Antes de `usuarioRepository.deleteById(id)` se ejecuta en orden: (1) eliminar asistencias del alumno, (2) anular "registrado por" en asistencias, (3) eliminar mediciones físicas, (4) eliminar excepciones de calendario, (5) **eliminar** todas las rutinas asignadas al alumno con `rutinaService.eliminarRutina(r.getId())` (ya no se desasignan; así no quedan rutinas huérfanas en "Rutinas asignadas"), (6) eliminar el usuario.
 - **Repositorios:** Añadidos `void deleteByUsuario_Id(Long usuarioId)` en `AsistenciaRepository`, `MedicionFisicaRepository` y `CalendarioExcepcionRepository`.
 - **UsuarioService:** Inyección de `MedicionFisicaRepository`, `CalendarioExcepcionRepository` y `RutinaRepository`; imports de `Rutina` y repositorios.
 
@@ -570,6 +571,21 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 | `AsistenciaRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
 | `MedicionFisicaRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
 | `CalendarioExcepcionRepository.java` | `deleteByUsuario_Id(Long usuarioId)`. |
+
+---
+
+## 21. Ejercicios: formularios, modal Ver ejercicio, permisos y hoja rutina (Mar 2026)
+
+**Resumen:** Mejoras de vista y permisos en el módulo ejercicios: formularios crear/editar alineados con series y rutinas (título compacto, ancho completo, cabecera gradiente), modal "Ver ejercicio" con estilo unificado, DEVELOPER puede editar predeterminados, mensaje visible para sin_permisos_editar, y en la hoja de rutina el botón "Ver video" solo si hay URL.
+
+### Cambios
+- **Formularios crear y editar ejercicio:** Título en una línea (icono + "Nuevo/Editar Ejercicio" + subtítulo + "Volver a Ejercicios"); `container-fluid` max-width 1200px; bloque `.form-section` con `.card-header-ejercicio` en gradiente #764ba2 → #667eea "Datos del ejercicio"; fondo de página en gradiente suave; mismo criterio que crear serie.
+- **Modal Ver ejercicio (Mis Ejercicios):** Cabecera con gradiente y "Ver ejercicio" + botón X; cuerpo con imagen en `.modal-ejercicio-img-wrap`, badge grupos en lavanda (#e1bee7, #5e35b1), nombre y descripción; clases CSS `.modal-ejercicio-overlay`, `.modal-ejercicio-box`, etc.
+- **Permisos:** `Exercise.puedeSerEditadoPor` incluye rol DEVELOPER (además de ADMIN) para editar todo; en `ejercicios-lista.html` mensaje para `param.error=sin_permisos_editar`.
+- **Hoja de rutina (`verRutina.html`):** `data-video-url` solo se envía cuando hay URL; en JS, botón "Ver video" solo si `hasVideo` (URL válida, no "null" ni vacío).
+
+### Archivos
+`formulario-ejercicio-profesor.html`, `formulario-modificar-ejercicio-profesor.html`, `profesor/ejercicios-lista.html`, `rutinas/verRutina.html`, `Exercise.java`.
 
 ---
 

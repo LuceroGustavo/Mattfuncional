@@ -2,6 +2,22 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-09] - style(ejercicios): formularios crear/editar, modal Ver ejercicio, permisos y hoja rutina ✅
+
+### 🎯 **Resumen**
+Mejoras de vista y permisos en el módulo ejercicios: formularios alineados con series/rutinas, modal “Ver ejercicio” con estilo unificado, DEVELOPER puede editar predeterminados, mensaje sin_permisos_editar visible, y en la hoja de rutina (alumno) el botón “Ver video” solo aparece si hay URL.
+
+### ✅ **Cambios**
+- **Formularios crear y editar ejercicio:** Título compacto (una línea con Volver a Ejercicios), ancho completo (container-fluid max-width 1200px), bloque form-section con cabecera en gradiente violeta “Datos del ejercicio” (#764ba2 → #667eea), fondo de página en gradiente suave; mismo criterio que crear serie.
+- **Modal Ver ejercicio (Mis Ejercicios):** Cabecera con gradiente del módulo, botón X para cerrar, imagen en contenedor con bordes redondeados, badge grupos en lavanda/violeta, hint “Clic fuera o Escape para cerrar”; estilos en CSS (.modal-ejercicio-*).
+- **Permisos editar ejercicio:** `Exercise.puedeSerEditadoPor` incluye rol DEVELOPER (igual que ADMIN) para editar todo; mensaje en `ejercicios-lista.html` para `error=sin_permisos_editar`.
+- **Hoja de rutina (`verRutina.html`):** `data-video-url` solo se renderiza si hay URL; en el modal, el botón “Ver video” solo se muestra cuando hay URL válida (evitar botón vacío).
+
+### 📁 **Archivos modificados**
+`ejercicios/formulario-ejercicio-profesor.html`, `ejercicios/formulario-modificar-ejercicio-profesor.html`, `profesor/ejercicios-lista.html`, `rutinas/verRutina.html`, `Exercise.java`, `Documentacion/AVANCES_DEL_APP.md`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/AYUDA_MEMORIA.md`.
+
+---
+
 ## [2026-03-06] - fix(alumnos): eliminar alumno sin error de FK (asistencia y demás referencias) ✅
 
 ### 🎯 **Resumen**
