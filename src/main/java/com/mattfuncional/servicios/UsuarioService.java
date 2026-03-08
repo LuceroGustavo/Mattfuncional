@@ -329,11 +329,10 @@ public class UsuarioService {
         medicionFisicaRepository.deleteByUsuario_Id(id);
         // 4) Excepciones de calendario (días por excepción)
         calendarioExcepcionRepository.deleteByUsuario_Id(id);
-        // 5) Desasignar rutinas (dejar rutina sin alumno; no se borran las rutinas)
+        // 5) Eliminar todas las rutinas asignadas al alumno (activas e inactivas); así no quedan rutinas huérfanas en "Rutinas asignadas"
         List<Rutina> rutinasDelAlumno = rutinaRepository.findByUsuarioId(id);
         for (Rutina r : rutinasDelAlumno) {
-            r.setUsuario(null);
-            rutinaRepository.save(r);
+            rutinaService.eliminarRutina(r.getId());
         }
         usuarioRepository.deleteById(id);
     }

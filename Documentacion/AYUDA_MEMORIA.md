@@ -21,4 +21,23 @@ Para ver la lista de mejoras pendientes e implementadas (ítem por ítem), el ch
 
 ---
 
-*Última actualización: Febrero 2026. AYUDA_MEMORIA y PLAN_DE_DESARROLLO se unificaron en un solo documento.*
+## Pendientes – Ejercicios y vistas
+
+1. **Mejorar HTML crear y modificar ejercicios:**
+   - Dejar los formularios de **crear ejercicio** y **modificar ejercicio** acordes al resto de HTML de creaciones (misma estructura, estilos y convenciones).
+   - Respetar **colores por módulo** según la interpretación ya usada en el proyecto (ej.: revisar qué color tiene asignado "rutina" en los parámetros/tabs con los que se trabaja y aplicar esa lógica; los HTML de ejercicios deben usar los colores del módulo ejercicios).
+   - En la **creación de ejercicios**, incluir un **acceso directo** a la creación de grupos musculares (enlace o botón a `/profesor/mis-grupos-musculares/nuevo` o similar).
+2. **Mejorar modal que muestra el ejercicio** en las vistas de ejercicios (lista/ver ejercicios): diseño y contenido del modal más claros y alineados con el resto de la interfaz.
+
+---
+
+## Verificar / reparar – Eliminar usuario y rutinas asignadas
+
+- **Problema:** Al eliminar todos los usuarios y luego ir a "Rutinas asignadas", al abrir una rutina aparecía que no se podía ver porque solo se pueden ver rutinas asignadas a usuarios (al no existir el usuario, la rutina quedaba huérfana).
+- **Lógica a seguir:** Al **eliminar un usuario**, deben **eliminarse también todas sus rutinas asignadas** (activas e inactivas). Así, si se eliminan todos los usuarios, no debe haber rutinas asignadas.
+- **Implementado:** En `UsuarioService.eliminarUsuario` se eliminan las rutinas del alumno con `rutinaService.eliminarRutina(id)` en lugar de solo desasignarlas (antes se hacía `setUsuario(null)`).
+- **A futuro (backups/exportación):** Cuando se implemente el sistema de backups y exportación, explicar que si se quiere **mantener el historial del usuario** antes de eliminarlo, debe **exportar su historial** antes de borrarlo (a revisar cuando esté el módulo de backup).
+
+---
+
+*Última actualización: Marzo 2026. AYUDA_MEMORIA y PLAN_DE_DESARROLLO se unificaron en un solo documento.*

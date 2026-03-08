@@ -325,10 +325,12 @@
                         content.appendChild(descDiv);
                     }
                     const videoUrl = card.getAttribute('data-video-url');
-                    if (videoUrl) {
+                    const hasVideo = videoUrl && videoUrl !== 'null' && String(videoUrl).trim() !== '';
+                    if (hasVideo) {
                         var a = document.createElement('a');
                         a.href = videoUrl;
                         a.target = '_blank';
+                        a.rel = 'noopener';
                         a.innerHTML = '<i class="fas fa-play-circle"></i> Ver video';
                         a.style.cssText = 'display:inline-block;margin-top:0.75rem;color:#58a6ff;font-weight:600;font-size:clamp(1.1rem, 2.5vw, 1.3rem);order:4';
                         content.appendChild(a);
@@ -370,7 +372,7 @@
         </div>
         <div class="ejercicios-grid">
             <div th:each="serieEjercicio : ${serie.serieEjercicios}" class="sala-item-wrap"
-                 th:attr="data-desc=${serieEjercicio.exercise.description}, data-video-url=${serieEjercicio.exercise.videoUrl}"
+                 th:attr="data-desc=${serieEjercicio.exercise.description}, data-video-url=${(serieEjercicio.exercise.videoUrl != null && !#strings.isEmpty(serieEjercicio.exercise.videoUrl)) ? serieEjercicio.exercise.videoUrl : null}"
                  th:with="repsDisplay=${serieEjercicio.valor != null ? (serieEjercicio.valor + ' ' + (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' ? 'rep.' : #strings.toLowerCase(serieEjercicio.unidad) == 'min' ? 'min' : #strings.toLowerCase(serieEjercicio.unidad) == 'seg' or #strings.toLowerCase(serieEjercicio.unidad) == 's' ? 'seg' : (serieEjercicio.unidad != null ? serieEjercicio.unidad : 'rep.'))) : '—'}">
                 <div class="item-titulo" th:text="${serieEjercicio.exercise.name}">Ejercicio</div>
                 <div class="sala-item">

@@ -178,31 +178,28 @@ public class Exercise {
     }
     
     /**
-     * Verifica si el ejercicio puede ser editado por un usuario específico
-     * - Admin puede editar todo
-     * - Ejercicios predeterminados solo pueden ser editados por admin
-     * - Ejercicios personalizados solo pueden ser editados por su propietario
+     * Verifica si el ejercicio puede ser editado por un usuario específico.
+     * - DEVELOPER y ADMIN pueden editar todo (incluidos predeterminados).
+     * - Ejercicios predeterminados solo pueden ser editados por DEVELOPER o ADMIN.
+     * - Ejercicios personalizados solo pueden ser editados por su propietario (profesor).
      */
     public boolean puedeSerEditadoPor(com.mattfuncional.entidades.Usuario usuario) {
         if (usuario == null) {
             return false;
         }
-        
-        // El admin (único gestor del panel) puede editar todo, incluidos predeterminados
-        if ("ADMIN".equals(usuario.getRol())) {
+        String rol = usuario.getRol() != null ? usuario.getRol() : "";
+        // DEVELOPER y ADMIN pueden editar todo, incluidos predeterminados
+        if ("DEVELOPER".equals(rol) || "ADMIN".equals(rol)) {
             return true;
         }
-        
-        // Si es predeterminado, solo el admin puede editar (ya cubierto arriba)
+        // Si es predeterminado, solo DEVELOPER/ADMIN pueden editar (ya cubierto arriba)
         if (isPredeterminado()) {
             return false;
         }
-        
         // Si tiene profesor, solo el propietario puede editar
         if (profesor != null && usuario.getProfesor() != null) {
             return profesor.getId().equals(usuario.getProfesor().getId());
         }
-        
         return false;
     }
 }

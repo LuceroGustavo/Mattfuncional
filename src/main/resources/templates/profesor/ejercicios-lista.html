@@ -169,6 +169,7 @@
         <span th:if="${param.error[0] == 'ejercicio_no_encontrado'}">El ejercicio no fue encontrado.</span>
         <span th:if="${param.error[0] == 'no_se_puede_eliminar_predeterminado'}">No se pueden eliminar ejercicios predeterminados.</span>
         <span th:if="${param.error[0] == 'sin_permisos'}">No tienes permisos para eliminar este ejercicio.</span>
+        <span th:if="${param.error[0] == 'sin_permisos_editar'}">No tienes permisos para editar este ejercicio. Los ejercicios predeterminados (del sistema) solo pueden ser editados por el administrador.</span>
         <span th:if="${param.error[0] == 'error_eliminar'}">Error al eliminar el ejercicio. Por favor, intenta nuevamente.</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
