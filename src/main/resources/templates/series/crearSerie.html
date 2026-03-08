@@ -321,47 +321,7 @@
                 `;
                 ul.appendChild(li);
             });
-            // Asignar evento de clic a cada slide después de renderizar
-            Array.from(ul.querySelectorAll('.splide__slide')).forEach(slide => {
-                slide.addEventListener('click', function (e) {
-                    const id = slide.dataset.id;
-                    const nombre = slide.dataset.nombre;
-                    const card = slide.querySelector('.ejercicio-card');
-                    if (ejerciciosSeleccionados.has(id)) {
-                        return;
-                    }
-                    card.classList.add('selected');
-                    ejerciciosSeleccionados.add(id);
-                    const fila = tablaEjerciciosSerie.insertRow();
-                    fila.dataset.id = id;
-                    fila.innerHTML = `
-                        <td>${nombre}</td>
-                        <td><input type="number" class="form-control valor-input" value="1" required min="1"></td>
-                        <td>
-                            <select class="form-select unidad-select">
-                                <option value="reps" selected>Repeticiones</option>
-                                <option value="min">Minutos</option>
-                                <option value="seg">Segundos</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control peso-input" min="0" placeholder="Ej: 10">
-                            <div class="form-check mt-1">
-                                <input class="form-check-input sin-peso-check" type="checkbox">
-                                <label class="form-check-label">No requiere peso</label>
-                            </div>
-                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
-                                                <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
-                                                <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
-                                            </div>
-                                        </td>
-                                    `;
-                    actualizarVistaTabla();
-                });
-            });
+            // El clic se maneja con un solo listener delegado en carousel (más abajo) para evitar duplicados
         }
 
         function filtrarEjercicios() {
@@ -391,9 +351,6 @@
         filtroEjercicio.addEventListener('input', filtrarEjercicios);
         filtroMusculo.addEventListener('change', filtrarEjercicios);
 
-        // Inicializar el set de ejercicios seleccionados
-        const ejerciciosSeleccionados = new Set();
-
         function actualizarVistaTabla() {
             noEjerciciosMsg.style.display = tablaEjerciciosSerie.rows.length === 0 ? 'block' : 'none';
         }
@@ -416,9 +373,7 @@
                     if (slide) {
                         const nombre = slide.dataset.nombre;
                         const card = slide.querySelector('.ejercicio-card');
-
                         card.classList.add('selected');
-                        ejerciciosSeleccionados.add(String(ejercicio.ejercicioId));
 
                         const fila = tablaEjerciciosSerie.insertRow();
                         fila.dataset.id = ejercicio.ejercicioId;
@@ -460,15 +415,8 @@
             const id = slide.dataset.id;
             const nombre = slide.dataset.nombre;
             const card = slide.querySelector('.ejercicio-card');
-
-            if (ejerciciosSeleccionados.has(id)) {
-                // Si ya está seleccionado, lo quitamos (opcional, o mostrar alerta)
-                // alert('Este ejercicio ya ha sido añadido a la serie.');
-                return;
-            }
-            
+            // Permitir añadir el mismo ejercicio varias veces (reps/peso distintos)
             card.classList.add('selected');
-            ejerciciosSeleccionados.add(id);
 
             const fila = tablaEjerciciosSerie.insertRow();
             fila.dataset.id = id;
@@ -479,6 +427,7 @@
                     <select class="form-select unidad-select">
                         <option value="reps" selected>Repeticiones</option>
                         <option value="min">Minutos</option>
+                        <option value="seg">Segundos</option>
                     </select>
                 </td>
                 <td>
@@ -525,15 +474,13 @@
             if (eliminarBtn) {
                 const fila = eliminarBtn.closest('tr');
                 const id = fila.dataset.id;
-                
-                // Desmarcar la tarjeta en el carrusel
-                const slide = carousel.querySelector(`.splide__slide[data-id="${id}"]`);
-                if (slide) {
-                    slide.querySelector('.ejercicio-card').classList.remove('selected');
-                }
-
-                ejerciciosSeleccionados.delete(id);
                 fila.remove();
+                // Desmarcar la tarjeta solo si no queda ninguna fila de ese ejercicio
+                const quedanFilasConEsteEjercicio = Array.from(tablaEjerciciosSerie.rows).some(row => row.dataset.id === id);
+                if (!quedanFilasConEsteEjercicio) {
+                    const slide = carousel.querySelector(`.splide__slide[data-id="${id}"]`);
+                    if (slide) slide.querySelector('.ejercicio-card').classList.remove('selected');
+                }
                 actualizarVistaTabla();
             }
         });
