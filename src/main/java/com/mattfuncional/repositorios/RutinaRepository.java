@@ -35,6 +35,8 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
     // Buscar rutinas plantilla por profesor y nombre
     List<Rutina> findByProfesorIdAndEsPlantillaTrueAndNombreContainingIgnoreCase(Long profesorId, String nombre);
 
+    Optional<Rutina> findByNombreAndEsPlantillaTrueAndProfesorId(String nombre, Long profesorId);
+
     // Buscar todas las rutinas plantilla
     List<Rutina> findByEsPlantillaTrue();
 

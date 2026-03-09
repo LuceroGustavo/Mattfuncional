@@ -139,6 +139,55 @@ public class ImagenServicio {
     }
 
     /**
+     * Guarda una imagen para restore de backup, usando el nombre original del archivo en el ZIP
+     * (ej: "imagenes/1.webp" → guarda como "1.webp"). Preserva el formato y evita ejercicio_0, etc.
+     * @param archivoBytes contenido de la imagen
+     * @param rutaEnZip ruta en el ZIP (ej: "imagenes/1.webp" o "imagenes/ejercicio_0.jpg")
+     */
+    public Imagen guardarParaRestore(byte[] archivoBytes, String rutaEnZip) {
+        if (archivoBytes == null || archivoBytes.length == 0) {
+            throw new IllegalArgumentException("El archivo está vacío o es nulo");
+        }
+        if (archivoBytes.length > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("El archivo es demasiado grande. Máximo " + (MAX_FILE_SIZE / 1024 / 1024) + "MB permitido.");
+        }
+        if (rutaEnZip == null || rutaEnZip.isBlank()) {
+            throw new IllegalArgumentException("La ruta en ZIP no puede ser nula");
+        }
+        try {
+            String nombreArchivo = rutaEnZip.contains("/") ? rutaEnZip.substring(rutaEnZip.lastIndexOf('/') + 1) : rutaEnZip;
+            String formato = getImageFormat(nombreArchivo);
+            byte[] optimizedBytes = archivoBytes;
+            if (!"gif".equalsIgnoreCase(formato) && !"webp".equalsIgnoreCase(formato) && imageOptimizationService != null) {
+                byte[] opt = imageOptimizationService.optimizeImage(archivoBytes, formato);
+                if (opt != null && opt.length > 0) optimizedBytes = opt;
+            }
+            String formatoFinal = ("gif".equalsIgnoreCase(formato) || "webp".equalsIgnoreCase(formato))
+                ? formato : determinarFormatoFinal(optimizedBytes, formato);
+            String mimeType = getMimeType(formatoFinal);
+
+            String rutaArchivo = nombreArchivo.contains(".") ? nombreArchivo : (nombreArchivo + "." + formatoFinal);
+            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
+            Path parent = archivoPath.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            Files.write(archivoPath, optimizedBytes);
+
+            Imagen imagen = new Imagen();
+            imagen.setMime(mimeType);
+            imagen.setNombre(rutaArchivo);
+            imagen.setRutaArchivo(rutaArchivo);
+            imagen.setTamanoBytes((long) optimizedBytes.length);
+
+            Imagen savedImagen = imagenRepository.save(imagen);
+            logger.info("Imagen guardada para restore: {} ({} bytes) [{}]", rutaArchivo, optimizedBytes.length, formatoFinal.toUpperCase());
+            return savedImagen;
+        } catch (Exception e) {
+            logger.error("Error al guardar imagen para restore: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al guardar la imagen para restore: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Guarda una imagen desde MultipartFile (método principal)
      */
     private Imagen guardarImagen(MultipartFile archivo) {

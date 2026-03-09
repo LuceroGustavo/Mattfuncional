@@ -2,6 +2,28 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-09] - fix(backup): nombres originales de imágenes y restauración de series ✅
+
+### 🎯 **Resumen**
+Correcciones en el módulo de backup ZIP: export/import usan nombres originales de imágenes (1.webp, 2.webp) en lugar de ejercicio_0, ejercicio_1; rutinas y series se asignan al profesor logueado; eliminación de ejercicios borra también el archivo físico.
+
+### ✅ **Cambios**
+- **Export:** Usa `rutaArchivo` de la imagen en BD (1.webp, 2.webp) para los archivos en el ZIP. Fallback a `ejercicio_N.ext` si no hay nombre.
+- **Import:** `ImagenServicio.guardarParaRestore(byte[], rutaEnZip)` extrae el nombre del ZIP y guarda con ese nombre. Preserva gif/webp sin optimizar.
+- **Rutinas y series:** Se asignan al profesor del usuario que importa (no al primero de la BD). `importarDesdeZip` recibe `Profesor profesorParaRestore`.
+- **ExerciseService.deleteExercise():** Elimina el archivo físico de la imagen además del registro en BD.
+- **Fix sintaxis:** Eliminado código duplicado al final de `ExerciseZipBackupService.java` (`turn ".jpg";` y llaves extra).
+
+### 📁 **Archivos modificados**
+`ExerciseZipBackupService.java`, `ImagenServicio.java`, `AdminPanelController.java`, `ExerciseService.java`, `RutinaRepository.java`, `Documentacion/PLAN_BACKUP_Y_EXPORTACION.md`.
+
+### ⏳ **Pendiente testear**
+- Exportar e importar con "Suplantar" verificando nombres 1.webp, 2.webp.
+- Restauración de series visible en panel del profesor.
+- Importar backup antiguo con ejercicio_0.jpg.
+
+---
+
 ## [2026-03-09] - style(ejercicios): formularios crear/editar, modal Ver ejercicio, permisos y hoja rutina ✅
 
 ### 🎯 **Resumen**

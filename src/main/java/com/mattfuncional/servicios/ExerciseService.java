@@ -203,7 +203,16 @@ public class ExerciseService {
 
         if (exercise.getImagen() != null) {
             Imagen imagen = exercise.getImagen();
+            exercise.setImagen(null);
+            exerciseRepository.save(exercise);
             if (!"not_imagen.png".equals(imagen.getNombre())) {
+                try {
+                    imagenServicio.eliminarImagen(imagen.getId());
+                } catch (Exception e) {
+                    logger.warn("No se pudo eliminar archivo físico de imagen {}: {}", imagen.getId(), e.getMessage());
+                    imagenRepository.delete(imagen);
+                }
+            } else {
                 imagenRepository.delete(imagen);
             }
         }

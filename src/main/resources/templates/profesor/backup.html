@@ -7,10 +7,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body { background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh; }
         .backup-card { border-radius: 1.2rem; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-        .table-backup td { vertical-align: middle; }
+        .backup-card .card-header { border-radius: 1.2rem 1.2rem 0 0; font-weight: 600; }
+        .backup-card-placeholder { opacity: 0.7; }
+        .detalle-archivo { background: #f8f9fa; border-radius: 0.5rem; padding: 1rem; }
+        #zonaSubida { cursor: pointer; transition: background 0.2s; }
+        #zonaSubida:hover { background: #f0f0f0 !important; }
+        #zonaSubida.dragover { border-color: #0d6efd !important; background: #e7f1ff !important; }
+        .progress-modal .progress { height: 8px; }
     </style>
 </head>
 <body>
@@ -20,58 +27,68 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h1 class="fw-bold mb-1"><i class="fas fa-database me-2" style="color:#5e35b1;"></i>Sistema de backup</h1>
-            <p class="text-muted mb-0">Exportar e importar ejercicios en ZIP (datos + imágenes en sus carpetas)</p>
+            <p class="text-muted mb-0">Exportar e importar ejercicios, series, rutinas y alumnos</p>
         </div>
         <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Volver a Administración
         </a>
     </div>
 
-    <!-- Exportar ejercicios -->
+    <!-- 1. Exportar backup completo -->
     <div class="card backup-card mb-4">
+        <div class="card-header bg-success bg-opacity-10 text-success py-3">
+            <i class="fas fa-file-export me-2"></i>Exportar backup completo
+        </div>
         <div class="card-body">
-            <h5 class="card-title"><i class="fas fa-file-export me-2 text-success"></i>Exportar ejercicios</h5>
-            <p class="text-muted small mb-3">Generá un <strong>ZIP</strong> con todos los ejercicios del sistema (predeterminados y propios). Incluye datos (JSON) e imágenes en carpeta <code>imagenes/</code>. Sirve para backup o para restaurar en otra instalación.</p>
-            <a th:href="@{/profesor/backup/exportar-zip}" class="btn btn-success">
-                <i class="fas fa-file-archive me-2"></i>Exportar ejercicios
+            <p class="text-muted small mb-3">Generá un <strong>ZIP</strong> con ejercicios, rutinas plantilla y sus series. Al restaurar con "Suplantar", todo queda tal cual estaba. Incluye datos e imágenes.</p>
+            <a th:href="@{/profesor/backup/exportar-zip}" class="btn btn-success" id="btnExportar">
+                <i class="fas fa-file-archive me-2"></i>Exportar backup completo
             </a>
+            <p class="small text-muted mt-2 mb-0">La descarga puede tardar unos segundos.</p>
         </div>
     </div>
 
-    <!-- Importar: arrastrar o seleccionar archivo (no carpeta backup del servidor) -->
+    <!-- 2. Importar backup -->
     <div class="card backup-card mb-4">
+        <div class="card-header bg-info bg-opacity-10 text-info py-3">
+            <i class="fas fa-file-import me-2"></i>Importar backup
+        </div>
         <div class="card-body">
-            <h5 class="card-title"><i class="fas fa-file-import me-2 text-info"></i>Importar ejercicios</h5>
-            <p class="text-muted small mb-3">Subí un archivo <strong>ZIP</strong> exportado desde este sistema. Las imágenes y los datos se restauran en sus carpetas y en la base de datos. Arrastrá el archivo o seleccionalo.</p>
+            <p class="text-muted small mb-3">Subí un <strong>ZIP</strong> exportado desde este sistema. Si es backup completo (ejercicios + rutinas + series), al usar "Suplantar" se restaura todo tal cual.</p>
             <form th:action="@{/profesor/backup/importar}" method="post" enctype="multipart/form-data" id="formImportar">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Archivo ZIP de backup</label>
-                    <div class="border rounded-3 p-4 text-center bg-light" id="zonaSubida" style="min-height: 120px;">
+                <div class="border rounded-3 p-4 text-center bg-light position-relative" id="zonaSubida" style="min-height: 100px;">
+                    <p class="mb-2 text-muted" id="textoZona">Arrastrá el ZIP acá o hacé clic para seleccionar</p>
+                    <label class="btn btn-outline-primary btn-sm mb-0" style="cursor:pointer">
                         <input type="file" name="archivoZip" id="archivoZip" accept=".zip" class="d-none">
-                        <p class="mb-2 text-muted" id="textoZona">Arrastrá el backup acá o hacé clic para seleccionar archivo</p>
-                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnSeleccionar">Seleccionar archivo...</button>
-                        <p class="small text-muted mt-2 mb-0" id="nombreArchivo"></p>
+                        Seleccionar archivo...
+                    </label>
+                </div>
+                <div id="detalleArchivo" class="mt-3 d-none">
+                    <div class="detalle-archivo">
+                        <p class="mb-1"><strong>Archivo:</strong> <span id="detalleNombre"></span></p>
+                        <p class="mb-1"><strong>Ejercicios:</strong> <span id="detalleCantidad"></span> <span id="detalleRutinas" class="text-muted"></span></p>
+                        <p class="mb-2"><strong>Fecha del backup:</strong> <span id="detalleFecha"></span></p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" name="pisarTodos" value="false" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Agregar ejercicios
+                            </button>
+                            <button type="submit" name="pisarTodos" value="true" class="btn btn-warning" onclick="return confirm('¿Suplantar todos los ejercicios? Se borrarán los actuales y se importarán los del ZIP. Esto afectará a las series y rutinas que los usen.');">
+                                <i class="fas fa-exchange-alt me-1"></i>Suplantar ejercicios
+                            </button>
+                        </div>
+                        <p class="small text-muted mt-2 mb-0">
+                            <i class="fas fa-exclamation-triangle text-warning"></i> Suplantar borra todos los ejercicios actuales y los reemplaza. <strong>Afectará a las series y rutinas</strong> que los usen.
+                        </p>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Al importar</label>
-                    <div class="form-check">
-                        <input type="radio" name="pisarTodos" id="noPisar" value="false" class="form-check-input" checked>
-                        <label class="form-check-label" for="noPisar">No grabar si el ejercicio ya existe</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" name="pisarTodos" id="pisarTodos" value="true" class="form-check-input">
-                        <label class="form-check-label" for="pisarTodos">Se pisarán todos los ejercicios (se borran los actuales y se importan los del ZIP). Si hay rutinas o series que usan ejercicios, puede fallar.</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" id="btnImportar" disabled><i class="fas fa-upload me-2"></i>Importar</button>
             </form>
             <div th:if="${importResult}" class="alert mt-3" th:classappend="${importResult.success} ? 'alert-success' : 'alert-danger'" role="alert">
                 <span th:if="${importResult.success}">
                     <strong>Importación correcta.</strong>
-                    <span th:text="${importResult.ejerciciosImportados} + ' ejercicios importados'">0</span>
+                    <span th:text="${importResult.ejerciciosImportados} + ' ejercicios'">0</span>
                     <span th:if="${importResult.ejerciciosConImagen != null}" th:text="' (' + ${importResult.ejerciciosConImagen} + ' con imagen)'"> </span>
-                    <span th:if="${importResult.ejerciciosOmitidos != null && importResult.ejerciciosOmitidos > 0}" th:text="', ' + ${importResult.ejerciciosOmitidos} + ' omitidos (ya existían)'"> </span>.
+                    <span th:if="${importResult.rutinasImportadas != null && importResult.rutinasImportadas > 0}" th:text="', ' + ${importResult.rutinasImportadas} + ' rutinas, ' + ${importResult.seriesImportadas} + ' series'"> </span>
+                    <span th:if="${importResult.ejerciciosOmitidos != null && importResult.ejerciciosOmitidos > 0}" th:text="', ' + ${importResult.ejerciciosOmitidos} + ' omitidos'"> </span>.
                 </span>
                 <span th:if="${!importResult.success}" th:text="${importResult.message}">Error</span>
                 <ul th:if="${importResult.errores != null && !importResult.errores.isEmpty()}" class="mb-0 mt-2">
@@ -81,81 +98,177 @@
         </div>
     </div>
 
-    <!-- Archivos de backup guardados en el servidor (solo para descargar) -->
-    <div class="card backup-card mb-4">
+    <!-- 3. Exportar series (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-layer-group me-2"></i>Exportar series
+        </div>
         <div class="card-body">
-            <h5 class="card-title"><i class="fas fa-folder-open me-2 text-primary"></i>Archivos de backup en el servidor</h5>
-            <p class="text-muted small mb-3">Archivos guardados en la carpeta del servidor. Solo para <strong>descargar</strong>. Para <strong>importar</strong>, usá la zona de arriba (arrastrar o seleccionar archivo ZIP).</p>
-            <p class="text-muted small mb-3" th:if="${backupDirectory != null}" th:text="'Carpeta: ' + ${backupDirectory}">Carpeta</p>
-            <div th:if="${totalBackups != null && totalBackups > 0}">
-                <div class="table-responsive">
-                    <table class="table table-backup table-hover">
-                        <thead>
-                            <tr>
-                                <th>Archivo</th>
-                                <th>Ejercicios</th>
-                                <th>Con imagen</th>
-                                <th>Tamaño</th>
-                                <th>Fecha</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="b : ${backups}">
-                                <td th:text="${b.nombre}">archivo.json</td>
-                                <td th:text="${b.cantidadEjercicios}">0</td>
-                                <td th:text="${b.ejerciciosConImagen != null} ? ${b.ejerciciosConImagen} : 0">0</td>
-                                <td th:text="${#numbers.formatDecimal(b.tamaño != null ? b.tamaño : 0, 0, 'COMMA', 0, 'POINT')} + ' B'">0 B</td>
-                                <td th:text="${b.fechaModificacion != null} ? ${#dates.format(b.fechaModificacion, 'dd/MM/yyyy HH:mm')} : '-'">-</td>
-                                <td>
-                                    <a th:href="@{/profesor/backup/descargar(fileName=${b.nombre})}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="Descargar">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 4. Importar series (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-file-import me-2"></i>Importar series
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 5. Exportar rutinas (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-list-alt me-2"></i>Exportar rutinas
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 6. Importar rutinas (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-file-import me-2"></i>Importar rutinas
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 7. Exportar alumnos (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-users me-2"></i>Exportar alumnos
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 8. Importar alumnos (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-file-import me-2"></i>Importar alumnos
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+
+    <!-- 9. Exportar alumnos a Excel (placeholder) -->
+    <div class="card backup-card backup-card-placeholder mb-4">
+        <div class="card-header bg-secondary bg-opacity-25 text-secondary py-3">
+            <i class="fas fa-file-excel me-2"></i>Exportar alumnos a Excel
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">En desarrollo</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal progreso -->
+<div class="modal fade" id="modalProgreso" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Procesando...</span>
+                </div>
+                <h6 class="mb-2" id="modalProgresoTitulo">Exportando ejercicios...</h6>
+                <div class="progress mb-0" id="barraProgreso" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
                 </div>
             </div>
-            <p th:if="${totalBackups == null || totalBackups == 0}" class="text-muted mb-0">Aún no hay archivos en esta carpeta. Usá «Exportar ejercicios» para generar un ZIP y guardarlo donde quieras; para importar usá la zona de arriba.</p>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script th:inline="javascript">
 (function() {
     var zona = document.getElementById('zonaSubida');
     var input = document.getElementById('archivoZip');
-    var texto = document.getElementById('textoZona');
-    var nombreArchivo = document.getElementById('nombreArchivo');
-    var btnSeleccionar = document.getElementById('btnSeleccionar');
-    var btnImportar = document.getElementById('btnImportar');
+    var detalleArchivo = document.getElementById('detalleArchivo');
+    var formImportar = document.getElementById('formImportar');
+    var modalProgreso = new bootstrap.Modal(document.getElementById('modalProgreso'));
+    var modalProgresoTitulo = document.getElementById('modalProgresoTitulo');
 
-    function actualizarEstado() {
-        var hay = input.files && input.files.length > 0;
-        btnImportar.disabled = !hay;
-        if (hay) nombreArchivo.textContent = input.files[0].name;
-        else nombreArchivo.textContent = '';
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return '-';
+        var parts = fechaStr.split(/[-_]/);
+        if (parts.length >= 3) return parts[2] + '/' + parts[1] + '/' + parts[0] + (parts.length >= 6 ? ' ' + parts[3] + ':' + parts[4] : '');
+        return fechaStr;
     }
 
-    btnSeleccionar.addEventListener('click', function() { input.click(); });
-    input.addEventListener('change', actualizarEstado);
+    input.addEventListener('change', async function() {
+        var file = input.files[0];
+        if (!file) {
+            detalleArchivo.classList.add('d-none');
+            return;
+        }
+        try {
+            if (typeof JSZip === 'undefined') {
+                detalleArchivo.classList.remove('d-none');
+                document.getElementById('detalleNombre').textContent = file.name;
+                document.getElementById('detalleCantidad').textContent = '?';
+                document.getElementById('detalleFecha').textContent = '-';
+                return;
+            }
+            var zip = await JSZip.loadAsync(file);
+            var manifestEntry = zip.file('manifest.json');
+            if (!manifestEntry) {
+                detalleArchivo.classList.add('d-none');
+                alert('El archivo no contiene manifest.json (no es un backup válido de ejercicios).');
+                return;
+            }
+            var manifestText = await manifestEntry.async('string');
+            var manifestInfo = JSON.parse(manifestText);
+            document.getElementById('detalleNombre').textContent = file.name;
+            document.getElementById('detalleCantidad').textContent = manifestInfo.cantidadEjercicios != null ? manifestInfo.cantidadEjercicios : '?';
+            var rutinasSpan = document.getElementById('detalleRutinas');
+            if (manifestInfo.cantidadRutinas != null && manifestInfo.cantidadSeries != null) {
+                rutinasSpan.textContent = '| Rutinas: ' + manifestInfo.cantidadRutinas + ' | Series: ' + manifestInfo.cantidadSeries;
+            } else { rutinasSpan.textContent = ''; }
+            document.getElementById('detalleFecha').textContent = formatearFecha(manifestInfo.fecha) || '-';
+            detalleArchivo.classList.remove('d-none');
+        } catch (e) {
+            detalleArchivo.classList.add('d-none');
+            alert('No se pudo leer el archivo ZIP: ' + e.message);
+        }
+    });
 
-    zona.addEventListener('click', function(e) { if (e.target === zona || e.target === texto || e.target === btnSeleccionar) input.click(); });
-    zona.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); zona.classList.add('border-primary'); });
-    zona.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); zona.classList.remove('border-primary'); });
+    zona.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); zona.classList.add('dragover'); });
+    zona.addEventListener('dragleave', function(e) { e.preventDefault(); zona.classList.remove('dragover'); });
     zona.addEventListener('drop', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        zona.classList.remove('border-primary');
+        zona.classList.remove('dragover');
         var files = e.dataTransfer.files;
         if (files.length && files[0].name.toLowerCase().endsWith('.zip')) {
-            input.files = files;
-            actualizarEstado();
-        } else {
-            nombreArchivo.textContent = 'Seleccioná un archivo .zip';
+            var dt = new DataTransfer();
+            dt.items.add(files[0]);
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change'));
         }
+    });
+
+    formImportar.addEventListener('submit', function() {
+        if (!input.files || input.files.length === 0) {
+            alert('Seleccioná un archivo ZIP primero.');
+            return false;
+        }
+        modalProgresoTitulo.textContent = 'Importando ejercicios...';
+        modalProgreso.show();
+        return true;
+    });
+
+    document.getElementById('btnExportar').addEventListener('click', function() {
+        modalProgresoTitulo.textContent = 'Preparando descarga...';
+        modalProgreso.show();
+        setTimeout(function() { modalProgreso.hide(); }, 4000);
     });
 })();
 </script>

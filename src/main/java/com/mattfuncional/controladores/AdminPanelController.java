@@ -1,9 +1,11 @@
 package com.mattfuncional.controladores;
 
+import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.servicios.ExerciseBackupService;
 import com.mattfuncional.servicios.ExerciseExportImportService;
 import com.mattfuncional.servicios.ExerciseZipBackupService;
+import com.mattfuncional.servicios.ProfesorService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,13 +40,25 @@ public class AdminPanelController {
     private final ExerciseExportImportService exerciseExportImportService;
     private final ExerciseBackupService exerciseBackupService;
     private final ExerciseZipBackupService exerciseZipBackupService;
+    private final ProfesorService profesorService;
 
     public AdminPanelController(ExerciseExportImportService exerciseExportImportService,
                                 ExerciseBackupService exerciseBackupService,
-                                ExerciseZipBackupService exerciseZipBackupService) {
+                                ExerciseZipBackupService exerciseZipBackupService,
+                                ProfesorService profesorService) {
         this.exerciseExportImportService = exerciseExportImportService;
         this.exerciseBackupService = exerciseBackupService;
         this.exerciseZipBackupService = exerciseZipBackupService;
+        this.profesorService = profesorService;
+    }
+
+    private Profesor getProfesorParaUsuario(Usuario usuario) {
+        if (usuario == null) return null;
+        if ("DEVELOPER".equals(usuario.getRol())) {
+            return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
+        }
+        if (usuario.getProfesor() != null) return usuario.getProfesor();
+        return usuario.getCorreo() != null ? profesorService.getProfesorByCorreo(usuario.getCorreo()) : null;
     }
 
     @GetMapping("/administracion")
@@ -58,13 +74,54 @@ public class AdminPanelController {
         if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
             return "redirect:/profesor/dashboard";
         }
-        Map<String, Object> backupsResult = exerciseExportImportService.listarBackupsDisponibles();
-        Map<String, Object> profesoresResult = exerciseBackupService.obtenerProfesoresParaBackup();
-        model.addAttribute("backups", backupsResult.get("backups"));
-        model.addAttribute("totalBackups", backupsResult.get("total") != null ? backupsResult.get("total") : 0);
-        model.addAttribute("backupDirectory", backupsResult.get("backupDirectory"));
-        model.addAttribute("profesores", profesoresResult.get("profesores"));
         return "profesor/backup";
+    }
+
+    /**
+     * Importa ejercicios desde ZIP (form submit). Redirige con resultado en flash.
+     */
+    @PostMapping("/backup/importar")
+    public String importarBackupZip(@AuthenticationPrincipal Usuario usuarioActual,
+                                    @RequestParam("archivoZip") MultipartFile archivoZip,
+                                    @RequestParam(value = "pisarTodos", defaultValue = "false") boolean pisarTodos,
+                                    RedirectAttributes redirectAttributes) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return "redirect:/profesor/dashboard";
+        }
+        try {
+            Profesor profesor = getProfesorParaUsuario(usuarioActual);
+            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor);
+            redirectAttributes.addFlashAttribute("importResult", result);
+        } catch (IOException e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Error al leer el archivo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("importResult", err);
+        }
+        return "redirect:/profesor/backup";
+    }
+
+    /**
+     * Importa ejercicios desde ZIP. Retorna JSON para uso con fetch (alternativa).
+     */
+    @PostMapping("/backup/importar-ejercicios")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> importarEjerciciosZip(@AuthenticationPrincipal Usuario usuarioActual,
+                                                                      @RequestParam("archivoZip") MultipartFile archivoZip,
+                                                                      @RequestParam("pisarTodos") boolean pisarTodos) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", "Sin permiso"));
+        }
+        try {
+            Profesor profesor = getProfesorParaUsuario(usuarioActual);
+            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor);
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Error al leer el archivo: " + e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
     }
 
     /**
@@ -153,33 +210,4 @@ public class AdminPanelController {
         }
     }
 
-    /**
-     * Importa ejercicios desde un archivo ZIP subido (arrastrar o seleccionar archivo).
-     * No usa la carpeta backup del servidor: el backup viene del usuario.
-     */
-    @PostMapping("/backup/importar")
-    public String importarBackupZip(@AuthenticationPrincipal Usuario usuarioActual,
-                                    @RequestParam("archivoZip") MultipartFile archivoZip,
-                                    @RequestParam(value = "pisarTodos", required = false) boolean pisarTodos,
-                                    Model model) {
-        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
-            return "redirect:/profesor/dashboard";
-        }
-        try {
-            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos);
-            model.addAttribute("importResult", result);
-        } catch (IOException e) {
-            Map<String, Object> err = new HashMap<>();
-            err.put("success", false);
-            err.put("message", "Error al leer el archivo: " + e.getMessage());
-            model.addAttribute("importResult", err);
-        }
-        Map<String, Object> backupsResult = exerciseExportImportService.listarBackupsDisponibles();
-        Map<String, Object> profesoresResult = exerciseBackupService.obtenerProfesoresParaBackup();
-        model.addAttribute("backups", backupsResult.get("backups"));
-        model.addAttribute("totalBackups", backupsResult.get("total") != null ? backupsResult.get("total") : 0);
-        model.addAttribute("backupDirectory", backupsResult.get("backupDirectory"));
-        model.addAttribute("profesores", profesoresResult.get("profesores"));
-        return "profesor/backup";
-    }
 }

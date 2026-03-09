@@ -27,6 +27,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 19. [Vista de serie y rutinas – Formato unificado y escritorio](#19-vista-de-serie-y-rutinas--formato-unificado-y-escritorio-feb-2026)
 20. [Eliminar alumno – Fix FK asistencia y referencias](#20-eliminar-alumno--fix-fk-asistencia-y-referencias-mar-2026)
 21. [Ejercicios: formularios, modal Ver ejercicio, permisos y hoja rutina](#21-ejercicios-formularios-modal-ver-ejercicio-permisos-y-hoja-rutina-mar-2026)
+22. [Backup ZIP: nombres originales de imágenes y restauración de series](#22-backup-zip-nombres-originales-de-imágenes-y-restauración-de-series-mar-2026)
 
 ---
 
@@ -586,6 +587,27 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 
 ### Archivos
 `formulario-ejercicio-profesor.html`, `formulario-modificar-ejercicio-profesor.html`, `profesor/ejercicios-lista.html`, `rutinas/verRutina.html`, `Exercise.java`.
+
+---
+
+## 22. Backup ZIP: nombres originales de imágenes y restauración de series (Mar 2026)
+
+**Resumen:** Correcciones en el módulo de backup ZIP: export/import usan nombres originales de imágenes (1.webp, 2.webp) en lugar de ejercicio_0, ejercicio_1; rutinas y series se asignan al profesor logueado; eliminación de ejercicios borra también el archivo físico.
+
+### Cambios
+- **Export:** Usa `rutaArchivo` de la imagen en BD para los archivos en el ZIP (1.webp, 2.webp). Fallback a `ejercicio_N.ext` si no hay nombre.
+- **Import:** `ImagenServicio.guardarParaRestore(byte[], rutaEnZip)` extrae el nombre del ZIP y guarda con ese nombre. Preserva gif/webp sin optimizar.
+- **Rutinas y series:** Se asignan al profesor del usuario que importa. `importarDesdeZip` recibe `Profesor profesorParaRestore` desde `AdminPanelController`.
+- **ExerciseService.deleteExercise():** Elimina el archivo físico de la imagen.
+- **Fix sintaxis:** Eliminado código duplicado al final de `ExerciseZipBackupService.java`.
+
+### Archivos
+`ExerciseZipBackupService.java`, `ImagenServicio.java`, `AdminPanelController.java`, `ExerciseService.java`, `RutinaRepository.java`, `Documentacion/PLAN_BACKUP_Y_EXPORTACION.md`.
+
+### Pendiente testear
+- Exportar e importar con "Suplantar" verificando nombres 1.webp, 2.webp.
+- Restauración de series visible en panel del profesor.
+- Importar backup antiguo con ejercicio_0.jpg.
 
 ---
 

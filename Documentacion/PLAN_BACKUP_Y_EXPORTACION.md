@@ -2,7 +2,39 @@
 
 **Objetivo:** Permitir crear backups/exportaciones que se puedan usar en otra instalación o en otra app, y exportar datos a Excel para análisis o respaldo.
 
-**Estado:** En curso — Fase 1 (backup ejercicios ZIP) **implementada**. Pendiente: mejorar plan y continuar con fases 2–5.
+**Estado:** En curso — Fase 1 (backup ejercicios ZIP) **implementada**. Mejoras de nombres de imágenes y restauración de series aplicadas (2026-03-09). Pendiente: fases 2–5.
+
+---
+
+## Cambios y mejoras recientes (2026-03-09)
+
+### Implementado
+
+- **Nombres de imágenes originales en export/import**
+  - **Exportar:** Usa el nombre original de la imagen en BD (`rutaArchivo`, ej. `1.webp`, `2.webp`) en lugar de `ejercicio_0.jpg`, `ejercicio_1.gif`. Solo si no hay nombre se usa fallback `ejercicio_N.ext`.
+  - **Importar:** `ImagenServicio.guardarParaRestore(byte[], rutaEnZip)` extrae el nombre del archivo del ZIP (ej. `imagenes/1.webp` → `1.webp`) y guarda con ese nombre. Preserva formato (gif/webp sin optimizar para no perder animación).
+- **Restauración de rutinas y series**
+  - Backup completo incluye `rutinas.json` y `series.json`. Al importar con "Suplantar" o "Agregar", se restauran rutinas y series.
+  - Las rutinas y series se asignan al **profesor logueado** (no al primero de la BD). `importarDesdeZip` recibe `Profesor profesorParaRestore` desde `AdminPanelController`.
+- **Eliminación de ejercicios:** `ExerciseService.deleteExercise()` ahora elimina también el archivo físico de la imagen (`ImagenServicio.eliminarImagen()`).
+
+### Archivos modificados
+
+| Archivo | Cambios |
+|---------|---------|
+| `ExerciseZipBackupService.java` | Export con `rutaArchivo` original; import con `guardarParaRestore(bytes, rutaEnZip)`; parámetro `Profesor` para rutinas/series |
+| `ImagenServicio.java` | `guardarParaRestore(byte[], String rutaEnZip)` — usa nombre del ZIP |
+| `AdminPanelController.java` | Inyecta `ProfesorService`; pasa profesor del usuario a `importarDesdeZip` |
+| `ExerciseService.java` | `deleteExercise()` elimina archivo físico de imagen |
+| `RutinaRepository.java` | `findByNombreAndEsPlantillaTrueAndProfesorId()` para evitar duplicados en modo Agregar |
+
+### Pendiente testear
+
+- [ ] Exportar backup con ejercicios que tengan imágenes `1.webp`, `2.webp`, etc. → verificar que el ZIP contiene `imagenes/1.webp`, `imagenes/2.webp`.
+- [ ] Importar ese ZIP con "Suplantar" → verificar que las imágenes se guardan como `1.webp`, `2.webp` en `uploads/ejercicios/` y que se ven en la lista de ejercicios.
+- [ ] Importar backup completo (ejercicios + rutinas + series) con "Suplantar" → verificar que las series aparecen en el panel del profesor (contador "Series" > 0).
+- [ ] Importar con "Agregar" → verificar que no duplica rutinas existentes por nombre.
+- [ ] Importar backup antiguo con `ejercicio_0.jpg` en el ZIP → verificar que se restaura correctamente (nombre `ejercicio_0.jpg`).
 
 ---
 
@@ -11,19 +43,15 @@
 ### Implementado
 
 - **Backup de ejercicios en ZIP (Fase 1)**
-  - **Exportar:** Un solo botón «Exportar ejercicios» en `/profesor/backup`. Genera un ZIP con **todos** los ejercicios del sistema (predeterminados + propios), sin elegir por profesor. Contenido: `manifest.json`, `ejercicios.json`, carpeta `imagenes/` (sin Base64).
-  - **Importar:** Zona «Arrastrá el backup acá o seleccioná archivo» (no se usa la carpeta backup del servidor). Subida de ZIP → POST `/profesor/backup/importar`. Dos modos:
-    - **No grabar si ya existe:** por nombre (ejercicio del sistema); los que ya existen se omiten.
-    - **Se pisarán todos los ejercicios:** se borran todos los ejercicios actuales y se importan los del ZIP (importados como sistema: `profesor = null`, `esPredeterminado = true`).
-  - **Servicio:** `ExerciseZipBackupService` — `exportarEjerciciosAZip()` (sin parámetros), `importarDesdeZip(MultipartFile, boolean pisarTodos)`. Grupos musculares resueltos por nombre (sistema, `profesorId = null`).
-  - **Controlador:** `AdminPanelController`: GET `/profesor/backup` (página), GET `/profesor/backup/exportar-zip` (descarga), POST `/profesor/backup/importar` (archivo ZIP + `pisarTodos`).
-  - **Vista:** `profesor/backup.html` — exportar ejercicios (un botón), importar (drag & drop + dos opciones de importación). Sección «Archivos de backup en el servidor» solo para descargar.
-  - **Enlaces:** El botón «Backup y resguardo» en `/profesor/usuarios-sistema` y en `/profesor/pagina-publica` lleva a `/profesor/backup` (ya no dice «En desarrollo»).
+  - **Exportar:** Tarjeta con botón. Genera ZIP y descarga al navegador (carpeta predefinida). Contenido: `manifest.json`, `ejercicios.json`, carpeta `imagenes/` (con nombres originales: 1.webp, 2.webp, etc.). Modal de progreso durante la exportación.
+  - **Importar:** Zona arrastrar/seleccionar. Al seleccionar ZIP se lee `manifest.json` (JSZip client-side) y se muestra detalle: cantidad ejercicios, rutinas, series, fecha. Dos botones: **Agregar ejercicios** (suma, omite existentes) y **Suplantar ejercicios** (borra todos e importa; aviso de impacto en series/rutinas; confirmación). POST `/profesor/backup/importar` (form) y `/profesor/backup/importar-ejercicios` (JSON). Modal de progreso.
+  - **Servicio:** `ExerciseZipBackupService` — `exportarEjerciciosAZip()`, `importarDesdeZip(MultipartFile, boolean pisarTodos, Profesor profesorParaRestore)`.
+  - **Controlador:** `AdminPanelController`: GET `/profesor/backup`, GET `/profesor/backup/exportar-zip`, POST `/profesor/backup/importar`, POST `/profesor/backup/importar-ejercicios` (retorna JSON).
+  - **Vista:** `profesor/backup.html` — Tarjetas: (1) Exportar ejercicios, (2) Importar ejercicios (detalle archivo + botones Agregar/Suplantar), (3–9) placeholders series/rutinas/alumnos. Sin carpeta backup servidor. Modal progreso durante export/import.
+  - **Enlaces:** El botón «Backup y resguardo» en `/profesor/usuarios-sistema` y en `/profesor/pagina-publica` lleva a `/profesor/backup`.
 
 ### Pendiente / para mejorar mañana
 
-- Revisar y actualizar el plan con lo implementado (alinear secciones 2.x con la realidad).
-- Decidir si «pisar todos» debe desvincular o tratar rutinas/series que referencian ejercicios (hoy puede fallar por FK).
 - Fase 2: exportar alumnos a Excel.
 - Fases 3–5: rutinas/series a JSON (y opcional Excel), importación opcional.
 
