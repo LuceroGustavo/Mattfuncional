@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -42,10 +43,15 @@ public class ExerciseService {
     }
     
     /**
-     * Obtiene todos los ejercicios con imágenes cargadas (para admin)
+     * Obtiene todos los ejercicios con imágenes cargadas (para admin / export)
      */
     public List<Exercise> findAllExercisesWithImages() {
         return exerciseRepository.findAllWithImages();
+    }
+
+    /** Ejercicio del sistema (sin profesor) con ese nombre, para evitar duplicados al importar. */
+    public Optional<Exercise> findByNameAndProfesorNull(String name) {
+        return exerciseRepository.findByNameAndProfesorIsNull(name);
     }
 
     public Exercise findById(Long id) {

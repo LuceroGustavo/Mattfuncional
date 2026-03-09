@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de backup - Mattfuncional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh; }
+        .backup-card { border-radius: 1.2rem; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .table-backup td { vertical-align: middle; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="fw-bold mb-1"><i class="fas fa-database me-2" style="color:#5e35b1;"></i>Sistema de backup</h1>
+            <p class="text-muted mb-0">Exportar e importar ejercicios en ZIP (datos + imágenes en sus carpetas)</p>
+        </div>
+        <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Administración
+        </a>
+    </div>
+
+    <!-- Exportar ejercicios -->
+    <div class="card backup-card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-file-export me-2 text-success"></i>Exportar ejercicios</h5>
+            <p class="text-muted small mb-3">Generá un <strong>ZIP</strong> con todos los ejercicios del sistema (predeterminados y propios). Incluye datos (JSON) e imágenes en carpeta <code>imagenes/</code>. Sirve para backup o para restaurar en otra instalación.</p>
+            <a th:href="@{/profesor/backup/exportar-zip}" class="btn btn-success">
+                <i class="fas fa-file-archive me-2"></i>Exportar ejercicios
+            </a>
+        </div>
+    </div>
+
+    <!-- Importar: arrastrar o seleccionar archivo (no carpeta backup del servidor) -->
+    <div class="card backup-card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-file-import me-2 text-info"></i>Importar ejercicios</h5>
+            <p class="text-muted small mb-3">Subí un archivo <strong>ZIP</strong> exportado desde este sistema. Las imágenes y los datos se restauran en sus carpetas y en la base de datos. Arrastrá el archivo o seleccionalo.</p>
+            <form th:action="@{/profesor/backup/importar}" method="post" enctype="multipart/form-data" id="formImportar">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Archivo ZIP de backup</label>
+                    <div class="border rounded-3 p-4 text-center bg-light" id="zonaSubida" style="min-height: 120px;">
+                        <input type="file" name="archivoZip" id="archivoZip" accept=".zip" class="d-none">
+                        <p class="mb-2 text-muted" id="textoZona">Arrastrá el backup acá o hacé clic para seleccionar archivo</p>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnSeleccionar">Seleccionar archivo...</button>
+                        <p class="small text-muted mt-2 mb-0" id="nombreArchivo"></p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Al importar</label>
+                    <div class="form-check">
+                        <input type="radio" name="pisarTodos" id="noPisar" value="false" class="form-check-input" checked>
+                        <label class="form-check-label" for="noPisar">No grabar si el ejercicio ya existe</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" name="pisarTodos" id="pisarTodos" value="true" class="form-check-input">
+                        <label class="form-check-label" for="pisarTodos">Se pisarán todos los ejercicios (se borran los actuales y se importan los del ZIP). Si hay rutinas o series que usan ejercicios, puede fallar.</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnImportar" disabled><i class="fas fa-upload me-2"></i>Importar</button>
+            </form>
+            <div th:if="${importResult}" class="alert mt-3" th:classappend="${importResult.success} ? 'alert-success' : 'alert-danger'" role="alert">
+                <span th:if="${importResult.success}">
+                    <strong>Importación correcta.</strong>
+                    <span th:text="${importResult.ejerciciosImportados} + ' ejercicios importados'">0</span>
+                    <span th:if="${importResult.ejerciciosConImagen != null}" th:text="' (' + ${importResult.ejerciciosConImagen} + ' con imagen)'"> </span>
+                    <span th:if="${importResult.ejerciciosOmitidos != null && importResult.ejerciciosOmitidos > 0}" th:text="', ' + ${importResult.ejerciciosOmitidos} + ' omitidos (ya existían)'"> </span>.
+                </span>
+                <span th:if="${!importResult.success}" th:text="${importResult.message}">Error</span>
+                <ul th:if="${importResult.errores != null && !importResult.errores.isEmpty()}" class="mb-0 mt-2">
+                    <li th:each="e : ${importResult.errores}" th:text="${e}">error</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archivos de backup guardados en el servidor (solo para descargar) -->
+    <div class="card backup-card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fas fa-folder-open me-2 text-primary"></i>Archivos de backup en el servidor</h5>
+            <p class="text-muted small mb-3">Archivos guardados en la carpeta del servidor. Solo para <strong>descargar</strong>. Para <strong>importar</strong>, usá la zona de arriba (arrastrar o seleccionar archivo ZIP).</p>
+            <p class="text-muted small mb-3" th:if="${backupDirectory != null}" th:text="'Carpeta: ' + ${backupDirectory}">Carpeta</p>
+            <div th:if="${totalBackups != null && totalBackups > 0}">
+                <div class="table-responsive">
+                    <table class="table table-backup table-hover">
+                        <thead>
+                            <tr>
+                                <th>Archivo</th>
+                                <th>Ejercicios</th>
+                                <th>Con imagen</th>
+                                <th>Tamaño</th>
+                                <th>Fecha</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="b : ${backups}">
+                                <td th:text="${b.nombre}">archivo.json</td>
+                                <td th:text="${b.cantidadEjercicios}">0</td>
+                                <td th:text="${b.ejerciciosConImagen != null} ? ${b.ejerciciosConImagen} : 0">0</td>
+                                <td th:text="${#numbers.formatDecimal(b.tamaño != null ? b.tamaño : 0, 0, 'COMMA', 0, 'POINT')} + ' B'">0 B</td>
+                                <td th:text="${b.fechaModificacion != null} ? ${#dates.format(b.fechaModificacion, 'dd/MM/yyyy HH:mm')} : '-'">-</td>
+                                <td>
+                                    <a th:href="@{/profesor/backup/descargar(fileName=${b.nombre})}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="Descargar">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p th:if="${totalBackups == null || totalBackups == 0}" class="text-muted mb-0">Aún no hay archivos en esta carpeta. Usá «Exportar ejercicios» para generar un ZIP y guardarlo donde quieras; para importar usá la zona de arriba.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+    var zona = document.getElementById('zonaSubida');
+    var input = document.getElementById('archivoZip');
+    var texto = document.getElementById('textoZona');
+    var nombreArchivo = document.getElementById('nombreArchivo');
+    var btnSeleccionar = document.getElementById('btnSeleccionar');
+    var btnImportar = document.getElementById('btnImportar');
+
+    function actualizarEstado() {
+        var hay = input.files && input.files.length > 0;
+        btnImportar.disabled = !hay;
+        if (hay) nombreArchivo.textContent = input.files[0].name;
+        else nombreArchivo.textContent = '';
+    }
+
+    btnSeleccionar.addEventListener('click', function() { input.click(); });
+    input.addEventListener('change', actualizarEstado);
+
+    zona.addEventListener('click', function(e) { if (e.target === zona || e.target === texto || e.target === btnSeleccionar) input.click(); });
+    zona.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); zona.classList.add('border-primary'); });
+    zona.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); zona.classList.remove('border-primary'); });
+    zona.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zona.classList.remove('border-primary');
+        var files = e.dataTransfer.files;
+        if (files.length && files[0].name.toLowerCase().endsWith('.zip')) {
+            input.files = files;
+            actualizarEstado();
+        } else {
+            nombreArchivo.textContent = 'Seleccioná un archivo .zip';
+        }
+    });
+})();
+</script>
+</body>
+</html>
