@@ -1,0 +1,18 @@
+========================================
+  IMÁGENES DE EJERCICIOS PREDETERMINADOS
+========================================
+
+Carpeta: uploads/ejercicios
+
+NOMBRES DE ARCHIVOS (por número):
+  - 1.webp, 2.webp, 3.webp ... hasta 60.webp
+  - O bien: 1.gif, 2.gif, ... 60.gif
+
+El sistema busca primero N.webp; si no existe, N.gif.
+Si no hay archivo para un número, ese ejercicio usa imagen por defecto.
+
+Lista completa 1-60: ver Documentacion/OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md
+(sección "Nombres de archivos por número").
+
+Después de borrar la base de datos: entrá a "Ver ejercicios" como profesor
+y el sistema crea los 60 ejercicios automáticamente usando estos archivos.
