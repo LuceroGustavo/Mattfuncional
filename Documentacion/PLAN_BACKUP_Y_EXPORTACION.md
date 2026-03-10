@@ -16,20 +16,30 @@
 
 No se asume que todo ejercicio esté en una serie, que toda serie esté en una rutina ni que todo alumno tenga rutinas.
 
+- **Grupo muscular** = categoría de ejercicio (ej. "Pecho", "Bíceps"). Un ejercicio puede pertenecer a uno o varios grupos; puede haber grupos sin ejercicios vinculados. En el backup se exportan e importan para que los ejercicios resuelvan sus grupos por nombre.
+
 ### Comportamiento implementado
 
 | Aspecto | Export | Import |
 |--------|--------|--------|
+| **Grupos musculares** | Se exportan todos (sistema + de profesores) en `grupos-musculares.json` (`nombre`, `esSistema`). El manifest incluye `cantidadGruposMusculares`. Cada ejercicio lleva `muscleGroups`: lista de nombres. | Si existe `grupos-musculares.json`, se importan **primero** (idempotente por nombre + sistema/profesor). Luego los ejercicios resuelven sus grupos por nombre (sistema o del profesor de restore). |
 | **Series sin rutina** | Se exportan todas las series plantilla con `rutina_id` null (`findByEsPlantillaTrueAndRutinaIsNull()`), primero en `series.json`, con `rutinaIndex: null`. | Si `rutinaIndex` es null o ausente, la serie se crea con `rutina = null` (aparece en "Mis Series"). |
 | **Series en rutinas** | Por cada rutina plantilla se exportan sus series con `rutinaIndex` = índice de esa rutina en `rutinas.json`. | Se asigna la rutina correspondiente de `rutinasCreadas` según `rutinaIndex`. |
 | **SerieEjercicio** | Se exporta la lista completa por serie (exerciseName, valor, unidad, peso, orden). El mismo ejercicio puede repetirse con distintos datos. | Se recrean todos los ítems; se respeta "mismo ejercicio varias veces con distinto peso/repetición". |
 | **Modo Agregar** | — | Si una rutina ya existe (mismo nombre y profesor), se usa esa rutina para vincular las series de ese índice en lugar de omitirlas. |
 
+### Orden de importación en el ZIP
+
+1. **Grupos musculares** (si existe `grupos-musculares.json`) — así los ejercicios pueden resolver grupos por nombre.
+2. **Ejercicios** (con `muscleGroups` como nombres; se enlazan a grupos ya creados).
+3. **Rutinas** y **series** (con referencia a ejercicios ya importados).
+
 ### Archivos involucrados
 
-- `ExerciseZipBackupService.java`: export con series standalone + series por rutina; método `serieToMap(Serie, Integer rutinaIndex)`; import con `rutinaIndex` opcional (null = serie sin rutina).
+- `ExerciseZipBackupService.java`: export con grupos musculares, series standalone + series por rutina; método `serieToMap(Serie, Integer rutinaIndex)`; import con grupos primero, luego ejercicios (resolve por nombre), luego rutinas/series.
+- `GrupoMuscularService.java`: `findAll()` para export; `ensureGrupoExiste(nombre, esSistema, profesor)` para import idempotente.
 - `SerieRepository.java`: `findByEsPlantillaTrueAndRutinaIsNull()` para listar series sin rutina.
-- `profesor/backup.html`: uso de `importResult` como mapa (notación `importResult['errores']`, etc.) para compatibilidad con Thymeleaf.
+- `profesor/backup.html`: uso de `importResult` como mapa; muestra `gruposMuscularesImportados` en el mensaje de éxito y "Grupos: X" en la vista previa del ZIP.
 
 ### Pendiente mejorar
 
@@ -45,6 +55,9 @@ No se asume que todo ejercicio esté en una serie, que toda serie esté en una r
 - **Nombres de imágenes originales en export/import**
   - **Exportar:** Usa el nombre original de la imagen en BD (`rutaArchivo`, ej. `1.webp`, `2.webp`) en lugar de `ejercicio_0.jpg`, `ejercicio_1.gif`. Solo si no hay nombre se usa fallback `ejercicio_N.ext`.
   - **Importar:** `ImagenServicio.guardarParaRestore(byte[], rutaEnZip)` extrae el nombre del archivo del ZIP (ej. `imagenes/1.webp` → `1.webp`) y guarda con ese nombre. Preserva formato (gif/webp sin optimizar para no perder animación).
+- **Grupos musculares en backup**
+  - Export: se incluyen todos los grupos (sistema + profesores) en `grupos-musculares.json`; cada ejercicio exporta `muscleGroups` (nombres). Manifest: `cantidadGruposMusculares`.
+  - Import: se leen los grupos primero (idempotente por nombre); los ejercicios resuelven sus grupos por nombre (sistema o profesor de restore). El resultado incluye `gruposMuscularesImportados`.
 - **Restauración de rutinas y series**
   - Backup completo incluye `rutinas.json` y `series.json`. Al importar con "Suplantar" o "Agregar", se restauran rutinas y series.
   - Las rutinas y series se asignan al **profesor logueado** (no al primero de la BD). `importarDesdeZip` recibe `Profesor profesorParaRestore` desde `AdminPanelController`.

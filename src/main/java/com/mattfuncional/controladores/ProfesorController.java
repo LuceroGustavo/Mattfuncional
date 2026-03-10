@@ -720,7 +720,7 @@ public class ProfesorController {
         model.addAttribute("exercise", new com.mattfuncional.entidades.Exercise());
         model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         model.addAttribute("profesor", profesor);
-        return "ejercicios/formulario-ejercicio-profesor";
+        return "ejercicios/formulario-ejercicio";
     }
 
     @PostMapping("/mis-ejercicios/nuevo")
@@ -737,7 +737,7 @@ public class ProfesorController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
-            return "ejercicios/formulario-ejercicio-profesor";
+            return "ejercicios/formulario-ejercicio";
         }
         try {
             exercise.setProfesor(profesor);
@@ -749,7 +749,7 @@ public class ProfesorController {
             model.addAttribute("errorMessage", "Error al crear el ejercicio: " + e.getMessage());
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
-            return "ejercicios/formulario-ejercicio-profesor";
+            return "ejercicios/formulario-ejercicio";
         }
     }
 
@@ -798,7 +798,7 @@ public class ProfesorController {
         model.addAttribute("ejercicioGrupoIds", ejercicioGrupoIds);
         model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         model.addAttribute("profesor", profesor);
-        return "ejercicios/formulario-modificar-ejercicio-profesor";
+        return "ejercicios/formulario-modificar-ejercicio";
     }
 
     @PostMapping("/mis-ejercicios/editar/{id}")
@@ -823,7 +823,7 @@ public class ProfesorController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
-            return "ejercicios/formulario-modificar-ejercicio-profesor";
+            return "ejercicios/formulario-modificar-ejercicio";
         }
         try {
             exercise.setProfesor(ejercicioExistente.getProfesor());
@@ -837,7 +837,7 @@ public class ProfesorController {
             model.addAttribute("errorMessage", "Error al actualizar el ejercicio: " + e.getMessage());
             model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
             model.addAttribute("profesor", profesor);
-            return "ejercicios/formulario-modificar-ejercicio-profesor";
+            return "ejercicios/formulario-modificar-ejercicio";
         }
     }
 

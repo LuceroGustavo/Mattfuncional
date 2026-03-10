@@ -38,6 +38,20 @@ public class GrupoMuscularService {
         return grupoMuscularRepository.findByProfesorIsNullOrderByNombreAsc();
     }
 
+    /** Todos los grupos (sistema + de todos los profesores). Para backup/export. */
+    @Transactional(readOnly = true)
+    public List<GrupoMuscular> findAll() {
+        return grupoMuscularRepository.findAll().stream()
+                .sorted((a, b) -> {
+                    boolean sa = a.getProfesor() == null;
+                    boolean sb = b.getProfesor() == null;
+                    if (sa != sb) return sa ? -1 : 1;
+                    return (a.getNombre() != null && b.getNombre() != null)
+                            ? a.getNombre().compareToIgnoreCase(b.getNombre()) : 0;
+                })
+                .collect(Collectors.toList());
+    }
+
     public Optional<GrupoMuscular> findById(Long id) {
         return grupoMuscularRepository.findById(id);
     }
@@ -91,6 +105,20 @@ public class GrupoMuscularService {
     @Transactional
     public GrupoMuscular guardar(GrupoMuscular grupo) {
         return grupoMuscularRepository.save(grupo);
+    }
+
+    /** Asegura que exista un grupo con ese nombre (sistema o del profesor). Idempotente para backup/import. */
+    @Transactional
+    public GrupoMuscular ensureGrupoExiste(String nombre, boolean esSistema, Profesor profesor) {
+        if (nombre == null || nombre.isBlank()) return null;
+        String n = nombre.trim();
+        if (esSistema) {
+            return grupoMuscularRepository.findByNombreAndProfesorIsNull(n)
+                    .orElseGet(() -> grupoMuscularRepository.save(new GrupoMuscular(n, null)));
+        }
+        if (profesor == null) return null;
+        return grupoMuscularRepository.findByNombreAndProfesorId(n, profesor.getId())
+                .orElseGet(() -> grupoMuscularRepository.save(new GrupoMuscular(n, profesor)));
     }
 
     @Transactional

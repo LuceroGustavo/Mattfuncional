@@ -88,6 +88,7 @@
                     <strong>Importación correcta.</strong>
                     <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
                     <span th:if="${importResult['ejerciciosConImagen'] != null}" th:text="' (' + ${importResult['ejerciciosConImagen']} + ' con imagen)'"> </span>
+                    <span th:if="${importResult['gruposMuscularesImportados'] != null && importResult['gruposMuscularesImportados'] > 0}" th:text="', ' + ${importResult['gruposMuscularesImportados']} + ' grupos musculares'"> </span>
                     <span th:if="${importResult['rutinasImportadas'] != null && importResult['rutinasImportadas'] > 0}" th:text="', ' + ${importResult['rutinasImportadas']} + ' rutinas, ' + ${importResult['seriesImportadas']} + ' series'"> </span>
                     <span th:if="${importResult['ejerciciosOmitidos'] != null && importResult['ejerciciosOmitidos'] > 0}" th:text="', ' + ${importResult['ejerciciosOmitidos']} + ' omitidos'"> </span>.
                 </span>
@@ -228,9 +229,10 @@
             document.getElementById('detalleNombre').textContent = file.name;
             document.getElementById('detalleCantidad').textContent = manifestInfo.cantidadEjercicios != null ? manifestInfo.cantidadEjercicios : '?';
             var rutinasSpan = document.getElementById('detalleRutinas');
-            if (manifestInfo.cantidadRutinas != null && manifestInfo.cantidadSeries != null) {
-                rutinasSpan.textContent = '| Rutinas: ' + manifestInfo.cantidadRutinas + ' | Series: ' + manifestInfo.cantidadSeries;
-            } else { rutinasSpan.textContent = ''; }
+            var parts = [];
+            if (manifestInfo.cantidadGruposMusculares != null) parts.push('Grupos: ' + manifestInfo.cantidadGruposMusculares);
+            if (manifestInfo.cantidadRutinas != null && manifestInfo.cantidadSeries != null) parts.push('Rutinas: ' + manifestInfo.cantidadRutinas, 'Series: ' + manifestInfo.cantidadSeries);
+            rutinasSpan.textContent = parts.length ? '| ' + parts.join(' | ') : '';
             document.getElementById('detalleFecha').textContent = formatearFecha(manifestInfo.fecha) || '-';
             detalleArchivo.classList.remove('d-none');
         } catch (e) {
