@@ -458,8 +458,21 @@ public class ExerciseZipBackupService {
                         }
                     }
 
+                    String nombreSerie = (String) sd.get("nombre");
+                    if (nombreSerie == null || nombreSerie.isBlank()) continue;
+
+                    // En modo Agregar: no duplicar series (mismo nombre en la misma rutina o standalone para el profesor).
+                    // Usamos listas para no fallar si hay varias con el mismo nombre (ej. duplicados previos).
+                    if (!pisarTodos) {
+                        if (rutina != null) {
+                            if (!serieRepository.findAllByNombreAndRutinaId(nombreSerie, rutina.getId()).isEmpty()) continue;
+                        } else {
+                            if (!serieRepository.findAllByNombreAndRutinaIsNullAndProfesor_Id(nombreSerie, profesorRestore.getId()).isEmpty()) continue;
+                        }
+                    }
+
                     Serie serie = new Serie();
-                    serie.setNombre((String) sd.get("nombre"));
+                    serie.setNombre(nombreSerie);
                     serie.setOrden(toInt(sd.get("orden"), 0));
                     serie.setDescripcion((String) sd.get("descripcion"));
                     serie.setEsPlantilla(sd.get("esPlantilla") == null || Boolean.TRUE.equals(sd.get("esPlantilla")));

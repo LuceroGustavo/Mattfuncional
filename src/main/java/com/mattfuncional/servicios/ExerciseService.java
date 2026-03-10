@@ -8,6 +8,7 @@ import com.mattfuncional.excepciones.ResourceNotFoundException;
 import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.ImagenRepository;
 import com.mattfuncional.repositorios.ProfesorRepository;
+import com.mattfuncional.repositorios.SerieEjercicioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,18 @@ public class ExerciseService {
     private final ImagenRepository imagenRepository;
     private final ImagenServicio imagenServicio;
     private final ProfesorRepository profesorRepository;
+    private final SerieEjercicioRepository serieEjercicioRepository;
 
     public ExerciseService(ExerciseRepository exerciseRepository,
             ImagenRepository imagenRepository,
             ImagenServicio imagenServicio,
-            ProfesorRepository profesorRepository) {
+            ProfesorRepository profesorRepository,
+            SerieEjercicioRepository serieEjercicioRepository) {
         this.exerciseRepository = exerciseRepository;
         this.imagenRepository = imagenRepository;
         this.imagenServicio = imagenServicio;
         this.profesorRepository = profesorRepository;
+        this.serieEjercicioRepository = serieEjercicioRepository;
     }
 
     public List<Exercise> findAllExercises() {
@@ -222,6 +226,12 @@ public class ExerciseService {
     public void deleteExercise(Long id) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado con ID: " + id));
+
+        // Eliminar referencias en serie_ejercicio para no violar FK al borrar el ejercicio
+        int eliminados = serieEjercicioRepository.deleteByExerciseId(id);
+        if (eliminados > 0) {
+            logger.info("Eliminadas {} referencias de SerieEjercicio para el ejercicio id={}", eliminados, id);
+        }
 
         if (exercise.getImagen() != null) {
             Imagen imagen = exercise.getImagen();

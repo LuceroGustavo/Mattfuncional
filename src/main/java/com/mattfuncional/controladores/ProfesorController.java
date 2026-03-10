@@ -633,9 +633,12 @@ public class ProfesorController {
             return "redirect:/login?error=true";
         }
 
-        // Asegurar que existan los 60 ejercicios predeterminados (imágenes desde uploads/ejercicios/ 1.webp..60.webp)
+        // Solo asegurar los 60 predeterminados si hay 0 (primera vez / instalación nueva).
+        // Si el usuario eliminó alguno predeterminado, no re-agregarlo al listar.
         try {
-            exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
+            if (exerciseService.countEjerciciosPredeterminados() == 0) {
+                exerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados();
+            }
         } catch (Exception e) {
             logger.warn("No se pudieron asegurar ejercicios predeterminados: {}", e.getMessage());
         }

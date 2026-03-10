@@ -31,8 +31,14 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
     // Contar series por rutina
     long countByRutinaId(Long rutinaId);
 
-    // Buscar serie por nombre y rutina
+    // Buscar serie por nombre y rutina (puede haber varias si hubo duplicados; usar lista para no fallar con NonUniqueResult)
     Serie findByNombreAndRutinaId(String nombre, Long rutinaId);
+
+    /** Para modo Agregar: comprobar si ya existe alguna serie con ese nombre en la rutina (evitar duplicados). Devuelve lista para no fallar si hay varias. */
+    List<Serie> findAllByNombreAndRutinaId(String nombre, Long rutinaId);
+
+    /** Para modo Agregar: comprobar si ya existe alguna serie standalone con ese nombre y profesor. Devuelve lista para no fallar si hay varias. */
+    List<Serie> findAllByNombreAndRutinaIsNullAndProfesor_Id(String nombre, Long profesorId);
 
     // Buscar series plantilla por profesor
     List<Serie> findByProfesorIdAndEsPlantillaTrue(Long profesorId);
