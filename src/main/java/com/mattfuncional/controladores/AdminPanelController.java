@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,6 +37,7 @@ import java.util.Map;
 @RequestMapping("/profesor")
 public class AdminPanelController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AdminPanelController.class);
     private static final DateTimeFormatter ZIP_FILENAME_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
 
     private final ExerciseExportImportService exerciseExportImportService;
@@ -141,6 +144,7 @@ public class AdminPanelController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                     .body(resource);
         } catch (Exception e) {
+            logger.error("Error al exportar backup ZIP: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }

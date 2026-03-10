@@ -104,7 +104,13 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
      */
     @Query("SELECT e FROM Exercise e LEFT JOIN FETCH e.imagen WHERE e.id = :id")
     Optional<Exercise> findByIdWithImage(@Param("id") Long id);
-    
+
+    /**
+     * Ejercicio por ID con imagen y grupos (para formulario de edición, evita LazyInitializationException).
+     */
+    @Query("SELECT DISTINCT e FROM Exercise e LEFT JOIN FETCH e.imagen LEFT JOIN FETCH e.grupos WHERE e.id = :id")
+    Optional<Exercise> findByIdWithImageAndGrupos(@Param("id") Long id);
+
     /**
      * Cuenta ejercicios propios de un profesor (excluyendo predeterminados)
      */

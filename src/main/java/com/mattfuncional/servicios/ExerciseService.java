@@ -67,6 +67,14 @@ public class ExerciseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado con ID: " + id));
     }
 
+    /**
+     * Para formulario de edición: carga ejercicio con imagen y grupos y evita LazyInitializationException en la vista.
+     */
+    public Exercise findByIdWithImageAndGrupos(Long id) {
+        return exerciseRepository.findByIdWithImageAndGrupos(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado con ID: " + id));
+    }
+
     @Transactional
     public void saveExercise(Exercise exercise, MultipartFile imageFile) {
         saveExercise(exercise, imageFile, null);
@@ -127,6 +135,20 @@ public class ExerciseService {
 
         exerciseRepository.save(exercise);
         logger.info("Ejercicio guardado exitosamente: {} con ID: {}", exercise.getName(), exercise.getId());
+    }
+
+    /**
+     * Guarda un ejercicio sin validar duplicados ni permisos. Solo para restore de backup (suplantar).
+     * La imagen ya viene asignada en exercise desde ImagenServicio.guardarParaRestore; imageFile se ignora.
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public void saveExerciseForRestore(Exercise exercise, MultipartFile imageFile) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Imagen imagen = imagenServicio.guardar(imageFile);
+            exercise.setImagen(imagen);
+        }
+        exerciseRepository.save(exercise);
+        logger.debug("Ejercicio guardado (restore): {} con ID: {}", exercise.getName(), exercise.getId());
     }
 
     @Transactional

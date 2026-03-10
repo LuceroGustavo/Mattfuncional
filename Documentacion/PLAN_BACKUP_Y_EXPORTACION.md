@@ -2,7 +2,39 @@
 
 **Objetivo:** Permitir crear backups/exportaciones que se puedan usar en otra instalación o en otra app, y exportar datos a Excel para análisis o respaldo.
 
-**Estado:** En curso — Fase 1 (backup ejercicios ZIP) **implementada**. Mejoras de nombres de imágenes y restauración de series aplicadas (2026-03-09). Pendiente: fases 2–5.
+**Estado:** En curso — Fase 1 (backup ejercicios ZIP) **implementada**. Restauración completa de series (standalone y por rutina) y rutinas aplicada. Pendiente: fases 2–5; mejorar estilo y excepciones en el servicio de backup.
+
+---
+
+## Implementación actual: series y rutinas (export/import)
+
+### Modelo de datos respetado
+
+- **Serie** = grupo de ejercicios (lista de `SerieEjercicio`). Una serie puede tener el mismo ejercicio varias veces con distinto peso y repeticiones.
+- **Rutina** = grupo de series. Una rutina contiene N series.
+- **Usuario (alumno)** puede tener varias rutinas asignadas (o ninguna).
+
+No se asume que todo ejercicio esté en una serie, que toda serie esté en una rutina ni que todo alumno tenga rutinas.
+
+### Comportamiento implementado
+
+| Aspecto | Export | Import |
+|--------|--------|--------|
+| **Series sin rutina** | Se exportan todas las series plantilla con `rutina_id` null (`findByEsPlantillaTrueAndRutinaIsNull()`), primero en `series.json`, con `rutinaIndex: null`. | Si `rutinaIndex` es null o ausente, la serie se crea con `rutina = null` (aparece en "Mis Series"). |
+| **Series en rutinas** | Por cada rutina plantilla se exportan sus series con `rutinaIndex` = índice de esa rutina en `rutinas.json`. | Se asigna la rutina correspondiente de `rutinasCreadas` según `rutinaIndex`. |
+| **SerieEjercicio** | Se exporta la lista completa por serie (exerciseName, valor, unidad, peso, orden). El mismo ejercicio puede repetirse con distintos datos. | Se recrean todos los ítems; se respeta "mismo ejercicio varias veces con distinto peso/repetición". |
+| **Modo Agregar** | — | Si una rutina ya existe (mismo nombre y profesor), se usa esa rutina para vincular las series de ese índice en lugar de omitirlas. |
+
+### Archivos involucrados
+
+- `ExerciseZipBackupService.java`: export con series standalone + series por rutina; método `serieToMap(Serie, Integer rutinaIndex)`; import con `rutinaIndex` opcional (null = serie sin rutina).
+- `SerieRepository.java`: `findByEsPlantillaTrueAndRutinaIsNull()` para listar series sin rutina.
+- `profesor/backup.html`: uso de `importResult` como mapa (notación `importResult['errores']`, etc.) para compatibilidad con Thymeleaf.
+
+### Pendiente mejorar
+
+- **Estilo:** Revisar nombres de variables, extraer constantes, comentarios y formato del código en `ExerciseZipBackupService` para mantener consistencia con el resto del proyecto.
+- **Excepciones:** Unificar manejo de errores (validación del ZIP, JSON malformado, rutina/serie duplicada en modo Agregar, fallos al guardar imagen o entidad). Considerar excepciones de dominio (p. ej. `BackupImportException`) y mensajes claros al usuario en lugar de fallos genéricos.
 
 ---
 

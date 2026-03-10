@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Optional;
 import java.util.HashSet;
+import java.util.Set;
+import com.mattfuncional.entidades.GrupoMuscular;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
@@ -769,7 +771,7 @@ public class ProfesorController {
             return "redirect:/login?error=true";
         }
 
-        com.mattfuncional.entidades.Exercise ejercicio = exerciseService.findById(id);
+        com.mattfuncional.entidades.Exercise ejercicio = exerciseService.findByIdWithImageAndGrupos(id);
         if (ejercicio == null) {
             return "redirect:/profesor/mis-ejercicios?error=ejercicio_no_encontrado";
         }
@@ -779,7 +781,15 @@ public class ProfesorController {
             return "redirect:/profesor/mis-ejercicios?error=sin_permisos_editar";
         }
 
+        // IDs de grupos del ejercicio (evita acceder a exercise.grupos en la vista y posibles LazyInitializationException)
+        Set<Long> ejercicioGrupoIds = new HashSet<>();
+        if (ejercicio.getGrupos() != null) {
+            for (GrupoMuscular g : ejercicio.getGrupos()) {
+                if (g != null && g.getId() != null) ejercicioGrupoIds.add(g.getId());
+            }
+        }
         model.addAttribute("exercise", ejercicio);
+        model.addAttribute("ejercicioGrupoIds", ejercicioGrupoIds);
         model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
         model.addAttribute("profesor", profesor);
         return "ejercicios/formulario-modificar-ejercicio-profesor";

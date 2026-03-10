@@ -60,7 +60,9 @@ public class ImagenServicio {
     }
 
     /**
-     * Guarda una imagen desde MultipartFile
+     * Guarda una imagen subida por el usuario (ejercicio creado/editado por profesor).
+     * El archivo se guarda con nombre único en uploads/ejercicios/ para no pisar los predeterminados (1.webp…60)
+     * ni colisionar con otras subidas: formato "nombreSanitizado_8charsUUID.ext" (ej. curl_biceps_a1b2c3d4.jpg).
      */
     public Imagen guardar(MultipartFile archivo) {
         if (archivo == null || archivo.isEmpty()) {
@@ -386,6 +388,20 @@ public class ImagenServicio {
     }
 
     /**
+     * Obtiene el contenido de la imagen si el archivo físico existe. No lanza si no existe (para backup: no romper export).
+     * @return bytes de la imagen o null si la imagen no existe en BD o el archivo no está en disco
+     */
+    public byte[] obtenerContenidoSiExiste(String idImagen) {
+        if (idImagen == null || idImagen.isBlank()) return null;
+        try {
+            return obtenerContenido(idImagen);
+        } catch (Exception e) {
+            logger.warn("Imagen no disponible para export (id={}): {}", idImagen, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Obtiene la ruta física completa de una imagen
      */
     public Path obtenerRutaFisica(String idImagen) {
@@ -426,12 +442,10 @@ public class ImagenServicio {
     }
 
     /**
-     * Genera una ruta simple para el archivo (sin organización por fecha)
-     * Formato: nombre_archivo.ext
-     * Todas las imágenes se guardan directamente en uploads/ejercicios/
+     * Genera nombre de archivo único para subidas de usuario (evita pisar 1.webp…60 de predeterminados).
+     * Formato: nombreSanitizado_8charsUUID.ext (ej. 1_1b637bae.jpg, curl_biceps_a1b2c3d4.webp).
      */
     private String generarRutaArchivo(String nombreOriginal, String formato) {
-        // Generar nombre único
         String nombreUnico = UUID.randomUUID().toString().substring(0, 8);
         String nombreSinExtension = sanitizarNombre(nombreOriginal);
         if (nombreSinExtension.length() > 50) {

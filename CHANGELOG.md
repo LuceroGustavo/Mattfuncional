@@ -2,6 +2,22 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - fix(backup): series independientes de rutina y restauración correcta ✅
+
+### 🎯 **Resumen**
+Las series son entidades que pueden existir sin rutina (biblioteca "Mis Series") o dentro de una rutina. Se corrige export/import para incluir series standalone y series por rutina; en import se crean todas las series (con `rutinaIndex` null o válido). Documentación actualizada con lo implementado y pendiente (estilo, excepciones).
+
+### ✅ **Cambios**
+- **Export:** Series sin rutina (`findByEsPlantillaTrueAndRutinaIsNull()`) se exportan primero en `series.json` con `rutinaIndex: null`; luego las series de cada rutina con su `rutinaIndex`. Método auxiliar `serieToMap(Serie, Integer rutinaIndex)`.
+- **Import:** Si `rutinaIndex` es null o inválido, la serie se crea con `rutina = null`. Si es válido, se asigna la rutina de `rutinasCreadas`. Modo Agregar: si la rutina ya existe se usa esa instancia para vincular las series (no se omiten).
+- **SerieRepository:** `findByEsPlantillaTrueAndRutinaIsNull()` para listar series sin rutina.
+- **Documentación:** `PLAN_BACKUP_Y_EXPORTACION.md` — sección "Implementación actual: series y rutinas" (modelo, comportamiento, archivos); "Pendiente mejorar" (estilo, excepciones).
+
+### 📁 **Archivos modificados**
+`ExerciseZipBackupService.java`, `SerieRepository.java`, `Documentacion/PLAN_BACKUP_Y_EXPORTACION.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-09] - fix(backup): nombres originales de imágenes y restauración de series ✅
 
 ### 🎯 **Resumen**

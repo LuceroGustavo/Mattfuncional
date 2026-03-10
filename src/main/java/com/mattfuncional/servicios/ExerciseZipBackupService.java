@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -92,13 +93,21 @@ public class ExerciseZipBackupService {
         if (ejercicios.isEmpty()) {
             throw new RuntimeException("No hay ejercicios para exportar");
         }
+        // Orden: predeterminados primero (1-60), luego los creados por el usuario (61+), por id
+        ejercicios = new ArrayList<>(ejercicios);
+        ejercicios.sort((a, b) -> {
+            boolean pa = a.getEsPredeterminado() != null && a.getEsPredeterminado() || a.getProfesor() == null;
+            boolean pb = b.getEsPredeterminado() != null && b.getEsPredeterminado() || b.getProfesor() == null;
+            if (pa != pb) return pa ? -1 : 1;
+            return Long.compare(a.getId() == null ? 0 : a.getId(), b.getId() == null ? 0 : b.getId());
+        });
         String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         List<Rutina> rutinasPlantilla = rutinaRepository.findByEsPlantillaTrue();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            // 1. manifest.json
-            int totalSeries = 0;
+            // 1. manifest.json (series = standalone + las que pertenecen a rutinas)
+            int totalSeries = serieRepository.findByEsPlantillaTrueAndRutinaIsNull().size();
             for (Rutina r : rutinasPlantilla) {
                 Rutina rConSeries = rutinaRepository.findByIdWithSeries(r.getId()).orElse(r);
                 if (rConSeries.getSeries() != null) totalSeries += rConSeries.getSeries().size();
@@ -127,12 +136,16 @@ public class ExerciseZipBackupService {
                 item.put("instructions", ej.getInstructions());
                 item.put("benefits", ej.getBenefits());
                 item.put("contraindications", ej.getContraindications());
+                boolean esPredet = ej.getEsPredeterminado() != null && ej.getEsPredeterminado() || ej.getProfesor() == null;
+                item.put("esPredeterminado", esPredet);
+                item.put("ordenExport", index);
                 if (ej.getGrupos() != null && !ej.getGrupos().isEmpty()) {
                     item.put("muscleGroups", ej.getGrupos().stream()
                             .map(com.mattfuncional.entidades.GrupoMuscular::getNombre)
                             .collect(Collectors.toList()));
                 }
                 if (ej.getImagen() != null) {
+                    // Mismo nombre que en uploads/ejercicios/ (1.webp, 44.gif o nombre_uuid.ext para usuario)
                     String nombreOriginal = ej.getImagen().getRutaArchivo();
                     String imagenArchivo = (nombreOriginal != null && !nombreOriginal.isBlank())
                         ? "imagenes/" + nombreOriginal
@@ -152,28 +165,40 @@ public class ExerciseZipBackupService {
             zos.write(ejerciciosJsonBytes);
             zos.closeEntry();
 
-            // 3. imagenes/ (usa nombre original: 1.webp, 2.webp, etc.)
+            // 3. imagenes/ — mismo nombre que en uploads/ejercicios/ (sin modificación)
+            // Predeterminados: 1.webp, 2.gif, ... 60.webp. Usuario: nombre_uuid.ext (ej. curl_biceps_a1b2c3d4.jpg).
             index = 0;
-            for (Exercise ej : ejercicios) {
-                if (ej.getImagen() != null) {
-                    try {
-                        byte[] imagenBytes = imagenServicio.obtenerContenido(ej.getImagen().getId());
-                        String nombreOriginal = ej.getImagen().getRutaArchivo();
-                        String entryName = (nombreOriginal != null && !nombreOriginal.isBlank())
-                            ? "imagenes/" + nombreOriginal
-                            : "imagenes/ejercicio_" + index + extensionDesdeMime(ej.getImagen().getMime());
+            for (Exercise ejercicio : ejercicios) {
+                if (ejercicio.getImagen() != null) {
+                    byte[] imagenBytes = imagenServicio.obtenerContenidoSiExiste(ejercicio.getImagen().getId());
+                    if (imagenBytes != null && imagenBytes.length > 0) {
+                        String nombreEnCarpeta = ejercicio.getImagen().getRutaArchivo();
+                        String entryName = (nombreEnCarpeta != null && !nombreEnCarpeta.isBlank())
+                            ? "imagenes/" + nombreEnCarpeta
+                            : "imagenes/ejercicio_" + index + extensionDesdeMime(ejercicio.getImagen().getMime());
                         zos.putNextEntry(new ZipEntry(entryName));
                         zos.write(imagenBytes);
                         zos.closeEntry();
-                    } catch (Exception e) {
-                        logger.warn("Error incluyendo imagen del ejercicio {}: {}", ej.getName(), e.getMessage());
+                    } else {
+                        logger.warn("Ejercicio \"{}\" tiene imagen en BD pero el archivo no existe en disco; se exporta sin imagen.", ejercicio.getName());
                     }
                 }
                 index++;
             }
             // 4. rutinas.json y series.json (backup completo)
+            // Las series son independientes: pueden no tener rutina (biblioteca) o pertenecer a una rutina.
             List<Map<String, Object>> rutinasParaJson = new ArrayList<>();
             List<Map<String, Object>> seriesParaJson = new ArrayList<>();
+
+            // 4a. Series sin rutina (standalone) primero, con rutinaIndex null
+            List<Serie> seriesStandalone = serieRepository.findByEsPlantillaTrueAndRutinaIsNull();
+            seriesStandalone.sort((a, b) -> Integer.compare(a.getOrden(), b.getOrden()));
+            for (Serie serie : seriesStandalone) {
+                Serie sConEj = serieRepository.findByIdWithSerieEjercicios(serie.getId()).orElse(serie);
+                seriesParaJson.add(serieToMap(sConEj, null));
+            }
+
+            // 4b. Rutinas y sus series (cada serie con rutinaIndex = índice de la rutina)
             int rutinaIndex = 0;
             for (Rutina rutina : rutinasPlantilla) {
                 Rutina rConSeries = rutinaRepository.findByIdWithSeries(rutina.getId()).orElse(rutina);
@@ -191,34 +216,7 @@ public class ExerciseZipBackupService {
                     seriesOrdenadas.sort((a, b) -> Integer.compare(a.getOrden(), b.getOrden()));
                     for (Serie serie : seriesOrdenadas) {
                         Serie sConEj = serieRepository.findByIdWithSerieEjercicios(serie.getId()).orElse(serie);
-                        Map<String, Object> serieItem = new HashMap<>();
-                        serieItem.put("rutinaIndex", rutinaIndex);
-                        serieItem.put("orden", serie.getOrden());
-                        serieItem.put("nombre", serie.getNombre());
-                        serieItem.put("descripcion", serie.getDescripcion());
-                        serieItem.put("esPlantilla", serie.isEsPlantilla());
-                        serieItem.put("repeticionesSerie", serie.getRepeticionesSerie());
-                        serieItem.put("creador", serie.getCreador());
-                        List<Map<String, Object>> seList = new ArrayList<>();
-                        if (sConEj.getSerieEjercicios() != null) {
-                            List<SerieEjercicio> seOrdenados = new ArrayList<>(sConEj.getSerieEjercicios());
-                            seOrdenados.sort((a, b) -> Integer.compare(
-                                    a.getOrden() != null ? a.getOrden().intValue() : 0,
-                                    b.getOrden() != null ? b.getOrden().intValue() : 0));
-                            for (SerieEjercicio se : seOrdenados) {
-                                if (se.getExercise() != null) {
-                                    Map<String, Object> seItem = new LinkedHashMap<>();
-                                    seItem.put("exerciseName", se.getExercise().getName());
-                                    seItem.put("valor", se.getValor());
-                                    seItem.put("unidad", se.getUnidad());
-                                    seItem.put("peso", se.getPeso());
-                                    seItem.put("orden", se.getOrden() != null ? se.getOrden().intValue() : 0);
-                                    seList.add(seItem);
-                                }
-                            }
-                        }
-                        serieItem.put("serieEjercicios", seList);
-                        seriesParaJson.add(serieItem);
+                        seriesParaJson.add(serieToMap(sConEj, rutinaIndex));
                     }
                 }
                 rutinaIndex++;
@@ -283,25 +281,44 @@ public class ExerciseZipBackupService {
                 new String(ejerciciosJsonBytes, StandardCharsets.UTF_8),
                 new TypeReference<List<Map<String, Object>>>() {});
 
-        boolean esBackupCompleto = zipEntries.containsKey("rutinas.json") && zipEntries.containsKey("series.json");
+        // Orden de importación: predeterminados primero, luego user; mismo orden que en el export (ordenExport)
+        ejerciciosData.sort((a, b) -> {
+            boolean pa = a.get("esPredeterminado") == null || Boolean.TRUE.equals(a.get("esPredeterminado"));
+            boolean pb = b.get("esPredeterminado") == null || Boolean.TRUE.equals(b.get("esPredeterminado"));
+            if (pa != pb) return pa ? -1 : 1;
+            int oa = a.get("ordenExport") instanceof Number ? ((Number) a.get("ordenExport")).intValue() : 0;
+            int ob = b.get("ordenExport") instanceof Number ? ((Number) b.get("ordenExport")).intValue() : 0;
+            return Integer.compare(oa, ob);
+        });
+
+        boolean esBackupCompleto = getZipEntryBytes(zipEntries, "rutinas.json") != null && getZipEntryBytes(zipEntries, "series.json") != null;
 
         if (pisarTodos) {
-            // Orden: SerieEjercicio, PizarraItem, Serie, Rutina, Exercise (respeta FK)
-            int serieEjerciciosEliminados = serieEjercicioRepository.deleteAllWithExercise();
-            int pizarraItemsEliminados = pizarraItemRepository.deleteAllItems();
-            logger.info("Referencias eliminadas: {} SerieEjercicio, {} PizarraItem", serieEjerciciosEliminados, pizarraItemsEliminados);
-
-            if (esBackupCompleto) {
-                serieRepository.deleteAll();
-                rutinaRepository.deleteAll();
-                logger.info("Series y rutinas eliminadas para restore completo");
+            // Borrado en una transacción separada que hace COMMIT para que el import vea BD vacía
+            DefaultTransactionDefinition defBorrado = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            TransactionTemplate txBorrado = new TransactionTemplate(transactionManager, defBorrado);
+            Integer borrados = txBorrado.execute(status -> {
+                int serieEjerciciosEliminados = serieEjercicioRepository.deleteAllWithExercise();
+                int pizarraItemsEliminados = pizarraItemRepository.deleteAllItems();
+                logger.info("Referencias eliminadas: {} SerieEjercicio, {} PizarraItem", serieEjerciciosEliminados, pizarraItemsEliminados);
+                if (esBackupCompleto) {
+                    serieRepository.deleteAll();
+                    rutinaRepository.deleteAll();
+                    logger.info("Series y rutinas eliminadas para restore completo");
+                }
+                List<Exercise> existentes = exerciseService.findAllExercisesWithImages();
+                int n = existentes.size();
+                for (Exercise e : existentes) {
+                    exerciseService.deleteExercise(e.getId());
+                }
+                logger.info("Ejercicios existentes borrados antes de importar: {}", n);
+                return n;
+            });
+            if (borrados == null) {
+                result.put("success", false);
+                result.put("message", "Error al borrar datos previos para suplantar");
+                return result;
             }
-
-            List<Exercise> existentes = exerciseService.findAllExercisesWithImages();
-            for (Exercise e : existentes) {
-                exerciseService.deleteExercise(e.getId());
-            }
-            logger.info("Ejercicios existentes borrados antes de importar: {}", existentes.size());
         }
 
         int importados = 0;
@@ -309,13 +326,16 @@ public class ExerciseZipBackupService {
         int conImagen = 0;
         List<String> errores = new ArrayList<>();
         Map<String, byte[]> zipEntriesFinal = zipEntries; // para uso en lambda
-        int ejercicioIndex = 0;
+        // Con Suplantar (pisarTodos): nunca omitir por nombre. Se borró todo y se importa cada ejercicio
+        // tal cual viene en el backup (imagen, grupos musculares, descripción); el mismo nombre puede
+        // tener otra imagen, otros grupos u otra descripción.
         for (Map<String, Object> data : ejerciciosData) {
             String name = (String) data.get("name");
             if (name == null || name.isBlank()) {
                 errores.add("Ejercicio sin nombre en el ZIP");
                 continue;
             }
+            // Solo en modo "Agregar" se omiten duplicados por nombre. Con Suplantar siempre se importa.
             if (!pisarTodos && exerciseService.findByNameAndProfesorNull(name).isPresent()) {
                 omitidos++;
                 continue;
@@ -335,7 +355,9 @@ public class ExerciseZipBackupService {
                     ejercicio.setBenefits((String) data.get("benefits"));
                     ejercicio.setContraindications((String) data.get("contraindications"));
                     ejercicio.setProfesor(null);
-                    ejercicio.setEsPredeterminado(true);
+                    // Respetar esPredeterminado del backup: solo los del sistema llevan estrella; ZIP antiguos sin clave = true
+                    boolean esPredet = data.get("esPredeterminado") == null || Boolean.TRUE.equals(data.get("esPredeterminado"));
+                    ejercicio.setEsPredeterminado(esPredet);
 
                     if (data.get("muscleGroups") != null) {
                         @SuppressWarnings("unchecked")
@@ -351,7 +373,12 @@ public class ExerciseZipBackupService {
                             ejercicio.setImagen(img);
                         }
                     }
-                    exerciseService.saveExercise(ejercicio, null);
+                    // Suplantar: guardar sin validar duplicados (ya se borró todo). Resto: validar por nombre.
+                    if (pisarTodos) {
+                        exerciseService.saveExerciseForRestore(ejercicio, null);
+                    } else {
+                        exerciseService.saveExercise(ejercicio, null);
+                    }
                     return true;
                 } catch (Exception e) {
                     errores.add(nombreEjercicio + ": " + e.getMessage());
@@ -382,8 +409,12 @@ public class ExerciseZipBackupService {
                     : profesorRepository.findAll().stream().findFirst()
                             .orElseThrow(() -> new RuntimeException("No hay profesor en el sistema para restaurar rutinas"));
 
-            byte[] rutinasBytes = zipEntries.get("rutinas.json");
-            byte[] seriesBytes = zipEntries.get("series.json");
+            byte[] rutinasBytes = getZipEntryBytes(zipEntries, "rutinas.json");
+            byte[] seriesBytes = getZipEntryBytes(zipEntries, "series.json");
+            if (rutinasBytes == null || seriesBytes == null) {
+                logger.warn("Backup completo esperado pero faltan archivos: rutinas.json={}, series.json={}",
+                        rutinasBytes != null, seriesBytes != null);
+            }
             if (rutinasBytes != null && seriesBytes != null) {
                 List<Map<String, Object>> rutinasData = objectMapper.readValue(
                         new String(rutinasBytes, StandardCharsets.UTF_8),
@@ -396,8 +427,10 @@ public class ExerciseZipBackupService {
                 for (Map<String, Object> rd : rutinasData) {
                     String nombreRutina = (String) rd.get("nombre");
                     if (nombreRutina == null || nombreRutina.isBlank()) continue;
-                    if (!pisarTodos && rutinaRepository.findByNombreAndEsPlantillaTrueAndProfesorId(nombreRutina, profesorRestore.getId()).isPresent()) {
-                        rutinasCreadas.add(null);
+                    // Con Suplantar siempre crear. En "Agregar", si la rutina ya existe usamos esa para vincular las series.
+                    Optional<Rutina> rutinaExistente = rutinaRepository.findByNombreAndEsPlantillaTrueAndProfesorId(nombreRutina, profesorRestore.getId());
+                    if (!pisarTodos && rutinaExistente.isPresent()) {
+                        rutinasCreadas.add(rutinaExistente.get());
                         continue;
                     }
                     Rutina rutina = new Rutina();
@@ -415,10 +448,15 @@ public class ExerciseZipBackupService {
                 }
 
                 for (Map<String, Object> sd : seriesData) {
-                    int rutinaIdx = toInt(sd.get("rutinaIndex"), 0);
-                    if (rutinaIdx < 0 || rutinaIdx >= rutinasCreadas.size()) continue;
-                    Rutina rutina = rutinasCreadas.get(rutinaIdx);
-                    if (rutina == null) continue;
+                    // rutinaIndex null o < 0 = serie sin rutina (standalone); si es válido, vincular a esa rutina
+                    Object ri = sd.get("rutinaIndex");
+                    Rutina rutina = null;
+                    if (ri != null && ri instanceof Number) {
+                        int rutinaIdx = ((Number) ri).intValue();
+                        if (rutinaIdx >= 0 && rutinaIdx < rutinasCreadas.size()) {
+                            rutina = rutinasCreadas.get(rutinaIdx);
+                        }
+                    }
 
                     Serie serie = new Serie();
                     serie.setNombre((String) sd.get("nombre"));
@@ -467,6 +505,49 @@ public class ExerciseZipBackupService {
         }
         logger.info("Importación ZIP: {} ejercicios, {} rutinas, {} series, pisarTodos={}", importados, rutinasImportadas, seriesImportadas, pisarTodos);
         return result;
+    }
+
+    /** Obtiene bytes de una entrada del ZIP por nombre (exacto o ignorando mayúsculas / path). */
+    private static byte[] getZipEntryBytes(Map<String, byte[]> zipEntries, String nombreArchivo) {
+        if (zipEntries.containsKey(nombreArchivo)) return zipEntries.get(nombreArchivo);
+        String lower = nombreArchivo.toLowerCase();
+        for (Map.Entry<String, byte[]> e : zipEntries.entrySet()) {
+            if (e.getKey().toLowerCase().equals(lower) || e.getKey().replace("\\", "/").toLowerCase().endsWith("/" + lower))
+                return e.getValue();
+        }
+        return null;
+    }
+
+    /** Construye el mapa JSON de una serie para exportar (rutinaIndex null = serie sin rutina). */
+    private Map<String, Object> serieToMap(Serie serie, Integer rutinaIndex) {
+        Map<String, Object> serieItem = new HashMap<>();
+        serieItem.put("rutinaIndex", rutinaIndex);
+        serieItem.put("orden", serie.getOrden());
+        serieItem.put("nombre", serie.getNombre());
+        serieItem.put("descripcion", serie.getDescripcion());
+        serieItem.put("esPlantilla", serie.isEsPlantilla());
+        serieItem.put("repeticionesSerie", serie.getRepeticionesSerie());
+        serieItem.put("creador", serie.getCreador());
+        List<Map<String, Object>> seList = new ArrayList<>();
+        if (serie.getSerieEjercicios() != null) {
+            List<SerieEjercicio> seOrdenados = new ArrayList<>(serie.getSerieEjercicios());
+            seOrdenados.sort((a, b) -> Integer.compare(
+                    a.getOrden() != null ? a.getOrden().intValue() : 0,
+                    b.getOrden() != null ? b.getOrden().intValue() : 0));
+            for (SerieEjercicio se : seOrdenados) {
+                if (se.getExercise() != null) {
+                    Map<String, Object> seItem = new LinkedHashMap<>();
+                    seItem.put("exerciseName", se.getExercise().getName());
+                    seItem.put("valor", se.getValor());
+                    seItem.put("unidad", se.getUnidad());
+                    seItem.put("peso", se.getPeso());
+                    seItem.put("orden", se.getOrden() != null ? se.getOrden().intValue() : 0);
+                    seList.add(seItem);
+                }
+            }
+        }
+        serieItem.put("serieEjercicios", seList);
+        return serieItem;
     }
 
     private static int toInt(Object o, int defaultValue) {

@@ -82,17 +82,17 @@
                     </div>
                 </div>
             </form>
-            <div th:if="${importResult}" class="alert mt-3" th:classappend="${importResult.success} ? 'alert-success' : 'alert-danger'" role="alert">
-                <span th:if="${importResult.success}">
+            <div th:if="${importResult}" class="alert mt-3" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+                <span th:if="${importResult['success']}">
                     <strong>Importación correcta.</strong>
-                    <span th:text="${importResult.ejerciciosImportados} + ' ejercicios'">0</span>
-                    <span th:if="${importResult.ejerciciosConImagen != null}" th:text="' (' + ${importResult.ejerciciosConImagen} + ' con imagen)'"> </span>
-                    <span th:if="${importResult.rutinasImportadas != null && importResult.rutinasImportadas > 0}" th:text="', ' + ${importResult.rutinasImportadas} + ' rutinas, ' + ${importResult.seriesImportadas} + ' series'"> </span>
-                    <span th:if="${importResult.ejerciciosOmitidos != null && importResult.ejerciciosOmitidos > 0}" th:text="', ' + ${importResult.ejerciciosOmitidos} + ' omitidos'"> </span>.
+                    <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
+                    <span th:if="${importResult['ejerciciosConImagen'] != null}" th:text="' (' + ${importResult['ejerciciosConImagen']} + ' con imagen)'"> </span>
+                    <span th:if="${importResult['rutinasImportadas'] != null && importResult['rutinasImportadas'] > 0}" th:text="', ' + ${importResult['rutinasImportadas']} + ' rutinas, ' + ${importResult['seriesImportadas']} + ' series'"> </span>
+                    <span th:if="${importResult['ejerciciosOmitidos'] != null && importResult['ejerciciosOmitidos'] > 0}" th:text="', ' + ${importResult['ejerciciosOmitidos']} + ' omitidos'"> </span>.
                 </span>
-                <span th:if="${!importResult.success}" th:text="${importResult.message}">Error</span>
-                <ul th:if="${importResult.errores != null && !importResult.errores.isEmpty()}" class="mb-0 mt-2">
-                    <li th:each="e : ${importResult.errores}" th:text="${e}">error</li>
+                <span th:if="${!importResult['success']}" th:text="${importResult['message']}">Error</span>
+                <ul th:if="${importResult['errores'] != null && !importResult['errores'].isEmpty()}" class="mb-0 mt-2">
+                    <li th:each="e : ${importResult['errores']}" th:text="${e}">error</li>
                 </ul>
             </div>
         </div>
