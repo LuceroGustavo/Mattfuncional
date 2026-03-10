@@ -25,3 +25,6 @@ Se eliminaron **formulario-ejercicio-profesor.html** y **formulario-modificar-ej
 - **Crear ejercicio:** `/profesor/mis-ejercicios/nuevo` → `ejercicios/formulario-ejercicio.html` (POST a `/profesor/mis-ejercicios/nuevo`).
 - **Editar ejercicio:** `/profesor/mis-ejercicios/editar/{id}` → `ejercicios/formulario-modificar-ejercicio.html` (POST a `/profesor/mis-ejercicios/editar/{id}`).
 - **Lista:** `/profesor/mis-ejercicios` → `profesor/ejercicios-lista.html`.
+
+### Fix botones en editar (Feb 2026)
+En **formulario-modificar-ejercicio.html** los botones "Guardar Cambios" y "Cancelar" no se veían (formulario largo; en algunos entornos la respuesta podía cortarse). Se añadieron botones al **inicio del formulario** (visibles sin scroll) y se mantienen al final; se quitó la barra fija al pie que podía ocultarse.

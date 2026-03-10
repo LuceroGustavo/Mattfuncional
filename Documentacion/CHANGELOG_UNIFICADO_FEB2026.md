@@ -28,6 +28,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 20. [Eliminar alumno – Fix FK asistencia y referencias](#20-eliminar-alumno--fix-fk-asistencia-y-referencias-mar-2026)
 21. [Ejercicios: formularios, modal Ver ejercicio, permisos y hoja rutina](#21-ejercicios-formularios-modal-ver-ejercicio-permisos-y-hoja-rutina-mar-2026)
 22. [Backup ZIP: nombres originales de imágenes y restauración de series](#22-backup-zip-nombres-originales-de-imágenes-y-restauración-de-series-mar-2026)
+23. [Fix: botones Guardar/Cancelar en formulario editar ejercicio](#23-fix-botones-guardarcancelar-en-formulario-editar-ejercicio-feb-2026)
 
 ---
 
@@ -608,6 +609,23 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 - Exportar e importar con "Suplantar" verificando nombres 1.webp, 2.webp.
 - Restauración de series visible en panel del profesor.
 - Importar backup antiguo con ejercicio_0.jpg.
+
+---
+
+## 23. Fix: botones Guardar/Cancelar en formulario editar ejercicio (Feb 2026)
+
+**Resumen:** En la página de edición de ejercicio (`/profesor/mis-ejercicios/editar/{id}`) los botones "Guardar Cambios" y "Cancelar" no se veían (formulario más largo que el de crear; en algunos casos la respuesta podía cortarse por ERR_INCOMPLETE_CHUNKED_ENCODING). Se ajustó la plantilla para que los botones sean siempre visibles.
+
+### Cambios
+- **Plantilla `formulario-modificar-ejercicio.html`:**
+  - Se eliminó la barra de botones fija al pie (`.form-actions-fixed`), que podía quedar oculta o dar problemas de layout.
+  - Se eliminó la barra duplicada fuera del card (arriba del formulario).
+  - Se mantuvieron los botones al final del formulario (`.form-actions-bottom`) en flujo normal.
+  - Se añadió una **barra de botones al inicio del formulario** (justo debajo del mensaje de error), visible sin scroll, para que Cancelar y Guardar Cambios se vean siempre aunque el contenido sea largo o la respuesta se corte.
+- **Referencia:** Se comparó con la versión del formulario en el commit `487172658aedfd15419f3f2a93b66cdf996a0b86` (`formulario-modificar-ejercicio-profesor.html`), donde los botones estaban solo al final en un layout más corto.
+
+### Archivos
+`src/main/resources/templates/ejercicios/formulario-modificar-ejercicio.html`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/PLANTILLAS_EJERCICIOS_Y_PROFESOR.md`.
 
 ---
 
