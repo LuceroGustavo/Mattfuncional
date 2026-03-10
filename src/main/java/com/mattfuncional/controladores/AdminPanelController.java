@@ -73,9 +73,14 @@ public class AdminPanelController {
     }
 
     @GetMapping("/backup")
-    public String paginaBackup(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+    public String paginaBackup(@AuthenticationPrincipal Usuario usuarioActual,
+                              @RequestParam(name = "fragment", required = false) String fragment,
+                              Model model) {
         if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
             return "redirect:/profesor/dashboard";
+        }
+        if (fragment != null && !fragment.isEmpty()) {
+            return "profesor/backup :: contenido";
         }
         return "profesor/backup";
     }

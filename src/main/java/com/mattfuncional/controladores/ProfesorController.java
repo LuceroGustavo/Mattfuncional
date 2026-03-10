@@ -99,7 +99,10 @@ public class ProfesorController {
     }
 
     @GetMapping("/manual")
-    public String manualUsuario() {
+    public String manualUsuario(@RequestParam(name = "fragment", required = false) String fragment) {
+        if (fragment != null && !fragment.isEmpty()) {
+            return "profesor/manual-usuario :: contenido";
+        }
         return "profesor/manual-usuario";
     }
 

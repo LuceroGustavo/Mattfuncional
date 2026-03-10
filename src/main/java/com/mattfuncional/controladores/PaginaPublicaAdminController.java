@@ -28,13 +28,18 @@ public class PaginaPublicaAdminController {
     private ConsultaService consultaService;
 
     @GetMapping
-    public String verPaginaPublica(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+    public String verPaginaPublica(@AuthenticationPrincipal Usuario usuarioActual,
+                                   @RequestParam(name = "fragment", required = false) String fragment,
+                                   Model model) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
         model.addAttribute("planes", planPublicoService.getAllPlanes());
         model.addAttribute("config", configuracionPaginaPublicaService.getAllConfig());
         model.addAttribute("consultas", consultaService.getUltimasConsultas(20));
+        if (fragment != null && !fragment.isEmpty()) {
+            return "profesor/pagina-publica-admin :: contenido";
+        }
         return "profesor/pagina-publica-admin";
     }
 

@@ -21,15 +21,16 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container py-5">
+<div th:fragment="contenido" class="admin-backup-fragment">
+<div class="container py-5 admin-section-content">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h1 class="fw-bold mb-1"><i class="fas fa-database me-2" style="color:#5e35b1;"></i>Sistema de backup</h1>
             <p class="text-muted mb-0">Exportar e importar ejercicios, series, rutinas y alumnos</p>
         </div>
-        <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary">
+        <a th:if="${(param.embed == null || param.embed.isEmpty()) && (param.fragment == null || param.fragment.isEmpty())}" th:href="@{/profesor/administracion}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Volver a Administración
         </a>
     </div>
@@ -167,10 +168,9 @@
             <p class="text-muted small mb-0">En desarrollo</p>
         </div>
     </div>
-</div>
 
-<!-- Modal progreso -->
-<div class="modal fade" id="modalProgreso" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <!-- Modal progreso (incluido en fragmento para uso en panel administración) -->
+    <div class="modal fade" id="modalProgreso" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center py-4">
@@ -184,9 +184,8 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
 (function() {
     var zona = document.getElementById('zonaSubida');
@@ -272,5 +271,8 @@
     });
 })();
 </script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

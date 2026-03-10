@@ -31,7 +31,9 @@ public class UsuariosSistemaController {
     private DuplicadosCheckService duplicadosCheckService;
 
     @GetMapping
-    public String verUsuariosSistema(@AuthenticationPrincipal Usuario usuarioActual, Model model) {
+    public String verUsuariosSistema(@AuthenticationPrincipal Usuario usuarioActual,
+                                     @RequestParam(name = "fragment", required = false) String fragment,
+                                     Model model) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
         }
@@ -44,6 +46,9 @@ public class UsuariosSistemaController {
         }
         if (hayDuplicadosReales) {
             model.addAttribute("correosDuplicados", correosDuplicados);
+        }
+        if (fragment != null && !fragment.isEmpty()) {
+            return "profesor/usuarios-sistema :: contenido";
         }
         return "profesor/usuarios-sistema";
     }

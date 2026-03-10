@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()))
                 .csrf(csrf -> csrf.disable());
 
         http.authenticationProvider(authenticationProvider());

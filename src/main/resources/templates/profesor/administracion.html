@@ -7,84 +7,228 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
             min-height: 100vh;
         }
-        .admin-card {
-            border: none;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-            min-height: 180px;
+        .admin-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            min-height: calc(100vh - 120px);
+        }
+        .admin-main {
+            flex: 1 1 0;
+            min-width: 0;
+            min-height: 560px;
             display: flex;
             flex-direction: column;
+            order: 1;
+        }
+        .admin-main .admin-content-wrap {
+            flex: 1;
+            min-height: 560px;
+            height: calc(100vh - 180px);
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            overflow-y: auto;
+        }
+        .admin-main .admin-content-wrap .admin-section-content {
+            min-height: 100%;
+        }
+        .admin-main .admin-content-wrap.loading {
+            display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .admin-main .admin-content-wrap .loading-text {
+            color: #5e35b1;
+            font-weight: 600;
+        }
+        .admin-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            padding: 1rem 1rem 1rem 0;
+            order: 0;
+        }
+        .admin-sidebar .nav-section {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .admin-sidebar .nav-section-title {
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #5e35b1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, #ede7f6 0%, #e8eaf6 100%);
+            border-bottom: 1px solid rgba(94, 53, 177, 0.15);
+        }
+        .admin-sidebar .admin-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.9rem 1rem;
+            color: #37474f;
             text-decoration: none;
-            color: inherit;
-            transition: transform 0.15s;
+            border-bottom: 1px solid #f5f5f5;
+            transition: background 0.2s, color 0.2s;
         }
-        .admin-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            color: inherit;
+        .admin-sidebar .admin-nav-link:last-child {
+            border-bottom: none;
         }
-        .admin-card i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .admin-sidebar .admin-nav-link:hover {
+            background: linear-gradient(135deg, #ede7f6 0%, #e8eaf6 100%);
             color: #5e35b1;
         }
-        .admin-card .admin-card-title {
-            font-size: 1.25rem;
+        .admin-sidebar .admin-nav-link.active {
+            background: linear-gradient(135deg, #d1c4e9 0%, #b39ddb 100%);
+            color: #fff;
             font-weight: 600;
-            color: #37474f;
         }
-        .admin-card .admin-card-desc {
-            font-size: 0.9rem;
-            color: #546e7a;
-            margin-top: 0.25rem;
+        .admin-sidebar .admin-nav-link i {
+            width: 1.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #5e35b1;
         }
-        .card-usuarios { background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); }
-        .card-pagina { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
-        .card-backup { background: linear-gradient(135deg, #ffecb3 60%, #ffe082 100%); }
-        .card-backup.disabled { opacity: 0.85; cursor: not-allowed; }
+        .admin-sidebar .admin-nav-link.active i {
+            color: #fff;
+        }
+        .admin-sidebar .admin-nav-link .nav-link-text {
+            font-size: 0.95rem;
+        }
+        @media (max-width: 991px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            .admin-sidebar {
+                width: 100%;
+                padding: 0 0 1rem 0;
+                order: 0;
+            }
+            .admin-main { order: 1; }
+            .admin-main .admin-content-wrap {
+                height: 480px;
+                min-height: 480px;
+            }
+            .admin-sidebar .nav-section {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                padding: 0.5rem;
+            }
+            .admin-sidebar .admin-nav-link {
+                flex: 1 1 auto;
+                min-width: 140px;
+                border-radius: 0.5rem;
+                border: 1px solid #eee;
+            }
+        }
     </style>
 </head>
 <body>
-<div th:replace="fragments/navbar :: navbar"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold mb-1"><i class="fas fa-cogs me-2" style="color:#5e35b1;"></i>Administración del sistema</h1>
-        <p class="text-muted">Seleccioná una sección para gestionar</p>
-    </div>
-
-    <div class="row g-4 justify-content-center">
-        <div class="col-12 col-md-6 col-lg-4">
-            <a th:href="@{/profesor/usuarios-sistema}" class="admin-card card card-usuarios">
-                <i class="fas fa-users-cog"></i>
-                <span class="admin-card-title">Administración de usuarios</span>
-                <span class="admin-card-desc">Crear, modificar y eliminar usuarios del sistema</span>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a th:href="@{/profesor/pagina-publica}" class="admin-card card card-pagina">
-                <i class="fas fa-globe"></i>
-                <span class="admin-card-title">Administración de la página pública</span>
-                <span class="admin-card-desc">Planes, precios, contacto y horarios</span>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a th:href="@{/profesor/backup}" class="admin-card card card-backup">
-                <i class="fas fa-database"></i>
-                <span class="admin-card-title">Sistema de backup</span>
-                <span class="admin-card-desc">Exportar e importar ejercicios (JSON con imágenes)</span>
-            </a>
+<div class="container-fluid py-3 px-3 px-md-4">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav class="nav-section">
+                <div class="nav-section-title"><i class="fas fa-cogs me-2" style="color:#5e35b1;"></i>Administración del sistema</div>
+                <a href="#" class="admin-nav-link active" data-src="/profesor/usuarios-sistema?fragment=1" data-label="usuarios">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="nav-link-text">Administración de usuarios del sistema</span>
+                </a>
+                <a href="#" class="admin-nav-link" data-src="/profesor/pagina-publica?fragment=1" data-label="pagina">
+                    <i class="fas fa-globe"></i>
+                    <span class="nav-link-text">Administración de la página pública</span>
+                </a>
+                <a href="#" class="admin-nav-link" data-src="/profesor/backup?fragment=1" data-label="backup">
+                    <i class="fas fa-database"></i>
+                    <span class="nav-link-text">Sistema de backups</span>
+                </a>
+                <a href="#" class="admin-nav-link" data-src="/profesor/manual?fragment=1" data-label="manual">
+                    <i class="fas fa-book"></i>
+                    <span class="nav-link-text">Manual de usuario</span>
+                </a>
+            </nav>
+        </aside>
+        <div class="admin-main">
+            <div id="adminContent" class="admin-content-wrap loading" aria-live="polite">
+                <p class="loading-text mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Cargando…</p>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+    var contentEl = document.getElementById('adminContent');
+    var links = document.querySelectorAll('.admin-nav-link[data-src]');
+    var storageKey = 'admin-section';
+
+    function setActive(link) {
+        links.forEach(function(l) { l.classList.remove('active'); });
+        if (link) link.classList.add('active');
+    }
+
+    function loadSection(url) {
+        if (!contentEl || !url) return;
+        contentEl.classList.add('loading');
+        contentEl.innerHTML = '<p class="loading-text mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Cargando…</p>';
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) {
+                if (!r.ok) throw new Error('Error ' + r.status);
+                return r.text();
+            })
+            .then(function(html) {
+                contentEl.classList.remove('loading');
+                contentEl.innerHTML = html;
+                contentEl.querySelectorAll('script').forEach(function(oldScript) {
+                    var script = document.createElement('script');
+                    if (oldScript.src) script.src = oldScript.src; else script.textContent = oldScript.textContent;
+                    contentEl.appendChild(script);
+                });
+                try { sessionStorage.setItem(storageKey, url); } catch (e) {}
+            })
+            .catch(function() {
+                contentEl.classList.remove('loading');
+                contentEl.innerHTML = '<p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>No se pudo cargar la sección. <a href="' + url.replace('fragment=1', '') + '">Abrir en página completa</a></p>';
+            });
+    }
+
+    links.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var url = this.getAttribute('data-src');
+            if (url) {
+                setActive(this);
+                loadSection(url);
+            }
+        });
+    });
+
+    var defaultUrl = '/profesor/usuarios-sistema?fragment=1';
+    try {
+        var saved = sessionStorage.getItem(storageKey);
+        if (saved) {
+            var match = Array.prototype.find.call(links, function(l) { return l.getAttribute('data-src') === saved; });
+            if (match) {
+                setActive(match);
+                loadSection(saved);
+                return;
+            }
+        }
+    } catch (e) {}
+    loadSection(defaultUrl);
+})();
+</script>
 </body>
 </html>

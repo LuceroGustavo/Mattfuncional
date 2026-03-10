@@ -15,9 +15,9 @@
     </style>
 </head>
 <body>
-<div th:replace="fragments/navbar :: navbar"></div>
+<div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
+<div th:fragment="contenido" class="container-fluid py-4 px-4 admin-section-content" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <h3 class="mb-0"><i class="fas fa-globe me-2" style="color:#5e35b1;"></i>Administrar página pública</h3>
         <a href="/planes" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-external-link-alt me-1"></i>Ver página pública</a>
@@ -25,8 +25,8 @@
 
     <div th:if="${ok}" class="alert alert-success" th:text="${ok}">Guardado</div>
 
-    <!-- Tarjetas de acceso directo -->
-    <div class="row g-3 mb-4">
+    <!-- Tarjetas de acceso directo (ocultas cuando se muestra embebido o como fragmento) -->
+    <div th:if="${(param.embed == null || param.embed.isEmpty()) && (param.fragment == null || param.fragment.isEmpty())}" class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-md-4">
             <a th:href="@{/profesor/usuarios-sistema}" class="text-decoration-none">
                 <div class="card border-0 shadow-sm h-100 rounded-3 overflow-hidden" style="background: linear-gradient(135deg, #c8e6c9 60%, #b2dfdb 100%); transition: transform 0.15s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">

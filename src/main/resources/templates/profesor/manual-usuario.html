@@ -25,9 +25,25 @@
     </style>
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="manual-container">
+    <div th:fragment="contenido" class="manual-container admin-section-content">
+        <style>
+            .admin-section-content.manual-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            .admin-section-content .manual-title { color: #5e35b1; font-weight: 700; margin-bottom: 1.5rem; }
+            .admin-section-content .manual h2 { font-size: 1.35rem; color: #37474f; border-bottom: 2px solid #b39ddb; padding-bottom: 0.4rem; margin-top: 2rem; }
+            .admin-section-content .manual h3 { font-size: 1.1rem; color: #546e7a; margin-top: 1.2rem; }
+            .admin-section-content .manual ul { padding-left: 1.25rem; }
+            .admin-section-content .manual li { margin-bottom: 0.4rem; }
+            .admin-section-content .manual p { margin-bottom: 0.8rem; }
+            .admin-section-content .manual .nav-interna { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+            .admin-section-content .manual .nav-interna a { color: #5e35b1; text-decoration: none; display: block; padding: 0.35rem 0; }
+            .admin-section-content .manual .nav-interna a:hover { text-decoration: underline; }
+            .admin-section-content .manual .card-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+            .admin-section-content .manual table { font-size: 0.95rem; }
+            .admin-section-content .manual table th { background: #ede7f6; color: #37474f; }
+            .admin-section-content .manual .icon-item { margin-bottom: 0.5rem; }
+        </style>
         <div class="manual">
             <h1 class="manual-title"><i class="fa-solid fa-book me-2"></i>Manual del usuario</h1>
             <p class="text-muted">Para profesores, administradores y ayudantes. Cómo usar el panel de Mattfuncional a diario.</p>

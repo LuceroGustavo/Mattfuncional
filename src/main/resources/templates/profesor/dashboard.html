@@ -19,6 +19,50 @@
         .dashboard-cards {
             gap: 2rem;
         }
+        /* Grid 4 columnas: arriba 4 tarjetas grandes (menos altas), abajo 4 tarjetas de acceso */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .dashboard-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .dashboard-grid .card-module {
+            min-height: 160px;
+            flex: 0 0 auto;
+        }
+        .dashboard-grid .card-module i {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-grid .card-module .stat {
+            font-size: 2.2rem;
+        }
+        .dashboard-grid .card-module .label {
+            font-size: 1.1rem;
+        }
+        .dashboard-grid .main-action-card {
+            min-height: 82px;
+            flex: 1 1 auto;
+            max-width: none;
+        }
+        .dashboard-grid .main-action-card i {
+            font-size: 1.6rem;
+        }
+        .dashboard-grid .main-action-card .card-label {
+            font-size: 0.95rem;
+        }
+        .dashboard-grid .main-action-card .card-inner {
+            padding: 0.6rem 0.75rem;
+        }
         .card-module {
             border: none;
             border-radius: 1.5rem;
@@ -121,6 +165,56 @@
             color: #37474f;
             border-color: #90a4ae;
         }
+        /* Tarjetas rectangulares de acceso (Ejercicios, Pizarra, Administrar sistema) – ~40% más chicas */
+        .main-action-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .main-action-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 0;
+            min-width: 120px;
+            max-width: 192px;
+            min-height: 72px;
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .main-action-card:hover {
+            color: inherit;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+        .main-action-card .card-inner {
+            text-align: center;
+            padding: 0.5rem 0.6rem;
+        }
+        .main-action-card i {
+            font-size: 1.35rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .main-action-card .card-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #37474f;
+        }
+        .main-action-card.card-ejercicios { background: linear-gradient(135deg, #fff9c4 60%, #ffe082 100%); }
+        .main-action-card.card-ejercicios i { color: #e65100; }
+        .main-action-card.card-pizarra { background: linear-gradient(135deg, #ffcc80 60%, #ffb74d 100%); }
+        .main-action-card.card-pizarra i { color: #e65100; }
+        .main-action-card.card-admin { background: linear-gradient(135deg, #e1bee7 60%, #d1c4e9 100%); }
+        .main-action-card.card-admin i { color: #5e35b1; }
+        .main-action-card.card-calendario { background: linear-gradient(135deg, #bbdefb 60%, #b3e5fc 100%); }
+        .main-action-card.card-calendario i { color: #1565c0; }
         .tabs-section {
             background: #fff;
             border-radius: 1.2rem;
@@ -199,12 +293,17 @@
         .tabs-section .btn-danger { background: #ef9a9a; border-color: #e57373; color: #b71c1c; }
         .tabs-section .btn-danger:hover { background: #e57373; border-color: #ef5350; color: #b71c1c; }
         @media (max-width: 991px) {
+            .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
             .dashboard-cards { flex-direction: column; gap: 1.2rem; }
             .card-module { min-width: 100%; }
+            .main-action-card { max-width: 100%; }
         }
         @media (max-width: 575px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
             .tabs-section { padding: 1rem 0.3rem; }
             .main-actions .btn { width: 100%; margin-bottom: 0.7rem; }
+            .main-action-cards { flex-direction: column; }
+            .main-action-card { max-width: 100%; min-width: 100%; }
         }
     </style>
 </head>
@@ -220,46 +319,67 @@
             </div>
         </div>
 
-        <!-- Tarjetas de módulos -->
-        <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-4 mb-4" style="margin-top:2rem;">
-            <div class="card-module card-alumnos card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="alumnos" role="button" tabindex="0" title="Ver lista de alumnos">
-                <a th:href="@{/profesor/alumnos/nuevo}" class="card-module-add" title="Nuevo alumno"><i class="fa-solid fa-user-plus"></i></a>
-                <i class="fa-solid fa-users"></i>
-                <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
-                <div class="label">Alumnos</div>
+        <!-- Grid 4x2: 4 tarjetas arriba (menos altas), 4 abajo alineadas por columna -->
+        <div class="dashboard-grid">
+            <!-- Columna 1: Alumnos | Calendario -->
+            <div class="dashboard-col">
+                <div class="card-module card-alumnos card-scroll-tab" data-scroll-tab="alumnos" role="button" tabindex="0" title="Ver lista de alumnos">
+                    <a th:href="@{/profesor/alumnos/nuevo}" class="card-module-add" title="Nuevo alumno"><i class="fa-solid fa-user-plus"></i></a>
+                    <i class="fa-solid fa-users"></i>
+                    <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
+                    <div class="label">Alumnos</div>
+                </div>
+                <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="main-action-card card-calendario" target="_blank" rel="noopener noreferrer" title="Calendario Semanal">
+                    <div class="card-inner">
+                        <i class="fa-solid fa-calendar-week"></i>
+                        <span class="card-label">Calendario</span>
+                    </div>
+                </a>
             </div>
-            <div class="card-module card-series card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="series" role="button" tabindex="0" title="Ver lista de series">
-                <a href="/series/crear" class="card-module-add" title="Crear serie"><i class="fa-solid fa-plus"></i></a>
-                <i class="fa-solid fa-dumbbell"></i>
-                <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
-                <div class="label">Series</div>
+            <!-- Columna 2: Series | Ejercicios -->
+            <div class="dashboard-col">
+                <div class="card-module card-series card-scroll-tab" data-scroll-tab="series" role="button" tabindex="0" title="Ver lista de series">
+                    <a href="/series/crear" class="card-module-add" title="Crear serie"><i class="fa-solid fa-plus"></i></a>
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
+                    <div class="label">Series</div>
+                </div>
+                <a th:href="@{/profesor/mis-ejercicios}" class="main-action-card card-ejercicios" target="_blank" rel="noopener noreferrer" title="Ver ejercicios">
+                    <div class="card-inner">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span class="card-label">Ejercicios</span>
+                    </div>
+                </a>
             </div>
-            <div class="card-module card-rutinas card-scroll-tab" style="min-width:260px; min-height:160px;" data-scroll-tab="rutinas" role="button" tabindex="0" title="Ver lista de rutinas">
-                <a th:href="@{/rutinas/crear}" class="card-module-add" title="Crear rutina"><i class="fa-solid fa-plus"></i></a>
-                <i class="fa-solid fa-list-check"></i>
-                <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
-                <div class="label">Rutinas</div>
+            <!-- Columna 3: Rutinas | Pizarra -->
+            <div class="dashboard-col">
+                <div class="card-module card-rutinas card-scroll-tab" data-scroll-tab="rutinas" role="button" tabindex="0" title="Ver lista de rutinas">
+                    <a th:href="@{/rutinas/crear}" class="card-module-add" title="Crear rutina"><i class="fa-solid fa-plus"></i></a>
+                    <i class="fa-solid fa-list-check"></i>
+                    <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
+                    <div class="label">Rutinas</div>
+                </div>
+                <a th:href="@{/profesor/pizarra}" class="main-action-card card-pizarra" target="_blank" rel="noopener noreferrer" title="Pizarra en sala">
+                    <div class="card-inner">
+                        <i class="fa-solid fa-tv"></i>
+                        <span class="card-label">Pizarra</span>
+                    </div>
+                </a>
             </div>
-            <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="card-module card-asignadas card-link" style="min-width:260px; min-height:160px;" target="_blank" rel="noopener noreferrer" title="Calendario Semanal">
-                <i class="fa-solid fa-calendar-week"></i>
-                <div class="label">Calendario Semanal</div>
-            </a>
-        </div>
-
-        <!-- Botones principales -->
-        <div class="main-actions d-flex flex-wrap justify-content-center mb-4">
-            <a th:href="@{/profesor/mis-ejercicios}" class="btn btn-rutinas mx-1">
-                <i class="fa-solid fa-dumbbell me-2"></i>Ver Ejercicios
-            </a>
-            <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary mx-1">
-                <i class="fa-solid fa-cogs me-2"></i>Administrar sistema
-            </a>
-            <a th:href="@{/profesor/pizarra}" class="btn btn-pizarra mx-1">
-                <i class="fa-solid fa-tv me-2"></i>Pizarra
-            </a>
-            <a th:href="@{/profesor/manual}" class="btn btn-outline-secondary mx-1" title="Manual de uso del panel">
-                <i class="fa-solid fa-book me-2"></i>Manual del usuario
-            </a>
+            <!-- Columna 4: Asignaciones | Administrar sistema -->
+            <div class="dashboard-col">
+                <div class="card-module card-asignadas card-scroll-tab" data-scroll-tab="asignaciones" role="button" tabindex="0" title="Ver rutinas asignadas">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
+                    <div class="label">Asignaciones</div>
+                </div>
+                <a th:href="@{/profesor/administracion}" class="main-action-card card-admin" target="_blank" rel="noopener noreferrer" title="Administrar sistema">
+                    <div class="card-inner">
+                        <i class="fa-solid fa-cogs"></i>
+                        <span class="card-label">Administrar sistema</span>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- Tabs y contenido -->
