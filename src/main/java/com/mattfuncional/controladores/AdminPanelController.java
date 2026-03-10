@@ -106,7 +106,7 @@ public class AdminPanelController {
             err.put("message", "Error al leer el archivo: " + e.getMessage());
             redirectAttributes.addFlashAttribute("importResult", err);
         }
-        return "redirect:/profesor/backup";
+        return "redirect:/profesor/administracion?seccion=backup";
     }
 
     /**

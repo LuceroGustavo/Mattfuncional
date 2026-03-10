@@ -1006,6 +1006,9 @@ public class ProfesorController {
         if (!grupoMuscularService.puedeSerEditadoPorProfesor(id, profesor.getId())) {
             return "redirect:/profesor/mis-grupos-musculares?error=sin_permisos";
         }
+        if (!exerciseService.findExercisesByGrupoId(id).isEmpty()) {
+            return "redirect:/profesor/mis-grupos-musculares?error=grupo_en_uso";
+        }
         grupoMuscularService.eliminar(id);
         return "redirect:/profesor/mis-grupos-musculares?success=grupo_eliminado";
     }

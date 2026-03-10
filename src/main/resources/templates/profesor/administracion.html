@@ -137,6 +137,20 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container-fluid py-3 px-3 px-md-4">
+    <div th:if="${importResult}" class="alert mb-3" th:classappend="${importResult.success} ? 'alert-success' : 'alert-danger'" role="alert">
+        <span th:if="${importResult.success}">
+            <strong>Importación correcta.</strong>
+            <span th:text="${importResult.ejerciciosImportados} + ' ejercicios'">0</span>
+            <span th:if="${importResult.ejerciciosConImagen != null}" th:text="' (' + ${importResult.ejerciciosConImagen} + ' con imagen)'"> </span>
+            <span th:if="${importResult.gruposMuscularesImportados != null && importResult.gruposMuscularesImportados > 0}" th:text="', ' + ${importResult.gruposMuscularesImportados} + ' grupos musculares'"> </span>
+            <span th:if="${importResult.rutinasImportadas != null && importResult.rutinasImportadas > 0}" th:text="', ' + ${importResult.rutinasImportadas} + ' rutinas, ' + ${importResult.seriesImportadas} + ' series'"> </span>
+            <span th:if="${importResult.ejerciciosOmitidos != null && importResult.ejerciciosOmitidos > 0}" th:text="', ' + ${importResult.ejerciciosOmitidos} + ' omitidos'"> </span>.
+        </span>
+        <span th:if="${!importResult.success}" th:text="${importResult.message}">Error</span>
+        <ul th:if="${importResult.errores != null && !importResult.errores.isEmpty()}" class="mb-0 mt-2">
+            <li th:each="e : ${importResult.errores}" th:text="${e}">error</li>
+        </ul>
+    </div>
     <div class="admin-layout">
         <aside class="admin-sidebar">
             <nav class="nav-section">
@@ -220,18 +234,30 @@
     });
 
     var defaultUrl = '/profesor/usuarios-sistema?fragment=1';
-    try {
-        var saved = sessionStorage.getItem(storageKey);
-        if (saved) {
-            var match = Array.prototype.find.call(links, function(l) { return l.getAttribute('data-src') === saved; });
-            if (match) {
-                setActive(match);
-                loadSection(saved);
-                return;
-            }
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('seccion') === 'backup') {
+        var backupLink = Array.prototype.find.call(links, function(l) { return (l.getAttribute('data-src') || '').indexOf('backup') >= 0; });
+        if (backupLink) {
+            setActive(backupLink);
+            loadSection(backupLink.getAttribute('data-src'));
+            try { sessionStorage.setItem(storageKey, backupLink.getAttribute('data-src')); } catch (e) {}
+            defaultUrl = null;
         }
-    } catch (e) {}
-    loadSection(defaultUrl);
+    }
+    if (defaultUrl) {
+        try {
+            var saved = sessionStorage.getItem(storageKey);
+            if (saved) {
+                var match = Array.prototype.find.call(links, function(l) { return l.getAttribute('data-src') === saved; });
+                if (match) {
+                    setActive(match);
+                    loadSection(saved);
+                    return;
+                }
+            }
+        } catch (e) {}
+        loadSection(defaultUrl);
+    }
 })();
 </script>
 </body>

@@ -31,6 +31,7 @@
     </div>
     <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <span th:if="${param.error[0] == 'sin_permisos'}">No tienes permisos para editar o eliminar ese grupo (solo puedes modificar los que creaste).</span>
+        <span th:if="${param.error[0] == 'grupo_en_uso'}">No se puede eliminar: hay ejercicios que usan este grupo muscular. Quitá este grupo de esos ejercicios primero (editá cada ejercicio y desmarcá el grupo) y después volvé a intentar eliminar.</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
