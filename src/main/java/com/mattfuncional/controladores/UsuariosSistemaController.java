@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -33,6 +37,7 @@ public class UsuariosSistemaController {
     @GetMapping
     public String verUsuariosSistema(@AuthenticationPrincipal Usuario usuarioActual,
                                      @RequestParam(name = "fragment", required = false) String fragment,
+                                     HttpServletRequest request,
                                      Model model) {
         if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
             return "redirect:/profesor/dashboard";
@@ -48,9 +53,13 @@ public class UsuariosSistemaController {
             model.addAttribute("correosDuplicados", correosDuplicados);
         }
         if (fragment != null && !fragment.isEmpty()) {
+            String errorMessage = request.getParameter("errorMessage");
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                model.addAttribute("errorMessage", errorMessage);
+            }
             return "profesor/usuarios-sistema :: contenido";
         }
-        return "profesor/usuarios-sistema";
+        return "redirect:/profesor/administracion";
     }
 
     @GetMapping("/crear")
@@ -71,10 +80,10 @@ public class UsuariosSistemaController {
         }
         Usuario usuario = usuarioService.getUsuarioById(id);
         if (usuario == null) {
-            return "redirect:/profesor/usuarios-sistema?error=notfound";
+            return "redirect:/profesor/administracion?error=notfound";
         }
         if (isDeveloper(usuario) && !isDeveloper(usuarioActual)) {
-            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+            return "redirect:/profesor/administracion?error=developer-locked";
         }
         model.addAttribute("usuario", usuario);
         model.addAttribute("usuarioActual", usuarioActual);
@@ -100,12 +109,14 @@ public class UsuariosSistemaController {
                 profesor = profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
             }
             usuarioService.crearUsuarioSistema(nombre, correo, password, rol, profesor);
-            return "redirect:/profesor/usuarios-sistema?ok=creado";
+            return "redirect:/profesor/administracion?ok=creado";
         } catch (Exception e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("usuariosSistema", usuarioService.getUsuariosSistemaPara(usuarioActual));
-            model.addAttribute("usuarioActual", usuarioActual);
-            return "profesor/usuarios-sistema";
+            try {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error al crear usuario";
+                return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException ex) {
+                return "redirect:/profesor/administracion?error=crear";
+            }
         }
     }
 
@@ -120,9 +131,9 @@ public class UsuariosSistemaController {
             if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId)) {
                 return "redirect:/login?logout";
             }
-            return "redirect:/profesor/usuarios-sistema?ok=eliminado";
+            return "redirect:/profesor/administracion?ok=eliminado";
         }
-        return "redirect:/profesor/usuarios-sistema?error=no-permitido";
+        return "redirect:/profesor/administracion?error=no-permitido";
     }
 
     @PostMapping("/rol")
@@ -134,16 +145,16 @@ public class UsuariosSistemaController {
         }
         Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
         if (objetivo == null) {
-            return "redirect:/profesor/usuarios-sistema?error=notfound";
+            return "redirect:/profesor/administracion?error=notfound";
         }
         if (isDeveloper(objetivo)) {
-            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+            return "redirect:/profesor/administracion?error=developer-locked";
         }
         if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId) && !"ADMIN".equalsIgnoreCase(rol)) {
-            return "redirect:/profesor/usuarios-sistema?error=self-rol";
+            return "redirect:/profesor/administracion?error=self-rol";
         }
         usuarioService.actualizarRolUsuario(usuarioId, rol);
-        return "redirect:/profesor/usuarios-sistema?ok=rol";
+        return "redirect:/profesor/administracion?ok=rol";
     }
 
     @PostMapping("/password")
@@ -155,13 +166,13 @@ public class UsuariosSistemaController {
         }
         Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
         if (objetivo == null) {
-            return "redirect:/profesor/usuarios-sistema?error=notfound";
+            return "redirect:/profesor/administracion?error=notfound";
         }
         if (isDeveloper(objetivo) && !isDeveloper(usuarioActual)) {
-            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+            return "redirect:/profesor/administracion?error=developer-locked";
         }
         usuarioService.cambiarPasswordUsuario(usuarioId, password);
-        return "redirect:/profesor/usuarios-sistema?ok=password";
+        return "redirect:/profesor/administracion?ok=password";
     }
 
     @PostMapping("/perfil")
@@ -172,7 +183,7 @@ public class UsuariosSistemaController {
             return "redirect:/profesor/dashboard";
         }
         usuarioService.actualizarDatosUsuarioSistema(usuarioActual.getId(), nombre, correo);
-        return "redirect:/profesor/usuarios-sistema?ok=perfil";
+        return "redirect:/profesor/administracion?ok=perfil";
     }
 
     @PostMapping("/editar")
@@ -187,22 +198,22 @@ public class UsuariosSistemaController {
         }
         Usuario objetivo = usuarioService.getUsuarioById(usuarioId);
         if (objetivo == null) {
-            return "redirect:/profesor/usuarios-sistema?error=notfound";
+            return "redirect:/profesor/administracion?error=notfound";
         }
         if (isDeveloper(objetivo) && !isDeveloper(usuarioActual)) {
-            return "redirect:/profesor/usuarios-sistema?error=developer-locked";
+            return "redirect:/profesor/administracion?error=developer-locked";
         }
         usuarioService.actualizarDatosUsuarioSistema(usuarioId, nombre, correo);
         if (rol != null && !rol.isBlank() && !isDeveloper(objetivo)) {
             if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId) && !"ADMIN".equalsIgnoreCase(rol)) {
-                return "redirect:/profesor/usuarios-sistema?error=self-rol";
+                return "redirect:/profesor/administracion?error=self-rol";
             }
             usuarioService.actualizarRolUsuario(usuarioId, rol);
         }
         if (password != null && !password.isBlank()) {
             usuarioService.cambiarPasswordUsuario(usuarioId, password);
         }
-        return "redirect:/profesor/usuarios-sistema?ok=datos";
+        return "redirect:/profesor/administracion?ok=datos";
     }
 
     private boolean isAdminOrDeveloper(Usuario usuario) {

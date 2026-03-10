@@ -103,7 +103,7 @@ public class ProfesorController {
         if (fragment != null && !fragment.isEmpty()) {
             return "profesor/manual-usuario :: contenido";
         }
-        return "profesor/manual-usuario";
+        return "redirect:/profesor/administracion";
     }
 
     @GetMapping("/{id}")

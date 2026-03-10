@@ -181,9 +181,13 @@
 
     function loadSection(url) {
         if (!contentEl || !url) return;
+        var fullUrl = url;
+        if (window.location.search && window.location.search.length > 1) {
+            fullUrl += (url.indexOf('?') >= 0 ? '&' : '?') + window.location.search.substring(1);
+        }
         contentEl.classList.add('loading');
         contentEl.innerHTML = '<p class="loading-text mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Cargando…</p>';
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(fullUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(function(r) {
                 if (!r.ok) throw new Error('Error ' + r.status);
                 return r.text();
