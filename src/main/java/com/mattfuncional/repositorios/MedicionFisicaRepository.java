@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
  
 public interface MedicionFisicaRepository extends JpaRepository<MedicionFisica, Long> {
-    List<MedicionFisica> findByUsuarioIdOrderByFechaDesc(Long usuarioId);
+    /** Últimas mediciones del usuario (más reciente primero). */
+    List<MedicionFisica> findByUsuario_IdOrderByFechaDesc(Long usuarioId);
 
     void deleteByUsuario_Id(Long usuarioId);
 } 

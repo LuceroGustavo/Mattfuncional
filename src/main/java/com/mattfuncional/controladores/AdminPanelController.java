@@ -2,6 +2,7 @@ package com.mattfuncional.controladores;
 
 import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
+import com.mattfuncional.servicios.AlumnoExportService;
 import com.mattfuncional.servicios.ExerciseBackupService;
 import com.mattfuncional.servicios.ExerciseExportImportService;
 import com.mattfuncional.servicios.ExerciseZipBackupService;
@@ -44,15 +45,18 @@ public class AdminPanelController {
     private final ExerciseBackupService exerciseBackupService;
     private final ExerciseZipBackupService exerciseZipBackupService;
     private final ProfesorService profesorService;
+    private final AlumnoExportService alumnoExportService;
 
     public AdminPanelController(ExerciseExportImportService exerciseExportImportService,
                                 ExerciseBackupService exerciseBackupService,
                                 ExerciseZipBackupService exerciseZipBackupService,
-                                ProfesorService profesorService) {
+                                ProfesorService profesorService,
+                                AlumnoExportService alumnoExportService) {
         this.exerciseExportImportService = exerciseExportImportService;
         this.exerciseBackupService = exerciseBackupService;
         this.exerciseZipBackupService = exerciseZipBackupService;
         this.profesorService = profesorService;
+        this.alumnoExportService = alumnoExportService;
     }
 
     private Profesor getProfesorParaUsuario(Usuario usuario) {
@@ -129,6 +133,32 @@ public class AdminPanelController {
             err.put("success", false);
             err.put("message", "Error al leer el archivo: " + e.getMessage());
             return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    /**
+     * Exporta alumnos del profesor a Excel (datos, cantidad asignaciones, últimas 3 evoluciones).
+     */
+    @GetMapping("/backup/exportar-alumnos-excel")
+    public ResponseEntity<Resource> exportarAlumnosExcel(@AuthenticationPrincipal Usuario usuarioActual) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return ResponseEntity.notFound().build();
+        }
+        Profesor profesor = getProfesorParaUsuario(usuarioActual);
+        if (profesor == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            byte[] excelBytes = alumnoExportService.exportarAlumnosAExcel(profesor.getId());
+            String fileName = "alumnos_" + LocalDateTime.now().format(ZIP_FILENAME_DATE) + ".xlsx";
+            Resource resource = new ByteArrayResource(excelBytes);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            logger.error("Error al exportar alumnos a Excel: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 

@@ -110,16 +110,15 @@
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
                 <!-- Arriba: Exportar alumnos -->
-                <div class="card backup-card backup-card-placeholder card-alumnos-export">
+                <div class="card backup-card card-alumnos-export">
                     <div class="card-header card-header-alumnos-export">
                         <i class="fas fa-users me-2"></i>Exportar alumnos
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small mb-2">Descargar listado de alumnos (Excel o CSV).</p>
-                        <button type="button" class="btn btn-sm disabled" style="background: rgba(3, 169, 244, 0.2); color: #0277bd;" disabled>
+                        <p class="text-muted small mb-2">Descargá un Excel con datos de alumnos, cantidad de asignaciones y últimas 3 evoluciones (mediciones).</p>
+                        <a th:href="@{/profesor/backup/exportar-alumnos-excel}" class="btn btn-sm" style="background: rgba(3, 169, 244, 0.25); color: #0277bd; border: 1px solid #03a9f4;">
                             <i class="fas fa-file-export me-1"></i>Exportar
-                        </button>
-                        <p class="small text-muted mt-2 mb-0">En desarrollo</p>
+                        </a>
                     </div>
                 </div>
                 <!-- Abajo: Importar alumnos -->

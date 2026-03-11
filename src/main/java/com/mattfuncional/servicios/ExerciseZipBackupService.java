@@ -518,7 +518,8 @@ public class ExerciseZipBackupService {
                     serie.setNombre(nombreSerie);
                     serie.setOrden(toInt(sd.get("orden"), 0));
                     serie.setDescripcion((String) sd.get("descripcion"));
-                    serie.setEsPlantilla(sd.get("esPlantilla") == null || Boolean.TRUE.equals(sd.get("esPlantilla")));
+                    // En restore completo todas las series se consideran plantilla para que el panel muestre el total correcto
+                    serie.setEsPlantilla(true);
                     serie.setRepeticionesSerie(toInt(sd.get("repeticionesSerie"), 1));
                     serie.setCreador(sd.get("creador") != null ? (String) sd.get("creador") : "ADMIN");
                     serie.setRutina(rutina);

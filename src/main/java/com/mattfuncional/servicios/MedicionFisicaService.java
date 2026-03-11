@@ -18,6 +18,6 @@ public class MedicionFisicaService {
     }
 
     public List<MedicionFisica> obtenerMedicionesPorUsuario(Long usuarioId) {
-        return medicionFisicaRepository.findByUsuarioIdOrderByFechaDesc(usuarioId);
+        return medicionFisicaRepository.findByUsuario_IdOrderByFechaDesc(usuarioId);
     }
 } 
