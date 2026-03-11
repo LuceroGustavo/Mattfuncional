@@ -2,6 +2,21 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-11] - docs: acceso al sistema y límite de subida Nginx ✅
+
+### 🎯 **Resumen**
+Documentación de cómo ingresar a la app (URLs, credenciales de desarrollo) y cómo modificar el límite de subida en Nginx del servidor.
+
+### ✅ **Cambios**
+- **LEEME_PRIMERO:** Nueva sección "0. Cómo ingresar" con URLs (detodoya.com.ar, localhost, IP), páginas públicas sin login, credenciales profesor y developer.
+- **MANUAL-USUARIO:** Sección "1. Acceso al sistema" ampliada con URLs concretas y usuario de prueba (profesor@mattfuncional.com / profesor).
+- **DESPLIEGUE-SERVIDOR:** Nueva sección "8.1 Modificar límite de subida (client_max_body_size)" con instrucciones por SSH, SCP y Consola VNC.
+
+### 📁 **Archivos modificados**
+`Documentacion/LEEME_PRIMERO.md`, `Documentacion/MANUAL-USUARIO.md`, `Documentacion/servidor/DESPLIEGUE-SERVIDOR.md`, `COMMIT_PENDIENTE.md`.
+
+---
+
 ## [2026-02-09] - fix(backup): series independientes de rutina y restauración correcta ✅
 
 ### 🎯 **Resumen**

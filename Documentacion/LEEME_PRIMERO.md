@@ -4,6 +4,27 @@
 
 ---
 
+## 0. Cómo ingresar (acceso rápido)
+
+| Entorno | URL | Login |
+|---------|-----|-------|
+| **Producción** | http://detodoya.com.ar | `/login` — requiere correo y contraseña |
+| **Local** | http://localhost:8080 | `/login` — mismo flujo |
+| **Servidor (IP)** | http://149.50.144.53:8080 | Ver [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) |
+
+**Páginas públicas (sin login):** `/` (landing), `/planes`, `/publica`, `/demo`.
+
+**Credenciales de desarrollo** (creadas por `DataInitializer` al arrancar):
+
+| Usuario | Correo | Contraseña |
+|---------|--------|------------|
+| Profesor/Admin | profesor@mattfuncional.com | profesor |
+| Developer | developer@mattfuncional.com | Qbasic.1977.mattfuncional |
+
+Tras iniciar sesión se redirige al **Panel del profesor** (`/profesor/{id}`).
+
+---
+
 ## 1. Qué es este proyecto
 
 - **Nombre:** Mattfuncional (evolución de MiGym).

@@ -1,58 +1,40 @@
 # TAREA ACTUAL - Estado para Commit
 
 ## 📋 Resumen Ejecutivo
-**Problema del dropdown [object Object] CORREGIDO** ✅ + **Error de transacción CORREGIDO** ✅ - La importación ahora debería funcionar completamente.
+**Documentación de acceso y Nginx** – Listo para commit y push desde casa (red bloqueada en el trabajo).
 
-## ✅ LO QUE SÍ FUNCIONA
-- Modal se abre correctamente
-- Interfaz con dos métodos de asignación
-- Backend endpoints implementados
-- **NUEVO**: Dropdown de backups muestra nombres de archivos correctamente
-- **NUEVO**: Error de transacción "rollback-only" corregido
-- Compilación exitosa sin errores
+## 🚀 COMMIT PENDIENTE (hacer desde casa)
 
-## ❌ LO QUE NO FUNCIONA
-- **RESUELTO**: Dropdown de backups no se cargaba (ahora funciona)
-- **RESUELTO**: Error de transacción durante importación (ahora corregido)
-- Sistema de backup no muestra archivos (pendiente de verificar)
-- Botón amarillo "Importar JSON" (pendiente de verificar)
+Ver archivo **`COMMIT_PENDIENTE.md`** en la raíz del proyecto para instrucciones completas.
 
-## 🔧 ARCHIVOS MODIFICADOS
-1. `src/main/resources/templates/admin/ejercicios-gestion.html` - **CORREGIDO** dropdown de backups
-2. `src/main/java/com/migym/servicios/ExerciseExportImportService.java` - **CORREGIDO** manejo de transacciones
-3. `historial/progreso_de_app/cambios_realizados.md` - Documentación actualizada
-
-## 🚀 PARA EL COMMIT
+**Comandos rápidos:**
 ```bash
-git add .
-git commit -m "fix: Resolve [object Object] dropdown and transaction rollback issues
+cd C:\Users\ESS03\Desktop\APPS\Mattfuncional
 
-- Fix backup dropdown to show filenames instead of [object Object]
-- Fix transaction rollback error in exercise import service
-- Improve error handling and transaction management
-- Add error tracking for better debugging"
-git push
+git add Documentacion/LEEME_PRIMERO.md Documentacion/MANUAL-USUARIO.md Documentacion/servidor/DESPLIEGUE-SERVIDOR.md CHANGELOG.md COMMIT_PENDIENTE.md
+
+git commit -m "docs: acceso al sistema y límite de subida Nginx
+
+- LEEME_PRIMERO: sección Cómo ingresar (URLs, credenciales dev)
+- MANUAL-USUARIO: URLs concretas y usuario de prueba
+- DESPLIEGUE-SERVIDOR: sección 8.1 client_max_body_size (SSH, SCP, VNC)
+- CHANGELOG: entrada docs acceso y Nginx"
+
+git push origin main
 ```
 
-## 🐛 PROBLEMAS RESUELTOS ✅
+## 📁 Archivos a commitear
+- `Documentacion/LEEME_PRIMERO.md` – Cómo ingresar (URLs, credenciales)
+- `Documentacion/MANUAL-USUARIO.md` – Acceso al sistema ampliado
+- `Documentacion/servidor/DESPLIEGUE-SERVIDOR.md` – Sección 8.1 Nginx client_max_body_size
+- `CHANGELOG.md` – Entrada docs
+- `COMMIT_PENDIENTE.md` – Guía para commit desde casa
 
-### 1. **Dropdown [object Object]**
-- **CAUSA**: JavaScript trataba objetos completos como strings
-- **SOLUCIÓN**: Extraer solo `backup.nombre` o `backup.displayName`
-- **RESULTADO**: Dropdown ahora muestra nombres de archivos correctamente
-
-### 2. **Error de Transacción**
-- **CAUSA**: Manejo incorrecto de transacciones y excepciones
-- **SOLUCIÓN**: `@Transactional(rollbackFor = Exception.class)` + propagación correcta
-- **RESULTADO**: Importación más robusta sin errores de rollback
-
-## 📝 DESPUÉS DEL COMMIT
-1. **Probar la importación** para confirmar funcionamiento completo
-2. **Verificar sistema de backup** principal
-3. **Crear issue** si hay otros problemas
-4. **Continuar con desarrollo** de funcionalidades
+## 📝 Pendiente testear (desde casa)
+- Exportar/importar backup con nombres 1.webp, 2.webp
+- Restauración de series en panel
+- Aplicar client_max_body_size en Nginx del servidor (SSH o VNC)
 
 ---
-**Estado**: ✅ **DOBLE CORRECCIÓN** - Listo para commit y testing
-**Prioridad**: Alta (problemas críticos resueltos)
-**Riesgo**: Bajo (correcciones específicas y seguras)
+**Estado**: Listo para commit y push
+**Nota**: Red bloqueada en el trabajo; ejecutar desde casa

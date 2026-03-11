@@ -7,9 +7,10 @@ Para contexto técnico del proyecto ver [LEEME_PRIMERO.md](LEEME_PRIMERO.md). Pa
 
 ## 1. Acceso al sistema
 
-- **URL:** La que te haya dado el administrador (ej. `http://tu-servidor:8080`).
-- **Inicio de sesión:** Solo usuarios con rol **ADMIN**, **AYUDANTE** o **DEVELOPER**. Los alumnos no tienen usuario ni contraseña; se gestionan desde el panel.
+- **URL:** La que te haya dado el administrador. En producción: `http://detodoya.com.ar`. En local: `http://localhost:8080`.
+- **Inicio de sesión:** Ir a la URL y hacer clic en **Iniciar sesión** (o ir directo a `/login`). Solo usuarios con rol **ADMIN**, **AYUDANTE** o **DEVELOPER** pueden ingresar. Los alumnos no tienen usuario ni contraseña; se gestionan desde el panel.
 - **Credenciales:** Correo electrónico y contraseña. Si las olvidás, un administrador puede restablecerlas desde **Usuarios del sistema**.
+- **Usuarios de prueba** (creados al instalar): `profesor@mattfuncional.com` / `profesor` (Admin); `developer@mattfuncional.com` (Developer; contraseña en DataInitializer).
 
 Tras ingresar, se abre el **Panel del profesor** (dashboard).
 

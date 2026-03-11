@@ -218,6 +218,40 @@ Luego en el menú elegí la opción que necesites (por ejemplo **5** para despli
 
 ---
 
+## 8.1 Modificar límite de subida (client_max_body_size)
+
+Para permitir subir archivos ZIP grandes (backup de ejercicios con imágenes), Nginx debe tener `client_max_body_size` configurado. El archivo `nginx-detodoya.conf` del repo ya incluye `client_max_body_size 50M;` dentro del bloque `server` HTTPS.
+
+**Si necesitás aplicarlo o cambiarlo en el servidor:**
+
+1. **Por SSH** (con clave configurada):
+   ```bash
+   ssh -p 5638 root@149.50.144.53
+   ```
+   Luego en el servidor:
+   ```bash
+   # Ver si ya está configurado
+   grep -n client_max_body_size /etc/nginx/sites-available/detodoya.com.ar
+
+   # Si no está o querés cambiarlo, editar:
+   nano /etc/nginx/sites-available/detodoya.com.ar
+   # Dentro del bloque server { ... } que tiene proxy_pass, agregar (o modificar):
+   #   client_max_body_size 50M;   # o 100M para backups más grandes
+
+   # Probar y recargar
+   nginx -t && systemctl reload nginx
+   ```
+
+2. **Copiar desde tu PC** (si modificaste el .conf en el repo):
+   ```bash
+   scp -P 5638 Documentacion/servidor/nginx-detodoya.conf root@149.50.144.53:/etc/nginx/sites-available/detodoya.com.ar
+   ssh -p 5638 root@149.50.144.53 "nginx -t && systemctl reload nginx"
+   ```
+
+3. **Por Consola VNC** (si no podés usar SSH): entrá al menú, y en una terminal del servidor ejecutá los mismos comandos `nano`, `nginx -t` y `systemctl reload nginx`.
+
+---
+
 ## 9. Resumen rápido (Consola VNC)
 
 1. Donweb → Consola VNC.
