@@ -14,12 +14,17 @@
         .backup-card .card-header { border-radius: 1rem 1rem 0 0; font-weight: 600; font-size: 0.95rem; padding: 0.6rem 1rem; }
         .backup-card .card-body { padding: 1rem; font-size: 0.9rem; }
         .backup-card-compact .card-body { padding: 0.85rem; }
-        .backup-card-placeholder { opacity: 0.85; }
+        .backup-card-placeholder { opacity: 0.9; }
         .detalle-archivo { background: #f8f9fa; border-radius: 0.5rem; padding: 0.6rem 0.75rem; font-size: 0.8rem; }
         #zonaSubida { cursor: pointer; transition: background 0.2s; min-height: 56px !important; padding: 0.5rem !important; }
         #zonaSubida:hover { background: #f0f0f0 !important; }
         #zonaSubida.dragover { border-color: #0d6efd !important; background: #e7f1ff !important; }
         .progress-modal .progress { height: 8px; }
+        /* Alumnos: celeste y azul pastel */
+        .card-header-alumnos-export { background: rgba(3, 169, 244, 0.15); color: #0277bd; }
+        .card-alumnos-export .card-body { background: rgba(225, 245, 254, 0.5); }
+        .card-header-alumnos-import { background: rgba(92, 107, 192, 0.2); color: #3949ab; }
+        .card-alumnos-import .card-body { background: rgba(232, 234, 246, 0.6); }
     </style>
 </head>
 <body>
@@ -37,100 +42,98 @@
         </a>
     </div>
 
+    <!-- 2 arriba, 2 abajo: izquierda = ejercicios/series/rutinas/grupos, derecha = alumnos -->
     <div class="row g-3">
-        <!-- 1. Ejercicios + series + rutinas + grupos musculares (Exportar e Importar) -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card backup-card backup-card-compact">
-                <div class="card-header bg-success bg-opacity-10 text-success">
-                    <i class="fas fa-dumbbell me-2"></i>Ejercicios + series + rutinas + grupos musculares
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">ZIP con ejercicios, rutinas plantilla, series e imágenes. Suplantar reemplaza todo.</p>
-                    <div class="mb-3">
-                        <a th:href="@{/profesor/backup/exportar-zip}" class="btn btn-success btn-sm w-100" id="btnExportar">
+        <!-- Columna izquierda: Ejercicios + series + rutinas + grupos musculares -->
+        <div class="col-12 col-md-6">
+            <div class="d-flex flex-column gap-3">
+                <!-- Arriba: Exportar -->
+                <div class="card backup-card backup-card-compact">
+                    <div class="card-header bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-file-export me-2"></i>Exportar ejercicios + series + rutinas + grupos musculares
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Generá un ZIP con ejercicios, rutinas plantilla, series e imágenes.</p>
+                        <a th:href="@{/profesor/backup/exportar-zip}" class="btn btn-success btn-sm" id="btnExportar">
                             <i class="fas fa-file-export me-1"></i>Exportar
                         </a>
                     </div>
-                    <form th:action="@{/profesor/backup/importar}" method="post" enctype="multipart/form-data" id="formImportar">
-                        <div class="border rounded-2 p-2 text-center bg-light position-relative" id="zonaSubida">
-                            <p class="mb-1 text-muted small" id="textoZona">ZIP acá o clic</p>
-                            <label class="btn btn-outline-primary btn-sm mb-0" style="cursor:pointer">
-                                <input type="file" name="archivoZip" id="archivoZip" accept=".zip" class="d-none">
-                                Seleccionar...
-                            </label>
-                        </div>
-                        <div id="detalleArchivo" class="mt-2 d-none">
-                            <div class="detalle-archivo">
-                                <p class="mb-1"><strong>Archivo:</strong> <span id="detalleNombre"></span></p>
-                                <p class="mb-1"><strong>Ejercicios:</strong> <span id="detalleCantidad"></span> <span id="detalleRutinas" class="text-muted"></span></p>
-                                <p class="mb-2"><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
-                                <div class="d-flex gap-1 flex-wrap">
-                                    <button type="submit" name="pisarTodos" value="false" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus me-1"></i>Agregar
-                                    </button>
-                                    <button type="submit" name="pisarTodos" value="true" class="btn btn-warning btn-sm" onclick="return confirm('¿Suplantar todo? Se borrarán los datos actuales.');">
-                                        <i class="fas fa-exchange-alt me-1"></i>Suplantar
-                                    </button>
+                </div>
+                <!-- Abajo: Importar -->
+                <div class="card backup-card backup-card-compact">
+                    <div class="card-header bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-file-import me-2"></i>Importar ejercicios + series + rutinas + grupos musculares
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Subí un ZIP exportado. Agregar o Suplantar.</p>
+                        <form th:action="@{/profesor/backup/importar}" method="post" enctype="multipart/form-data" id="formImportar">
+                            <div class="border rounded-2 p-2 text-center bg-light position-relative" id="zonaSubida">
+                                <p class="mb-1 text-muted small" id="textoZona">ZIP acá o clic</p>
+                                <label class="btn btn-outline-primary btn-sm mb-0" style="cursor:pointer">
+                                    <input type="file" name="archivoZip" id="archivoZip" accept=".zip" class="d-none">
+                                    Seleccionar...
+                                </label>
+                            </div>
+                            <div id="detalleArchivo" class="mt-2 d-none">
+                                <div class="detalle-archivo">
+                                    <p class="mb-1"><strong>Archivo:</strong> <span id="detalleNombre"></span></p>
+                                    <p class="mb-1"><strong>Ejercicios:</strong> <span id="detalleCantidad"></span> <span id="detalleRutinas" class="text-muted"></span></p>
+                                    <p class="mb-2"><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <button type="submit" name="pisarTodos" value="false" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-plus me-1"></i>Agregar
+                                        </button>
+                                        <button type="submit" name="pisarTodos" value="true" class="btn btn-warning btn-sm" onclick="return confirm('¿Suplantar todo? Se borrarán los datos actuales.');">
+                                            <i class="fas fa-exchange-alt me-1"></i>Suplantar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        </form>
+                        <div th:if="${importResult}" class="alert mt-2 py-2 px-2 small" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+                            <span th:if="${importResult['success']}">
+                                <strong>OK.</strong>
+                                <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
+                                <span th:if="${importResult['rutinasImportadas'] != null && importResult['rutinasImportadas'] > 0}" th:text="', ' + ${importResult['rutinasImportadas']} + ' rutinas'"> </span>.
+                            </span>
+                            <span th:if="${!importResult['success']}" th:text="${importResult['message']}">Error</span>
+                            <ul th:if="${importResult['errores'] != null && !importResult['errores'].isEmpty()}" class="mb-0 mt-1 ps-3 small">
+                                <li th:each="e : ${importResult['errores']}" th:text="${e}">error</li>
+                            </ul>
                         </div>
-                    </form>
-                    <div th:if="${importResult}" class="alert mt-2 py-2 px-2 small" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
-                        <span th:if="${importResult['success']}">
-                            <strong>OK.</strong>
-                            <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
-                            <span th:if="${importResult['rutinasImportadas'] != null && importResult['rutinasImportadas'] > 0}" th:text="', ' + ${importResult['rutinasImportadas']} + ' rutinas'"> </span>.
-                        </span>
-                        <span th:if="${!importResult['success']}" th:text="${importResult['message']}">Error</span>
-                        <ul th:if="${importResult['errores'] != null && !importResult['errores'].isEmpty()}" class="mb-0 mt-1 ps-3 small">
-                            <li th:each="e : ${importResult['errores']}" th:text="${e}">error</li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Exportar alumnos (placeholder) -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card backup-card backup-card-placeholder">
-                <div class="card-header bg-primary bg-opacity-10 text-primary">
-                    <i class="fas fa-users me-2"></i>Exportar alumnos
+        <!-- Columna derecha: Alumnos (celeste y azul pastel) -->
+        <div class="col-12 col-md-6">
+            <div class="d-flex flex-column gap-3">
+                <!-- Arriba: Exportar alumnos -->
+                <div class="card backup-card backup-card-placeholder card-alumnos-export">
+                    <div class="card-header card-header-alumnos-export">
+                        <i class="fas fa-users me-2"></i>Exportar alumnos
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Descargar listado de alumnos (Excel o CSV).</p>
+                        <button type="button" class="btn btn-sm disabled" style="background: rgba(3, 169, 244, 0.2); color: #0277bd;" disabled>
+                            <i class="fas fa-file-export me-1"></i>Exportar
+                        </button>
+                        <p class="small text-muted mt-2 mb-0">En desarrollo</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">Descargar listado de alumnos (Excel o CSV).</p>
-                    <button type="button" class="btn btn-outline-secondary btn-sm w-100" disabled>
-                        <i class="fas fa-file-export me-1"></i>Exportar
-                    </button>
-                    <p class="small text-muted mt-2 mb-0">En desarrollo</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Importar alumnos (placeholder) -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card backup-card backup-card-placeholder">
-                <div class="card-header bg-info bg-opacity-10 text-info">
-                    <i class="fas fa-file-import me-2"></i>Importar alumnos
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">Subir listado de alumnos desde archivo.</p>
-                    <button type="button" class="btn btn-outline-secondary btn-sm w-100" disabled>
-                        <i class="fas fa-file-import me-1"></i>Importar
-                    </button>
-                    <p class="small text-muted mt-2 mb-0">En desarrollo</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Más opciones (placeholder) -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card backup-card backup-card-placeholder">
-                <div class="card-header bg-secondary bg-opacity-25 text-secondary">
-                    <i class="fas fa-cogs me-2"></i>Más opciones
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">Otras exportaciones o backups.</p>
-                    <p class="small text-muted mb-0">En desarrollo</p>
+                <!-- Abajo: Importar alumnos -->
+                <div class="card backup-card backup-card-placeholder card-alumnos-import">
+                    <div class="card-header card-header-alumnos-import">
+                        <i class="fas fa-file-import me-2"></i>Importar alumnos
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Subir listado de alumnos desde archivo.</p>
+                        <button type="button" class="btn btn-sm disabled" style="background: rgba(92, 107, 192, 0.2); color: #3949ab;" disabled>
+                            <i class="fas fa-file-import me-1"></i>Importar
+                        </button>
+                        <p class="small text-muted mt-2 mb-0">En desarrollo</p>
+                    </div>
                 </div>
             </div>
         </div>
