@@ -44,6 +44,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findByProfesor_IdAndRol(Long profesorId, String rol);
 
+    /** Para detectar duplicados en importación cuando el alumno no tiene correo. */
+    Optional<Usuario> findFirstByProfesor_IdAndRolAndNombre(Long profesorId, String rol, String nombre);
+
     List<Usuario> findByTipoAsistencia(TipoAsistencia tipoAsistencia);
 
     // --- CONSULTAS OPTIMIZADAS PARA FASE 3 ---

@@ -108,7 +108,8 @@ No se asume que todo ejercicio esté en una serie, que toda serie esté en una r
 |---------------|--------|--------|
 | **Ejercicios – JSON** | Existe | `ExerciseBackupService`: exporta/restaura solo JSON (sin imágenes). `ExerciseExportImportService`: exporta JSON con imágenes en Base64; importa desde ese JSON. |
 | **Ejercicios – ZIP** | **Implementado** | `ExerciseZipBackupService`: exporta todos los ejercicios a ZIP (manifest + ejercicios.json + imagenes/); importar desde archivo subido con opción «no duplicar» o «pisar todos». |
-| **Alumnos – Excel** | No existe | No hay exportación de alumnos a Excel. |
+| **Alumnos – JSON backup** | **Implementado** | `AlumnoJsonBackupService`: exporta/importa alumnos en JSON (datos, mediciones, asistencias). |
+| **Alumnos – Excel** | **Implementado** | `AlumnoExportService`: exporta a Excel solo para reportes; no se usa para importar. |
 | **Rutinas / Series – export** | No existe | No hay exportación de rutinas ni series. |
 
 ---
@@ -165,14 +166,24 @@ ejercicios_backup_YYYY-MM-DD_HH-mm.zip
 
 ---
 
-## 3. Exportación de alumnos a Excel
+## 3. Backup de alumnos (JSON) e exportación a Excel
 
-### 3.1 Objetivo
+### 3.1 Backup JSON (exportar + importar)
 
-- Exportar **solo datos de alumnos** (atributos) a un Excel para respaldo, análisis o uso externo.
-- No exportar contraseñas ni datos sensibles innecesarios.
+- **Objetivo:** Backup completo de alumnos para respaldo, migración o restauración.
+- **Contenido:** Datos del alumno (Usuario), mediciones físicas (evoluciones), asistencias con observaciones y grupos trabajados.
+- **No incluye:** Rutinas asignadas (se reasignan manualmente tras importar).
+- **Servicio:** `AlumnoJsonBackupService` — `exportarAlumnosAJson(profesorId)`, `importarDesdeJson(archivo, profesor, pisarTodos)`.
+- **Modos:** Agregar (omite correos existentes) o Suplantar (borra todos los alumnos del profesor e importa).
 
-### 3.2 Qué exportar (atributos de Usuario/alumno)
+### 3.2 Exportación a Excel (solo reportes)
+
+- **Objetivo:** Exportar datos de alumnos a Excel para análisis o respaldo legible.
+- **No se usa para importar:** El Excel tiene formato para reportes; la importación se hace desde JSON.
+- **Servicio:** `AlumnoExportService` — `exportarAlumnosAExcel(profesorId)`.
+- **Columnas:** Ver `EXPORTACION_ALUMNOS_EXCEL.md`.
+
+### 3.3 Qué exportar (atributos de Usuario/alumno)
 
 Incluir columnas como (según entidad `Usuario`):
 
@@ -185,7 +196,7 @@ Incluir columnas como (según entidad `Usuario`):
 
 No incluir: password, avatar (o incluir solo ruta/URL si se desea), colecciones complejas como rutinas completas (opcional: una columna “cantidad de rutinas” si sirve).
 
-### 3.3 Método recomendado
+### 3.4 Método recomendado (Excel)
 
 - **Formato:** Excel (.xlsx).
 - **Librería:** Apache POI (p. ej. `org.apache.poi:poi-ooxml`). Añadir dependencia en `pom.xml`.
@@ -195,9 +206,10 @@ No incluir: password, avatar (o incluir solo ruta/URL si se desea), colecciones 
   - Escribir a `ByteArrayOutputStream` y devolver `byte[]`.
 - **Controlador:** GET (o POST) que devuelva el Excel con `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` y `Content-Disposition: attachment; filename="alumnos_YYYY-MM-DD.xlsx"`.
 
-### 3.4 Importación de alumnos desde Excel (opcional, fase posterior)
+### 3.5 Importación de alumnos
 
-- No es obligatorio para el primer entregable. Si más adelante se desea importar alumnos desde Excel, conviene definir columnas fijas y validaciones (correo único, etc.) y un endpoint POST que reciba el archivo y procese fila a fila.
+- **Desde JSON:** Implementada. POST `/profesor/backup/importar-alumnos` con `archivoJson` y `pisarTodos`.
+- **Desde Excel:** No implementada. La importación se hace desde JSON.
 
 ---
 

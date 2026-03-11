@@ -151,6 +151,16 @@
             <li th:each="e : ${importResult['errores']}" th:text="${e}">error</li>
         </ul>
     </div>
+    <div th:if="${importAlumnosResult}" class="alert mb-3" th:classappend="${importAlumnosResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+        <span th:if="${importAlumnosResult['success']}">
+            <strong>Importación de alumnos correcta.</strong>
+            <span th:text="${importAlumnosResult['message']}">OK</span>
+        </span>
+        <span th:if="${!importAlumnosResult['success']}" th:text="${importAlumnosResult['message']}">Error</span>
+        <ul th:if="${importAlumnosResult['errores'] != null && !importAlumnosResult['errores'].isEmpty()}" class="mb-0 mt-2">
+            <li th:each="e : ${importAlumnosResult['errores']}" th:text="${e}">error</li>
+        </ul>
+    </div>
     <div class="admin-layout">
         <aside class="admin-sidebar">
             <nav class="nav-section">

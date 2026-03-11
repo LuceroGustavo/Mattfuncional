@@ -3,6 +3,7 @@ package com.mattfuncional.controladores;
 import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.servicios.AlumnoExportService;
+import com.mattfuncional.servicios.AlumnoJsonBackupService;
 import com.mattfuncional.servicios.ExerciseBackupService;
 import com.mattfuncional.servicios.ExerciseExportImportService;
 import com.mattfuncional.servicios.ExerciseZipBackupService;
@@ -46,17 +47,20 @@ public class AdminPanelController {
     private final ExerciseZipBackupService exerciseZipBackupService;
     private final ProfesorService profesorService;
     private final AlumnoExportService alumnoExportService;
+    private final AlumnoJsonBackupService alumnoJsonBackupService;
 
     public AdminPanelController(ExerciseExportImportService exerciseExportImportService,
                                 ExerciseBackupService exerciseBackupService,
                                 ExerciseZipBackupService exerciseZipBackupService,
                                 ProfesorService profesorService,
-                                AlumnoExportService alumnoExportService) {
+                                AlumnoExportService alumnoExportService,
+                                AlumnoJsonBackupService alumnoJsonBackupService) {
         this.exerciseExportImportService = exerciseExportImportService;
         this.exerciseBackupService = exerciseBackupService;
         this.exerciseZipBackupService = exerciseZipBackupService;
         this.profesorService = profesorService;
         this.alumnoExportService = alumnoExportService;
+        this.alumnoJsonBackupService = alumnoJsonBackupService;
     }
 
     private Profesor getProfesorParaUsuario(Usuario usuario) {
@@ -137,7 +141,58 @@ public class AdminPanelController {
     }
 
     /**
+     * Exporta alumnos del profesor a JSON (backup completo: datos, mediciones, asistencias).
+     */
+    @GetMapping("/backup/exportar-alumnos-json")
+    public ResponseEntity<Resource> exportarAlumnosJson(@AuthenticationPrincipal Usuario usuarioActual) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return ResponseEntity.notFound().build();
+        }
+        Profesor profesor = getProfesorParaUsuario(usuarioActual);
+        if (profesor == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            byte[] jsonBytes = alumnoJsonBackupService.exportarAlumnosAJson(profesor.getId());
+            String fileName = "alumnos_backup_" + LocalDateTime.now().format(ZIP_FILENAME_DATE) + ".json";
+            Resource resource = new ByteArrayResource(jsonBytes);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            logger.error("Error al exportar alumnos a JSON: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Importa alumnos desde JSON (backup).
+     */
+    @PostMapping("/backup/importar-alumnos")
+    public String importarAlumnosJson(@AuthenticationPrincipal Usuario usuarioActual,
+                                      @RequestParam("archivoJson") MultipartFile archivoJson,
+                                      @RequestParam(value = "pisarTodos", defaultValue = "false") boolean pisarTodos,
+                                      RedirectAttributes redirectAttributes) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return "redirect:/profesor/dashboard";
+        }
+        try {
+            Profesor profesor = getProfesorParaUsuario(usuarioActual);
+            Map<String, Object> result = alumnoJsonBackupService.importarDesdeJson(archivoJson, profesor, pisarTodos);
+            redirectAttributes.addFlashAttribute("importAlumnosResult", result);
+        } catch (IOException e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Error al leer el archivo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("importAlumnosResult", err);
+        }
+        return "redirect:/profesor/administracion?seccion=backup";
+    }
+
+    /**
      * Exporta alumnos del profesor a Excel (datos, cantidad asignaciones, últimas 3 evoluciones).
+     * Solo para reportes; no se usa para importar.
      */
     @GetMapping("/backup/exportar-alumnos-excel")
     public ResponseEntity<Resource> exportarAlumnosExcel(@AuthenticationPrincipal Usuario usuarioActual) {

@@ -115,6 +115,12 @@ public class UsuarioService {
         return true;
     }
 
+    /** Invalida la caché de usuarios. Útil tras importar alumnos desde backup. */
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public void evictCacheUsuarios() {
+        // Solo invalida caché; el efecto está en la anotación
+    }
+
     @Cacheable(value = "usuarios", key = "'profesor-' + #profesorId")
     public List<Usuario> getAlumnosByProfesorId(Long profesorId) {
         return usuarioRepository.findAlumnosByProfesorIdWithRelations(profesorId);

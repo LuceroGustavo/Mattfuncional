@@ -4,6 +4,18 @@ Documentación de todos los cambios realizados desde el sistema de backup (expor
 
 ---
 
+## 6. Backup de alumnos: JSON + Excel separado (marzo 2026)
+
+**Objetivo:** Separar el backup de alumnos (JSON, con importación) de la exportación a Excel (solo reportes).
+
+**Cambios:**
+- **Tarjeta superior "Backup de alumnos":** Botón "Exportar backup" (JSON con datos completos: notas del profesor, mediciones, asistencias) y botón "Exportar a Excel" (solo para reportes).
+- **Tarjeta inferior "Importar backup de alumnos":** Zona arrastrar/seleccionar archivo JSON; botones Agregar y Suplantar.
+- **Servicio:** `AlumnoJsonBackupService` — exporta/importa JSON. Incluye Usuario, MedicionFisica, Asistencia (observaciones, grupos trabajados).
+- **Rutas:** GET `/profesor/backup/exportar-alumnos-json`, POST `/profesor/backup/importar-alumnos`, GET `/profesor/backup/exportar-alumnos-excel`.
+
+---
+
 ## 1. Redirección tras importar backup
 
 **Objetivo:** Tras importar un ZIP (Agregar o Suplantar), el usuario debe volver a la página de administración en la sección backup, no a una URL separada de backup.

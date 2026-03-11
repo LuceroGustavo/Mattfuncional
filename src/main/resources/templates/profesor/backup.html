@@ -16,9 +16,9 @@
         .backup-card-compact .card-body { padding: 0.85rem; }
         .backup-card-placeholder { opacity: 0.9; }
         .detalle-archivo { background: #f8f9fa; border-radius: 0.5rem; padding: 0.6rem 0.75rem; font-size: 0.8rem; }
-        #zonaSubida { cursor: pointer; transition: background 0.2s; min-height: 56px !important; padding: 0.5rem !important; }
-        #zonaSubida:hover { background: #f0f0f0 !important; }
-        #zonaSubida.dragover { border-color: #0d6efd !important; background: #e7f1ff !important; }
+        #zonaSubida, #zonaSubidaAlumnos { cursor: pointer; transition: background 0.2s; min-height: 56px !important; padding: 0.5rem !important; }
+        #zonaSubida:hover, #zonaSubidaAlumnos:hover { background: #f0f0f0 !important; }
+        #zonaSubida.dragover, #zonaSubidaAlumnos.dragover { border-color: #0d6efd !important; background: #e7f1ff !important; }
         .progress-modal .progress { height: 8px; }
         /* Alumnos: celeste y azul pastel */
         .card-header-alumnos-export { background: rgba(3, 169, 244, 0.15); color: #0277bd; }
@@ -109,29 +109,65 @@
         <!-- Columna derecha: Alumnos (celeste y azul pastel) -->
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
-                <!-- Arriba: Exportar alumnos -->
+                <!-- Arriba: Backup de alumnos (JSON export + Excel aparte) -->
                 <div class="card backup-card card-alumnos-export">
                     <div class="card-header card-header-alumnos-export">
-                        <i class="fas fa-users me-2"></i>Exportar alumnos
+                        <i class="fas fa-users me-2"></i>Backup de alumnos
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small mb-2">Descargá un Excel con datos de alumnos, cantidad de asignaciones y últimas 3 evoluciones (mediciones).</p>
-                        <a th:href="@{/profesor/backup/exportar-alumnos-excel}" class="btn btn-sm" style="background: rgba(3, 169, 244, 0.25); color: #0277bd; border: 1px solid #03a9f4;">
-                            <i class="fas fa-file-export me-1"></i>Exportar
-                        </a>
+                        <p class="text-muted small mb-2">Exportá un JSON con datos completos (notas del profesor, mediciones, asistencias). Sirve para backup e importación.</p>
+                        <div class="d-flex gap-2 flex-wrap mb-2">
+                            <a th:href="@{/profesor/backup/exportar-alumnos-json}" class="btn btn-sm" style="background: rgba(3, 169, 244, 0.25); color: #0277bd; border: 1px solid #03a9f4;" id="btnExportarAlumnosJson">
+                                <i class="fas fa-file-export me-1"></i>Exportar backup
+                            </a>
+                            <a th:href="@{/profesor/backup/exportar-alumnos-excel}" class="btn btn-outline-secondary btn-sm" id="btnExportarAlumnosExcel">
+                                <i class="fas fa-file-excel me-1"></i>Exportar a Excel
+                            </a>
+                        </div>
+                        <p class="small text-muted mb-0">Excel: solo para reportes; no se usa para importar.</p>
                     </div>
                 </div>
-                <!-- Abajo: Importar alumnos -->
-                <div class="card backup-card backup-card-placeholder card-alumnos-import">
+                <!-- Abajo: Importar backup de alumnos -->
+                <div class="card backup-card card-alumnos-import">
                     <div class="card-header card-header-alumnos-import">
-                        <i class="fas fa-file-import me-2"></i>Importar alumnos
+                        <i class="fas fa-file-import me-2"></i>Importar backup de alumnos
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small mb-2">Subir listado de alumnos desde archivo.</p>
-                        <button type="button" class="btn btn-sm disabled" style="background: rgba(92, 107, 192, 0.2); color: #3949ab;" disabled>
-                            <i class="fas fa-file-import me-1"></i>Importar
-                        </button>
-                        <p class="small text-muted mt-2 mb-0">En desarrollo</p>
+                        <p class="text-muted small mb-2">Subí un JSON exportado. Agregar o Suplantar.</p>
+                        <form th:action="@{/profesor/backup/importar-alumnos}" method="post" enctype="multipart/form-data" id="formImportarAlumnos">
+                            <div class="border rounded-2 p-2 text-center bg-light position-relative" id="zonaSubidaAlumnos">
+                                <p class="mb-1 text-muted small" id="textoZonaAlumnos">JSON acá o clic</p>
+                                <label class="btn btn-outline-primary btn-sm mb-0" style="cursor:pointer">
+                                    <input type="file" name="archivoJson" id="archivoJsonAlumnos" accept=".json" class="d-none">
+                                    Seleccionar...
+                                </label>
+                            </div>
+                            <div id="detalleArchivoAlumnos" class="mt-2 d-none">
+                                <div class="detalle-archivo">
+                                    <p class="mb-1"><strong>Archivo:</strong> <span id="detalleNombreAlumnos"></span></p>
+                                    <p class="mb-1"><strong>Alumnos:</strong> <span id="detalleCantidadAlumnos"></span></p>
+                                    <p class="mb-2"><strong>Fecha:</strong> <span id="detalleFechaAlumnos"></span></p>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <button type="submit" name="pisarTodos" value="false" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-plus me-1"></i>Agregar
+                                        </button>
+                                        <button type="submit" name="pisarTodos" value="true" class="btn btn-warning btn-sm" onclick="return confirm('¿Suplantar todos los alumnos? Se borrarán los actuales.');">
+                                            <i class="fas fa-exchange-alt me-1"></i>Suplantar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div th:if="${importAlumnosResult}" class="alert mt-2 py-2 px-2 small" th:classappend="${importAlumnosResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+                            <span th:if="${importAlumnosResult['success']}">
+                                <strong>OK.</strong>
+                                <span th:text="${importAlumnosResult['message']}">OK</span>
+                            </span>
+                            <span th:if="${!importAlumnosResult['success']}" th:text="${importAlumnosResult['message']}">Error</span>
+                            <ul th:if="${importAlumnosResult['errores'] != null && !importAlumnosResult['errores'].isEmpty()}" class="mb-0 mt-1 ps-3 small">
+                                <li th:each="e : ${importAlumnosResult['errores']}" th:text="${e}">error</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -239,6 +275,73 @@
         modalProgreso.show();
         setTimeout(function() { modalProgreso.hide(); }, 4000);
     });
+
+    // Alumnos JSON: preview y submit
+    var zonaAlumnos = document.getElementById('zonaSubidaAlumnos');
+    var inputAlumnos = document.getElementById('archivoJsonAlumnos');
+    var detalleAlumnos = document.getElementById('detalleArchivoAlumnos');
+    var formImportarAlumnos = document.getElementById('formImportarAlumnos');
+    if (inputAlumnos) {
+        inputAlumnos.addEventListener('change', function() {
+            var file = inputAlumnos.files[0];
+            if (!file) {
+                if (detalleAlumnos) detalleAlumnos.classList.add('d-none');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    var data = JSON.parse(reader.result);
+                    if (detalleAlumnos) {
+                        document.getElementById('detalleNombreAlumnos').textContent = file.name;
+                        document.getElementById('detalleCantidadAlumnos').textContent = data.cantidadAlumnos != null ? data.cantidadAlumnos : (data.alumnos ? data.alumnos.length : '?');
+                        document.getElementById('detalleFechaAlumnos').textContent = data.fecha ? data.fecha.substring(0, 10) : '-';
+                        detalleAlumnos.classList.remove('d-none');
+                    }
+                } catch (e) {
+                    if (detalleAlumnos) detalleAlumnos.classList.add('d-none');
+                    alert('No se pudo leer el JSON: ' + e.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
+    if (zonaAlumnos) {
+        zonaAlumnos.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); zonaAlumnos.classList.add('dragover'); });
+        zonaAlumnos.addEventListener('dragleave', function(e) { e.preventDefault(); zonaAlumnos.classList.remove('dragover'); });
+        zonaAlumnos.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zonaAlumnos.classList.remove('dragover');
+            var files = e.dataTransfer.files;
+            if (files.length && files[0].name.toLowerCase().endsWith('.json')) {
+                var dt = new DataTransfer();
+                dt.items.add(files[0]);
+                inputAlumnos.files = dt.files;
+                inputAlumnos.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+    if (formImportarAlumnos) {
+        formImportarAlumnos.addEventListener('submit', function() {
+            if (!inputAlumnos.files || inputAlumnos.files.length === 0) {
+                alert('Seleccioná un archivo JSON primero.');
+                return false;
+            }
+            modalProgresoTitulo.textContent = 'Importando alumnos...';
+            modalProgreso.show();
+            setTimeout(function() { modalProgreso.hide(); }, 3000);
+            return true;
+        });
+    }
+    var btnExportarAlumnosJson = document.getElementById('btnExportarAlumnosJson');
+    if (btnExportarAlumnosJson) {
+        btnExportarAlumnosJson.addEventListener('click', function() {
+            modalProgresoTitulo.textContent = 'Preparando backup de alumnos...';
+            modalProgreso.show();
+            setTimeout(function() { modalProgreso.hide(); }, 3000);
+        });
+    }
 })();
 </script>
 </div>
