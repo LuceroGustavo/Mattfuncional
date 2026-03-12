@@ -2,6 +2,20 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-12] - docs: sistema de backup terminado ✅
+
+### 🎯 **Resumen**
+Se documenta que el sistema de backup está **terminado**: ejercicios (ZIP con opciones por checkbox), alumnos (JSON + Excel con columna Último trabajo). Referencias actualizadas en plan y cambios de backup.
+
+### ✅ **Cambios**
+- **PLAN_BACKUP_Y_EXPORTACION.md:** Estado pasado a "Terminado"; descripción de lo operativo y pendientes opcionales.
+- **CAMBIOS_BACKUP_IMPORT_EXPORT_FEB2026.md:** Nueva sección "Sistema de backup — estado terminado" con resumen de funcionalidades (ZIP, JSON alumnos, Excel alumnos con Último trabajo).
+
+### 📁 **Archivos modificados**
+`Documentacion/PLAN_BACKUP_Y_EXPORTACION.md`, `Documentacion/CAMBIOS_BACKUP_IMPORT_EXPORT_FEB2026.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-11] - docs: acceso al sistema y límite de subida Nginx ✅
 
 ### 🎯 **Resumen**

@@ -1,11 +1,12 @@
 package com.mattfuncional.servicios;
 
+import com.mattfuncional.entidades.Asistencia;
 import com.mattfuncional.entidades.DiaHorarioAsistencia;
-import com.mattfuncional.entidades.MedicionFisica;
+import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.enums.DiaSemana;
 import com.mattfuncional.enums.TipoAsistencia;
-import com.mattfuncional.repositorios.MedicionFisicaRepository;
+import com.mattfuncional.repositorios.AsistenciaRepository;
 import com.mattfuncional.repositorios.RutinaRepository;
 import com.mattfuncional.repositorios.UsuarioRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -18,29 +19,29 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Exporta alumnos del profesor a Excel según documentación EXPORTACION_ALUMNOS_EXCEL.md.
- * Incluye: datos del alumno, cantidad de asignaciones, últimas 3 evoluciones (mediciones físicas).
- * No incluye: fecha de alta, asistencias presentes/ausentes, listado de rutinas asignadas.
+ * Exporta alumnos del profesor a Excel.
+ * Incluye: datos del alumno, cantidad de asignaciones, y una columna "Último trabajo" (fecha + grupos + observaciones del último progreso).
  */
 @Service
 public class AlumnoExportService {
 
     private static final DateTimeFormatter FECHA_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FECHA_FORMAT_CORTO = DateTimeFormatter.ofPattern("dd/MM/yy");
     private static final DateTimeFormatter HORA_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-    private static final int ULTIMAS_EVOLUCIONES = 3;
 
     private final UsuarioRepository usuarioRepository;
-    private final MedicionFisicaRepository medicionFisicaRepository;
+    private final AsistenciaRepository asistenciaRepository;
     private final RutinaRepository rutinaRepository;
 
     public AlumnoExportService(UsuarioRepository usuarioRepository,
-                               MedicionFisicaRepository medicionFisicaRepository,
+                               AsistenciaRepository asistenciaRepository,
                                RutinaRepository rutinaRepository) {
         this.usuarioRepository = usuarioRepository;
-        this.medicionFisicaRepository = medicionFisicaRepository;
+        this.asistenciaRepository = asistenciaRepository;
         this.rutinaRepository = rutinaRepository;
     }
 
@@ -56,10 +57,21 @@ public class AlumnoExportService {
             Sheet sheet = workbook.createSheet("Alumnos");
             CellStyle headerStyle = crearEstiloCabecera(workbook);
             CellStyle dateStyle = crearEstiloFecha(workbook);
+            CellStyle titleStyle = crearEstiloTitulo(workbook);
+            CellStyle wrapStyle = crearEstiloWrap(workbook);
 
             int rowNum = 0;
 
-            // Cabecera
+            // 1. Título con fecha de exportación
+            String titulo = "Exportación de alumnos fecha " + LocalDate.now().format(FECHA_FORMAT);
+            Row titleRow = sheet.createRow(rowNum++);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue(titulo);
+            titleCell.setCellStyle(titleStyle);
+
+            rowNum++; // fila en blanco
+
+            // 2. Cabecera: datos del alumno + Cantidad de asignaciones + Último trabajo (una columna al final)
             Row headerRow = sheet.createRow(rowNum++);
             String[] headers = getHeaders();
             for (int i = 0; i < headers.length; i++) {
@@ -68,63 +80,34 @@ public class AlumnoExportService {
                 cell.setCellStyle(headerStyle);
             }
 
+            // 3. Una fila por alumno (sin columnas Ev); última columna = Último trabajo (fecha + dato)
             for (Usuario u : alumnos) {
+                int countRutinas = rutinaRepository.findByUsuarioIdAndEsPlantillaFalse(u.getId()).size();
+                List<Asistencia> asistencias = asistenciaRepository.findByUsuario_IdOrderByFechaDesc(u.getId());
+                Asistencia ultima = (asistencias != null && !asistencias.isEmpty()) ? asistencias.get(0) : null;
+                String textoUltimoTrabajo = formatearUltimoTrabajo(ultima);
+
                 Row row = sheet.createRow(rowNum++);
                 int col = 0;
-
-                // 1. Nombre
                 row.createCell(col++).setCellValue(toString(u.getNombre()));
-                // 2. Correo
                 row.createCell(col++).setCellValue(toString(u.getCorreo()));
-                // 3. Celular
                 row.createCell(col++).setCellValue(toString(u.getCelular()));
-                // 4. Edad
                 row.createCell(col++).setCellValue(u.getEdad());
-                // 5. Sexo
                 row.createCell(col++).setCellValue(toString(u.getSexo()));
-                // 6. Peso actual
-                row.createCell(col++).setCellValue(u.getPeso());
-                // 7. Estado
                 row.createCell(col++).setCellValue(toString(u.getEstadoAlumno()));
-                // 8. Fecha inicio
-                col = setCellFecha(row, col, u.getFechaInicio(), dateStyle);
-                // 9. Fecha baja
+                col = setCellFecha(row, col, u.getFechaAlta(), dateStyle);
                 col = setCellFecha(row, col, u.getFechaBaja(), dateStyle);
-                // 10. Tipo de asistencia (Virtual / Presencial / Semipresencial)
                 row.createCell(col++).setCellValue(formatearTipoAsistencia(u.getTipoAsistencia()));
-                // 11. Detalle asistencia
-                row.createCell(col++).setCellValue(toString(u.getDetalleAsistencia()));
-                // 12. Días y horarios (solo si Presencial o Semipresencial)
                 row.createCell(col++).setCellValue(formatearDiasYHorarios(u));
-                // 13-17. Objetivos, restricciones, notas, contacto emergencia x2
                 row.createCell(col++).setCellValue(toString(u.getObjetivosPersonales()));
                 row.createCell(col++).setCellValue(toString(u.getRestriccionesMedicas()));
                 row.createCell(col++).setCellValue(toString(u.getNotasProfesor()));
-                row.createCell(col++).setCellValue(toString(u.getContactoEmergenciaNombre()));
-                row.createCell(col++).setCellValue(toString(u.getContactoEmergenciaTelefono()));
-                // 18. Cantidad de asignaciones
-                int countRutinas = rutinaRepository.findByUsuarioIdAndEsPlantillaFalse(u.getId()).size();
                 row.createCell(col++).setCellValue(countRutinas);
-
-                // Últimas 3 evoluciones
-                List<MedicionFisica> mediciones = medicionFisicaRepository.findByUsuario_IdOrderByFechaDesc(u.getId());
-                List<MedicionFisica> ultimas = mediciones.isEmpty() ? List.of()
-                        : mediciones.subList(0, Math.min(ULTIMAS_EVOLUCIONES, mediciones.size()));
-
-                for (int ev = 1; ev <= ULTIMAS_EVOLUCIONES; ev++) {
-                    MedicionFisica m = (ev <= ultimas.size()) ? ultimas.get(ev - 1) : null;
-                    col = setCellFecha(row, col, m != null ? m.getFecha() : null, dateStyle);
-                    col = setCellDouble(row, col, m != null ? m.getPeso() : null);
-                    col = setCellDouble(row, col, m != null ? m.getAltura() : null);
-                    col = setCellDouble(row, col, m != null ? m.getCintura() : null);
-                    col = setCellDouble(row, col, m != null ? m.getPecho() : null);
-                    col = setCellDouble(row, col, m != null ? m.getCadera() : null);
-                    col = setCellDouble(row, col, m != null ? m.getBiceps() : null);
-                    col = setCellDouble(row, col, m != null ? m.getMuslo() : null);
-                }
+                Cell cellUltimo = row.createCell(col);
+                cellUltimo.setCellValue(textoUltimoTrabajo);
+                cellUltimo.setCellStyle(wrapStyle);
             }
 
-            // Ajustar ancho de columnas
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -137,15 +120,41 @@ public class AlumnoExportService {
 
     private static String[] getHeaders() {
         return new String[]{
-                "Nombre", "Correo", "Celular", "Edad", "Sexo", "Peso actual", "Estado",
-                "Fecha inicio", "Fecha baja", "Tipo de asistencia", "Detalle asistencia", "Días y horarios",
+                "Nombre", "Correo", "Celular", "Edad", "Sexo", "Estado",
+                "Fecha de alta", "Fecha baja", "Tipo de asistencia", "Días y horarios",
                 "Objetivos personales", "Restricciones médicas", "Notas profesor",
-                "Contacto emergencia nombre", "Contacto emergencia teléfono",
                 "Cantidad de asignaciones",
-                "Ev1_fecha", "Ev1_peso", "Ev1_altura", "Ev1_cintura", "Ev1_pecho", "Ev1_cadera", "Ev1_biceps", "Ev1_muslo",
-                "Ev2_fecha", "Ev2_peso", "Ev2_altura", "Ev2_cintura", "Ev2_pecho", "Ev2_cadera", "Ev2_biceps", "Ev2_muslo",
-                "Ev3_fecha", "Ev3_peso", "Ev3_altura", "Ev3_cintura", "Ev3_pecho", "Ev3_cadera", "Ev3_biceps", "Ev3_muslo"
+                "Último trabajo"
         };
+    }
+
+    /**
+     * Formato: primera línea = fecha (dd/MM/yy), segunda línea = grupos - observaciones (ej. "CARDIO - CORE - trabajo muy bien").
+     * Si no hay último trabajo, devuelve cadena vacía.
+     */
+    private static String formatearUltimoTrabajo(Asistencia ultima) {
+        if (ultima == null) return "";
+        String fecha = ultima.getFecha() != null ? ultima.getFecha().format(FECHA_FORMAT_CORTO) : "";
+        Set<GrupoMuscular> grupos = ultima.getGruposTrabajados();
+        String gruposStr = (grupos != null && !grupos.isEmpty())
+                ? grupos.stream().map(GrupoMuscular::getNombre).filter(n -> n != null && !n.isBlank()).collect(Collectors.joining(" - "))
+                : "";
+        String obs = ultima.getObservaciones() != null ? ultima.getObservaciones().trim() : "";
+        String dato = gruposStr;
+        if (!obs.isEmpty()) dato = dato.isEmpty() ? obs : dato + " - " + obs;
+        if (dato.isEmpty() && fecha.isEmpty()) return "";
+        if (dato.isEmpty()) return fecha;
+        if (fecha.isEmpty()) return dato;
+        return fecha + "\n" + dato;
+    }
+
+    private static CellStyle crearEstiloTitulo(Workbook wb) {
+        CellStyle s = wb.createCellStyle();
+        Font f = wb.createFont();
+        f.setBold(true);
+        f.setFontHeightInPoints((short) 12);
+        s.setFont(f);
+        return s;
     }
 
     private static String toString(Object o) {
@@ -198,12 +207,6 @@ public class AlumnoExportService {
         return col;
     }
 
-    private static int setCellDouble(Row row, int col, Double value) {
-        Cell cell = row.createCell(col++);
-        if (value != null) cell.setCellValue(value);
-        return col;
-    }
-
     private static CellStyle crearEstiloCabecera(Workbook wb) {
         CellStyle s = wb.createCellStyle();
         Font f = wb.createFont();
@@ -215,6 +218,12 @@ public class AlumnoExportService {
     private static CellStyle crearEstiloFecha(Workbook wb) {
         CellStyle s = wb.createCellStyle();
         s.setDataFormat(wb.createDataFormat().getFormat("dd/mm/yyyy"));
+        return s;
+    }
+
+    private static CellStyle crearEstiloWrap(Workbook wb) {
+        CellStyle s = wb.createCellStyle();
+        s.setWrapText(true);
         return s;
     }
 }

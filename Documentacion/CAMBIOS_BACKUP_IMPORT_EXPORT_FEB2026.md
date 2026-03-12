@@ -4,6 +4,18 @@ Documentación de todos los cambios realizados desde el sistema de backup (expor
 
 ---
 
+## Sistema de backup — estado terminado (marzo 2026)
+
+El **sistema de backup** se considera **terminado** para el uso actual:
+
+- **Ejercicios + grupos + rutinas + series:** Exportar/importar ZIP (Agregar o Suplantar), con opciones por checkbox (Grupos, Ejercicios, Rutinas, Series). Imágenes con nombres originales.
+- **Alumnos — backup:** Exportar/importar JSON (Agregar o Suplantar). Incluye datos del alumno, mediciones físicas y asistencias (observaciones, grupos trabajados).
+- **Alumnos — Excel (reportes):** Una hoja con título "Exportación de alumnos fecha dd/MM/yyyy", columnas de datos del alumno (sin peso, sin detalle asistencia, sin contacto emergencia; Fecha de alta en lugar de fecha inicio), Cantidad de asignaciones y una columna final **Último trabajo** (fecha del último progreso + grupos y observaciones, ej. "11/03/26" y debajo "CARDIO - CORE - trabajo muy bien").
+
+Documentación de referencia: `PLAN_BACKUP_Y_EXPORTACION.md`, `EXPORTACION_ALUMNOS_EXCEL.md`.
+
+---
+
 ## 6. Backup de alumnos: JSON + Excel separado (marzo 2026)
 
 **Objetivo:** Separar el backup de alumnos (JSON, con importación) de la exportación a Excel (solo reportes).

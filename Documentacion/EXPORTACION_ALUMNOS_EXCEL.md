@@ -4,7 +4,14 @@ Lista final de columnas para el Excel de exportación de alumnos (según ajustes
 
 ---
 
-## 1. Datos del alumno (Usuario)
+## 1. Título y cabecera
+
+- **Primera fila:** "Exportación de alumnos fecha dd/MM/yyyy" (fecha del día de exportación).
+- **Fila en blanco** y luego la fila de cabecera con los nombres de columna.
+
+---
+
+## 2. Datos del alumno (Usuario)
 
 | Columna | Atributo | Notas |
 |---------|----------|--------|
@@ -13,27 +20,20 @@ Lista final de columnas para el Excel de exportación de alumnos (según ajustes
 | Celular | celular | Teléfono |
 | Edad | edad | Años |
 | Sexo | sexo | M/F u otro |
-| Peso actual | peso | kg |
 | Estado | estadoAlumno | ACTIVO / INACTIVO |
-| **Fecha inicio** | fechaInicio | Se exporta |
-| **Fecha baja** | fechaBaja | Solo si la tiene |
-| **Tipo de asistencia** | tipoAsistencia | **Virtual** (ONLINE), **Presencial**, **Semipresencial** |
-| Detalle asistencia | detalleAsistencia | Texto libre que puede llevar ya un resumen (ej: "Pase libre"). |
-| Días y horarios | diasHorariosAsistencia | **Solo si tipo = Presencial o Semipresencial.** Días y franjas horarias en que asiste. Ejemplos de formato: *"Lunes, jueves y viernes 10:00-11:00"* o *"Lunes 10:00, Martes 13:00, Jueves 15:00"* (según tenga mismo horario todos los días o horarios distintos por día). Se arma a partir de `diasHorariosAsistencia` (dia + horaEntrada + horaSalida). No se exportan presentes/ausentes. |
+| **Fecha de alta** | fechaAlta | Fecha en que se dio de alta al alumno |
+| Fecha baja | fechaBaja | Solo si la tiene |
+| Tipo de asistencia | tipoAsistencia | **Virtual** (ONLINE), **Presencial**, **Semipresencial** |
+| Días y horarios | diasHorariosAsistencia | Solo si tipo = Presencial o Semipresencial. Ej: "Lunes 10:00-11:00, Martes 13:00-14:00" |
 | Objetivos personales | objetivosPersonales | Texto libre |
 | Restricciones médicas | restriccionesMedicas | Texto libre |
 | Notas profesor | notasProfesor | Notas internas |
-| Contacto emergencia nombre | contactoEmergenciaNombre | |
-| Contacto emergencia teléfono | contactoEmergenciaTelefono | |
 
-**No se exporta**
-- Fecha de alta
-- Asistencias presentes o ausentes (ningún conteo ni historial de asistencia)
-- Password, rol, avatar, historialEstado, historialAsistencia
+**No se exportan:** Peso actual, Detalle asistencia, Contacto emergencia nombre, Contacto emergencia teléfono, contraseña, avatar, historial.
 
 ---
 
-## 2. Cantidad de asignaciones
+## 3. Cantidad de asignaciones
 
 | Columna | Cálculo |
 |---------|--------|
@@ -41,42 +41,37 @@ Lista final de columnas para el Excel de exportación de alumnos (según ajustes
 
 ---
 
-## 3. Últimas 3 evoluciones (MedicionFisica)
+## 4. Último trabajo
 
-Por cada una de las últimas 3 mediciones (orden por fecha descendente):
+Una sola columna al final: **Último trabajo**.
 
-- **Ev1** (más reciente): Ev1_fecha, Ev1_peso, Ev1_altura, Ev1_cintura, Ev1_pecho, Ev1_cadera, Ev1_biceps, Ev1_muslo  
-- **Ev2**: Ev2_fecha, Ev2_peso, Ev2_altura, Ev2_cintura, Ev2_pecho, Ev2_cadera, Ev2_biceps, Ev2_muslo  
-- **Ev3**: Ev3_fecha, Ev3_peso, Ev3_altura, Ev3_cintura, Ev3_pecho, Ev3_cadera, Ev3_biceps, Ev3_muslo  
-
-Si hay menos de 3 mediciones, las columnas de Ev2/Ev3 quedan vacías.
+- **Origen:** Último registro de asistencia/progreso del alumno (fecha, grupos musculares trabajados, observaciones), el mismo que se muestra en la tarjeta "Último trabajo" en la ficha del alumno.
+- **Formato en la celda:**  
+  - Primera línea: fecha del último trabajo (dd/MM/yy, ej. 11/03/26).  
+  - Segunda línea: grupos y observaciones (ej. "CARDIO - CORE - trabajo muy bien").  
+- Si el alumno no tiene ningún registro de progreso con datos, la celda queda vacía.
+- La celda tiene ajuste de texto (wrap) para que se vean las dos líneas.
 
 ---
 
-## Orden sugerido de columnas en el Excel
+## Orden de columnas en el Excel
 
 1. Nombre  
 2. Correo  
 3. Celular  
 4. Edad  
 5. Sexo  
-6. Peso actual  
-7. Estado  
-8. Fecha inicio  
-9. Fecha baja  
-10. Tipo de asistencia (Virtual / Presencial / Semipresencial)  
-11. Detalle asistencia  
-12. Días y horarios (para Presencial/Semipresencial: ej. "Lunes, jueves y viernes 10:00-11:00" o "Lunes 10:00, Martes 13:00, Jueves 15:00")  
-13. Objetivos personales  
-14. Restricciones médicas  
-15. Notas profesor  
-16. Contacto emergencia nombre  
-17. Contacto emergencia teléfono  
-18. Cantidad de asignaciones  
-19. Ev1_fecha … Ev1_muslo  
-20. Ev2_fecha … Ev2_muslo  
-21. Ev3_fecha … Ev3_muslo  
+6. Estado  
+7. Fecha de alta  
+8. Fecha baja  
+9. Tipo de asistencia  
+10. Días y horarios  
+11. Objetivos personales  
+12. Restricciones médicas  
+13. Notas profesor  
+14. Cantidad de asignaciones  
+15. Último trabajo  
 
 ---
 
-*Documento de referencia para implementar la exportación a Excel en el panel de backup.*
+*Documento de referencia para la exportación a Excel en el panel de backup. Implementado en `AlumnoExportService`.*

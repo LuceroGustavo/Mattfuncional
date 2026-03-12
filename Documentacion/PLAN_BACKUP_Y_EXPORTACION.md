@@ -2,7 +2,7 @@
 
 **Objetivo:** Permitir crear backups/exportaciones que se puedan usar en otra instalación o en otra app, y exportar datos a Excel para análisis o respaldo.
 
-**Estado:** En curso — Fase 1 (backup ejercicios ZIP) **implementada**. Restauración completa de series (standalone y por rutina) y rutinas aplicada. Pendiente: fases 2–5; mejorar estilo y excepciones en el servicio de backup.
+**Estado:** **Terminado** (febrero–marzo 2026). El sistema de backup está operativo: backup/restauración de ejercicios (ZIP con grupos, imágenes, rutinas y series), backup/restauración de alumnos (JSON), exportación de alumnos a Excel (reportes con columna Último trabajo). Pendientes opcionales: mejorar estilo y excepciones en `ExerciseZipBackupService`; exportación de rutinas/series a JSON si se requiere en el futuro.
 
 ---
 
