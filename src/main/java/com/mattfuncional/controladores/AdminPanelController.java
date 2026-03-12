@@ -100,13 +100,18 @@ public class AdminPanelController {
     public String importarBackupZip(@AuthenticationPrincipal Usuario usuarioActual,
                                     @RequestParam("archivoZip") MultipartFile archivoZip,
                                     @RequestParam(value = "pisarTodos", defaultValue = "false") boolean pisarTodos,
+                                    @RequestParam(value = "importarGrupos", defaultValue = "true") boolean importarGrupos,
+                                    @RequestParam(value = "importarEjercicios", defaultValue = "true") boolean importarEjercicios,
+                                    @RequestParam(value = "importarRutinas", defaultValue = "true") boolean importarRutinas,
+                                    @RequestParam(value = "importarSeries", defaultValue = "true") boolean importarSeries,
                                     RedirectAttributes redirectAttributes) {
         if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
             return "redirect:/profesor/dashboard";
         }
         try {
             Profesor profesor = getProfesorParaUsuario(usuarioActual);
-            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor);
+            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor,
+                    importarGrupos, importarEjercicios, importarRutinas, importarSeries);
             redirectAttributes.addFlashAttribute("importResult", result);
         } catch (IOException e) {
             Map<String, Object> err = new HashMap<>();
@@ -124,13 +129,18 @@ public class AdminPanelController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> importarEjerciciosZip(@AuthenticationPrincipal Usuario usuarioActual,
                                                                       @RequestParam("archivoZip") MultipartFile archivoZip,
-                                                                      @RequestParam("pisarTodos") boolean pisarTodos) {
+                                                                      @RequestParam("pisarTodos") boolean pisarTodos,
+                                                                      @RequestParam(value = "importarGrupos", defaultValue = "true") boolean importarGrupos,
+                                                                      @RequestParam(value = "importarEjercicios", defaultValue = "true") boolean importarEjercicios,
+                                                                      @RequestParam(value = "importarRutinas", defaultValue = "true") boolean importarRutinas,
+                                                                      @RequestParam(value = "importarSeries", defaultValue = "true") boolean importarSeries) {
         if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
             return ResponseEntity.status(403).body(Map.of("success", false, "message", "Sin permiso"));
         }
         try {
             Profesor profesor = getProfesorParaUsuario(usuarioActual);
-            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor);
+            Map<String, Object> result = exerciseZipBackupService.importarDesdeZip(archivoZip, pisarTodos, profesor,
+                    importarGrupos, importarEjercicios, importarRutinas, importarSeries);
             return ResponseEntity.ok(result);
         } catch (IOException e) {
             Map<String, Object> err = new HashMap<>();

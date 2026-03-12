@@ -79,11 +79,19 @@
                                     <p class="mb-1"><strong>Archivo:</strong> <span id="detalleNombre"></span></p>
                                     <p class="mb-1"><strong>Ejercicios:</strong> <span id="detalleCantidad"></span> <span id="detalleRutinas" class="text-muted"></span></p>
                                     <p class="mb-2"><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+                                    <p class="mb-2 small text-muted">Restaurar solo lo que marques:</p>
+                                    <div class="d-flex flex-wrap gap-3 mb-2">
+                                        <label class="d-flex align-items-center gap-1 small"><input type="checkbox" name="importarGrupos" value="true" class="form-check-input" checked> Grupos musculares</label>
+                                        <label class="d-flex align-items-center gap-1 small"><input type="checkbox" name="importarEjercicios" value="true" class="form-check-input" checked> Ejercicios</label>
+                                        <label class="d-flex align-items-center gap-1 small"><input type="checkbox" name="importarRutinas" value="true" class="form-check-input" checked> Rutinas</label>
+                                        <label class="d-flex align-items-center gap-1 small"><input type="checkbox" name="importarSeries" value="true" class="form-check-input" checked> Series</label>
+                                    </div>
+                                    <p class="mb-2 small text-muted">Si elegís Series, conviene tener también Rutinas y Ejercicios marcados.</p>
                                     <div class="d-flex gap-1 flex-wrap">
                                         <button type="submit" name="pisarTodos" value="false" class="btn btn-primary btn-sm">
                                             <i class="fas fa-plus me-1"></i>Agregar
                                         </button>
-                                        <button type="submit" name="pisarTodos" value="true" class="btn btn-warning btn-sm" onclick="return confirm('¿Suplantar todo? Se borrarán los datos actuales.');">
+                                        <button type="submit" name="pisarTodos" value="true" class="btn btn-warning btn-sm" onclick="return confirm('¿Suplantar lo seleccionado? Se borrarán solo esos datos actuales.');">
                                             <i class="fas fa-exchange-alt me-1"></i>Suplantar
                                         </button>
                                     </div>
