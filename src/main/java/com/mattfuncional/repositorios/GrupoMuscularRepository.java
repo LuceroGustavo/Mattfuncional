@@ -25,4 +25,9 @@ public interface GrupoMuscularRepository extends JpaRepository<GrupoMuscular, Lo
     Optional<GrupoMuscular> findByNombreAndProfesorIsNull(String nombre);
 
     Optional<GrupoMuscular> findByNombreAndProfesorId(String nombre, Long profesorId);
+
+    /** Evita "Query did not return unique result" si hay duplicados en BD. */
+    Optional<GrupoMuscular> findFirstByNombreAndProfesorIsNull(String nombre);
+
+    Optional<GrupoMuscular> findFirstByNombreAndProfesorId(String nombre, Long profesorId);
 }

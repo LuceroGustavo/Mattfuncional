@@ -53,9 +53,9 @@ public class ExerciseService {
         return exerciseRepository.findAllWithImages();
     }
 
-    /** Ejercicio del sistema (sin profesor) con ese nombre, para evitar duplicados al importar. */
+    /** Ejercicio del sistema (sin profesor) con ese nombre, para evitar duplicados al importar. Usa findFirst para tolerar duplicados en BD. */
     public Optional<Exercise> findByNameAndProfesorNull(String name) {
-        return exerciseRepository.findByNameAndProfesorIsNull(name);
+        return exerciseRepository.findFirstByNameAndProfesorIsNull(name);
     }
 
     public Exercise findById(Long id) {

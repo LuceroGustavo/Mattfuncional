@@ -44,6 +44,10 @@ Tras la reorganización, la documentación queda así:
 
 **Estado:** Opcional; se puede abordar cuando corresponda.
 
+**Progreso (verificado Feb 2026):**
+- ✅ **Módulo Administración del sistema (HTML):** Todas las excepciones y mensajes de este módulo ya tienen estilo unificado (modales Mattfuncional, alertas `.alert-mattfuncional`). Incluye: usuarios-sistema, pagina-publica-admin, backup, depuracion, administracion.
+- ⏳ **Pendiente:** Todo el resto de la aplicación (login, formularios de alumno/ejercicio/serie/rutina, calendario, pizarra, etc.).
+
 ---
 
 ### 3.2 Depuración anual de base de datos ✅ (implementado Feb 2026)

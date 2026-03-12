@@ -16,7 +16,8 @@
 <body>
 <div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div th:fragment="contenido" class="container-fluid py-4 px-4 admin-section-content" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
+<th:block th:fragment="contenido">
+<div class="container-fluid py-4 px-4 admin-section-content" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
         <h3 class="mb-0"><i class="fas fa-users-cog me-2" style="color:#5e35b1;"></i>Administración de usuarios</h3>
         <div class="d-flex gap-2">
@@ -55,14 +56,14 @@
         </div>
     </div>
 
-    <div th:if="${param.ok != null}" class="alert alert-success">Operación realizada correctamente.</div>
-    <div th:if="${param.error == 'notfound'}" class="alert alert-danger">Usuario no encontrado.</div>
-    <div th:if="${param.error == 'developer-locked'}" class="alert alert-warning">No está permitido modificar el usuario developer.</div>
-    <div th:if="${param.error == 'no-permitido'}" class="alert alert-danger">No tenés permiso para eliminar ese usuario.</div>
-    <div th:if="${param.error == 'self-rol'}" class="alert alert-warning">No podés cambiar tu propio rol a otro que no sea Admin.</div>
-    <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Error</div>
+    <div th:if="${param.ok != null}" class="alert alert-success alert-mattfuncional"><i class="fas fa-check-circle me-2"></i>Operación realizada correctamente.</div>
+    <div th:if="${param.error == 'notfound'}" class="alert alert-danger alert-mattfuncional"><i class="fas fa-exclamation-circle me-2"></i>Usuario no encontrado.</div>
+    <div th:if="${param.error == 'developer-locked'}" class="alert alert-warning alert-mattfuncional"><i class="fas fa-lock me-2"></i>No está permitido modificar el usuario developer.</div>
+    <div th:if="${param.error == 'no-permitido'}" class="alert alert-danger alert-mattfuncional"><i class="fas fa-ban me-2"></i>No tenés permiso para eliminar ese usuario.</div>
+    <div th:if="${param.error == 'self-rol'}" class="alert alert-warning alert-mattfuncional"><i class="fas fa-user-shield me-2"></i>No podés cambiar tu propio rol a otro que no sea Admin.</div>
+    <div th:if="${errorMessage != null}" class="alert alert-danger alert-mattfuncional"><i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}">Error</span></div>
 
-    <div th:if="${correosDuplicados != null && !correosDuplicados.isEmpty()}" class="alert alert-warning alert-dismissible fade show">
+    <div th:if="${correosDuplicados != null && !correosDuplicados.isEmpty()}" class="alert alert-warning alert-dismissible fade show alert-mattfuncional">
         <strong><i class="fas fa-exclamation-triangle me-1"></i> Correos duplicados en la base de datos</strong>
         <p class="mb-1 mt-2 small">Revisá los correos en la tabla <code>usuario</code> o <code>profesor</code>.</p>
         <ul class="mb-0 small">
@@ -121,9 +122,9 @@
                                 <i class="fas fa-edit"></i>
                             </a>
                             <th:block th:with="puedeEliminar=${usuarioActual != null && (usuarioActual.rol == 'DEVELOPER' || (usuarioActual.rol == 'ADMIN' && u.id != usuarioActual.id))}">
-                                <form th:if="${puedeEliminar}" th:action="@{/profesor/usuarios-sistema/eliminar}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar a este usuario? No se puede deshacer.');">
+                                <form th:if="${puedeEliminar}" th:action="@{/profesor/usuarios-sistema/eliminar}" method="post" class="d-inline form-eliminar-usuario">
                                     <input type="hidden" name="usuarioId" th:value="${u.id}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-confirmar-eliminar" title="Eliminar" data-msg="¿Eliminar a este usuario? No se puede deshacer."><i class="fas fa-trash-alt"></i></button>
                                 </form>
                                 <span th:if="${!puedeEliminar}" class="text-muted">—</span>
                             </th:block>
@@ -139,6 +140,63 @@
     </div>
 </div>
 
+<!-- Modal confirmación (estilo Mattfuncional) -->
+    <div class="modal fade" id="modalConfirmar" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-confirmar-header">
+                    <h5 class="modal-title" id="modalConfirmarTitulo"><i class="fas fa-exclamation-circle me-2"></i>Confirmar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modalConfirmarMensaje">¿Está seguro?</div>
+                <div class="modal-footer modal-confirmar-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirmarBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+    var modalConfirmarEl = document.getElementById('modalConfirmar');
+    var modalConfirmarInst = modalConfirmarEl ? new bootstrap.Modal(modalConfirmarEl) : null;
+    function confirmar(mensaje) {
+        return new Promise(function(resolve) {
+            if (!modalConfirmarEl || !modalConfirmarInst) { resolve(false); return; }
+            var msgEl = document.getElementById('modalConfirmarMensaje');
+            var btnEl = document.getElementById('modalConfirmarBtn');
+            if (msgEl) msgEl.textContent = mensaje || '¿Está seguro?';
+            function cleanup() {
+                btnEl.removeEventListener('click', onConfirm);
+                modalConfirmarEl.removeEventListener('hidden.bs.modal', onHide);
+            }
+            function onConfirm() {
+                cleanup();
+                modalConfirmarInst.hide();
+                resolve(true);
+            }
+            function onHide() {
+                cleanup();
+                resolve(false);
+            }
+            btnEl.addEventListener('click', onConfirm);
+            modalConfirmarEl.addEventListener('hidden.bs.modal', onHide);
+            modalConfirmarInst.show();
+        });
+    }
+    document.querySelectorAll('.btn-confirmar-eliminar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var msg = this.getAttribute('data-msg') || '¿Está seguro?';
+            var form = this.closest('form');
+            confirmar(msg).then(function(ok) {
+                if (ok && form) form.submit();
+            });
+        });
+    });
+})();
+</script>
+</th:block>
 </body>
 </html>

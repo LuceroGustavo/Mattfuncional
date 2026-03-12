@@ -38,6 +38,9 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
     Optional<Rutina> findByNombreAndEsPlantillaTrueAndProfesorId(String nombre, Long profesorId);
 
+    /** Evita "Query did not return unique result" si hay rutinas duplicadas. */
+    Optional<Rutina> findFirstByNombreAndEsPlantillaTrueAndProfesorId(String nombre, Long profesorId);
+
     // Buscar todas las rutinas plantilla
     List<Rutina> findByEsPlantillaTrue();
 

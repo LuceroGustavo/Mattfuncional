@@ -57,7 +57,7 @@ public class GrupoMuscularService {
     }
 
     public Optional<GrupoMuscular> findByNombreSistema(String nombre) {
-        return grupoMuscularRepository.findByNombreAndProfesorIsNull(nombre);
+        return grupoMuscularRepository.findFirstByNombreAndProfesorIsNull(nombre);
     }
 
     /** Convierte una lista de IDs a Set de GrupoMuscular (ignora IDs no encontrados). */
@@ -81,11 +81,11 @@ public class GrupoMuscularService {
         for (String nombre : names) {
             if (nombre == null || nombre.isBlank()) continue;
             String n = nombre.trim();
-            Optional<GrupoMuscular> gSistema = grupoMuscularRepository.findByNombreAndProfesorIsNull(n);
+            Optional<GrupoMuscular> gSistema = grupoMuscularRepository.findFirstByNombreAndProfesorIsNull(n);
             if (gSistema.isPresent()) {
                 result.add(gSistema.get());
             } else if (profesorId != null) {
-                grupoMuscularRepository.findByNombreAndProfesorId(n, profesorId).ifPresent(result::add);
+                grupoMuscularRepository.findFirstByNombreAndProfesorId(n, profesorId).ifPresent(result::add);
             }
         }
         return result;
@@ -95,7 +95,7 @@ public class GrupoMuscularService {
     @Transactional
     public void asegurarGruposSistema() {
         for (String nombre : NOMBRES_GRUPOS_SISTEMA) {
-            if (grupoMuscularRepository.findByNombreAndProfesorIsNull(nombre).isEmpty()) {
+            if (grupoMuscularRepository.findFirstByNombreAndProfesorIsNull(nombre).isEmpty()) {
                 GrupoMuscular g = new GrupoMuscular(nombre, null);
                 grupoMuscularRepository.save(g);
             }
@@ -113,11 +113,11 @@ public class GrupoMuscularService {
         if (nombre == null || nombre.isBlank()) return null;
         String n = nombre.trim();
         if (esSistema) {
-            return grupoMuscularRepository.findByNombreAndProfesorIsNull(n)
+            return grupoMuscularRepository.findFirstByNombreAndProfesorIsNull(n)
                     .orElseGet(() -> grupoMuscularRepository.save(new GrupoMuscular(n, null)));
         }
         if (profesor == null) return null;
-        return grupoMuscularRepository.findByNombreAndProfesorId(n, profesor.getId())
+        return grupoMuscularRepository.findFirstByNombreAndProfesorId(n, profesor.getId())
                 .orElseGet(() -> grupoMuscularRepository.save(new GrupoMuscular(n, profesor)));
     }
 
@@ -128,9 +128,9 @@ public class GrupoMuscularService {
 
     public boolean existeNombreParaProfesor(String nombre, Long profesorId) {
         if (profesorId == null) {
-            return grupoMuscularRepository.findByNombreAndProfesorIsNull(nombre).isPresent();
+            return grupoMuscularRepository.findFirstByNombreAndProfesorIsNull(nombre).isPresent();
         }
-        return grupoMuscularRepository.findByNombreAndProfesorId(nombre, profesorId).isPresent();
+        return grupoMuscularRepository.findFirstByNombreAndProfesorId(nombre, profesorId).isPresent();
     }
 
     /** Solo los grupos con profesor no nulo (creados por el profesor) pueden editarse/eliminarse por ese profesor. */

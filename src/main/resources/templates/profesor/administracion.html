@@ -137,7 +137,8 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container-fluid py-3 px-3 px-md-4">
-    <div th:if="${importResult}" class="alert mb-3" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+    <div id="adminAlerts" class="admin-alerts-container">
+    <div th:if="${importResult}" class="alert mb-3 admin-alert-item" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
         <span th:if="${importResult['success']}">
             <strong>Importación correcta.</strong>
             <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
@@ -161,8 +162,8 @@
             <li th:each="e : ${importAlumnosResult['errores']}" th:text="${e}">error</li>
         </ul>
     </div>
-    <div th:if="${depuracionResult}" class="alert mb-3" th:classappend="${depuracionResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
-        <span th:if="${depuracionResult['success']}">
+    <div th:if="${depuracionResult}" class="alert alert-mattfuncional mb-3 admin-alert-item" th:classappend="${depuracionResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+        <span th:if="${depuracionResult['success']}"><i class="fas fa-check-circle me-2"></i>
             <strong>Depuración completada.</strong>
             <span th:if="${depuracionResult['tipo'] == 'asistencias'}">
                 Se eliminaron <strong th:text="${depuracionResult['eliminados']}">0</strong> registros de asistencias con fecha anterior a <strong th:text="${depuracionResult['fechaLimite']}">fecha</strong>.
@@ -171,7 +172,9 @@
                 Se eliminaron <strong th:text="${depuracionResult['eliminados']}">0</strong> rutinas asignadas creadas antes de <strong th:text="${depuracionResult['fechaLimite']}">fecha</strong>.
             </span>
         </span>
-        <span th:if="${!depuracionResult['success']}" th:text="${depuracionResult['message']}">Error</span>
+        <span th:if="${!depuracionResult['success']}"><i class="fas fa-exclamation-circle me-2"></i><span th:text="${depuracionResult['message']}">Error</span></span>
+    </div>
+    <div th:if="${ok}" class="alert alert-success mb-3 admin-alert-item" role="alert" th:text="${ok}">OK</div>
     </div>
     <div class="admin-layout">
         <aside class="admin-sidebar">
@@ -221,6 +224,8 @@
 
     function loadSection(url) {
         if (!contentEl || !url) return;
+        var alertsEl = document.getElementById('adminAlerts');
+        if (alertsEl) alertsEl.style.display = 'none';
         var fullUrl = url;
         if (window.location.search && window.location.search.length > 1) {
             fullUrl += (url.indexOf('?') >= 0 ? '&' : '?') + window.location.search.substring(1);
@@ -276,6 +281,15 @@
             setActive(depLink);
             loadSection(depLink.getAttribute('data-src'));
             try { sessionStorage.setItem(storageKey, depLink.getAttribute('data-src')); } catch (e) {}
+            defaultUrl = null;
+        }
+    }
+    if (params.get('seccion') === 'pagina') {
+        var paginaLink = Array.prototype.find.call(links, function(l) { return (l.getAttribute('data-src') || '').indexOf('pagina-publica') >= 0; });
+        if (paginaLink) {
+            setActive(paginaLink);
+            loadSection(paginaLink.getAttribute('data-src'));
+            try { sessionStorage.setItem(storageKey, paginaLink.getAttribute('data-src')); } catch (e) {}
             defaultUrl = null;
         }
     }

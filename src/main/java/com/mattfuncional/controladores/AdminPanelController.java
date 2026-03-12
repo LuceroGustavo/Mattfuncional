@@ -193,6 +193,12 @@ public class AdminPanelController {
             err.put("success", false);
             err.put("message", "Error al leer el archivo: " + e.getMessage());
             redirectAttributes.addFlashAttribute("importAlumnosResult", err);
+        } catch (Exception e) {
+            logger.error("Error al importar alumnos: {}", e.getMessage(), e);
+            Map<String, Object> err = new HashMap<>();
+            err.put("success", false);
+            err.put("message", "Error al importar: " + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
+            redirectAttributes.addFlashAttribute("importAlumnosResult", err);
         }
         return "redirect:/profesor/administracion?seccion=backup";
     }

@@ -9,6 +9,10 @@ import com.mattfuncional.enums.TipoAsistencia;
 import com.mattfuncional.repositorios.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -36,18 +40,21 @@ public class AlumnoJsonBackupService {
     private final AsistenciaRepository asistenciaRepository;
     private final GrupoMuscularService grupoMuscularService;
     private final UsuarioService usuarioService;
+    private final PlatformTransactionManager transactionManager;
     private final ObjectMapper objectMapper;
 
     public AlumnoJsonBackupService(UsuarioRepository usuarioRepository,
                                    MedicionFisicaRepository medicionFisicaRepository,
                                    AsistenciaRepository asistenciaRepository,
                                    GrupoMuscularService grupoMuscularService,
-                                   UsuarioService usuarioService) {
+                                   UsuarioService usuarioService,
+                                   PlatformTransactionManager transactionManager) {
         this.usuarioRepository = usuarioRepository;
         this.medicionFisicaRepository = medicionFisicaRepository;
         this.asistenciaRepository = asistenciaRepository;
         this.grupoMuscularService = grupoMuscularService;
         this.usuarioService = usuarioService;
+        this.transactionManager = transactionManager;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -179,11 +186,21 @@ public class AlumnoJsonBackupService {
         if (alumnosData == null) alumnosData = new ArrayList<>();
 
         if (pisarTodos) {
-            List<Usuario> existentes = usuarioRepository.findByProfesor_IdAndRol(profesor.getId(), "ALUMNO");
-            for (Usuario u : existentes) {
-                if (u.getId() != null) {
-                    usuarioService.eliminarUsuario(u.getId());
+            DefaultTransactionDefinition defBorrado = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            TransactionTemplate txBorrado = new TransactionTemplate(transactionManager, defBorrado);
+            Boolean okBorrado = txBorrado.execute(status -> {
+                List<Usuario> existentes = usuarioRepository.findByProfesor_IdAndRol(profesor.getId(), "ALUMNO");
+                for (Usuario u : existentes) {
+                    if (u.getId() != null) {
+                        usuarioService.eliminarUsuario(u.getId());
+                    }
                 }
+                return true;
+            });
+            if (!Boolean.TRUE.equals(okBorrado)) {
+                result.put("success", false);
+                result.put("message", "Error al borrar alumnos existentes para suplantar.");
+                return result;
             }
         }
 

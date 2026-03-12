@@ -63,7 +63,7 @@
                 <a href="#progreso">10. Progreso del alumno</a>
                 <a href="#pizarra">11. Pizarra en sala (TV)</a>
                 <a href="#usuarios">12. Usuarios del sistema</a>
-                <a href="#administracion">13. Administración y página pública</a>
+                <a href="#administracion">13. Administración del sistema</a>
                 <a href="#resumen">14. Resumen rápido</a>
             </nav>
 
@@ -196,14 +196,53 @@
             </div>
 
             <div class="card-section" id="administracion">
-                <h2>13. Administración y página pública</h2>
-                <p>Desde <strong>Administrar sistema</strong> accedés a:</p>
+                <h2>13. Administración del sistema</h2>
+                <p>Desde <strong>Administrar sistema</strong> en el panel accedés al panel de administración con las siguientes secciones. Solo visible para roles <strong>ADMIN</strong> y <strong>DEVELOPER</strong>.</p>
+
+                <h3 id="administracion-usuarios">13.1 Administración de usuarios del sistema</h3>
+                <p>Gestioná los usuarios que pueden iniciar sesión en Mattfuncional (ADMIN, AYUDANTE, DEVELOPER).</p>
                 <ul>
-                    <li><strong>Administración de usuarios</strong> — crear, editar y eliminar usuarios del sistema (admin/ayudante).</li>
-                    <li><strong>Página pública</strong> — configurar la landing del gimnasio, planes, días/horarios, consultas recibidas desde el formulario de /planes.</li>
-                    <li><strong>Backups y descargas</strong> — (si está implementado) listar y descargar backups.</li>
+                    <li><strong>Listado de usuarios:</strong> Se muestra una tabla con nombre, correo, rol y acciones (Editar, Eliminar).</li>
+                    <li><strong>Crear usuario:</strong> Botón "+ Crear usuario". Completás nombre, correo, rol y contraseña. El correo debe ser único.</li>
+                    <li><strong>Editar usuario:</strong> Podés cambiar nombre, correo, rol y contraseña. El usuario <strong>DEVELOPER</strong> del sistema no se puede modificar ni eliminar (protección del sistema).</li>
+                    <li><strong>Eliminar usuario:</strong> Solo ADMIN puede eliminar otros usuarios (no a sí mismo). El DEVELOPER puede eliminar a cualquiera. Al eliminar se pide confirmación.</li>
+                    <li><strong>Mi perfil:</strong> Cada usuario puede editar su propio nombre y correo desde esta misma pantalla. El rol solo lo cambia un ADMIN o DEVELOPER.</li>
                 </ul>
-                <p>Las <strong>consultas recibidas</strong> desde el formulario de la página Planes se gestionan desde el panel de página pública; podés marcarlas como vistas y eliminarlas.</p>
+
+                <h3>13.2 Administración de la página pública</h3>
+                <p>Configurá la landing del gimnasio que ven los visitantes (antes de registrarse).</p>
+                <ul>
+                    <li><strong>Planes y precios:</strong> Creá y editá los planes que se muestran en la página /planes. Cada plan tiene nombre, descripción, precio y orden. Podés eliminar planes que ya no usés.</li>
+                    <li><strong>Días y horarios:</strong> Configurá los horarios de atención que se muestran en la página pública.</li>
+                    <li><strong>Consultas recibidas:</strong> Las consultas enviadas desde el formulario de contacto de la página pública aparecen aquí. Podés marcarlas como vistas y eliminarlas.</li>
+                </ul>
+
+                <h3 id="administracion-backup">13.3 Sistema de backups</h3>
+                <p>Exportá e importá datos para respaldo o migración.</p>
+                <p><strong>Ejercicios, series, rutinas y grupos musculares:</strong></p>
+                <ul>
+                    <li><strong>Exportar:</strong> Generá un archivo ZIP con todos los ejercicios, rutinas plantilla, series, grupos musculares e imágenes. Se descarga al instante.</li>
+                    <li><strong>Importar:</strong> Subí un ZIP exportado. Podés elegir qué importar (grupos, ejercicios, rutinas, series). Dos modos:
+                        <ul>
+                            <li><strong>Agregar:</strong> Importa solo lo que no existe. Los datos actuales se conservan. Ideal para sumar ejercicios o rutinas nuevas sin borrar nada.</li>
+                            <li><strong>Suplantar:</strong> Borra los datos actuales de las categorías marcadas y los reemplaza con los del backup. Acción irreversible. Usalo cuando querés restaurar un backup completo.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><strong>Backup de alumnos:</strong></p>
+                <ul>
+                    <li><strong>Exportar backup:</strong> Generá un JSON con todos los alumnos (datos, mediciones, asistencias). Sirve para respaldo.</li>
+                    <li><strong>Exportar a Excel:</strong> Solo para reportes; no se usa para importar.</li>
+                    <li><strong>Importar alumnos:</strong> Subí un JSON exportado. <strong>Agregar</strong> suma alumnos nuevos (por correo); <strong>Suplantar</strong> borra los actuales y reemplaza con los del archivo.</li>
+                </ul>
+
+                <h3 id="administracion-depuracion">13.4 Depuración de datos</h3>
+                <p>Eliminá registros antiguos para mantener la base de datos ligera. <strong>Acciones irreversibles.</strong> Hacé un backup de alumnos antes si querés conservar el historial.</p>
+                <ul>
+                    <li><strong>Registro de asistencias e inasistencias:</strong> Eliminá todos los registros de presente/ausente con fecha <strong>anterior</strong> a la que seleccionás. Ejemplo: si elegís 12/12/2025, se borran los registros del 11/12/2025 y hacia atrás. Los del 12/12 en adelante se conservan.</li>
+                    <li><strong>Rutinas asignadas a alumnos:</strong> Eliminá las asignaciones creadas antes de una fecha. Las rutinas plantilla (Mis Rutinas) no se tocan. Los alumnos perderán el acceso a esos enlaces.</li>
+                </ul>
+                <p>En ambos casos debés <strong>seleccionar una fecha</strong> antes de confirmar. Si no hay fecha, el sistema te lo indicará.</p>
             </div>
 
             <div class="card-section" id="resumen">
@@ -232,6 +271,8 @@
                         <tr><td>Pizarra para la TV</td><td>Pizarra → crear/editar → abrir URL en la TV</td></tr>
                         <tr><td>Gestionar usuarios del sistema</td><td>Administrar sistema → Usuarios</td></tr>
                         <tr><td>Configurar página pública y ver consultas</td><td>Administrar sistema → Página pública</td></tr>
+                        <tr><td>Exportar o importar ejercicios/rutinas</td><td>Administrar sistema → Sistema de backups</td></tr>
+                        <tr><td>Depurar asistencias o rutinas antiguas</td><td>Administrar sistema → Depuración de datos</td></tr>
                     </tbody>
                 </table>
             </div>

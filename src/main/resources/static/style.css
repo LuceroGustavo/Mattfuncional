@@ -42,3 +42,36 @@
   color: white;
   border-radius: 12px;
 }
+
+/* Modales de confirmación/alerta reutilizables (estilo Mattfuncional) */
+.modal-confirmar-header {
+  background: linear-gradient(135deg, #5e35b1 0%, #7e57c2 100%) !important;
+  color: #fff !important;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+.modal-confirmar-header .btn-close {
+  filter: brightness(0) invert(1);
+}
+.modal-confirmar-footer .btn-primary {
+  background: linear-gradient(135deg, #5e35b1, #7e57c2);
+  border: none;
+}
+
+/* Alertas con estilo Mattfuncional */
+.alert-mattfuncional {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.alert-mattfuncional.alert-success {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
+}
+.alert-mattfuncional.alert-danger {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #c62828;
+}
+.alert-mattfuncional.alert-warning {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  color: #f57f17;
+}

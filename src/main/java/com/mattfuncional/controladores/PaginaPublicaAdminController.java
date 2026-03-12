@@ -65,7 +65,7 @@ public class PaginaPublicaAdminController {
         plan.setActivo(true);
         planPublicoService.guardar(plan);
         ra.addFlashAttribute("ok", "Plan guardado");
-        return "redirect:/profesor/pagina-publica";
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     @PostMapping("/plan/eliminar")
@@ -77,7 +77,31 @@ public class PaginaPublicaAdminController {
         }
         planPublicoService.eliminar(id);
         ra.addFlashAttribute("ok", "Plan eliminado");
-        return "redirect:/profesor/pagina-publica";
+        return "redirect:/profesor/administracion?seccion=pagina";
+    }
+
+    @PostMapping("/plan/subir/{id}")
+    public String subirPlan(@AuthenticationPrincipal Usuario usuarioActual,
+                           @PathVariable Long id,
+                           RedirectAttributes ra) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        planPublicoService.moverArriba(id);
+        ra.addFlashAttribute("ok", "Orden actualizado");
+        return "redirect:/profesor/administracion?seccion=pagina";
+    }
+
+    @PostMapping("/plan/bajar/{id}")
+    public String bajarPlan(@AuthenticationPrincipal Usuario usuarioActual,
+                           @PathVariable Long id,
+                           RedirectAttributes ra) {
+        if (usuarioActual == null || !isAdminOrDeveloper(usuarioActual)) {
+            return "redirect:/profesor/dashboard";
+        }
+        planPublicoService.moverAbajo(id);
+        ra.addFlashAttribute("ok", "Orden actualizado");
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     @PostMapping("/consulta/eliminar")
@@ -89,7 +113,7 @@ public class PaginaPublicaAdminController {
         }
         consultaService.eliminar(id);
         ra.addFlashAttribute("ok", "Consulta eliminada");
-        return "redirect:/profesor/pagina-publica";
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     @PostMapping("/config")
@@ -109,7 +133,7 @@ public class PaginaPublicaAdminController {
         configuracionPaginaPublicaService.actualizar(ConfiguracionPaginaPublica.CLAVE_DIAS_HORARIOS, dias_horarios);
         configuracionPaginaPublicaService.actualizar(ConfiguracionPaginaPublica.CLAVE_TELEFONO, telefono);
         ra.addFlashAttribute("ok", "Configuración guardada");
-        return "redirect:/profesor/pagina-publica";
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     @PostMapping("/consulta/marcar-visto/{id}")
@@ -132,7 +156,7 @@ public class PaginaPublicaAdminController {
         }
         consultaService.marcarComoVisto(id);
         ra.addFlashAttribute("ok", "Consulta marcada como vista");
-        return "redirect:/profesor/pagina-publica";
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     private boolean isAdminOrDeveloper(Usuario u) {

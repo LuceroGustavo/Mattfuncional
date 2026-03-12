@@ -87,9 +87,9 @@
                                 </form>
                             </th:block>
                             <span th:if="${c.visto}" class="badge bg-secondary me-1">Visto</span>
-                            <form th:action="@{/profesor/pagina-publica/consulta/eliminar}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta consulta?');">
+                            <form th:action="@{/profesor/pagina-publica/consulta/eliminar}" method="post" class="d-inline form-eliminar-consulta">
                                 <input type="hidden" name="id" th:value="${c.id}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-confirmar-eliminar" title="Eliminar" data-msg="¿Eliminar esta consulta?"><i class="fas fa-trash-alt"></i></button>
                             </form>
                         </td>
                     </tr>
@@ -115,21 +115,33 @@
                         <th>Precio</th>
                         <th>Veces/sem</th>
                         <th>Descripción</th>
-                        <th>Acciones</th>
+                        <th style="width: 180px;">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="plan : ${planes}">
+                    <tr th:each="plan, planStat : ${planes}">
                         <td th:text="${plan.nombre}">Plan</td>
                         <td th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</td>
                         <td th:text="${plan.vecesPorSemana != null ? plan.vecesPorSemana : 'Libre'}">-</td>
                         <td><span class="small" th:text="${plan.descripcion}">-</span></td>
                         <td>
-                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id=${plan.id}, data-nombre=${plan.nombre}, data-descripcion=${plan.descripcion}, data-precio=${plan.precio}, data-veces=${plan.vecesPorSemana}, data-orden=${plan.orden}">Editar</button>
-                            <form th:action="@{/profesor/pagina-publica/plan/eliminar}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este plan?');">
-                                <input type="hidden" name="id" th:value="${plan.id}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
-                            </form>
+                            <div class="d-flex align-items-center gap-1 flex-wrap">
+                                <div class="btn-group btn-group-sm flex-shrink-0">
+                                    <form th:if="${!planStat.first}" th:action="@{/profesor/pagina-publica/plan/subir/{id}(id=${plan.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Subir"><i class="fas fa-arrow-up" style="font-size: 0.7rem;"></i></button>
+                                    </form>
+                                    <button th:if="${planStat.first}" type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 disabled" title="Primero" disabled><i class="fas fa-arrow-up" style="font-size: 0.7rem;"></i></button>
+                                    <form th:if="${!planStat.last}" th:action="@{/profesor/pagina-publica/plan/bajar/{id}(id=${plan.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Bajar"><i class="fas fa-arrow-down" style="font-size: 0.7rem;"></i></button>
+                                    </form>
+                                    <button th:if="${planStat.last}" type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 disabled" title="Último" disabled><i class="fas fa-arrow-down" style="font-size: 0.7rem;"></i></button>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id=${plan.id}, data-nombre=${plan.nombre}, data-descripcion=${plan.descripcion}, data-precio=${plan.precio}, data-veces=${plan.vecesPorSemana}, data-orden=${plan.orden}" title="Editar"><i class="fas fa-pen me-1"></i>Editar</button>
+                                <form th:action="@{/profesor/pagina-publica/plan/eliminar}" method="post" class="d-inline form-eliminar-plan">
+                                    <input type="hidden" name="id" th:value="${plan.id}">
+                                    <button type="button" class="btn btn-danger btn-sm btn-confirmar-eliminar" title="Eliminar" data-msg="¿Eliminar este plan?"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <tr th:if="${planes == null || planes.isEmpty()}">
@@ -176,10 +188,9 @@
     </div>
 
     <a th:href="@{/profesor/administracion}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Volver al panel de administración</a>
-</div>
 
-<!-- Modal Editar/Crear Plan -->
-<div class="modal fade" id="modalPlan" tabindex="-1">
+    <!-- Modal Editar/Crear Plan (dentro del fragmento para que funcione en carga AJAX) -->
+    <div class="modal fade" id="modalPlan" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="formPlan" th:action="@{/profesor/pagina-publica/plan/guardar}" method="post">
@@ -219,19 +230,85 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.getElementById('modalPlan').addEventListener('show.bs.modal', function(e) {
-    var btn = e.relatedTarget;
-    var id = btn.getAttribute('data-id') || '';
-    document.getElementById('planId').value = id;
-    document.querySelector('#formPlan input[name="nombre"]').value = btn.getAttribute('data-nombre') || '';
-    document.querySelector('#formPlan input[name="precio"]').value = btn.getAttribute('data-precio') || '0';
-    document.querySelector('#formPlan input[name="vecesPorSemana"]').value = btn.getAttribute('data-veces') || '';
-    document.querySelector('#formPlan input[name="orden"]').value = btn.getAttribute('data-orden') || '0';
-    document.querySelector('#formPlan textarea[name="descripcion"]').value = btn.getAttribute('data-descripcion') || '';
-    document.getElementById('modalPlanTitle').textContent = id ? 'Editar plan' : 'Nuevo plan';
-});
-</script>
+    <!-- Modal confirmación (estilo Mattfuncional, reutilizable) -->
+    <div class="modal fade" id="modalConfirmar" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-confirmar-header">
+                    <h5 class="modal-title" id="modalConfirmarTitulo"><i class="fas fa-exclamation-circle me-2"></i>Confirmar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modalConfirmarMensaje">¿Está seguro?</div>
+                <div class="modal-footer modal-confirmar-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirmarBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var modalEl = document.getElementById('modalPlan');
+        if (modalEl) {
+            modalEl.addEventListener('show.bs.modal', function(e) {
+                var btn = e.relatedTarget;
+                var id = btn ? (btn.getAttribute('data-id') || '') : '';
+                var planId = document.getElementById('planId');
+                if (planId) planId.value = id;
+                var nombreInp = document.querySelector('#formPlan input[name="nombre"]');
+                if (nombreInp) nombreInp.value = btn ? (btn.getAttribute('data-nombre') || '') : '';
+                var precioInp = document.querySelector('#formPlan input[name="precio"]');
+                if (precioInp) precioInp.value = btn ? (btn.getAttribute('data-precio') || '0') : '0';
+                var vecesInp = document.querySelector('#formPlan input[name="vecesPorSemana"]');
+                if (vecesInp) vecesInp.value = btn ? (btn.getAttribute('data-veces') || '') : '';
+                var ordenInp = document.querySelector('#formPlan input[name="orden"]');
+                if (ordenInp) ordenInp.value = btn ? (btn.getAttribute('data-orden') || '0') : '0';
+                var descInp = document.querySelector('#formPlan textarea[name="descripcion"]');
+                if (descInp) descInp.value = btn ? (btn.getAttribute('data-descripcion') || '') : '';
+                var titleEl = document.getElementById('modalPlanTitle');
+                if (titleEl) titleEl.textContent = id ? 'Editar plan' : 'Nuevo plan';
+            });
+        }
+
+        var modalConfirmarEl = document.getElementById('modalConfirmar');
+        var modalConfirmarInst = modalConfirmarEl ? new bootstrap.Modal(modalConfirmarEl) : null;
+        function confirmar(mensaje) {
+            return new Promise(function(resolve) {
+                if (!modalConfirmarEl || !modalConfirmarInst) { resolve(false); return; }
+                var msgEl = document.getElementById('modalConfirmarMensaje');
+                var btnEl = document.getElementById('modalConfirmarBtn');
+                if (msgEl) msgEl.textContent = mensaje || '¿Está seguro?';
+                function cleanup() {
+                    btnEl.removeEventListener('click', onConfirm);
+                    modalConfirmarEl.removeEventListener('hidden.bs.modal', onHide);
+                }
+                function onConfirm() {
+                    cleanup();
+                    modalConfirmarInst.hide();
+                    resolve(true);
+                }
+                function onHide() {
+                    cleanup();
+                    resolve(false);
+                }
+                btnEl.addEventListener('click', onConfirm);
+                modalConfirmarEl.addEventListener('hidden.bs.modal', onHide);
+                modalConfirmarInst.show();
+            });
+        }
+
+        document.querySelectorAll('.btn-confirmar-eliminar').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var msg = this.getAttribute('data-msg') || '¿Está seguro?';
+                var form = this.closest('form');
+                confirmar(msg).then(function(ok) {
+                    if (ok && form) form.submit();
+                });
+            });
+        });
+    })();
+    </script>
+</div>
 </body>
 </html>

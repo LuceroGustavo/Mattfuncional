@@ -36,6 +36,50 @@ public class PlanPublicoService {
         planPublicoRepository.deleteById(id);
     }
 
+    /** Mueve el plan una posición hacia arriba (menor orden). Retorna true si se movió. */
+    @Transactional
+    public boolean moverArriba(Long id) {
+        List<PlanPublico> planes = planPublicoRepository.findAllByOrderByOrdenAsc();
+        int idx = -1;
+        for (int i = 0; i < planes.size(); i++) {
+            if (planes.get(i).getId().equals(id)) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx <= 0) return false;
+        PlanPublico actual = planes.get(idx);
+        PlanPublico anterior = planes.get(idx - 1);
+        int ordActual = actual.getOrden();
+        actual.setOrden(anterior.getOrden());
+        anterior.setOrden(ordActual);
+        planPublicoRepository.save(actual);
+        planPublicoRepository.save(anterior);
+        return true;
+    }
+
+    /** Mueve el plan una posición hacia abajo (mayor orden). Retorna true si se movió. */
+    @Transactional
+    public boolean moverAbajo(Long id) {
+        List<PlanPublico> planes = planPublicoRepository.findAllByOrderByOrdenAsc();
+        int idx = -1;
+        for (int i = 0; i < planes.size(); i++) {
+            if (planes.get(i).getId().equals(id)) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0 || idx >= planes.size() - 1) return false;
+        PlanPublico actual = planes.get(idx);
+        PlanPublico siguiente = planes.get(idx + 1);
+        int ordActual = actual.getOrden();
+        actual.setOrden(siguiente.getOrden());
+        siguiente.setOrden(ordActual);
+        planPublicoRepository.save(actual);
+        planPublicoRepository.save(siguiente);
+        return true;
+    }
+
     /** Crea los 4 planes iniciales si no existen. */
     @Transactional
     public void asegurarPlanesIniciales() {

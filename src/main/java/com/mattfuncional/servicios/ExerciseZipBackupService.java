@@ -496,7 +496,7 @@ public class ExerciseZipBackupService {
                 for (Map<String, Object> rd : rutinasData) {
                     String nombreRutina = (String) rd.get("nombre");
                     if (nombreRutina == null || nombreRutina.isBlank()) continue;
-                    Optional<Rutina> rutinaExistente = rutinaRepository.findByNombreAndEsPlantillaTrueAndProfesorId(nombreRutina, profesorRestore.getId());
+                    Optional<Rutina> rutinaExistente = rutinaRepository.findFirstByNombreAndEsPlantillaTrueAndProfesorId(nombreRutina, profesorRestore.getId());
                     if (!pisarTodos && rutinaExistente.isPresent()) {
                         rutinasCreadas.add(rutinaExistente.get());
                         continue;

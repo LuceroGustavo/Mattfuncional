@@ -17,6 +17,9 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
     /** Para saber si ya existe un ejercicio predeterminado con ese nombre (evitar duplicados al asegurar). */
     Optional<Exercise> findByNameAndProfesorIsNull(String name);
 
+    /** Igual que findByNameAndProfesorIsNull pero usa findFirst para evitar "Query did not return unique result" si hay duplicados en BD. */
+    Optional<Exercise> findFirstByNameAndProfesorIsNull(String name);
+
     @Query("SELECT e FROM Exercise e JOIN e.grupos g WHERE g = :grupo")
     List<Exercise> findByGruposContaining(@Param("grupo") GrupoMuscular grupo);
 

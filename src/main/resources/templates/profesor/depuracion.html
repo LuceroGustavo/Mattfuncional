@@ -46,12 +46,12 @@
                     <div class="dep-warning-box mb-3">
                         <i class="fas fa-exclamation-triangle me-2"></i><strong>Acción irreversible.</strong> No se puede deshacer. Hacé un backup de alumnos antes si querés conservar el historial.
                     </div>
-                    <form th:action="@{/profesor/depuracion/asistencias}" method="post" onsubmit="return confirm('¿Estás seguro? Se eliminarán permanentemente todos los registros de asistencias con fecha anterior a la seleccionada.');">
+                    <form th:action="@{/profesor/depuracion/asistencias}" method="post" class="form-depuracion-asistencias">
                         <div class="mb-3">
                             <label for="fechaAsistencias" class="form-label fw-semibold">Eliminar registros con fecha anterior a:</label>
                             <input type="date" id="fechaAsistencias" name="fechaLimite" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-warning">
+                        <button type="button" class="btn btn-warning btn-confirmar-depuracion" data-msg="¿Estás seguro? Se eliminarán permanentemente todos los registros de asistencias con fecha anterior a la seleccionada." data-input-id="fechaAsistencias">
                             <i class="fas fa-trash-alt me-1"></i>Eliminar asistencias antiguas
                         </button>
                     </form>
@@ -73,12 +73,12 @@
                     <div class="dep-warning-box mb-3">
                         <i class="fas fa-exclamation-triangle me-2"></i><strong>Acción irreversible.</strong> No se puede deshacer. Los alumnos perderán el acceso a esos enlaces de rutina.
                     </div>
-                    <form th:action="@{/profesor/depuracion/rutinas-asignadas}" method="post" onsubmit="return confirm('¿Estás seguro? Se eliminarán permanentemente todas las rutinas asignadas creadas antes de la fecha seleccionada.');">
+                    <form th:action="@{/profesor/depuracion/rutinas-asignadas}" method="post" class="form-depuracion-rutinas">
                         <div class="mb-3">
                             <label for="fechaRutinas" class="form-label fw-semibold">Eliminar asignaciones creadas antes de:</label>
                             <input type="date" id="fechaRutinas" name="fechaLimite" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="button" class="btn btn-danger btn-confirmar-depuracion" data-msg="¿Estás seguro? Se eliminarán permanentemente todas las rutinas asignadas creadas antes de la fecha seleccionada." data-input-id="fechaRutinas">
                             <i class="fas fa-trash-alt me-1"></i>Eliminar rutinas asignadas antiguas
                         </button>
                     </form>
@@ -87,6 +87,93 @@
         </div>
     </div>
 </div>
+
+<!-- Modal alerta (fecha requerida) -->
+<div class="modal fade" id="modalAlertaDepuracion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-confirmar-header">
+                <h5 class="modal-title"><i class="fas fa-calendar-times me-2"></i>Fecha requerida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalAlertaDepuracionMensaje">Seleccioná una fecha primero.</div>
+            <div class="modal-footer modal-confirmar-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal confirmación (estilo Mattfuncional) -->
+<div class="modal fade" id="modalConfirmarDepuracion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-confirmar-header">
+                <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Confirmar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalConfirmarDepuracionMensaje">¿Está seguro?</div>
+            <div class="modal-footer modal-confirmar-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modalConfirmarDepuracionBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var modalEl = document.getElementById('modalConfirmarDepuracion');
+    var modalInst = modalEl && typeof bootstrap !== 'undefined' ? new bootstrap.Modal(modalEl) : null;
+    function confirmar(mensaje) {
+        return new Promise(function(resolve) {
+            if (!modalEl || !modalInst) { resolve(false); return; }
+            var msgEl = document.getElementById('modalConfirmarDepuracionMensaje');
+            var btnEl = document.getElementById('modalConfirmarDepuracionBtn');
+            if (msgEl) msgEl.textContent = mensaje || '¿Está seguro?';
+            function cleanup() {
+                if (btnEl) btnEl.removeEventListener('click', onConfirm);
+                if (modalEl) modalEl.removeEventListener('hidden.bs.modal', onHide);
+            }
+            function onConfirm() {
+                cleanup();
+                modalInst.hide();
+                resolve(true);
+            }
+            function onHide() {
+                cleanup();
+                resolve(false);
+            }
+            if (btnEl) btnEl.addEventListener('click', onConfirm);
+            if (modalEl) modalEl.addEventListener('hidden.bs.modal', onHide);
+            modalInst.show();
+        });
+    }
+    function mostrarAlerta(mensaje) {
+        var modalAlerta = document.getElementById('modalAlertaDepuracion');
+        var msgEl = document.getElementById('modalAlertaDepuracionMensaje');
+        if (modalAlerta && msgEl && typeof bootstrap !== 'undefined') {
+            if (msgEl) msgEl.textContent = mensaje || 'Seleccioná una fecha primero.';
+            (new bootstrap.Modal(modalAlerta)).show();
+        }
+    }
+    document.querySelectorAll('.btn-confirmar-depuracion').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var inputId = this.getAttribute('data-input-id');
+            var input = inputId ? document.getElementById(inputId) : null;
+            if (!input || !input.value || input.value.trim() === '') {
+                mostrarAlerta('Seleccioná una fecha antes de continuar.');
+                return;
+            }
+            var msg = this.getAttribute('data-msg') || '¿Está seguro?';
+            var form = this.closest('form');
+            confirmar(msg).then(function(ok) {
+                if (ok && form) form.submit();
+            });
+        });
+    });
+})();
+</script>
 </div>
 </body>
 </html>
