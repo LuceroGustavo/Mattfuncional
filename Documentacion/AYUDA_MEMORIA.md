@@ -35,7 +35,15 @@ Para ver la lista de mejoras pendientes e implementadas (ítem por ítem), el ch
 - **Problema:** Al eliminar todos los usuarios y luego ir a "Rutinas asignadas", al abrir una rutina aparecía que no se podía ver porque solo se pueden ver rutinas asignadas a usuarios (al no existir el usuario, la rutina quedaba huérfana).
 - **Lógica a seguir:** Al **eliminar un usuario**, deben **eliminarse también todas sus rutinas asignadas** (activas e inactivas). Así, si se eliminan todos los usuarios, no debe haber rutinas asignadas.
 - **Implementado:** En `UsuarioService.eliminarUsuario` se eliminan las rutinas del alumno con `rutinaService.eliminarRutina(id)` en lugar de solo desasignarlas (antes se hacía `setUsuario(null)`).
-- **A futuro (backups/exportación):** Cuando se implemente el sistema de backups y exportación, explicar que si se quiere **mantener el historial del usuario** antes de eliminarlo, debe **exportar su historial** antes de borrarlo (a revisar cuando esté el módulo de backup).
+- **Backup de alumnos:** El sistema de backup está **terminado** (marzo 2026). Si se quiere **mantener el historial del usuario** antes de eliminarlo, usar **Backup y resguardo** → "Exportar backup" (JSON de alumnos) o "Exportar a Excel" (reportes). Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) § Backup y exportación.
+
+---
+
+## Sistema de backup — terminado (Mar 2026)
+
+- **Ejercicios + grupos + rutinas + series:** Exportar/importar ZIP desde Administración → Backup y resguardo. Opciones por checkbox (Grupos, Ejercicios, Rutinas, Series). Agregar o Suplantar.
+- **Alumnos:** Exportar backup (JSON) o Exportar a Excel (reportes con columna Último trabajo). Importar desde JSON (Agregar o Suplantar).
+- **Documentación:** [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) (Backup y exportación, Excel alumnos).
 
 ---
 

@@ -4,13 +4,10 @@ import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.servicios.AlumnoExportService;
 import com.mattfuncional.servicios.AlumnoJsonBackupService;
-import com.mattfuncional.servicios.ExerciseBackupService;
-import com.mattfuncional.servicios.ExerciseExportImportService;
 import com.mattfuncional.servicios.ExerciseZipBackupService;
 import com.mattfuncional.servicios.ProfesorService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -42,21 +37,15 @@ public class AdminPanelController {
     private static final Logger logger = LoggerFactory.getLogger(AdminPanelController.class);
     private static final DateTimeFormatter ZIP_FILENAME_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
 
-    private final ExerciseExportImportService exerciseExportImportService;
-    private final ExerciseBackupService exerciseBackupService;
     private final ExerciseZipBackupService exerciseZipBackupService;
     private final ProfesorService profesorService;
     private final AlumnoExportService alumnoExportService;
     private final AlumnoJsonBackupService alumnoJsonBackupService;
 
-    public AdminPanelController(ExerciseExportImportService exerciseExportImportService,
-                                ExerciseBackupService exerciseBackupService,
-                                ExerciseZipBackupService exerciseZipBackupService,
+    public AdminPanelController(ExerciseZipBackupService exerciseZipBackupService,
                                 ProfesorService profesorService,
                                 AlumnoExportService alumnoExportService,
                                 AlumnoJsonBackupService alumnoJsonBackupService) {
-        this.exerciseExportImportService = exerciseExportImportService;
-        this.exerciseBackupService = exerciseBackupService;
         this.exerciseZipBackupService = exerciseZipBackupService;
         this.profesorService = profesorService;
         this.alumnoExportService = alumnoExportService;
@@ -248,71 +237,6 @@ public class AdminPanelController {
                     .body(resource);
         } catch (Exception e) {
             logger.error("Error al exportar backup ZIP: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    /**
-     * Exporta ejercicios a JSON (con imágenes en Base64). Alternativa al ZIP.
-     * profesorId=null → ejercicios predeterminados del sistema.
-     * profesorId no null → ejercicios creados por ese profesor.
-     */
-    @GetMapping("/backup/exportar")
-    public ResponseEntity<Resource> exportarEjercicios(@AuthenticationPrincipal Usuario usuarioActual,
-                                                        @RequestParam(required = false) Long profesorId) {
-        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
-            return ResponseEntity.notFound().build();
-        }
-        try {
-            Map<String, Object> result = exerciseExportImportService.exportarEjerciciosProfesor(profesorId);
-            if (!Boolean.TRUE.equals(result.get("success"))) {
-                return ResponseEntity.badRequest().build();
-            }
-            String fileName = (String) result.get("fileName");
-            if (fileName == null || fileName.contains("..")) {
-                return ResponseEntity.badRequest().build();
-            }
-            Path dir = Paths.get("").toAbsolutePath().resolve("backups").resolve("ejercicios");
-            Path path = dir.resolve(fileName).normalize();
-            if (!path.startsWith(dir)) {
-                return ResponseEntity.badRequest().build();
-            }
-            Resource resource = new UrlResource(path.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .body(resource);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    /**
-     * Descarga un archivo de backup existente por nombre.
-     */
-    @GetMapping("/backup/descargar")
-    public ResponseEntity<Resource> descargarBackup(@AuthenticationPrincipal Usuario usuarioActual,
-                                                    @RequestParam String fileName) {
-        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
-            return ResponseEntity.notFound().build();
-        }
-        if (fileName == null || fileName.contains("..") || !fileName.endsWith(".json")) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            Path path = Paths.get("").toAbsolutePath().resolve("backups").resolve("ejercicios").resolve(fileName);
-            Resource resource = new UrlResource(path.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .body(resource);
-        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }

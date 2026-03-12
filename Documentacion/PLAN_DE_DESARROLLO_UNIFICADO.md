@@ -2,9 +2,9 @@
 
 **Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
 
-**Última actualización:** Febrero 2026  
+**Última actualización:** Marzo 2026  
 **Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO, PLAN_MODIFICACIONES y AYUDA_MEMORIA (ya eliminados).  
-**Uso:** Un solo documento con la visión del proyecto, fases, checklist y pendientes detallados (ítem por ítem). Los avances implementados están en [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md).
+**Uso:** Un solo documento con la visión del proyecto, fases, checklist y pendientes detallados (ítem por ítem). Resumen de lo implementado en [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md).
 
 ---
 
@@ -28,7 +28,7 @@
 - **Rutinas:** Creación en base a series, ABM, asignación rutina → alumno, enlace único (token), hoja `/rutinas/hoja/{token}`, Copiar enlace, WhatsApp desde ficha alumno.
 - **Usuarios (alumnos):** Ficha (datos físicos y online). Sin usuario/contraseña; alumnos nunca autentican (Fase 6 completada).
 - **Calendario semanal:** Mantener. Uso: alumnos que asisten, vista por día/horario, presentismo. Asistencia (presente/ausente/pendiente) ya implementada en calendario y vista Mis Alumnos. Estructura: `CalendarioController`, `CalendarioService`, `Asistencia`, `DiaHorarioAsistencia`, `SlotConfig`, `semanal-profesor.html`.
-- **Grupos musculares:** Entidad `GrupoMuscular` (ya implementado). ABM en `/profesor/mis-grupos-musculares`. Ver AVANCES_DEL_APP.md y PLAN_GRUPOS_MUSCULARES_ENTIDAD.md.
+- **Grupos musculares:** Entidad `GrupoMuscular` (ya implementado). ABM en `/profesor/mis-grupos-musculares`. Ver DOCUMENTACION_UNIFICADA.md § Referencias técnicas.
 
 ---
 
@@ -102,7 +102,7 @@
 - [x] **Pantalla de entrenamiento en sala** (pizarra digital, modo TV, control desde panel, polling).
 - [x] **Página pública:** landing, Planes, formulario de consulta, administración desde panel.
 - [x] **Manual del usuario:** Implementado. Página HTML en `/profesor/manual` accesible desde el panel (botón "Manual del usuario"); cubre acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso, pizarra, usuarios del sistema, administración y resumen. MANUAL-USUARIO.md sigue como referencia.
-- [ ] **Gestión de backup:** Backups y descargas desde el panel de administración (listar, descargar, importar si aplica).
+- [x] **Gestión de backup:** Terminado (Mar 2026). En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series con opciones por checkbox); exportar/importar alumnos (JSON); exportar alumnos a Excel (reportes con Último trabajo). Ver [PLAN_BACKUP_Y_EXPORTACION.md](PLAN_BACKUP_Y_EXPORTACION.md).
 - [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
@@ -110,10 +110,10 @@
 
 ## 8. Pendientes (lo que realmente falta)
 
-La mayoría del desarrollo está completada (calendario, pizarra, página pública, ficha alumno, etc.). Quedan por implementar o completar:
+La mayoría del desarrollo está completada (calendario, pizarra, página pública, ficha alumno, backup, etc.). Queda por implementar o completar:
 
 - **Manual del usuario:** **Completado.** Página HTML en `/profesor/manual` (botón en panel); cubre todas las funcionalidades. MANUAL-USUARIO.md se mantiene como referencia en documentación.
-- **Gestión de backup:** Implementar en el panel de administración la sección de backups y descargas (listar backups, descargar, importar si aplica).
+- **Gestión de backup:** **Completado (Mar 2026).** En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series); exportar/importar alumnos (JSON); exportar alumnos a Excel. Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) § Backup y exportación.
 - **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
 
 Opcional / operativo:
@@ -170,8 +170,8 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 
 ### Gestión de backup
 
-- **Qué falta:** En el panel de administración, sección de **backups y descargas**: listar backups disponibles, descargar, opcionalmente importar.
-- **Estado:** Por implementar.
+- **Implementado (Mar 2026).** En Administración → Backup y resguardo: exportar/importar **ZIP** (ejercicios, grupos musculares, rutinas, series; opciones por checkbox; Agregar o Suplantar); exportar/importar **alumnos** (JSON; Agregar o Suplantar); exportar **alumnos a Excel** (reportes con columna Último trabajo). No hay listado de archivos en servidor: el usuario descarga o sube el archivo desde su equipo.
+- **Estado:** Terminado. Detalle en [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) § Backup y exportación.
 
 ### Depuración anual de datos (eliminar datos viejos)
 
@@ -193,14 +193,14 @@ Pendientes agregados tras resolver los modales en la ficha del alumno. Ver tambi
 
 **Estado:** **Completado** (Feb 2026). Ver [CHANGELOG_UNIFICADO_FEB2026.md](CHANGELOG_UNIFICADO_FEB2026.md) §18.
 
-### Después de los métodos de backup
+### Después del backup (pendientes opcionales)
 
-Cuando esté implementada la gestión de backup (listar, descargar, importar si aplica), pendientes operativos:
+Con el backup ya implementado, pendientes operativos opcionales:
 
 1. **Estilos de excepciones (avisos):** Dar estilos consistentes a las pantallas de excepciones/avisos/errores que muestra la aplicación.
 2. **Archivo para migración y despliegue:** Preparar un archivo (o documento) con todos los datos e instrucciones necesarios para la migración y el despliegue al servidor que compre el cliente (datos, scripts, pasos, variables, etc.).
 
-**Estado:** Por implementar / preparar una vez completado el backup.
+**Estado:** Opcional; se pueden abordar cuando corresponda.
 
 ---
 
@@ -208,11 +208,8 @@ Cuando esté implementada la gestión de backup (listar, descargar, importar si 
 
 | Documento | Contenido |
 |----------|------------|
-| [AVANCES_DEL_APP.md](AVANCES_DEL_APP.md) | Todo lo implementado hasta la fecha. |
-| [PLAN_GRUPOS_MUSCULARES_ENTIDAD.md](PLAN_GRUPOS_MUSCULARES_ENTIDAD.md) | Plan e implementación de grupos musculares (ya hecho). |
-| [OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md](OPTIMIZACION_EJERCICIOS_PREDETERMINADOS.md) | Imágenes 1–60 en `uploads/ejercicios/`. |
-| `Documentacion/CAMBIOS-ASISTENCIA-CALENDARIO-Y-VISTA-ALUMNOS.md` | Detalle técnico de asistencia en calendario y columna Presente. |
-| [FASE_7_PANTALLA_DE_SALA.md](FASE_7_PANTALLA_DE_SALA.md) | Plan detallado de la pizarra digital para TV. |
+| [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual, referencias técnicas. |
+| [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) | Despliegue en VPS (SSH, Nginx, menú). |
 
 ---
 

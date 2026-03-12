@@ -41,24 +41,6 @@ public class ExerciseBackupService {
         // Configurar ObjectMapper
         this.objectMapper = new ObjectMapper();
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        
-        // Crear directorio de backups si no existe
-        createBackupDirectory();
-    }
-
-    /**
-     * Crea el directorio de backups si no existe
-     */
-    private void createBackupDirectory() {
-        try {
-            Path backupPath = Paths.get(BACKUP_DIR);
-            if (!Files.exists(backupPath)) {
-                Files.createDirectories(backupPath);
-                logger.info("Directorio de backups creado: {}", backupPath.toAbsolutePath());
-            }
-        } catch (IOException e) {
-            logger.error("Error creando directorio de backups: {}", e.getMessage(), e);
-        }
     }
 
     /**
