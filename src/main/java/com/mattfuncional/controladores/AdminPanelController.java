@@ -4,6 +4,7 @@ import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.servicios.AlumnoExportService;
 import com.mattfuncional.servicios.AlumnoJsonBackupService;
+import com.mattfuncional.servicios.DepuracionService;
 import com.mattfuncional.servicios.ExerciseZipBackupService;
 import com.mattfuncional.servicios.ProfesorService;
 import org.springframework.core.io.ByteArrayResource;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -41,15 +43,18 @@ public class AdminPanelController {
     private final ProfesorService profesorService;
     private final AlumnoExportService alumnoExportService;
     private final AlumnoJsonBackupService alumnoJsonBackupService;
+    private final DepuracionService depuracionService;
 
     public AdminPanelController(ExerciseZipBackupService exerciseZipBackupService,
                                 ProfesorService profesorService,
                                 AlumnoExportService alumnoExportService,
-                                AlumnoJsonBackupService alumnoJsonBackupService) {
+                                AlumnoJsonBackupService alumnoJsonBackupService,
+                                DepuracionService depuracionService) {
         this.exerciseZipBackupService = exerciseZipBackupService;
         this.profesorService = profesorService;
         this.alumnoExportService = alumnoExportService;
         this.alumnoJsonBackupService = alumnoJsonBackupService;
+        this.depuracionService = depuracionService;
     }
 
     private Profesor getProfesorParaUsuario(Usuario usuario) {
@@ -239,6 +244,73 @@ public class AdminPanelController {
             logger.error("Error al exportar backup ZIP: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // --- Depuración de datos ---
+
+    @GetMapping("/depuracion")
+    public String paginaDepuracion(@AuthenticationPrincipal Usuario usuarioActual,
+                                  @RequestParam(name = "fragment", required = false) String fragment,
+                                  Model model) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return "redirect:/profesor/dashboard";
+        }
+        if (fragment != null && !fragment.isEmpty()) {
+            return "profesor/depuracion :: contenido";
+        }
+        return "profesor/depuracion";
+    }
+
+    @PostMapping("/depuracion/asistencias")
+    public String depurarAsistencias(@AuthenticationPrincipal Usuario usuarioActual,
+                                    @RequestParam("fechaLimite") String fechaLimiteStr,
+                                    RedirectAttributes redirectAttributes) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return "redirect:/profesor/dashboard";
+        }
+        try {
+            LocalDate fechaLimite = LocalDate.parse(fechaLimiteStr);
+            int eliminados = depuracionService.depurarAsistenciasAntesDe(fechaLimite);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("tipo", "asistencias");
+            result.put("eliminados", eliminados);
+            result.put("fechaLimite", fechaLimiteStr);
+            redirectAttributes.addFlashAttribute("depuracionResult", result);
+        } catch (Exception e) {
+            logger.error("Error al depurar asistencias: {}", e.getMessage(), e);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("depuracionResult", result);
+        }
+        return "redirect:/profesor/administracion?seccion=depuracion";
+    }
+
+    @PostMapping("/depuracion/rutinas-asignadas")
+    public String depurarRutinasAsignadas(@AuthenticationPrincipal Usuario usuarioActual,
+                                         @RequestParam("fechaLimite") String fechaLimiteStr,
+                                         RedirectAttributes redirectAttributes) {
+        if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
+            return "redirect:/profesor/dashboard";
+        }
+        try {
+            LocalDate fechaLimite = LocalDate.parse(fechaLimiteStr);
+            int eliminados = depuracionService.depurarRutinasAsignadasAntesDe(fechaLimite);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("tipo", "rutinas");
+            result.put("eliminados", eliminados);
+            result.put("fechaLimite", fechaLimiteStr);
+            redirectAttributes.addFlashAttribute("depuracionResult", result);
+        } catch (Exception e) {
+            logger.error("Error al depurar rutinas asignadas: {}", e.getMessage(), e);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("depuracionResult", result);
+        }
+        return "redirect:/profesor/administracion?seccion=depuracion";
     }
 
 }

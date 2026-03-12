@@ -3,6 +3,7 @@ package com.mattfuncional.repositorios;
 import com.mattfuncional.entidades.Asistencia;
 import com.mattfuncional.entidades.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
@@ -23,4 +24,12 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     /** Carga asistencias con usuario inicializado (evita LazyInitialization al construir el mapa). */
     @Query("SELECT a FROM Asistencia a LEFT JOIN FETCH a.usuario WHERE a.fecha BETWEEN :inicio AND :fin")
     List<Asistencia> findByFechaBetweenWithUsuario(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin);
+
+    /** Cuenta asistencias con fecha anterior a la indicada (para depuración). */
+    long countByFechaBefore(LocalDate fecha);
+
+    /** Elimina asistencias con fecha anterior a la indicada. Devuelve cantidad eliminada. */
+    @Modifying
+    @Query("DELETE FROM Asistencia a WHERE a.fecha < :fecha")
+    int deleteByFechaBefore(@Param("fecha") LocalDate fecha);
 } 

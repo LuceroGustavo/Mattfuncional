@@ -103,7 +103,7 @@
 - [x] **Página pública:** landing, Planes, formulario de consulta, administración desde panel.
 - [x] **Manual del usuario:** Implementado. Página HTML en `/profesor/manual` accesible desde el panel (botón "Manual del usuario"); cubre acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso, pizarra, usuarios del sistema, administración y resumen. MANUAL-USUARIO.md sigue como referencia.
 - [x] **Gestión de backup:** Terminado (Mar 2026). En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series con opciones por checkbox); exportar/importar alumnos (JSON); exportar alumnos a Excel (reportes con Último trabajo). Ver [PLAN_BACKUP_Y_EXPORTACION.md](PLAN_BACKUP_Y_EXPORTACION.md).
-- [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. Ver [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) §3.2.
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
 ---
@@ -114,7 +114,7 @@ La mayoría del desarrollo está completada (calendario, pizarra, página públi
 
 - **Manual del usuario:** **Completado.** Página HTML en `/profesor/manual` (botón en panel); cubre todas las funcionalidades. MANUAL-USUARIO.md se mantiene como referencia en documentación.
 - **Gestión de backup:** **Completado (Mar 2026).** En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series); exportar/importar alumnos (JSON); exportar alumnos a Excel. Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) § Backup y exportación.
-- **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. Ver [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) §3.2.
 
 Opcional / operativo:
 
@@ -161,7 +161,7 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 
 - **Qué falta:** Crear un **método o proceso programado** de **depuración anual de datos**: archivar o eliminar datos antiguos (ej. asistencia con más de 1 año).
 - **Plazo anual:** Conservar al menos 12 meses; archivar a export antes de purgar si hace falta.
-- **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- **Estado:** Por implementar. Ver [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) §3.2.
 
 ### Manual del usuario
 
@@ -176,7 +176,7 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 ### Depuración anual de datos (eliminar datos viejos)
 
 - **Qué falta:** Método o proceso para **archivar o eliminar datos antiguos** (ej. asistencia/presente de años anteriores). Conservar al menos 12 meses.
-- **Estado:** Por implementar. Ver [ESTIMATIVO_RECURSOS_SERVIDOR.md](ESTIMATIVO_RECURSOS_SERVIDOR.md).
+- **Estado:** Por implementar. Ver [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) §3.2.
 
 ### Mejoras post-modales (detalle alumno, rutinas, formularios)
 
@@ -209,6 +209,7 @@ Con el backup ya implementado, pendientes operativos opcionales:
 | Documento | Contenido |
 |----------|------------|
 | [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual, referencias técnicas. |
+| [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) | Últimos pendientes: excepciones/estilos, depuración de base, referencia rota. |
 | [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) | Despliegue en VPS (SSH, Nginx, menú). |
 
 ---

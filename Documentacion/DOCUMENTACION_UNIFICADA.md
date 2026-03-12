@@ -16,8 +16,7 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 - **Página pública:** Landing `/`, Planes `/planes`, consultas; administración en `/profesor/pagina-publica`.
 - **Manual del usuario:** HTML en `/profesor/manual` (botón en panel); cubre acceso, panel, alumnos, ejercicios, series, rutinas, calendario, pizarra, usuarios, administración.
 - **Backup (terminado Mar 2026):** Ver sección 2.
-
-**Pendiente real:** Depuración de datos antiguos (archivar/eliminar asistencia de más de 12 meses). Ver PLAN_DE_DESARROLLO_UNIFICADO.md.
+- **Depuración de datos (terminado Feb 2026):** Ver sección 2.1.
 
 ---
 
@@ -34,6 +33,21 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 **Excel alumnos – columnas:** Título "Exportación de alumnos fecha dd/MM/yyyy". Columnas: Nombre, Correo, Celular, Edad, Sexo, Estado, Fecha de alta, Fecha baja, Tipo de asistencia, Días y horarios, Objetivos personales, Restricciones médicas, Notas profesor, Cantidad de asignaciones, **Último trabajo** (fecha en una línea, grupos y observaciones en la siguiente; ej. "11/03/26" y "CARDIO - CORE - trabajo muy bien"). No se exportan: Peso, Detalle asistencia, Contacto emergencia.
 
 **Servicios:** `ExerciseZipBackupService`, `AlumnoJsonBackupService`, `AlumnoExportService`. Rutas en `AdminPanelController`: `/profesor/backup`, exportar-zip, importar, exportar-alumnos-json, importar-alumnos, exportar-alumnos-excel.
+
+---
+
+## 2.1 Depuración de datos
+
+**Estado:** Terminado (febrero 2026). Acceso: Administración → Depuración de datos (entre Sistema de backups y Manual de usuario).
+
+Permite eliminar registros antiguos para mantener la base de datos ligera. Dos tarjetas independientes:
+
+| Funcionalidad | Descripción |
+|---------------|-------------|
+| **Registro de asistencias e inasistencias** | Se elige una fecha límite. Se eliminan todos los registros con fecha **anterior** a la elegida (ej.: 12/12/2025 → se borra todo antes de esa fecha). Acción irreversible; se recomienda hacer backup antes. |
+| **Rutinas asignadas a alumnos** | Se elige una fecha límite. Se eliminan todas las rutinas asignadas cuya fecha de creación es **anterior** a la elegida. Las rutinas plantilla (Mis Rutinas) no se tocan. Acción irreversible. |
+
+**Servicios:** `DepuracionService`. Rutas en `AdminPanelController`: `GET /profesor/depuracion`, `POST /profesor/depuracion/asistencias`, `POST /profesor/depuracion/rutinas-asignadas`. Repositorios: `AsistenciaRepository` (countByFechaBefore, deleteByFechaBefore), `RutinaRepository` (findByEsPlantillaFalseAndFechaCreacionBefore).
 
 ---
 
@@ -60,7 +74,7 @@ El manual en la app (`/profesor/manual`) incluye:
 9. Progreso del alumno (modal grupos + observaciones)
 10. Pizarra en sala (editor, vista TV)
 11. Usuarios del sistema (admin/ayudante, perfiles)
-12. Administración (backup, página pública, etc.)
+12. Administración (backup, depuración de datos, página pública, etc.)
 13. Resumen rápido (tabla "Quiero… / Dónde")
 
 ---
@@ -76,7 +90,8 @@ El manual en la app (`/profesor/manual`) incluye:
 | **Ejercicios predeterminados** | `ExerciseCargaDefaultOptimizado.asegurarEjerciciosPredeterminados()`; imágenes en `uploads/ejercicios/` (1.webp–60.webp). |
 | **Restricción AYUDANTE** | No puede acceder a "Administrar sistema"; redirección y mensaje si intenta entrar a `/profesor/administracion`. |
 | **Eliminar alumno** | `UsuarioService.eliminarUsuario`: borra asistencias, mediciones, excepciones, rutinas asignadas; luego el usuario. |
+| **Depuración de datos** | `DepuracionService`; panel en `/profesor/depuracion`; elimina asistencias o rutinas asignadas anteriores a una fecha elegida. |
 
 ---
 
-*Última actualización: Marzo 2026. Para pendientes y checklist ver PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Última actualización: Febrero 2026. Para pendientes y checklist ver PLAN_DE_DESARROLLO_UNIFICADO.md.*

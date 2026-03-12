@@ -161,6 +161,18 @@
             <li th:each="e : ${importAlumnosResult['errores']}" th:text="${e}">error</li>
         </ul>
     </div>
+    <div th:if="${depuracionResult}" class="alert mb-3" th:classappend="${depuracionResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+        <span th:if="${depuracionResult['success']}">
+            <strong>Depuración completada.</strong>
+            <span th:if="${depuracionResult['tipo'] == 'asistencias'}">
+                Se eliminaron <strong th:text="${depuracionResult['eliminados']}">0</strong> registros de asistencias con fecha anterior a <strong th:text="${depuracionResult['fechaLimite']}">fecha</strong>.
+            </span>
+            <span th:if="${depuracionResult['tipo'] == 'rutinas'}">
+                Se eliminaron <strong th:text="${depuracionResult['eliminados']}">0</strong> rutinas asignadas creadas antes de <strong th:text="${depuracionResult['fechaLimite']}">fecha</strong>.
+            </span>
+        </span>
+        <span th:if="${!depuracionResult['success']}" th:text="${depuracionResult['message']}">Error</span>
+    </div>
     <div class="admin-layout">
         <aside class="admin-sidebar">
             <nav class="nav-section">
@@ -176,6 +188,10 @@
                 <a href="#" class="admin-nav-link" data-src="/profesor/backup?fragment=1" data-label="backup">
                     <i class="fas fa-database"></i>
                     <span class="nav-link-text">Sistema de backups</span>
+                </a>
+                <a href="#" class="admin-nav-link" data-src="/profesor/depuracion?fragment=1" data-label="depuracion">
+                    <i class="fas fa-broom"></i>
+                    <span class="nav-link-text">Depuración de datos</span>
                 </a>
                 <a href="#" class="admin-nav-link" data-src="/profesor/manual?fragment=1" data-label="manual">
                     <i class="fas fa-book"></i>
@@ -251,6 +267,15 @@
             setActive(backupLink);
             loadSection(backupLink.getAttribute('data-src'));
             try { sessionStorage.setItem(storageKey, backupLink.getAttribute('data-src')); } catch (e) {}
+            defaultUrl = null;
+        }
+    }
+    if (params.get('seccion') === 'depuracion') {
+        var depLink = Array.prototype.find.call(links, function(l) { return (l.getAttribute('data-src') || '').indexOf('depuracion') >= 0; });
+        if (depLink) {
+            setActive(depLink);
+            loadSection(depLink.getAttribute('data-src'));
+            try { sessionStorage.setItem(storageKey, depLink.getAttribute('data-src')); } catch (e) {}
             defaultUrl = null;
         }
     }

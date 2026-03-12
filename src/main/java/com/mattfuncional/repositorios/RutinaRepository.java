@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,4 +57,7 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
     Optional<Rutina> findByTokenPublicoWithSeries(@Param("token") String tokenPublico);
 
     boolean existsByTokenPublico(String tokenPublico);
+
+    /** Rutinas asignadas (no plantillas) creadas antes de la fecha indicada (para depuración). */
+    List<Rutina> findByEsPlantillaFalseAndFechaCreacionBefore(LocalDateTime fecha);
 }

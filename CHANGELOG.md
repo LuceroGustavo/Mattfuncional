@@ -2,6 +2,25 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - feat(admin): depuración de datos (asistencias y rutinas asignadas) ✅
+
+### 🎯 **Resumen**
+Nuevo panel "Depuración de datos" en Administración para eliminar registros antiguos y mantener la base de datos ligera. Dos tarjetas: (1) Registro de asistencias e inasistencias — elimina registros con fecha anterior a la elegida; (2) Rutinas asignadas a alumnos — elimina asignaciones creadas antes de la fecha elegida. Las rutinas plantilla no se tocan.
+
+### ✅ **Cambios**
+- **AdminPanelController:** `GET /profesor/depuracion`, `POST /profesor/depuracion/asistencias`, `POST /profesor/depuracion/rutinas-asignadas`.
+- **DepuracionService:** `depurarAsistenciasAntesDe`, `depurarRutinasAsignadasAntesDe`.
+- **AsistenciaRepository:** `countByFechaBefore`, `deleteByFechaBefore`.
+- **RutinaRepository:** `findByEsPlantillaFalseAndFechaCreacionBefore`.
+- **Plantilla:** `profesor/depuracion.html` con dos tarjetas, selectores de fecha y confirmación.
+- **administracion.html:** Nuevo ítem de menú "Depuración de datos" entre Sistema de backups y Manual de usuario.
+- **Documentación:** DOCUMENTACION_UNIFICADA.md §2.1, PENDIENTES_FINALES.md §3.2 actualizado.
+
+### 📁 **Archivos modificados/creados**
+`AdminPanelController.java`, `DepuracionService.java`, `AsistenciaRepository.java`, `RutinaRepository.java`, `profesor/depuracion.html`, `profesor/administracion.html`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/PENDIENTES_FINALES.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-12] - docs: sistema de backup terminado ✅
 
 ### 🎯 **Resumen**

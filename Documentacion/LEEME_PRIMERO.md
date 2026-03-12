@@ -59,6 +59,7 @@ Quedan **cuatro archivos** principales más la carpeta de servidor:
 | **AYUDA_MEMORIA.md** | Lista rápida de pendientes de ejercicios/vistas; nota sobre eliminar alumno y backup. Sistema de backup terminado (resumen). |
 | **PLAN_DE_DESARROLLO_UNIFICADO.md** | Visión, fases, checklist y pendientes detallados (único plan de desarrollo). |
 | **DOCUMENTACION_UNIFICADA.md** | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual (índice), referencias técnicas. |
+| **PENDIENTES_FINALES.md** | Últimos pendientes: trabajo de excepciones (estilos), depuración de base de datos, referencias rotas. |
 
 **Carpeta `servidor/`:** Despliegue en VPS (SSH, Nginx, menú). Ver `servidor/DESPLIEGUE-SERVIDOR.md` y `servidor/nginx-detodoya.conf`.
 
