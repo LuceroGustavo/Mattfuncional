@@ -73,9 +73,12 @@ public class AdminPanelController {
     }
 
     @GetMapping("/administracion")
-    public String panelAdministracion(@AuthenticationPrincipal Usuario usuarioActual) {
+    public String panelAdministracion(@AuthenticationPrincipal Usuario usuarioActual, RedirectAttributes redirectAttributes) {
         if (usuarioActual == null || (!"ADMIN".equals(usuarioActual.getRol()) && !"DEVELOPER".equals(usuarioActual.getRol()))) {
-            return "redirect:/profesor/dashboard";
+            redirectAttributes.addFlashAttribute("mensajeRestriccionAdmin", true);
+            Profesor profesor = getProfesorParaUsuario(usuarioActual);
+            if (profesor == null) return "redirect:/profesor/dashboard";
+            return "redirect:/profesor/" + profesor.getId();
         }
         return "profesor/administracion";
     }

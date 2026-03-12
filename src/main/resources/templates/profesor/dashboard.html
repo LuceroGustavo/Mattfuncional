@@ -319,6 +319,11 @@
             </div>
         </div>
 
+        <div th:if="${mensajeRestriccionAdmin}" class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+            <strong>Acceso restringido.</strong> Debe ser usuario administrador para poder ingresar a Administrar sistema.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
         <!-- Grid 4x2: 4 tarjetas arriba (menos altas), 4 abajo alineadas por columna -->
         <div class="dashboard-grid">
             <!-- Columna 1: Alumnos | Calendario -->
@@ -373,12 +378,19 @@
                     <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
                     <div class="label">Asignaciones</div>
                 </div>
-                <a th:href="@{/profesor/administracion}" class="main-action-card card-admin" target="_blank" rel="noopener noreferrer" title="Administrar sistema">
+                <!-- Solo ADMIN y DEVELOPER pueden acceder; AYUDANTE ve la tarjeta pero al hacer clic muestra mensaje -->
+                <a th:if="${usuario != null && (usuario.rol == 'ADMIN' || usuario.rol == 'DEVELOPER')}" th:href="@{/profesor/administracion}" class="main-action-card card-admin" target="_blank" rel="noopener noreferrer" title="Administrar sistema">
                     <div class="card-inner">
                         <i class="fa-solid fa-cogs"></i>
                         <span class="card-label">Administrar sistema</span>
                     </div>
                 </a>
+                <span th:if="${usuario != null && usuario.rol != 'ADMIN' && usuario.rol != 'DEVELOPER'}" class="main-action-card card-admin" role="button" tabindex="0" title="Administrar sistema (solo administradores)" style="cursor: pointer; text-decoration: none; display: inline-flex;" onclick="alert('Debe ser usuario administrador para poder ingresar.');">
+                    <div class="card-inner">
+                        <i class="fa-solid fa-cogs"></i>
+                        <span class="card-label">Administrar sistema</span>
+                    </div>
+                </span>
             </div>
         </div>
 

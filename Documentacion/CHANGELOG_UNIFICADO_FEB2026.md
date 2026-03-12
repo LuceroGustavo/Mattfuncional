@@ -29,6 +29,7 @@ Un solo documento con todos los cambios documentados por feature en Febrero 2026
 21. [Ejercicios: formularios, modal Ver ejercicio, permisos y hoja rutina](#21-ejercicios-formularios-modal-ver-ejercicio-permisos-y-hoja-rutina-mar-2026)
 22. [Backup ZIP: nombres originales de imágenes y restauración de series](#22-backup-zip-nombres-originales-de-imágenes-y-restauración-de-series-mar-2026)
 23. [Fix: botones Guardar/Cancelar en formulario editar ejercicio](#23-fix-botones-guardarcancelar-en-formulario-editar-ejercicio-feb-2026)
+24. [Restricción acceso Administrar sistema para rol AYUDANTE](#24-restricción-acceso-administrar-sistema-para-rol-ayudante-feb-2026)
 
 ---
 
@@ -626,6 +627,19 @@ La configuración editada en el panel afecta **solo la página Planes** por ahor
 
 ### Archivos
 `src/main/resources/templates/ejercicios/formulario-modificar-ejercicio.html`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/PLANTILLAS_EJERCICIOS_Y_PROFESOR.md`.
+
+---
+
+## 24. Restricción acceso Administrar sistema para rol AYUDANTE (Feb 2026)
+
+**Resumen:** El usuario con rol AYUDANTE no puede acceder al panel "Administrar sistema". En el dashboard ve la tarjeta pero al hacer clic aparece el mensaje "Debe ser usuario administrador para poder ingresar." Si intenta entrar por URL directa (`/profesor/administracion`), se redirige al panel del profesor con un aviso de acceso restringido.
+
+### Cambios
+- **AdminPanelController:** `panelAdministracion` recibe `RedirectAttributes`; si el usuario no es ADMIN ni DEVELOPER, redirige a `/profesor/{id}` con flash `mensajeRestriccionAdmin=true`.
+- **profesor/dashboard.html:** Tarjeta "Administrar sistema" condicional por rol (ADMIN/DEVELOPER → enlace; AYUDANTE u otro → `<span>` con alert al clic). Alert Bootstrap cuando existe `mensajeRestriccionAdmin`.
+
+### Archivos
+`AdminPanelController.java`, `profesor/dashboard.html`, `Documentacion/RESTRICCION_ACCESO_AYUDANTE_ADMINISTRACION.md`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`.
 
 ---
 
