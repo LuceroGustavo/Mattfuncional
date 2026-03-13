@@ -5,6 +5,7 @@
     <title>Crear Rutina - Mattfuncional</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -233,6 +234,22 @@
     </div>
 </div>
 
+<!-- Modal alerta estilo Mattfuncional -->
+<div class="modal fade" id="modalAlertaRutina" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-confirmar-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalAlertaRutinaMensaje"></div>
+            <div class="modal-footer modal-confirmar-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -308,15 +325,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitRutinaBtn');
     const rutinaForm = document.getElementById('rutinaForm');
 
+    function mostrarAlerta(mensaje) {
+        var el = document.getElementById('modalAlertaRutinaMensaje');
+        var modalEl = document.getElementById('modalAlertaRutina');
+        if (el) el.textContent = mensaje || '';
+        if (modalEl && typeof bootstrap !== 'undefined') (new bootstrap.Modal(modalEl)).show();
+    }
+
     submitBtn.addEventListener('click', function() {
         const nombreRutina = document.getElementById('nombre').value;
         if (!nombreRutina.trim()) {
-            alert('Por favor, ingresa un nombre para la rutina.');
+            mostrarAlerta('Por favor, ingresa un nombre para la rutina.');
             return;
         }
         const n = orderedList.querySelectorAll('input[name="selectedSeries"]').length;
         if (n === 0) {
-            alert('Debes seleccionar al menos una serie para agregar a la rutina.');
+            mostrarAlerta('Debes seleccionar al menos una serie para agregar a la rutina.');
             return;
         }
         rutinaForm.submit();

@@ -284,7 +284,7 @@ public class ProfesorController {
         Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
         if (profesor == null) return "redirect:/login";
 
-        Usuario alumno = usuarioService.getUsuarioById(id);
+        Usuario alumno = usuarioService.getUsuarioByIdParaFicha(id);
         boolean esPropietario = alumno != null && alumno.getProfesor() != null
                 && alumno.getProfesor().getId().equals(profesor.getId());
 
@@ -321,6 +321,7 @@ public class ProfesorController {
             @ModelAttribute Usuario alumno,
             @RequestParam(value = "horariosJson", required = false) String horariosJson,
             Model model,
+            RedirectAttributes redirectAttributes,
             @AuthenticationPrincipal Usuario profesorUsuario) {
         Profesor profesor = getProfesorParaUsuarioActual(profesorUsuario);
         if (profesor == null) return "redirect:/login";
@@ -402,7 +403,8 @@ public class ProfesorController {
                 }
 
                 usuarioService.actualizarUsuario(alumno);
-                return "redirect:/profesor/" + profesor.getId();
+                redirectAttributes.addFlashAttribute("mensajeSuccess", "Datos del alumno actualizados correctamente.");
+                return "redirect:/profesor/alumnos/" + id;
             } catch (Exception e) {
                 model.addAttribute("errorMessage", "Error al actualizar el alumno: " + e.getMessage());
                 model.addAttribute("usuario", alumno);

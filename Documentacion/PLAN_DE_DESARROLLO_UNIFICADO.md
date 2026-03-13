@@ -197,10 +197,10 @@ Pendientes agregados tras resolver los modales en la ficha del alumno. Ver tambi
 
 Con el backup ya implementado, pendientes operativos opcionales:
 
-1. **Estilos de excepciones (avisos):** Dar estilos consistentes a las pantallas de excepciones/avisos/errores que muestra la aplicación.
+1. **Estilos de excepciones (avisos):** Estilos consistentes en pantallas de excepciones/avisos/errores. **En curso.** Ver [PENDIENTES_FINALES.md](PENDIENTES_FINALES.md) §3.1.
 2. **Archivo para migración y despliegue:** Preparar un archivo (o documento) con todos los datos e instrucciones necesarios para la migración y el despliegue al servidor que compre el cliente (datos, scripts, pasos, variables, etc.).
 
-**Estado:** Opcional; se pueden abordar cuando corresponda.
+**Estado:** Ítem 1 en trabajo; resto opcional.
 
 ---
 

@@ -49,6 +49,31 @@ Permite eliminar registros antiguos para mantener la base de datos ligera. Dos t
 
 **Servicios:** `DepuracionService`. Rutas en `AdminPanelController`: `GET /profesor/depuracion`, `POST /profesor/depuracion/asistencias`, `POST /profesor/depuracion/rutinas-asignadas`. Repositorios: `AsistenciaRepository` (countByFechaBefore, deleteByFechaBefore), `RutinaRepository` (findByEsPlantillaFalseAndFechaCreacionBefore).
 
+### 2.2 Modales y avisos unificados (confirmaciones y alertas)
+
+**Estado:** Completado (febrero 2026). En toda la app las confirmaciones y avisos usan modales con estilo Mattfuncional (cabecera morada `.modal-confirmar-header`, pie `.modal-confirmar-footer` en `style.css`), reemplazando `alert()` y `confirm()` nativos del navegador.
+
+**Vistas con modal de confirmación y/o alerta:**
+
+| Vista | Confirmación | Alerta (éxito/error/info) |
+|-------|--------------|---------------------------|
+| Panel Administración (backup, depuracion, usuarios-sistema, pagina-publica-admin) | Sí | Sí |
+| Dashboard profesor | Eliminar serie, rutina, rutina asignada | Enlace copiado, “Debe ser administrador” |
+| Detalle alumno | Eliminar alumno, inactivar todas las rutinas | Enlace copiado, “Datos actualizados” (flash) |
+| Series crear/editar | — | Validación, éxito con redirección, errores |
+| Rutinas crear | — | Nombre y al menos una serie |
+| Ejercicios lista (profesor) | Eliminar ejercicio | — |
+| Grupos musculares | Eliminar grupo | — |
+| Pizarra lista | Eliminar pizarra | Código 4 dígitos, errores, enlace copiado |
+| Pizarra editor | Quitar columna, eliminar ejercicio, nuevo enlace TV | Todos los mensajes (nombre, errores, enlace copiado) |
+| Listado ejercicios (ejercicios) | — | “Ejercicio(s) agregado(s) a rutina” |
+
+**Editar alumno:** Tras guardar, redirección al detalle del alumno (`/profesor/alumnos/{id}`) con mensaje flash “Datos del alumno actualizados correctamente.” (ya no redirige al dashboard).
+
+**Vista Mis Ejercicios:** No se muestra la estrella azul ni el aviso “La estrellita azul indica ejercicios predeterminados del sistema.”; todas las filas tienen el mismo estilo (sin `table-info` en predeterminados).
+
+**Referencia:** CHANGELOG entrada [2026-02-09] feat(ux): modales unificados y mejoras en flujos.
+
 ---
 
 ## 3. Despliegue y servidor
@@ -94,4 +119,4 @@ El manual en la app (`/profesor/manual`) incluye:
 
 ---
 
-*Última actualización: Febrero 2026. Para pendientes y checklist ver PLAN_DE_DESARROLLO_UNIFICADO.md.*
+*Última actualización: Febrero 2026. Modales y avisos unificados (§2.2). Para pendientes ver PENDIENTES_FINALES.md.*

@@ -5,6 +5,7 @@
     <title>Listado de Ejercicios - Mattfuncional</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
   <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Lexend%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
@@ -405,11 +406,35 @@
     </div>
     <!-- Fin Splide -->
   </div>
+
+  <!-- Modal alerta (estilo Mattfuncional) -->
+  <div class="modal fade" id="modalAlertaExerciseLista" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header modal-confirmar-header">
+          <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="modalAlertaExerciseListaMensaje"></div>
+        <div class="modal-footer modal-confirmar-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
   <script>
     // Inicializar Splide
     document.addEventListener('DOMContentLoaded', function () {
+      function mostrarAlerta(msg) {
+        var el = document.getElementById('modalAlertaExerciseListaMensaje');
+        var m = document.getElementById('modalAlertaExerciseLista');
+        if (el) el.textContent = msg || '';
+        if (m && typeof bootstrap !== 'undefined') (new bootstrap.Modal(m)).show();
+      }
+
       new Splide('#splide', {
         type: 'slide',
         perPage: 3,
@@ -443,7 +468,7 @@
       addSelectedBtn.addEventListener('click', function() {
         if (selected.size === 0) return;
         // Aquí puedes enviar los IDs seleccionados a tu backend o lógica JS
-        alert('Ejercicios agregados a rutina: ' + Array.from(selected).join(', '));
+        mostrarAlerta('Ejercicios agregados a rutina: ' + Array.from(selected).join(', '));
         // Feedback visual
         addSelectedBtn.classList.add('btn-success');
         setTimeout(()=>addSelectedBtn.classList.remove('btn-success'), 1000);
@@ -474,7 +499,7 @@
       document.getElementById('addFromModalBtn').addEventListener('click', function() {
         if (!currentModalId) return;
         // Aquí puedes agregar el ejercicio a la rutina
-        alert('Ejercicio agregado a rutina: ' + currentModalId);
+        mostrarAlerta('Ejercicio agregado a rutina: ' + currentModalId);
         // Feedback visual
         const card = document.querySelector('.exercise-card[data-id="'+currentModalId+'"]');
         card.classList.add('border-success', 'shadow-lg');
@@ -486,7 +511,7 @@
       document.querySelectorAll('.add-single-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const id = this.getAttribute('data-id');
-          alert('Ejercicio agregado a rutina: ' + id);
+          mostrarAlerta('Ejercicio agregado a rutina: ' + id);
           const card = document.querySelector('.exercise-card[data-id="'+id+'"]');
           card.classList.add('border-success', 'shadow-lg');
           card.querySelector('.select-exercise').checked = true;

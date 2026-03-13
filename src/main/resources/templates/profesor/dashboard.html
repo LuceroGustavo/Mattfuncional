@@ -385,7 +385,7 @@
                         <span class="card-label">Administrar sistema</span>
                     </div>
                 </a>
-                <span th:if="${usuario != null && usuario.rol != 'ADMIN' && usuario.rol != 'DEVELOPER'}" class="main-action-card card-admin" role="button" tabindex="0" title="Administrar sistema (solo administradores)" style="cursor: pointer; text-decoration: none; display: inline-flex;" onclick="alert('Debe ser usuario administrador para poder ingresar.');">
+                <span th:if="${usuario != null && usuario.rol != 'ADMIN' && usuario.rol != 'DEVELOPER'}" class="main-action-card card-admin" role="button" tabindex="0" title="Administrar sistema (solo administradores)" style="cursor: pointer; text-decoration: none; display: inline-flex;" id="btnAdminNoPermitido">
                     <div class="card-inner">
                         <i class="fa-solid fa-cogs"></i>
                         <span class="card-label">Administrar sistema</span>
@@ -608,7 +608,7 @@
                                         <a th:href="@{/series/editar/{id}(id=${serie.id})}" class="btn btn-warning btn-sm">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
-                                        <a th:href="@{/series/eliminar/{id}(id=${serie.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta serie?')">
+                                        <a th:href="@{/series/eliminar/{id}(id=${serie.id})}" class="btn btn-danger btn-sm btn-confirmar-eliminar-dashboard" data-msg="¿Estás seguro de que querés eliminar esta serie?">
                                             <i class="fa-solid fa-trash me-1"></i>Eliminar
                                         </a>
                                     </td>
@@ -655,7 +655,7 @@
                                         <a th:href="@{/rutinas/editar/{id}(id=${rutina.id})}" class="btn btn-warning btn-sm">
                                             <i class="fa-solid fa-edit me-1"></i>Editar
                                         </a>
-                                        <a th:href="@{/rutinas/eliminar/{id}(id=${rutina.id})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta rutina?')">
+                                        <a th:href="@{/rutinas/eliminar/{id}(id=${rutina.id})}" class="btn btn-danger btn-sm btn-confirmar-eliminar-dashboard" data-msg="¿Estás seguro de que querés eliminar esta rutina?">
                                             <i class="fa-solid fa-trash me-1"></i>Eliminar
                                         </a>
                                     </td>
@@ -712,8 +712,8 @@
                                             <a th:if="${rutinaAsignada.estado == 'INACTIVA'}" th:href="@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutinaAsignada.id}, estado='ACTIVA', tab='asignaciones')}" class="btn btn-outline-success btn-sm py-1 px-2" title="Activar rutina">
                                                 <i class="fa-solid fa-play"></i>
                                             </a>
-                                            <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm py-1 px-2"
-                                               onclick="return confirm('¿Eliminar esta rutina asignada? Se borrará la asignación y no podrá recuperarse.');"
+                                            <a th:href="@{/rutinas/eliminar/{id}(id=${rutinaAsignada.id}, tab='asignaciones')}" class="btn btn-danger btn-sm py-1 px-2 btn-confirmar-eliminar-dashboard"
+                                               data-msg="¿Eliminar esta rutina asignada? Se borrará la asignación y no podrá recuperarse."
                                                title="Eliminar rutina">
                                                 <i class="fa-solid fa-trash"></i>
                                             </a>
@@ -723,6 +723,42 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form oculto para confirmar eliminación (action se asigna al hacer clic en Eliminar) -->
+    <form id="formConfirmarEliminarDashboard" method="get" action="" class="d-none"></form>
+
+    <!-- Modal confirmar eliminación (estilo panel administración) -->
+    <div class="modal fade" id="modalConfirmarEliminarDashboard" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-confirmar-header">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Confirmar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modalConfirmarEliminarDashboardMensaje">¿Estás seguro?</div>
+                <div class="modal-footer modal-confirmar-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="modalConfirmarEliminarDashboardBtn"><i class="fas fa-trash me-1"></i>Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal alerta (enlace copiado, avisos) -->
+    <div class="modal fade" id="modalAlertaDashboard" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-confirmar-header">
+                    <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modalAlertaDashboardMensaje"></div>
+                <div class="modal-footer modal-confirmar-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
                 </div>
             </div>
         </div>
@@ -739,6 +775,40 @@
         const urlMarcarAsistencia = /*[[@{/calendario/api/marcar-asistencia}]]*/ '/calendario/api/marcar-asistencia';
     </script>
     <script>
+        // Modales estilo Mattfuncional: alerta y confirmar eliminación
+        (function() {
+            var modalAlerta = document.getElementById('modalAlertaDashboard');
+            var modalAlertaMsg = document.getElementById('modalAlertaDashboardMensaje');
+            window.mostrarAlertaDashboard = function(mensaje) {
+                if (modalAlertaMsg) modalAlertaMsg.textContent = mensaje || '';
+                if (modalAlerta && typeof bootstrap !== 'undefined') (new bootstrap.Modal(modalAlerta)).show();
+            };
+            var btnAdmin = document.getElementById('btnAdminNoPermitido');
+            if (btnAdmin) btnAdmin.addEventListener('click', function() { window.mostrarAlertaDashboard('Debe ser usuario administrador para poder ingresar.'); });
+
+            var formEliminar = document.getElementById('formConfirmarEliminarDashboard');
+            var modalEliminar = document.getElementById('modalConfirmarEliminarDashboard');
+            var modalEliminarMsg = document.getElementById('modalConfirmarEliminarDashboardMensaje');
+            var modalEliminarBtn = document.getElementById('modalConfirmarEliminarDashboardBtn');
+            if (modalEliminar && typeof bootstrap !== 'undefined') {
+                var modalInst = new bootstrap.Modal(modalEliminar);
+                document.querySelectorAll('.btn-confirmar-eliminar-dashboard').forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (formEliminar) formEliminar.action = this.getAttribute('href') || '';
+                        if (modalEliminarMsg) modalEliminarMsg.textContent = this.getAttribute('data-msg') || '¿Estás seguro?';
+                        modalInst.show();
+                    });
+                });
+                if (modalEliminarBtn && formEliminar) {
+                    modalEliminarBtn.addEventListener('click', function() {
+                        modalInst.hide();
+                        formEliminar.submit();
+                    });
+                }
+            }
+        })();
+
         // Activar la pestaña indicada en la URL (?tab=series | rutinas | asignaciones)
         (function activarTabDesdeUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -795,7 +865,7 @@
             if (!fullUrl) return;
             try {
                 await navigator.clipboard.writeText(fullUrl);
-                alert('Enlace copiado.');
+                if (typeof window.mostrarAlertaDashboard === 'function') window.mostrarAlertaDashboard('Enlace copiado.');
             } catch (err) {
                 var inp = document.createElement('input');
                 inp.value = fullUrl;
@@ -803,7 +873,7 @@
                 inp.select();
                 document.execCommand('copy');
                 inp.remove();
-                alert('Enlace copiado.');
+                if (typeof window.mostrarAlertaDashboard === 'function') window.mostrarAlertaDashboard('Enlace copiado.');
             }
         });
 

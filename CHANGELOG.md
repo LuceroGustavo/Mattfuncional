@@ -2,6 +2,36 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-02-09] - feat(ux): modales unificados y mejoras en flujos ✅
+
+### 🎯 **Resumen**
+Unificación de confirmaciones y avisos en toda la app: se reemplazan `alert()` y `confirm()` nativos del navegador por modales con estilo Mattfuncional (cabecera morada `.modal-confirmar-header`, pie `.modal-confirmar-footer`). Además: redirección al detalle del alumno tras editar con mensaje de éxito, y eliminación de la estrella azul y del aviso de “ejercicios predeterminados” en la vista Mis Ejercicios.
+
+### ✅ **Cambios**
+
+**Modales de confirmación y alerta (estilo panel administración):**
+- **Series (crear/editar):** Modal de alerta para validaciones, éxito (“Serie actualizada/creada exitosamente”) con redirección, y errores. `series/crearSerie.html`.
+- **Rutinas (crear):** Modal de alerta para “nombre requerido” y “al menos una serie”. `rutinas/crearRutina.html`.
+- **Dashboard:** Modal confirmar para eliminar serie, rutina y rutina asignada; modal alerta para “Enlace copiado” y “Debe ser administrador”. `profesor/dashboard.html`.
+- **Detalle alumno:** Modal confirmar para eliminar alumno e inactivar todas las rutinas; modal alerta para “Enlace copiado”. Redirección a detalle del alumno tras guardar edición, con mensaje flash “Datos del alumno actualizados correctamente.” `profesor/alumno-detalle.html`, `ProfesorController.procesarEditarAlumno` (redirect + RedirectAttributes).
+- **Ejercicios (lista profesor):** Modal confirmar para eliminar ejercicio. `profesor/ejercicios-lista.html`.
+- **Grupos musculares:** Modal confirmar para eliminar grupo. `profesor/grupos-musculares-lista.html`.
+- **Pizarra lista:** Modal confirmar eliminar pizarra; modal alerta para código 4 dígitos, errores y “Enlace copiado”. `profesor/pizarra-lista.html`.
+- **Pizarra editor:** Modal alerta para todos los mensajes; modal confirmar (Promise) para quitar columna, eliminar ejercicio de columna y generar nuevo enlace TV. `profesor/pizarra-editor.html`.
+- **Listado ejercicios (ejercicios):** Modal alerta para “Ejercicios agregados a rutina” / “Ejercicio agregado a rutina”. `ejercicios/exercise-lista.html`.
+
+**Vista Mis Ejercicios:**
+- Eliminada la leyenda/aviso “La estrellita azul indica ejercicios predeterminados del sistema.” y el ícono de estrella en el banner.
+- Eliminada la estrella azul junto al nombre de cada ejercicio predeterminado en la tabla.
+- Eliminado el fondo distinto (`table-info`) en filas de ejercicios predeterminados. `profesor/ejercicios-lista.html`.
+
+**Backend:** `ProfesorController.procesarEditarAlumno`: tras actualizar alumno, redirección a `redirect:/profesor/alumnos/{id}` con `RedirectAttributes.addFlashAttribute("mensajeSuccess", ...)`.
+
+### 📁 **Archivos modificados**
+`ProfesorController.java`, `profesor/alumno-detalle.html`, `profesor/dashboard.html`, `profesor/ejercicios-lista.html`, `profesor/grupos-musculares-lista.html`, `profesor/pizarra-lista.html`, `profesor/pizarra-editor.html`, `series/crearSerie.html`, `rutinas/crearRutina.html`, `ejercicios/exercise-lista.html`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/PENDIENTES_FINALES.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-02-09] - feat(admin): depuración de datos (asistencias y rutinas asignadas) ✅
 
 ### 🎯 **Resumen**

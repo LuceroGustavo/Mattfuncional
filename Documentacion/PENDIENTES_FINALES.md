@@ -30,23 +30,13 @@ Tras la reorganización, la documentación queda así:
 
 ## 3. Pendientes principales (lo que falta)
 
-### 3.1 Trabajo de excepciones (estilos de avisos/errores)
+### 3.1 Modales y avisos unificados ✅ (completado Feb 2026)
 
-**Qué falta:** Dar estilos consistentes a las pantallas de excepciones, avisos y errores que muestra la aplicación.
+**Objetivo:** Estilos consistentes para confirmaciones y avisos en toda la app.
 
-**Dónde aparece:** PLAN_DE_DESARROLLO_UNIFICADO §9 "Después del backup (pendientes opcionales)" — ítem 1.
+**Estado:** **Completado.** Se reemplazaron `alert()` y `confirm()` nativos por modales con estilo Mattfuncional (`.modal-confirmar-header`, `.modal-confirmar-footer`) en: dashboard, detalle alumno (eliminar alumno, inactivar rutinas, enlace copiado), series crear/editar, rutinas crear, ejercicios-lista, grupos-musculares, pizarra-lista, pizarra-editor, exercise-lista. Redirección al detalle del alumno tras editar con mensaje flash. Vista Mis Ejercicios: eliminados la estrella azul y el aviso de ejercicios predeterminados.
 
-**Alcance sugerido:**
-- Revisar pantallas que muestran errores (login, backup, importación, formularios).
-- Unificar clases CSS para mensajes de error/aviso (ej. `.alert-danger`, `.alert-warning`).
-- Revisar mensajes de validación y excepciones en controladores (evitar textos técnicos al usuario).
-- Posibles ubicaciones: `backup.html`, `login.html`, formularios de alumno/ejercicio/serie/rutina, páginas de error.
-
-**Estado:** Opcional; se puede abordar cuando corresponda.
-
-**Progreso (verificado Feb 2026):**
-- ✅ **Módulo Administración del sistema (HTML):** Todas las excepciones y mensajes de este módulo ya tienen estilo unificado (modales Mattfuncional, alertas `.alert-mattfuncional`). Incluye: usuarios-sistema, pagina-publica-admin, backup, depuracion, administracion.
-- ⏳ **Pendiente:** Todo el resto de la aplicación (login, formularios de alumno/ejercicio/serie/rutina, calendario, pizarra, etc.).
+**Referencia:** DOCUMENTACION_UNIFICADA.md §2.2, CHANGELOG [2026-02-09] feat(ux): modales unificados.
 
 ---
 
@@ -65,7 +55,7 @@ Acceso: `/profesor/depuracion`. Servicio `DepuracionService`. Ver DOCUMENTACION_
 | Tarea | Prioridad | Esfuerzo estimado |
 |-------|-----------|-------------------|
 | Corregir referencia a ESTIMATIVO_RECURSOS_SERVIDOR | Baja | 5 min |
-| Estilos de excepciones/avisos/errores | Opcional | 2–4 h |
+| ~~Modales/estilos de avisos unificados~~ | ✅ Hecho | — |
 | ~~Método de depuración de base~~ | ✅ Hecho | — |
 
 ---
