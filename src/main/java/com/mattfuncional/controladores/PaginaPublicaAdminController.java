@@ -40,7 +40,7 @@ public class PaginaPublicaAdminController {
         if (fragment != null && !fragment.isEmpty()) {
             return "profesor/pagina-publica-admin :: contenido";
         }
-        return "redirect:/profesor/administracion";
+        return "redirect:/profesor/administracion?seccion=pagina";
     }
 
     @PostMapping("/plan/guardar")
