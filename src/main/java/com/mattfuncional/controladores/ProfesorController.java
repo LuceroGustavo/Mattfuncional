@@ -459,6 +459,20 @@ public class ProfesorController {
         return "profesor/alumno-detalle";
     }
 
+    /** Guarda solo las notas del profesor del alumno. */
+    @PostMapping("/alumnos/{id}/notas")
+    public String guardarNotasAlumno(@PathVariable Long id,
+            @RequestParam(value = "notasProfesor", required = false) String notasProfesor,
+            @AuthenticationPrincipal Usuario usuarioActual) {
+        Profesor profesor = getProfesorParaUsuarioActual(usuarioActual);
+        Usuario alumno = usuarioService.getUsuarioById(id);
+        if (alumno == null || profesor == null || alumno.getProfesor() == null || !alumno.getProfesor().getId().equals(profesor.getId())) {
+            return "redirect:/profesor/dashboard?error=No+tiene+permiso";
+        }
+        usuarioService.actualizarNotasProfesor(id, notasProfesor);
+        return "redirect:/profesor/alumnos/" + id + "?success=Notas+guardadas";
+    }
+
     /** Inactiva todas las rutinas asignadas al alumno. Solo si el alumno pertenece al profesor. */
     @GetMapping("/alumnos/{id}/rutinas/inactivar-todas")
     public String inactivarTodasRutinasDelAlumno(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioActual) {

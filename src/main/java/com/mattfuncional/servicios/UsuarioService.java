@@ -252,6 +252,14 @@ public class UsuarioService {
     }
 
     @CacheEvict(value = "usuarios", allEntries = true)
+    public void actualizarNotasProfesor(Long usuarioId, String notasProfesor) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+        usuario.setNotasProfesor(notasProfesor != null ? notasProfesor.trim() : null);
+        usuarioRepository.save(usuario);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
     public Usuario actualizarUsuario(Usuario usuario) {
         Usuario usuarioExistente = usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuario.getId()));
