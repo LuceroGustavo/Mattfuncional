@@ -299,6 +299,40 @@
                 font-size: 0.85em; 
             }
         }
+        /* Entorno 2 (≤991px): columnas de día igual ancho + cabecera corta (LUN, MAR…) vía marcado en HTML */
+        @media (max-width: 991.98px) {
+            .calendario-table { margin: 10px 4px; }
+            .tabla-horarios th:first-child,
+            .tabla-horarios td:first-child {
+                width: 2.6rem;
+                min-width: 2.6rem;
+                max-width: 3rem;
+                padding: 6px 2px;
+                font-size: 0.62rem;
+                line-height: 1.15;
+                word-break: break-word;
+            }
+            .tabla-horarios th.columna-dia-header,
+            .tabla-horarios td[data-col-index] {
+                width: calc((100% - 2.75rem) / 7);
+                min-width: 0 !important;
+                max-width: none !important;
+                padding: 5px 3px;
+                font-size: 0.68rem;
+            }
+            .tabla-horarios th.columna-dia-header {
+                white-space: normal;
+                line-height: 1.15;
+                padding: 8px 2px;
+            }
+            .tabla-horarios td[data-col-index] .usuarios-lista {
+                font-size: 0.62rem;
+            }
+            .tabla-horarios td[data-col-index] .usuario-item {
+                font-size: 0.62rem;
+                padding: 2px 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -397,10 +431,12 @@
                                     <th>Hora</th>
                                     <th th:each="dia, diaStat : ${diasSemana}"
                                         th:with="fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
-                                        th:text="${dia + ' ' + #temporals.format(fechaDia, 'dd')}"
                                         class="columna-dia-header"
                                         th:attr="data-col-index=${diaStat.index}"
-                                        title="Clic para resaltar esta columna"></th>
+                                        title="Clic para resaltar esta columna">
+                                        <span class="d-none d-lg-inline" th:text="${dia.name() + ' ' + #temporals.format(fechaDia, 'dd')}">LUNES 01</span>
+                                        <span class="d-lg-none" th:text="${dia.abrevCalendario + ' ' + #temporals.format(fechaDia, 'dd')}">LUN 01</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>

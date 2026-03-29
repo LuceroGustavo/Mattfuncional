@@ -87,3 +87,15 @@ En **CHANGELOG** y **tarea_actual.md** se menciona **COMMIT_PENDIENTE.md** y **D
    Actualizar DESPLIEGUE-SERVIDOR.md para que el menú sea `./mattfuncional` (y no `iniciar-menu.sh`), y aclarar qué hacer con los SQL de problemas (crearlos o documentar que son bajo demanda). Eso se puede hacer dentro del plan **migrar_servidor_cliente.md**.
 
 Cuando confirmes qué querés borrar, se puede ejecutar solo eso y dejar el resto como está.
+
+---
+
+## 6. Estado: crear y modificar alumno (implementado)
+
+- **Misma vista** `profesor/nuevoalumno.html` para **alta** (`GET/POST /profesor/alumnos/nuevo`) y **edición** (`GET/POST /profesor/alumnos/editar/{id}`), con `editMode` cuando corresponde.
+- **Horarios de asistencia:** selector visual (grilla); en móvil/entorno 2 cabeceras **LUN–DOM**, `data-dia` y JSON siguen usando enum (`LUNES`, …). Precarga en edición vía `horariosExistentesJson` + `cargarHorariosExistentes()`.
+- **Formulario de alumno:** sin bloque opcional de historial físico en alta/edición; mediciones se registran desde la **ficha del alumno** (`POST /profesor/alumnos/{id}/medicion/nueva`).
+- **Enlaces a editar:** desde `profesor/alumno-detalle.html` (botones “Editar alumno” / “Editar alumno completo”).
+- **Calendario semanal profesor:** en vista ≤992px, encabezados de día abreviados y columnas equilibradas (`DiaSemana.getAbrevCalendario()` + CSS en `calendario/semanal-profesor.html`).
+
+Para el detalle de vistas MiGymVirtual y seguimiento visual, ver también **PLAN_MODIFICACION_VISTAS.md** (§4.2.1).

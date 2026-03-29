@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuevo Alumno</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -212,56 +213,6 @@
                         <input type="text" class="form-control" id="contactoEmergenciaTelefono" th:field="*{contactoEmergenciaTelefono}">
                     </div>
                 </div>
-                <hr class="my-4">
-                <h5 class="mb-3 text-primary"><i class="fas fa-ruler-combined me-2"></i>Historial físico (opcional)</h5>
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Fecha de medición</label>
-                        <input type="date" class="form-control" name="medicionFisicaFecha">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Peso (kg)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaPeso" id="medicionFisicaPeso">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Altura (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaAltura" id="medicionFisicaAltura">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Cintura (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaCintura">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Pecho (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaPecho">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Cadera (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaCadera">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Bíceps (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaBiceps">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Muslo (cm)</label>
-                        <input type="number" step="0.1" class="form-control" name="medicionFisicaMuslo">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                        <button type="button" class="btn btn-info" onclick="calcularIMC()">Calcular IMC</button>
-                        <div id="resultadoIMC" class="mt-2 text-primary fw-bold"></div>
-                        <div id="interpretacionIMC" class="mt-1"></div>
-                        <div id="tablaIMC" class="mt-1"></div>
-                        <div id="rangoPesoIMC" class="mt-1"></div>
-                        <div class="mt-2 text-muted fw-bold" style="font-size:0.95em;">
-                            Estos valores son estimativos. Para una evaluación personalizada y segura, consulte siempre a un profesional de la salud o nutricionista.
-                        </div>
-                    </div>
-                </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-save me-2"></i>
@@ -281,7 +232,7 @@
 
 .horario-grid {
     display: grid;
-    grid-template-columns: 80px repeat(7, 1fr);
+    grid-template-columns: 4.5rem repeat(7, minmax(0, 1fr));
     gap: 1px;
     background: #e9ecef;
     border-radius: 8px;
@@ -389,20 +340,25 @@
     transform: scale(1.1);
 }
 
-@media (max-width: 768px) {
+/* Entorno 2 / móvil: cabeceras cortas (LUN–DOM) en JS + columnas de día iguales */
+@media (max-width: 991.98px) {
     .horario-grid {
-        grid-template-columns: 60px repeat(7, 1fr);
-        font-size: 0.7rem;
+        grid-template-columns: 2.65rem repeat(7, minmax(0, 1fr));
+        font-size: 0.65rem;
     }
-    
-    .slot-cell {
-        min-height: 30px;
-        padding: 4px;
-    }
-    
     .header-cell {
-        padding: 8px 4px;
-        font-size: 0.8rem;
+        padding: 7px 2px;
+        font-size: 0.62rem;
+        line-height: 1.15;
+        word-break: break-word;
+    }
+    .hora-cell {
+        padding: 5px 2px;
+        font-size: 0.6rem;
+    }
+    .slot-cell {
+        min-height: 28px;
+        padding: 3px;
     }
 }
 </style>
@@ -450,7 +406,7 @@ function actualizarHorariosSeleccionados() {
             const badge = document.createElement('div');
             badge.className = 'horario-badge';
             badge.innerHTML = `
-                <span>${dia} ${horaFormateada}</span>
+                <span>${etiquetaDiaCorta(dia)} ${horaFormateada}</span>
                 <button type="button" class="remove-btn" onclick="removerHorario('${dia}', ${hora})">
                     <i class="fas fa-times"></i>
                 </button>
@@ -544,8 +500,15 @@ function cargarHorariosExistentes() {
     }
 }
 
-// Días y horas para la grilla
+// Días (valores = enum backend) y etiquetas cortas para cabecera y badges
 const DIAS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"];
+const DIAS_ABREV = {
+    LUNES: "LUN", MARTES: "MAR", MIERCOLES: "MIE", JUEVES: "JUE",
+    VIERNES: "VIE", SABADO: "SAB", DOMINGO: "DOM"
+};
+function etiquetaDiaCorta(dia) {
+    return DIAS_ABREV[dia] || dia;
+}
 const HORAS = [];
 for (let h = 6; h < 21; h++) {
     HORAS.push({label: `${h}:00`, value: h});
@@ -563,7 +526,7 @@ function generarGrillaHorarios() {
     DIAS.forEach(dia => {
         let cell = document.createElement('div');
         cell.className = 'header-cell';
-        cell.textContent = dia;
+        cell.textContent = etiquetaDiaCorta(dia);
         grid.appendChild(cell);
     });
     // Filas de horas
@@ -618,40 +581,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- Horarios existentes se pasan vía data-horarios en #horariosExistentesData y se parsean en cargarHorariosExistentes() -->
-
-<script>
-function calcularIMC() {
-    var peso = parseFloat(document.getElementById('medicionFisicaPeso').value);
-    var altura = parseFloat(document.getElementById('medicionFisicaAltura').value);
-    var resultado = document.getElementById('resultadoIMC');
-    var interpretacion = document.getElementById('interpretacionIMC');
-    var tabla = document.getElementById('tablaIMC');
-    var rangoPeso = document.getElementById('rangoPesoIMC');
-    if (!peso || !altura || altura <= 0) {
-        resultado.textContent = 'Por favor, ingresa peso y altura válidos.';
-        interpretacion.textContent = '';
-        tabla.innerHTML = '';
-        rangoPeso.textContent = '';
-        return;
-    }
-    var imc = peso / Math.pow(altura / 100, 2);
-    resultado.textContent = 'IMC: ' + imc.toFixed(2);
-    // Interpretación
-    var texto = '';
-    if (imc < 18.5) texto = 'Bajo peso';
-    else if (imc < 25) texto = 'Normal';
-    else if (imc < 30) texto = 'Sobrepeso';
-    else texto = 'Obesidad';
-    interpretacion.textContent = 'Interpretación: ' + texto;
-    // Tabla de rangos
-    tabla.innerHTML = `<table class="table table-sm table-bordered w-auto mt-2"><thead><tr><th>IMC</th><th>Clasificación</th></tr></thead><tbody><tr><td>&lt; 18.5</td><td>Bajo peso</td></tr><tr><td>18.5 - 24.9</td><td>Normal</td></tr><tr><td>25 - 29.9</td><td>Sobrepeso</td></tr><tr><td>≥ 30</td><td>Obesidad</td></tr></tbody></table>`;
-    // Rango de peso saludable
-    var alturaM = altura / 100;
-    var pesoMin = 18.5 * Math.pow(alturaM, 2);
-    var pesoMax = 24.9 * Math.pow(alturaM, 2);
-    rangoPeso.textContent = 'Rango de peso saludable para tu estatura: ' + pesoMin.toFixed(1) + ' kg - ' + pesoMax.toFixed(1) + ' kg';
-}
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <div th:replace="~{fragments/bottom-nav :: bottom-nav}"></div>
