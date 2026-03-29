@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** | **Estado:** pestañas alineadas a referencia (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3 o §4.3 según prioridad. |
+| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** + pantalla **crear/modificar serie** (`/series/crear`, edición misma vista) | **Estado:** pestañas y formulario de serie alineados a referencia (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3. |
 
 ---
 
@@ -102,10 +102,12 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 **Terminología:** Entorno 1 ≈ escritorio (≥992px); entorno 2 ≈ móvil (≤991px en panel). Referencia: `APP referencia/Migymvirtual/`.
 
-#### Login (`templates/login.html`)
+#### Login (`templates/login.html`) — **actualizado (Mar 2026)**
 
-- `viewport`, `100dvh`, `safe-area`, padding responsive; toggle contraseña y `autocomplete` en campos.
-- Fondo degradado (sin depender de `/img/login.jpeg` en repo).
+- **Entorno 2 (≤991px):** fondo **`/img/login.png`** en capa fija `body.login-page::before` con **`background-size: contain`** para ver el arte completo en pantalla (relleno `#d0d0d0` si hay bandas); `background-position: center top`.
+- **Escritorio (≥992px):** fondo **`/img/logo-Navbar.png`** con `cover` en `body`.
+- **Tarjeta de login:** paleta **gris hormigón / carbón** (cabecera oscura, cuerpo claro, botón **Ingresar** `.btn-login-submit`); formulario posicionado con `clamp` en `padding-top` para equilibrio entre logo del PNG y pie de pantalla (ajustes finos iterados).
+- `viewport`, `100dvh`, `safe-area`, padding responsive; toggle contraseña y `autocomplete` en campos; variables JS (`currentUserName`, `usuariosSistema`) escapadas para evitar roturas por comillas en el script de login.
 
 #### Navbar (`templates/fragments/navbar.html`)
 
@@ -145,6 +147,15 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 - Card filtro buscar + Limpiar violeta; `#tablaSeries`; datos en `data-*` por fila.
 - Entorno 2: sin columna Acciones; fila abre `#modalVerSerieMobile`; Ver en móvil misma pestaña.
+
+#### Vista **crear / modificar serie** (`series/crearSerie.html`) — **completo (Mar 2026)**
+
+- **Misma plantilla** para alta (`GET/POST /series/crear`) y edición (`GET/POST /series/editar/{id}`); título y botón según `editMode`.
+- **Entorno 1 / 2:** `crear-serie-container` con padding responsive; sección **Datos de la serie** (`form-section` gradiente + borde violeta); **Grupo muscular** con wrapper violeta en móvil; **Ejercicios de la serie** con card filtro (buscar + **Limpiar** `btn-series-filtro`), tabla `table-sm` en `table-responsive`, columnas **Orden** y **Acción** con clases `orden-accion-*` y botones **Subir/Bajar**; en móvil **tabla primero** (`order-1` / `order-2` en la fila del carrusel).
+- **Carrusel Splide** de ejercicios (config tipo referencia: `perMove`, `speed`, `flickPower`, etc.); listener **Limpiar**; `actualizarOrdenAccionFilas()` en altas/bajas y al editar fila.
+- **Modal de alerta** Bootstrap con `modal-confirmar-header` / `modal-confirmar-footer`; orden de scripts: Splide → Bootstrap → script de la página (para `bootstrap.Modal`).
+- **Post-guardado:** campo opcional `volverUrl` en el form (`th:if`); si viene, el JS redirige allí; si no, a `/profesor/dashboard?tab=series`.
+- **Sin footer de marca** en esta vista (como referencia MiGymVirtual); se mantiene **bottom-nav** del panel.
 
 #### Pestaña **Mis Rutinas**
 

@@ -8,18 +8,29 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Fondo oscuro con acento violeta (branding Mattfuncional); sin imagen externa para no romper si falta el archivo */
+        /*
+         * Entorno 2 (≤991px): login.png con contain en capa fija — se ve el arte entero sin recortes ni desplazar el fondo.
+         * Escritorio (≥992px): logo-Navbar.png cover en body.
+         */
         body.login-page {
             margin: 0;
             min-height: 100vh;
             min-height: 100dvh;
-            background: linear-gradient(145deg, #1e1b4b 0%, #312e81 42%, #4c1d95 100%);
+            background-color: #c5c5c5;
+            background-image: url(/img/logo-Navbar.png);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
         }
 
         .login-container {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 1rem;
@@ -32,63 +43,126 @@
         .login-card {
             width: 100%;
             max-width: 420px;
-            border-radius: 18px;
-            border: none;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            border-radius: 16px;
+            border: 1px solid rgba(45, 45, 45, 0.12);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28), 0 2px 12px rgba(0, 0, 0, 0.12);
             overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(180deg, #3a3a3a 0%, #2d2d2d 100%);
+            color: #f0f0f0;
             border-radius: 0;
-            padding: 1.75rem 1.5rem;
+            padding: 1.5rem 1.25rem;
             text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         }
 
         .login-header h2 {
             font-weight: 700;
-            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            font-size: clamp(1.2rem, 3.8vw, 1.65rem);
+            letter-spacing: 0.02em;
         }
 
         .login-header p {
-            font-size: 0.95rem;
-            opacity: 0.95;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            color: #d0d0d0;
         }
 
         .login-card .card-body {
+            background: rgba(252, 252, 252, 0.97);
+            color: #2d2d2d;
+        }
+
+        .login-card .form-label {
+            color: #333;
+        }
+
+        .login-card .input-group-text {
+            background: #ececec;
+            border-color: #c8c8c8;
+            color: #444;
+        }
+
+        .login-card .form-control {
+            border-color: #c8c8c8;
             background: #fff;
         }
 
+        .login-card .form-control:focus {
+            border-color: #5a5a5a;
+            box-shadow: 0 0 0 0.2rem rgba(45, 45, 45, 0.12);
+        }
+
         .login-card #togglePassword {
-            border-color: #dee2e6;
+            border-color: #c8c8c8;
+            color: #444;
         }
 
         .login-card #togglePassword:hover {
-            background: #f8f9fa;
+            background: #eaeaea;
         }
 
-        @media (max-width: 991px) {
-            .login-container {
-                align-items: flex-start;
-                padding-top: max(1.5rem, env(safe-area-inset-top));
+        .login-card .btn-login-submit {
+            background: linear-gradient(180deg, #3d3d3d 0%, #2d2d2d 100%);
+            border: 1px solid #1f1f1f;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .login-card .btn-login-submit:hover {
+            background: linear-gradient(180deg, #4a4a4a 0%, #353535 100%);
+            color: #fff;
+        }
+
+        /* Entorno 2: arte completo visible (contain) en capa fija; relleno #d0d0d0 si hay bandas */
+        @media (max-width: 991.98px) {
+            body.login-page {
+                background-image: none;
+                background-color: #d0d0d0;
+                position: relative;
+                overflow-x: hidden;
             }
+
+            body.login-page::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                background-color: #d0d0d0;
+                background-image: url(/img/login.png);
+                background-repeat: no-repeat;
+                background-position: center top;
+                background-size: contain;
+            }
+
+            .login-container {
+                justify-content: flex-start;
+                padding-top: clamp(13.5rem, 49vh, 28rem);
+                padding-bottom: max(1.75rem, calc(env(safe-area-inset-bottom) + 1.25rem), 5vh);
+            }
+
             .login-card {
-                margin-top: 0.25rem;
+                margin-top: 0;
             }
         }
 
         @media (max-width: 576px) {
             .login-container {
-                padding: 0.75rem;
-                padding-top: max(1.25rem, env(safe-area-inset-top));
-                padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+                padding-right: max(0.75rem, env(safe-area-inset-right));
+                padding-top: clamp(12.25rem, 47vh, 24rem);
+                padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem), 6vh);
             }
             .login-header {
-                padding: 1.35rem 1rem;
+                padding: 1.25rem 1rem;
             }
             .login-header p {
-                font-size: 0.88rem;
+                font-size: 0.85rem;
             }
             .login-card .card-body {
                 padding: 1.25rem !important;
@@ -141,7 +215,7 @@
                         </div>
                     </div>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold">Ingresar</button>
+                        <button type="submit" class="btn btn-login-submit btn-lg fw-bold">Ingresar</button>
                     </div>
                 </form>
             </div>

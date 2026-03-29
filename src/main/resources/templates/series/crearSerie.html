@@ -125,11 +125,12 @@
             text-align: center;
         }
         .form-section {
-            background: #fff;
+            background: linear-gradient(135deg, #fff 0%, #faf5fc 50%, #f3e5f5 100%);
             border-radius: 1.2rem;
             box-shadow: 0 2px 12px rgba(0,0,0,0.09);
             padding: 2rem 1.5rem 1.5rem 1.5rem;
             margin-bottom: 2.5rem;
+            border: 2px solid #d1c4e9;
         }
         .form-section .card-header {
             background: linear-gradient(90deg, #1976d2 0%, #7e57c2 100%);
@@ -151,15 +152,96 @@
         .btn-primary:hover {
             background: linear-gradient(90deg, #7e57c2 0%, #1976d2 100%);
         }
+        .filtros-series-fila2-wrapper {
+            padding: 0;
+        }
         @media (max-width: 991px) {
-            .ejercicios-section, .form-section { padding: 1rem 0.3rem; }
+            .filtro-buscar-input {
+                max-width: calc(100% - 5rem);
+            }
+        }
+        @media (max-width: 991px) {
+            .filtros-series-fila2-wrapper {
+                background: linear-gradient(135deg, #ede7f6 60%, #e1bee7 100%);
+                border: 1px solid #d1c4e9;
+                border-radius: 0.75rem;
+                padding: 0.75rem;
+            }
+            .btn-series-filtro {
+                background: #7e57c2;
+                color: #fff;
+                border-color: #673ab7;
+                min-height: 38px;
+                padding: 0.35rem 0.65rem;
+                font-weight: 600;
+            }
+            .btn-series-filtro:hover {
+                background: #5e35b1;
+                color: #fff;
+                border-color: #5e35b1;
+            }
+        }
+        @media (min-width: 992px) {
+            .btn-series-filtro {
+                border-color: #b39ddb;
+                color: #5e35b1;
+                min-height: 38px;
+            }
+            .btn-series-filtro:hover {
+                background: #ede7f6;
+                color: #5e35b1;
+                border-color: #7e57c2;
+            }
+        }
+        @media (max-width: 991px) {
+            .ejercicios-section, .form-section { padding: 1rem 0.65rem; }
+            .main-title { font-size: 1.35rem; margin-top: 1rem; margin-bottom: 0.8rem; }
+            .crear-serie-container { padding-bottom: 0.5rem; }
+        }
+        .orden-accion-btns {
+            display: inline-flex;
+            flex-direction: row;
+            gap: 0.25rem;
+            align-items: center;
+        }
+        .orden-accion-flechas {
+            display: inline-flex;
+            flex-direction: row;
+            gap: 0.25rem;
+            align-items: center;
+        }
+        @media (max-width: 991px) {
+            .orden-accion-btns {
+                flex-direction: row;
+                gap: 0.35rem;
+                align-items: center;
+            }
+            .orden-accion-flechas {
+                flex-direction: column;
+                gap: 0.15rem;
+            }
+            .orden-accion-cell {
+                min-width: 0;
+                width: 1%;
+                white-space: nowrap;
+            }
+            tr.fila-primera .btn-subir-ejercicio { display: none !important; }
+            tr.fila-ultima .btn-bajar-ejercicio { display: none !important; }
+        }
+        .btn-guardar-serie {
+            min-height: 48px;
+            border-radius: 1.25rem;
+            font-weight: 600;
+        }
+        @media (max-width: 991px) {
+            .btn-guardar-serie { width: 100%; min-height: 50px; }
         }
     </style>
 </head>
 <body>
     <div th:replace="fragments/navbar :: navbar"></div>
 
-    <div class="container-fluid" style="max-width: 1400px;">
+    <div class="container-fluid crear-serie-container px-2 px-md-3" style="max-width: 1400px;">
         <div class="main-title">
             <i class="fa-solid fa-dumbbell me-2" style="color:#7e57c2;"></i><span th:if="${editMode}" th:text="'Modificar Serie'">Modificar Serie</span><span th:unless="${editMode}" th:text="'Crear Nueva Serie'">Crear Nueva Serie</span>
         </div>
@@ -170,11 +252,12 @@
                 <i class="fa-solid fa-running"></i> Ejercicios Disponibles
                         </div>
             <div class="row mb-3 g-2 align-items-center">
-                <div class="col-md-7 col-12">
-                    <input type="text" id="filtro-ejercicio" class="form-control" placeholder="Buscar ejercicio...">
+                <div class="col-12 col-md-8 d-flex gap-2 align-items-center flex-nowrap">
+                    <input type="text" id="filtro-ejercicio" class="form-control flex-grow-1 filtro-buscar-input" placeholder="Buscar ejercicio..." style="min-width: 0;">
+                    <button type="button" id="btn-limpiar-filtro" class="btn btn-series-filtro btn-sm flex-shrink-0" title="Limpiar filtros"><i class="fas fa-times me-1"></i>Limpiar</button>
                 </div>
-                <div class="col-md-5 col-12 mt-2 mt-md-0 text-md-end">
-                    <select id="filtro-musculo" class="form-select w-auto d-inline-block">
+                <div class="col-12 col-md-4 filtros-series-fila2-wrapper">
+                    <select id="filtro-musculo" class="form-select">
                         <option value="" th:selected="${selectedGrupoId == null}">Todos los grupos musculares</option>
                         <option th:each="grupo : ${gruposMusculares}"
                                 th:value="${grupo.nombre}"
@@ -220,8 +303,9 @@
                 <i class="fa-solid fa-edit me-2"></i><span th:if="${editMode}" th:text="'Modificar Serie'">Modificar Serie</span><span th:unless="${editMode}" th:text="'Crear Nueva Serie'">Crear Nueva Serie</span>
             </div>
             <form id="serieForm">
+                <input type="hidden" id="volverUrl" th:if="${volverUrl != null}" th:value="${volverUrl}">
                 <div class="row g-4">
-                    <div class="col-md-6">
+                    <div class="col-md-6 order-2 order-md-1">
                             <div class="mb-3">
                                 <label for="nombre" class="form-label fw-bold">Nombre de la Serie</label>
                                 <input type="text" id="nombre" class="form-control" required placeholder="Ej: Lunes - Pecho y Tríceps">
@@ -239,10 +323,11 @@
                                 <small class="form-text text-muted">Cantidad de vueltas (veces que se repite la serie completa en la rutina)</small>
                             </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 order-1 order-md-2">
                         <h6 class="fw-bold">Ejercicios en esta Serie</h6>
                         <p class="small text-muted mb-2">Usá las flechas para cambiar el orden de los ejercicios.</p>
-                            <table class="table table-striped">
+                            <div class="table-responsive">
+                            <table class="table table-striped table-sm align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Ejercicio</th>
@@ -256,19 +341,20 @@
                                     <!-- Los ejercicios seleccionados se añadirán aquí con JS -->
                                 </tbody>
                             </table>
+                            </div>
                             <div id="no-ejercicios" class="text-center text-muted mt-3">
                             <p>Aún no has añadido ejercicios. Selecciona un ejercicio del carrusel de arriba.</p>
                         </div>
                     </div>
                 </div>
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-save me-2"></i>Guardar Serie Plantilla</button>
+                <div class="d-grid d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg btn-guardar-serie px-md-5"><i class="fa-solid fa-save me-2"></i>Guardar Serie Plantilla</button>
             </div>
         </form>
         </div>
     </div>
 
-    <!-- Modal alerta (éxito/error/info) estilo Mattfuncional -->
+    <!-- Modal alerta (éxito/error/info) -->
     <div class="modal fade" id="modalAlertaSerie" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -285,6 +371,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="application/json" id="serie-data-json" th:if="${editMode and serieDTOJson != null}">[( ${serieDTOJson} )]</script>
     <script th:inline="javascript">
     /*<![CDATA[*/
@@ -368,11 +455,14 @@
             splide = new Splide('#ejercicios-carousel', {
                 type: 'slide',
                 perPage: 3,
-                perMove: 1,
+                perMove: 3,
                 gap: '0.3rem',
                 pagination: false,
+                speed: 350,
+                flickPower: 1000,
+                flickMaxPages: 3,
                 breakpoints: {
-                    576: { perPage: 2, gap: '0.15rem' },
+                    576: { perPage: 2, perMove: 2, gap: '0.15rem' },
                 }
             }).mount();
         }
@@ -381,9 +471,25 @@
         filtrarEjercicios();
         filtroEjercicio.addEventListener('input', filtrarEjercicios);
         filtroMusculo.addEventListener('change', filtrarEjercicios);
+        document.getElementById('btn-limpiar-filtro').addEventListener('click', function() {
+            filtroEjercicio.value = '';
+            filtroMusculo.value = '';
+            filtrarEjercicios();
+        });
 
         function actualizarVistaTabla() {
             noEjerciciosMsg.style.display = tablaEjerciciosSerie.rows.length === 0 ? 'block' : 'none';
+        }
+
+        function actualizarOrdenAccionFilas() {
+            const filas = Array.from(tablaEjerciciosSerie.rows);
+            filas.forEach(function(tr) {
+                tr.classList.remove('fila-primera', 'fila-ultima');
+            });
+            if (filas.length > 0) {
+                filas[0].classList.add('fila-primera');
+                filas[filas.length - 1].classList.add('fila-ultima');
+            }
         }
 
         // --- INICIALIZACIÓN PARA MODO EDICIÓN ---
@@ -422,20 +528,23 @@
                                 <input type="number" class="form-control peso-input" min="0" placeholder="Ej: 10" value="${ejercicio.peso !== null ? ejercicio.peso : ''}">
                                 <div class="form-check mt-1">
                                     <input class="form-check-input sin-peso-check" type="checkbox" ${ejercicio.peso === null ? 'checked' : ''}>
-                                    <label class="form-check-label">No requiere peso</label>
+                                    <label class="form-check-label">No</label>
                                 </div>
                             </td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
-                                    <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
-                                    <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
+                            <td class="orden-accion-cell">
+                                <div class="orden-accion-btns">
+                                    <div class="orden-accion-flechas">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm eliminar-btn" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                                 </div>
                             </td>
                         `;
                     }
                 });
                 actualizarVistaTabla();
+                actualizarOrdenAccionFilas();
             }
         }
 
@@ -465,19 +574,22 @@
                     <input type="number" class="form-control peso-input" min="0" placeholder="Ej: 10">
                     <div class="form-check mt-1">
                         <input class="form-check-input sin-peso-check" type="checkbox">
-                        <label class="form-check-label">No requiere peso</label>
+                        <label class="form-check-label">No</label>
                     </div>
                 </td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-secondary btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
-                        <button type="button" class="btn btn-outline-secondary btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm eliminar-btn"><i class="fas fa-trash-alt"></i></button>
+                <td class="orden-accion-cell">
+                    <div class="orden-accion-btns">
+                        <div class="orden-accion-flechas">
+                            <button type="button" class="btn btn-outline-secondary btn-sm btn-subir-ejercicio" title="Subir"><i class="fas fa-arrow-up"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm btn-bajar-ejercicio" title="Bajar"><i class="fas fa-arrow-down"></i></button>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
             `;
 
             actualizarVistaTabla();
+            actualizarOrdenAccionFilas();
         });
 
         tablaEjerciciosSerie.addEventListener('click', function(e) {
@@ -489,6 +601,7 @@
                 const prev = fila.previousElementSibling;
                 if (prev && prev.tagName === 'TR') {
                     tablaEjerciciosSerie.insertBefore(fila, prev);
+                    actualizarOrdenAccionFilas();
                 }
                 return;
             }
@@ -498,6 +611,7 @@
                 const next = fila.nextElementSibling;
                 if (next && next.tagName === 'TR') {
                     tablaEjerciciosSerie.insertBefore(next, fila);
+                    actualizarOrdenAccionFilas();
                 }
                 return;
             }
@@ -506,13 +620,13 @@
                 const fila = eliminarBtn.closest('tr');
                 const id = fila.dataset.id;
                 fila.remove();
-                // Desmarcar la tarjeta solo si no queda ninguna fila de ese ejercicio
                 const quedanFilasConEsteEjercicio = Array.from(tablaEjerciciosSerie.rows).some(row => row.dataset.id === id);
                 if (!quedanFilasConEsteEjercicio) {
                     const slide = carousel.querySelector(`.splide__slide[data-id="${id}"]`);
                     if (slide) slide.querySelector('.ejercicio-card').classList.remove('selected');
                 }
                 actualizarVistaTabla();
+                actualizarOrdenAccionFilas();
             }
         });
 
@@ -574,10 +688,18 @@
 
                 if (response.ok) {
                     const successMessage = editMode ? '¡Serie actualizada exitosamente!' : '¡Serie creada exitosamente!';
-                    mostrarAlerta(successMessage, { redirectUrl: '/profesor/dashboard?tab=series' });
+                    const volverInput = document.getElementById('volverUrl');
+                    const redirectUrl = (volverInput && volverInput.value) ? volverInput.value : '/profesor/dashboard?tab=series';
+                    mostrarAlerta(successMessage, { redirectUrl: redirectUrl });
                 } else {
-                    const errorData = await response.json();
-                    mostrarAlerta('Error al procesar la serie: ' + (errorData.message || 'Error desconocido'));
+                    var errText = 'Error desconocido';
+                    try {
+                        const errorData = await response.json();
+                        errText = errorData.message || errorData.error || errText;
+                    } catch (ex) {
+                        errText = await response.text() || errText;
+                    }
+                    mostrarAlerta('Error al procesar la serie: ' + errText);
                 }
             } catch (error) {
                 console.error('Error en la petición:', error);
@@ -586,9 +708,9 @@
         });
 
         actualizarVistaTabla();
+        actualizarOrdenAccionFilas();
     });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <div th:replace="~{fragments/bottom-nav :: bottom-nav}"></div>
 </body>
 </html> 
