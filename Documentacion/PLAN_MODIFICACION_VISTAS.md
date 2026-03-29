@@ -118,6 +118,22 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - Excepción `#modalVerSerieMobile`: pie en fila, botones proporcionados; colores pastel para acciones del modal serie.
 - `.modal-card-rutina`: tarjeta del modal de detalle de rutina.
 - `.table-responsive.mgv-scroll-panel` (≤991px): scroll interno en tablas de lectura del panel.
+- **≤991px — `#modalProgreso`:** pie del modal *Registrar progreso* en **una fila**, botones compactos (no columna a ancho completo como el footer genérico).
+
+#### Ficha **detalle de alumno** (`profesor/alumno-detalle.html`) — **completo (Mar 2026)**
+
+- **Entorno 1 / 2:** `container-fluid` responsive; rejilla de tarjetas (Datos personales con ícono editar, Restricciones, Asistencia programada, **Progreso del alumno**, Rutinas asignadas); bloque complementario sin duplicar restricciones.
+- **Sin “Volver al Dashboard”** en cabecera (navegación vía panel / barra inferior).
+- **Escritorio (≥lg):** acciones **Progreso** + **Editar** en fila superior; **Eliminar usuario** al pie de la página.
+- **Móvil:** progreso desde tarjeta (`#modalProgreso`); editar desde tarjeta Datos personales; presentismo con tabla compacta + **Consultar asistencias** (modal mensual JSON); filas de asistencia tocables → `#modalVerAsistenciaMobile` (delegación en `#historialAsistenciaBody`).
+- **Rutinas (últimas 3):** columnas ocultas en entorno 2; fila → `#modalVerRutinaMobile` con rutas y acciones Mattfuncional; `mgv-scroll-panel` donde aplica.
+- **Modales:** cabecera `modal-confirmar-header` (violeta) y pie `modal-confirmar-footer`; formulario de progreso con checklist en flex y botón **Guardar** `btn-primary`.
+- **Footer de marca** (`footer.footer`) **oculto** en esta vista (`body.ficha-alumno-body`).
+- **Nota de modelo:** el “progreso” se registra sobre **asistencia** (no tabla `registrosProgreso` separada como en la referencia); el historial corto refleja presentismo + trabajo + observaciones.
+
+#### Panel del profesor — footer
+
+- **`profesor/dashboard.html`:** mismo criterio; `body.panel-profesor-body` oculta `footer.footer`.
 
 #### Pestaña **Mis Alumnos** (`profesor/dashboard.html`)
 
@@ -145,12 +161,11 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
-- **4.3** Ficha detalle alumno (parity opcional con referencia).
 - **2.2 / 2.3** Pizarra y Calendario responsive.
 
 ### 4.3 Detalle de alumno
 
-Cuando se aborde la ficha, usar como guía `profesor/alumno-detalle.html` de la referencia para móvil/escritorio; respetar campos extra de Mattfuncional (notas, mediciones, etc.).
+**Estado: implementado y documentado en §4.2.1** (“Ficha detalle de alumno”). La referencia MiGymVirtual sirve como guía visual; Mattfuncional conserva presentismo, consulta mensual de asistencias, notas del profesor y rutas propias (`/rutinas/...`, `/profesor/alumnos/.../progreso`).
 
 ---
 

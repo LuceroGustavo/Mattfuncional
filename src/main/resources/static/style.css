@@ -96,6 +96,27 @@
   }
 }
 
+/* Ficha alumno — Registrar progreso: entorno 2 (≤991px) — Cancelar y Guardar en una fila, compactos */
+@media (max-width: 991.98px) {
+  #modalProgreso .modal-confirmar-footer {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+  }
+  #modalProgreso .modal-confirmar-footer .btn {
+    width: auto !important;
+    flex: 0 0 auto;
+    min-width: unset;
+    min-height: 38px;
+    padding: 0.4rem 0.95rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
 /* Botones del modal Serie: mismo criterio pastel que la tabla del panel */
 #modalVerSerieMobile .modal-serie-btn-action.btn-info {
   background: #80deea;

@@ -47,22 +47,6 @@
             font-size: 1.1rem;
         }
         
-        .btn-volver {
-            background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%);
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-volver:hover {
-            background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
-            transform: translateY(-2px);
-            color: white;
-        }
-        
         .alumno-info {
             background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
             border-radius: 15px;
@@ -228,10 +212,59 @@
             font-weight: 600;
         }
         /* Patrón de colores igual que panel: alumnos=verde pastel, series=violeta, rutinas=amarillo, asignaciones=celeste */
+        .stat-item.stat-card-datos { background: linear-gradient(135deg, #e3f2fd 60%, #bbdefb 100%); border-color: #90caf9; position: relative; }
+        .stat-item.stat-card-datos .stat-card-datos-list { font-size: 0.9rem; color: #5a6c7d; line-height: 1.6; min-height: 2.8rem; overflow: visible; display: block; -webkit-line-clamp: unset; }
+        .stat-item.stat-card-datos .stat-card-datos-list strong { color: #2c3e50; }
+        .stat-item .stat-card-edit {
+            position: absolute; top: 0.75rem; right: 0.75rem; width: 1.75rem; height: 1.75rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.95); color: #5e35b1;
+            text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.12); font-size: 0.8rem;
+        }
+        .stat-item .stat-card-edit i { font-size: 0.8rem !important; margin: 0; }
+        .stat-item .stat-card-edit:hover { background: #7e57c2; color: #fff; }
+        .stat-item.stat-card-progreso-clic { cursor: pointer; transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        .stat-item.stat-card-progreso-clic:hover { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
         .stat-item.stat-card-alumno { background: linear-gradient(135deg, #e8f5e9 60%, #b2dfdb 100%); border-color: #a5d6a7; }
         .stat-item.stat-card-asistencia { background: linear-gradient(135deg, #e3f2fd 60%, #b3e5fc 100%); border-color: #81d4fa; }
         .stat-item.stat-card-trabajo { background: linear-gradient(135deg, #ede7f6 60%, #b39ddb 100%); border-color: #b39ddb; }
         .stat-item.stat-card-rutinas { background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%); border-color: #ffd54f; }
+        .rutinas-asignadas-card .card-body { min-height: 280px; }
+        @media (max-width: 991.98px) {
+            .col-rutina-series, .col-rutina-resena, .col-rutina-acciones { display: none !important; }
+            .rutina-row-clickable { cursor: pointer; }
+            .rutina-row-clickable:hover { background-color: rgba(0,0,0,0.04); }
+            .rutina-nombre-movil, .rutina-categoria-movil { max-width: 42vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .col-asist-profesor, .col-asist-obs { display: none !important; }
+            .asistencia-row-clickable { cursor: pointer; }
+            .asistencia-row-clickable:hover { background-color: rgba(0,0,0,0.04); }
+            .info-card-asistencias .historial-asistencia-scroll {
+                height: 320px;
+                max-height: 320px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        @media (min-width: 992px) {
+            .rutina-row-clickable { cursor: default; }
+            .asistencia-row-clickable { cursor: default; }
+        }
+        @media (max-width: 991.98px) {
+            .main-container { margin: 12px 8px; padding: 20px 16px; padding-bottom: 1.25rem; }
+            .hero-title { font-size: 1.5rem; margin-bottom: 1rem; }
+            .hero-subtitle { font-size: 0.95rem; margin-bottom: 1.5rem; }
+            .btn-estado-ficha { font-size: 0.95rem; padding: 0.5rem 1rem !important; }
+            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+            .stat-item { min-height: auto; padding: 1rem; }
+            .stat-number { font-size: 1.5rem; }
+            .alumno-info { padding: 1rem; margin-bottom: 1.5rem; }
+            .alumno-info .row { flex-direction: column; }
+        }
+        @media (max-width: 575.98px) {
+            .main-container { margin: 8px 6px; padding: 16px 12px; }
+            .hero-title { font-size: 1.35rem; }
+        }
+        .ficha-pie-acciones .btn-danger { min-height: 44px; }
+        .notas-profesor-form textarea, .notas-profesor-form button { display: block; visibility: visible; }
         
         .nav-tabs .nav-link {
             border: none;
@@ -268,14 +301,16 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+        /* Esta vista no muestra el footer de marca (Mattfuncional / desarrollador) */
+        body.ficha-alumno-body footer.footer { display: none !important; }
     </style>
 </head>
-<body>
+<body class="ficha-alumno-body">
 
 <!-- Navbar fragment estándar -->
 <div th:replace="fragments/navbar :: navbar"></div>
 
-<div class="container-fluid" th:with="alumnoInactivo=${alumno.estadoAlumno == 'INACTIVO'}">
+<div class="container-fluid px-2 px-md-3" th:with="alumnoInactivo=${alumno.estadoAlumno == 'INACTIVO'}">
     <div class="main-container">
         <div th:if="${param.progreso != null && param.progreso[0] == 'ok'}" class="alert alert-success alert-dismissible fade show" role="alert">
             Progreso guardado correctamente.
@@ -301,12 +336,12 @@
             <span th:text="${mensajeSuccess}">Mensaje</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
-        <!-- Header: volver, Progreso, Editar, Eliminar -->
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <a th:href="@{/profesor/{id}(id=${alumno.profesor.id})}" class="btn btn-volver">
-                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
-            </a>
-            <div class="d-flex flex-wrap gap-2">
+
+        <form id="formEliminarAlumno" method="get" th:action="@{/profesor/alumnos/eliminar/{id}(id=${alumno.id})}" class="d-none"></form>
+
+        <!-- Entorno 1 (≥lg): progreso + editar — Eliminar solo al pie; n volver (navegación: barra inferior / panel) -->
+        <div class="d-none d-lg-flex justify-content-end align-items-center mb-4 flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
                 <button th:if="${!alumnoInactivo}" type="button" class="btn btn-success" id="btnProgreso" title="Registrar qué trabajó este alumno (grupos musculares y observaciones)">
                     <i class="fas fa-chart-line me-2"></i>Progreso
                 </button>
@@ -316,10 +351,6 @@
                 <a th:href="@{/profesor/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-warning" title="Editar alumno">
                     <i class="fas fa-edit me-2"></i>Editar
                 </a>
-                <form id="formEliminarAlumno" method="get" th:action="@{/profesor/alumnos/eliminar/{id}(id=${alumno.id})}" class="d-none"></form>
-                <button type="button" class="btn btn-danger" id="btnEliminarAlumno" title="Eliminar alumno">
-                    <i class="fas fa-trash me-2"></i>Eliminar
-                </button>
             </div>
         </div>
 
@@ -360,7 +391,7 @@
         <div class="modal fade" id="modalResumenAsistencias" tabindex="-1" aria-labelledby="modalResumenAsistenciasLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header modal-confirmar-header">
                         <h5 class="modal-title" id="modalResumenAsistenciasLabel">
                             <i class="fas fa-calendar-alt me-2"></i>Resumen mensual de asistencias
                         </h5>
@@ -407,20 +438,77 @@
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer modal-confirmar-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal Progreso -->
+        <!-- Modal detalle rutina (entorno 2: toque en fila de tabla) -->
+        <div class="modal fade" id="modalVerRutinaMobile" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header modal-confirmar-header">
+                        <h5 class="modal-title"><i class="fas fa-dumbbell me-2"></i>Detalle de rutina</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card border-0 shadow-sm mb-3 modal-card-rutina">
+                            <div class="card-body">
+                                <p class="mb-2"><strong>Fecha:</strong> <span id="modalRutinaFecha"></span></p>
+                                <p class="mb-2"><strong>Rutina:</strong> <span id="modalRutinaNombre" class="d-block"></span></p>
+                                <p class="mb-2"><strong>Categorías:</strong> <span id="modalRutinaCategoria" class="d-block small"></span></p>
+                                <p class="mb-2"><strong>Series:</strong> <span id="modalRutinaSeries"></span></p>
+                                <p class="mb-2"><strong>Estado:</strong> <span id="modalRutinaEstado"></span></p>
+                                <p class="mb-0"><strong>Reseña:</strong> <span id="modalRutinaResena" class="d-block small text-muted" style="white-space: pre-wrap;"></span></p>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <a id="modalRutinaBtnEditar" href="#" class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i>Modificar</a>
+                            <a id="modalRutinaBtnVer" href="#" class="btn btn-info btn-sm" target="_blank" rel="noopener"><i class="fas fa-eye me-1"></i>Ver</a>
+                            <button type="button" id="modalRutinaBtnCopiar" class="btn btn-outline-dark btn-sm"><i class="fas fa-link me-1"></i>Copiar enlace</button>
+                            <a id="modalRutinaBtnPausar" href="#" class="btn btn-outline-secondary btn-sm d-none"><i class="fas fa-pause me-1"></i>Pausar</a>
+                            <a id="modalRutinaBtnActivar" href="#" class="btn btn-outline-success btn-sm d-none"><i class="fas fa-play me-1"></i>Activar</a>
+                            <a id="modalRutinaBtnWhatsapp" href="#" class="btn btn-success btn-sm" target="_blank" rel="noopener"><i class="fab fa-whatsapp me-1"></i>WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal detalle fila asistencia / presentismo (entorno 2) -->
+        <div class="modal fade" id="modalVerAsistenciaMobile" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header modal-confirmar-header">
+                        <h5 class="modal-title"><i class="fas fa-calendar-check me-2"></i>Asistencia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2"><strong>Fecha:</strong> <span id="modalAsistFecha"></span></p>
+                        <p class="mb-2" id="modalAsistEstadoWrap"><strong>Estado:</strong> <span id="modalAsistEstado"></span></p>
+                        <p class="mb-2"><strong>Trabajado ese día:</strong></p>
+                        <p class="mb-3 small text-muted" id="modalAsistTrabaj">—</p>
+                        <p class="mb-2"><strong>Profesor:</strong></p>
+                        <div class="mb-3 small" id="modalAsistProfesor">—</div>
+                        <p class="mb-2"><strong>Observaciones:</strong></p>
+                        <p class="mb-0 small text-muted" id="modalAsistObs" style="white-space: pre-wrap;">—</p>
+                    </div>
+                    <div class="modal-footer modal-confirmar-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Progreso (cabecera y pie alineados a MiGymVirtual / modal-confirmar) -->
         <div class="modal fade" id="modalProgreso" tabindex="-1" aria-labelledby="modalProgresoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <div class="modal-header modal-confirmar-header">
                         <h5 class="modal-title" id="modalProgresoLabel"><i class="fas fa-chart-line me-2"></i>Registrar progreso</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form th:action="@{/profesor/alumnos/{id}/progreso(id=${alumno.id})}" method="post">
                         <div class="modal-body">
@@ -431,29 +519,25 @@
                             </div>
                             <div class="mb-3" th:if="${gruposMusculares != null && !gruposMusculares.isEmpty()}">
                                 <label class="form-label">Grupos musculares trabajados</label>
-                                <div class="border rounded p-2" style="max-height: 180px; overflow-y: auto;">
-                                    <div class="row g-1" th:each="g : ${gruposMusculares}">
-                                        <div class="col-12 col-md-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="grupoIds" th:value="${g.id}" th:id="${'grupo-' + g.id}"
-                                                       th:checked="${asistenciaHoy != null && asistenciaHoy.gruposTrabajados != null && #lists.contains(asistenciaHoy.gruposTrabajados.![id], g.id)}">
-                                                <label class="form-check-label" th:for="${'grupo-' + g.id}" th:text="${g.nombre}">Grupo</label>
-                                            </div>
-                                        </div>
+                                <div class="border rounded p-2 d-flex flex-wrap gap-2 gap-md-3 align-items-start" style="max-height: 220px; overflow-y: auto;">
+                                    <div th:each="g : ${gruposMusculares}" class="form-check mb-0" style="min-width: 5.5rem;">
+                                        <input class="form-check-input" type="checkbox" name="grupoIds" th:value="${g.id}" th:id="${'grupo-' + g.id}"
+                                               th:checked="${asistenciaHoy != null && asistenciaHoy.gruposTrabajados != null && #lists.contains(asistenciaHoy.gruposTrabajados.![id], g.id)}">
+                                        <label class="form-check-label" th:for="${'grupo-' + g.id}" th:text="${g.nombre}">Grupo</label>
                                     </div>
                                 </div>
                                 <div class="form-text">Puedes marcar varios (el alumno pudo trabajar distintos grupos ese día). En el historial se mostrarán separados por coma.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="progresoObservaciones" class="form-label">Observaciones</label>
-                                <textarea id="progresoObservaciones" name="observaciones" class="form-control" rows="3" maxlength="2000" placeholder="Ej: Buen ritmo, trabajó bien piernas..."
+                                <textarea id="progresoObservaciones" name="observaciones" class="form-control" rows="3" maxlength="2000" placeholder="Notas u observaciones sobre el entrenamiento..."
                                           th:text="${asistenciaHoy != null && asistenciaHoy.observaciones != null ? asistenciaHoy.observaciones : ''}"></textarea>
                                 <div class="form-text">Máximo 2000 caracteres.</div>
                             </div>
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer modal-confirmar-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Guardar</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Guardar</button>
                         </div>
                     </form>
                 </div>
@@ -531,43 +615,55 @@
         </div>
         <p class="hero-subtitle mb-3 text-center">Información detallada y seguimiento del progreso</p>
 
-        <!-- Tarjetas de vista rápida (colores: alumno=verde, asistencia=celeste, trabajo=violeta, rutinas=amarillo) -->
+        <!-- Tarjetas de acceso rápido (entorno 1: rejilla; entorno 2: una columna) -->
         <div class="stats-grid">
-            <!-- 1) Restricciones médicas (alumnos / salud → verde pastel) -->
+            <div class="stat-item stat-card-datos">
+                <a th:href="@{/profesor/alumnos/editar/{id}(id=${alumno.id})}" class="stat-card-edit" title="Editar alumno"><i class="fas fa-edit"></i></a>
+                <div class="stat-card-title"><i class="fas fa-id-card me-1"></i>Datos personales</div>
+                <div class="stat-card-datos-list">
+                    <p class="mb-1"><strong th:text="${alumno.nombre}">Nombre</strong></p>
+                    <p class="mb-1"><strong>Edad:</strong> <span th:text="${alumno.edad != null ? alumno.edad : '—'}">—</span> años</p>
+                    <p class="mb-1"><strong>Celular:</strong> <span th:text="${alumno.celular != null ? alumno.celular : '—'}">—</span></p>
+                    <p class="mb-0"><strong>Fecha de inicio:</strong>
+                        <span th:text="${alumno.fechaInicio != null ? #temporals.format(alumno.fechaInicio, 'dd/MM/yyyy') : (alumno.fechaAlta != null ? #temporals.format(alumno.fechaAlta, 'dd/MM/yyyy') : '—')}">—</span>
+                    </p>
+                </div>
+            </div>
             <div class="stat-item stat-card-alumno">
                 <div class="stat-card-title"><i class="fas fa-heartbeat me-1"></i>Restricciones médicas</div>
                 <div class="stat-card-content" th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : 'Ninguna'}">Ninguna</div>
             </div>
-            <!-- 2) Asistencia (horarios → celeste) -->
             <div class="stat-item stat-card-asistencia">
-                <div class="stat-card-title"><i class="fas fa-calendar-alt me-1"></i>Asistencia</div>
+                <div class="stat-card-title"><i class="fas fa-calendar-alt me-1"></i>Asistencia programada</div>
                 <div class="stat-card-content">
                     <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL' || #strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}">
                         <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'PRESENCIAL'}">Presencial</span>
                         <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'SEMIPRESENCIAL'}">Semipresencial</span>
                         <span th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}">
-                            <br><span th:text="${#strings.listJoin(alumno.diasHorariosAsistencia.![dia], ', ')}">Lunes, Miércoles</span>
-                            <span th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}" th:text="${' ' + #temporals.format(alumno.diasHorariosAsistencia[0].horaEntrada, 'HH:mm') + ' hs'}"> 18:00 hs</span>
+                            <br><span class="small" th:text="${#strings.listJoin(alumno.diasHorariosAsistencia.![dia], ', ')}">Días</span>
+                            <span class="small" th:if="${alumno.diasHorariosAsistencia != null && !alumno.diasHorariosAsistencia.isEmpty()}" th:text="${' · ' + #temporals.format(alumno.diasHorariosAsistencia[0].horaEntrada, 'HH:mm') + ' hs'}">hora</span>
                         </span>
                     </span>
                     <span th:if="${#strings.toString(alumno.tipoAsistencia) == 'ONLINE' || #strings.toString(alumno.tipoAsistencia) == 'VIRTUAL'}">Virtual</span>
-                    <span th:if="${alumno.tipoAsistencia == null}">-</span>
+                    <span th:if="${alumno.tipoAsistencia == null}">—</span>
                 </div>
             </div>
-            <!-- 3) Último trabajo (series/ejercicios → violeta) -->
-            <div class="stat-item stat-card-trabajo">
-                <div class="stat-card-title"><i class="fas fa-dumbbell me-1"></i>Último trabajo</div>
+            <div th:if="${!alumnoInactivo}" class="stat-item stat-card-trabajo stat-card-progreso-clic" data-bs-toggle="modal" data-bs-target="#modalProgreso" role="button" tabindex="0">
+                <div class="stat-card-title"><i class="fas fa-chart-line me-1"></i>Progreso del alumno</div>
                 <div class="stat-card-content">
-                    <th:block th:if="${historialAsistencia != null && !historialAsistencia.isEmpty()}" th:with="ultima=${historialAsistencia[0]}, obs=${historialAsistencia[0].observaciones != null && !historialAsistencia[0].observaciones.isEmpty() ? (#strings.length(historialAsistencia[0].observaciones) > 60 ? #strings.substring(historialAsistencia[0].observaciones, 0, 60) + '...' : historialAsistencia[0].observaciones) : '-'}">
-                        <span th:text="${#temporals.format(ultima.fecha, 'dd/MM/yyyy')}">-</span>
-                        <span th:if="${ultima.gruposTrabajados != null && !ultima.gruposTrabajados.isEmpty()}" th:text="${' · ' + #strings.listJoin(ultima.gruposTrabajados, ', ')}">-</span>
-                        <br>
-                        <span class="text-muted small" th:title="${ultima.observaciones}" th:text="${obs}">-</span>
+                    <th:block th:if="${historialAsistencia != null && !historialAsistencia.isEmpty()}" th:with="ultima=${historialAsistencia[0]}, obs=${historialAsistencia[0].observaciones != null && !historialAsistencia[0].observaciones.isEmpty() ? (#strings.length(historialAsistencia[0].observaciones) > 60 ? #strings.substring(historialAsistencia[0].observaciones, 0, 60) + '...' : historialAsistencia[0].observaciones) : '—'}">
+                        <span class="text-muted small">Último registro</span><br>
+                        <span th:text="${#temporals.format(ultima.fecha, 'dd/MM/yyyy')}">—</span>
+                        <span th:if="${ultima.gruposTrabajados != null && !ultima.gruposTrabajados.isEmpty()}" th:text="${' · ' + #strings.listJoin(ultima.gruposTrabajados, ', ')}"></span>
+                        <br><span class="text-muted small" th:text="${obs}">—</span>
                     </th:block>
-                    <span th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}" class="text-muted">Sin registros</span>
+                    <span th:if="${historialAsistencia == null || historialAsistencia.isEmpty()}" class="text-muted small">Sin registros. Tocá para cargar progreso / observaciones.</span>
                 </div>
             </div>
-            <!-- 4) Rutinas asignadas (rutinas → amarillo, clic → asignar; deshabilitado si inactivo) -->
+            <div th:if="${alumnoInactivo}" class="stat-item stat-card-trabajo stat-item-link-disabled">
+                <div class="stat-card-title"><i class="fas fa-chart-line me-1"></i>Progreso del alumno</div>
+                <div class="stat-card-content text-muted small">Activá el alumno para registrar progreso.</div>
+            </div>
             <a th:if="${!alumnoInactivo}" th:href="@{/profesor/asignar-rutina/{id}(id=${alumno.id})}" class="stat-item stat-item-link stat-card-rutinas text-decoration-none d-block">
                 <div class="stat-number" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
                 <div class="stat-label">Rutinas asignadas</div>
@@ -580,38 +676,33 @@
             </div>
         </div>
 
-        <!-- Datos personales del alumno (una sola tarjeta) -->
+        <!-- Más datos (complemento a la tarjeta; sin duplicar restricciones) -->
         <div class="alumno-info">
             <div class="row align-items-start">
-                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
-                    <h4 class="mb-3">
-                        <i class="fas fa-user me-2"></i>
-                        <span th:text="${alumno.nombre}">Nombre del Alumno</span>
-                    </h4>
-                    <p class="mb-1"><strong>Edad:</strong> <span th:text="${alumno.edad}">Edad</span> años</p>
-                    <p class="mb-1"><strong>Sexo:</strong> <span th:text="${alumno.sexo}">Sexo</span></p>
-                    <p class="mb-1"><strong>Email:</strong> <span th:text="${alumno.correo != null && !alumno.correo.isEmpty() ? alumno.correo : '-'}">-</span></p>
-                    <p class="mb-0"><strong>Celular:</strong> <span th:text="${alumno.celular != null ? alumno.celular : '-'}">-</span></p>
+                <div class="col-lg-4 col-md-6 mb-3 mb-md-0">
+                    <p class="mb-1"><strong>Email:</strong> <span th:text="${alumno.correo != null && !alumno.correo.isEmpty() ? alumno.correo : '—'}">—</span></p>
+                    <p class="mb-1"><strong>Sexo:</strong> <span th:text="${alumno.sexo != null ? alumno.sexo : '—'}">—</span></p>
+                    <p class="mb-0"><strong>Contacto de emergencia:</strong>
+                        <span th:text="${alumno.contactoEmergenciaNombre != null ? alumno.contactoEmergenciaNombre + ' (' + (alumno.contactoEmergenciaTelefono != null ? alumno.contactoEmergenciaTelefono : '') + ')' : '—'}">—</span>
+                    </p>
                 </div>
-                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
-                    <p class="mb-1"><strong>Fecha de Inicio:</strong> <span th:text="${alumno.fechaInicio != null ? #temporals.format(alumno.fechaInicio, 'dd/MM/yyyy') : '-'}">-</span></p>
-                    <p class="mb-0"><strong>Contacto de Emergencia:</strong> <span th:text="${alumno.contactoEmergenciaNombre != null ? alumno.contactoEmergenciaNombre + ' (' + alumno.contactoEmergenciaTelefono + ')' : '-'}">-</span></p>
+                <div class="col-lg-4 col-md-6 mb-3 mb-md-0">
+                    <p class="mb-1"><strong>Historial de estado</strong></p>
+                    <p class="mb-0 small" th:text="${historialEstadoFormateado != null && !historialEstadoFormateado.isEmpty() ? historialEstadoFormateado : (alumno.historialEstado != null ? alumno.historialEstado : '—')}">—</p>
                 </div>
-                <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
-                    <p class="mb-1"><strong>Restricciones Médicas:</strong> <span th:text="${alumno.restriccionesMedicas != null && !alumno.restriccionesMedicas.isEmpty() ? alumno.restriccionesMedicas : '-'}">-</span></p>
-                    <p class="mb-1"><strong>Historial de Estado:</strong></p>
-                    <p class="mb-1 small" th:text="${historialEstadoFormateado != null && !historialEstadoFormateado.isEmpty() ? historialEstadoFormateado : (alumno.historialEstado != null ? alumno.historialEstado : '-')}">-</p>
-                    <p class="mb-0"><strong>Objetivos:</strong> <span class="small" th:text="${alumno.objetivosPersonales != null && !alumno.objetivosPersonales.isEmpty() ? alumno.objetivosPersonales : '-'}">-</span></p>
+                <div class="col-lg-4 col-md-12 mb-0">
+                    <p class="mb-1"><strong>Objetivos personales</strong></p>
+                    <p class="mb-0 small" th:text="${alumno.objetivosPersonales != null && !alumno.objetivosPersonales.isEmpty() ? alumno.objetivosPersonales : '—'}">—</p>
                 </div>
             </div>
         </div>
 
-        <!-- Últimos 5 asistencias/ausencias -->
-        <div class="info-card">
+        <!-- Últimos 5 asistencias/ausencias (en móvil: columnas compactas; toque en fila = modal detalle) -->
+        <div class="info-card info-card-asistencias">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div>
-                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Últimos 5 asistencias/ausencias</h5>
-                    <p class="mb-0 small opacity-90">Para ver más, usá el botón <strong>Consultar asistencias</strong> (por mes).</p>
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Presentismo · últimas asistencias</h5>
+                    <p class="mb-0 small opacity-90">Resumen rápido. <strong>Consultar asistencias</strong> para ver por mes.</p>
                 </div>
                 <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalResumenAsistencias">
                     Consultar asistencias
@@ -625,13 +716,19 @@
                                 <th>Fecha</th>
                                 <th>Estado</th>
                                 <th>Trabajado ese día</th>
-                                <th>Profesor</th>
-                                <th>Observaciones</th>
+                                <th class="col-asist-profesor">Profesor</th>
+                                <th class="col-asist-obs">Observaciones</th>
                             </tr>
                         </thead>
                         <tbody id="historialAsistenciaBody">
                             <tr th:each="asistencia : ${historialAsistencia}"
-                                th:attr="data-fecha=${#temporals.format(asistencia.fecha, 'yyyy-MM-dd')}, data-presente=${asistencia.presente}">
+                                class="asistencia-row-clickable"
+                                th:attr="data-fecha=${#temporals.format(asistencia.fecha, 'yyyy-MM-dd')}, data-presente=${asistencia.presente},
+                                         data-fecha-show=${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')},
+                                         data-pendiente=${asistencia.pendiente},
+                                         data-trabajado=${asistencia.gruposTrabajados != null && !asistencia.gruposTrabajados.isEmpty() ? #strings.listJoin(asistencia.gruposTrabajados, ', ') : ''},
+                                         data-profesor=${asistencia.registradoPorNombre != null ? asistencia.registradoPorNombre : ''},
+                                         data-obs=${asistencia.observaciones != null ? asistencia.observaciones : ''}">
                                 <td th:text="${#temporals.format(asistencia.fecha, 'dd/MM/yyyy')}">Fecha</td>
                                 <td>
                                     <span th:if="${asistencia.pendiente}" class="badge bg-secondary">Pendiente</span>
@@ -669,7 +766,7 @@
         </div>
 
         <!-- Últimas 3 rutinas -->
-        <div class="info-card">
+        <div class="info-card rutinas-asignadas-card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-dumbbell me-2"></i>Últimas 3 rutinas</h5>
                 <p class="mb-0 small opacity-90">Para ver todas las asignaciones, usá <strong>Mis asignaciones</strong> en el panel del profesor.</p>
@@ -694,27 +791,49 @@
                     <h6>Sin rutinas asignadas</h6>
                     <p class="text-muted">Todavía no hay rutinas asignadas a este alumno.</p>
                 </div>
-                <div th:if="${rutinasAsignadas != null && !rutinasAsignadas.isEmpty()}" class="table-responsive">
-                    <table class="table table-sm table-hover align-middle">
+                <div th:if="${rutinasAsignadas != null && !rutinasAsignadas.isEmpty()}" class="table-responsive mgv-scroll-panel">
+                    <table class="table table-sm table-hover align-middle" id="tablaRutinasAlumno">
                         <thead class="table-light">
                             <tr>
                                 <th>Fecha</th>
                                 <th>Rutina</th>
                                 <th>Categoría</th>
-                                <th>Series</th>
+                                <th class="col-rutina-series">Series</th>
                                 <th>Estado</th>
-                                <th>Reseña</th>
-                                <th class="text-center">Acciones</th>
+                                <th class="col-rutina-resena">Reseña</th>
+                                <th class="text-center col-rutina-acciones">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="rutina : ${rutinasAsignadas}">
-                                <td th:text="${rutina.fechaCreacion != null ? #temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy') : 'Sin fecha'}">Fecha</td>
-                                <td><span th:attr="title=${rutina.nombre}" th:text="${#strings.abbreviate(rutina.nombre, 22)}">Nombre</span></td>
+                            <tr th:each="rutina : ${rutinasAsignadas}" class="rutina-row-clickable align-middle"
+                                th:attr="data-fecha=${rutina.fechaCreacion != null ? #temporals.format(rutina.fechaCreacion, 'dd/MM/yy') : 'Sin fecha'},
+                                        data-nombre=${rutina.nombre},
+                                        data-categoria=${(rutina.categoriasList != null and !rutina.categoriasList.isEmpty()) ? #strings.listJoin(rutina.categoriasList, ', ') : (rutina.categoria != null ? rutina.categoria : '')},
+                                        data-series=${rutina.series != null ? rutina.series.size() : 0},
+                                        data-estado=${rutina.estado != null ? rutina.estado : 'ACTIVA'},
+                                        data-resena=${rutina.notaParaAlumno != null ? rutina.notaParaAlumno : ''},
+                                        data-token=${rutina.tokenPublico},
+                                        data-url-editar=@{/rutinas/editar/{id}(id=${rutina.id}, alumnoId=${alumno.id})},
+                                        data-url-ver=@{/rutinas/ver/{id}(id=${rutina.id})},
+                                        data-url-hoja=@{/rutinas/hoja/{token}(token=${rutina.tokenPublico})},
+                                        data-url-pausar=@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutina.id}, estado='INACTIVA', tab='alumno', alumnoId=${alumno.id})},
+                                        data-url-activar=@{/rutinas/cambiar-estado-asignacion/{id}(id=${rutina.id}, estado='ACTIVA', tab='alumno', alumnoId=${alumno.id})},
+                                        data-phone=${alumno.celular != null ? alumno.celular : ''},
+                                        data-alumno-inactivo=${alumnoInactivo}">
+                                <td class="text-nowrap" th:text="${rutina.fechaCreacion != null ? #temporals.format(rutina.fechaCreacion, 'dd/MM/yy') : 'Sin fecha'}">Fecha</td>
+                                <td><span class="rutina-nombre-movil d-inline-block" th:attr="title=${rutina.nombre}" th:text="${#strings.abbreviate(rutina.nombre, 20)}">Nombre</span></td>
                                 <td>
-                                    <span class="badge bg-secondary" th:attr="title=${rutina.categoria}" th:text="${rutina.categoria != null ? #strings.abbreviate(rutina.categoria, 12) : '—'}">—</span>
+                                    <span class="d-none d-md-inline">
+                                        <th:block th:if="${rutina.categoriasList != null && !rutina.categoriasList.isEmpty()}">
+                                            <span th:each="cat : ${rutina.categoriasList}" class="badge bg-secondary me-1" th:text="${cat}">—</span>
+                                        </th:block>
+                                        <span th:if="${rutina.categoriasList == null || rutina.categoriasList.isEmpty()}" class="text-muted small">—</span>
+                                    </span>
+                                    <span class="d-inline d-md-none rutina-categoria-movil text-muted small"
+                                          th:attr="title=${(rutina.categoriasList != null && !rutina.categoriasList.isEmpty()) ? #strings.listJoin(rutina.categoriasList, ', ') : (rutina.categoria != null ? rutina.categoria : '')}"
+                                          th:text="${(rutina.categoriasList != null && !rutina.categoriasList.isEmpty()) ? #strings.abbreviate(#strings.listJoin(rutina.categoriasList, ', '), 14) : (rutina.categoria != null ? #strings.abbreviate(rutina.categoria, 14) : '—')}">—</span>
                                 </td>
-                                <td>
+                                <td class="col-rutina-series">
                                     <span class="badge bg-info" th:text="${rutina.series != null ? rutina.series.size() : 0}">0</span>
                                 </td>
                                 <td>
@@ -722,11 +841,11 @@
                                     <i th:if="${rutina.estado == 'INACTIVA'}" class="fas fa-pause-circle text-secondary" title="Inactiva"></i>
                                     <i th:if="${rutina.estado != null && rutina.estado != 'ACTIVA' && rutina.estado != 'INACTIVA'}" class="fas fa-circle text-muted" th:attr="title=${rutina.estado}"></i>
                                 </td>
-                                <td class="small text-muted" style="max-width: 180px;">
+                                <td class="small text-muted col-rutina-resena" style="max-width: 180px;">
                                     <span th:if="${rutina.notaParaAlumno != null && !#strings.isEmpty(rutina.notaParaAlumno)}" class="d-block text-truncate" th:attr="title=${rutina.notaParaAlumno}" th:text="${#strings.abbreviate(rutina.notaParaAlumno, 50)}">Reseña</span>
                                     <span th:if="${rutina.notaParaAlumno == null || #strings.isEmpty(rutina.notaParaAlumno)}" class="fst-italic">—</span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center col-rutina-acciones">
                                     <div class="d-flex flex-wrap gap-1 justify-content-center">
                                     <a th:if="${!alumnoInactivo}" th:href="@{/rutinas/editar/{id}(id=${rutina.id}, alumnoId=${alumno.id})}" class="btn btn-warning btn-sm py-1 px-2" title="Editar rutina (incluye nota para el alumno)">
                                         <i class="fas fa-edit"></i>
@@ -769,7 +888,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted small mb-2">Escribí notas sobre este alumno. Solo vos las ves. Se guardan al hacer clic en "Guardar notas".</p>
-                <form th:action="@{/profesor/alumnos/{id}/notas(id=${alumno.id})}" method="post" class="mb-0">
+                <form th:action="@{/profesor/alumnos/{id}/notas(id=${alumno.id})}" method="post" class="mb-0 notas-profesor-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <textarea class="form-control" rows="4" name="notasProfesor" id="notasProfesor"
                               placeholder="Ej: Buena predisposición, trabaja bien piernas, recordar estirar..."
@@ -779,6 +898,15 @@
                         <a th:href="@{/profesor/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-outline-secondary">Editar alumno completo</a>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Eliminar usuario (pie de página; entorno 2 alineado a MiGymVirtual) -->
+        <div class="ficha-pie-acciones mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-center justify-content-lg-end">
+                <button type="button" class="btn btn-danger px-4" id="btnEliminarAlumno" title="Eliminar alumno">
+                    <i class="fas fa-trash me-2"></i>Eliminar usuario
+                </button>
             </div>
         </div>
     </div>
@@ -791,10 +919,10 @@
     <script th:inline="javascript">
         var isAdminUsuario = /*[[${#authentication.principal != null and (#authentication.principal.rol == 'ADMIN' or #authentication.principal.rol == 'DEVELOPER')}]]*/ false;
         var currentUserId = /*[[${#authentication.principal != null ? #authentication.principal.id : 0}]]*/ 0;
-        var currentUserName = '[[${#authentication.principal != null ? #authentication.principal.nombre : ''}]]';
+        var currentUserName = /*[[${#authentication.principal != null ? #authentication.principal.nombre : ''}]]*/ '';
         var usuariosSistema = [
             /*[# th:each="u,stat : ${usuariosSistema}"]*/
-            { id: [[${u.id}]], nombre: '[[${u.nombre}]]' }/*[[${stat.last} ? '' : ',' ]]*/
+            { id: /*[[${u.id}]]*/ 0, nombre: /*[[${u.nombre}]]*/ '' }/*[[${stat.last} ? '' : ',' ]]*/
             /*[/]*/
         ];
     </script>
@@ -856,14 +984,131 @@
                 });
             }
 
+            function initRutinaMobileModalAlumno() {
+                var modal = document.getElementById('modalVerRutinaMobile');
+                if (!modal || typeof bootstrap === 'undefined') return;
+                var modalEl = new bootstrap.Modal(modal);
+                var spanFecha = document.getElementById('modalRutinaFecha');
+                var spanNombre = document.getElementById('modalRutinaNombre');
+                var spanCategoria = document.getElementById('modalRutinaCategoria');
+                var spanSeries = document.getElementById('modalRutinaSeries');
+                var spanEstado = document.getElementById('modalRutinaEstado');
+                var spanResena = document.getElementById('modalRutinaResena');
+                var btnEditar = document.getElementById('modalRutinaBtnEditar');
+                var btnVer = document.getElementById('modalRutinaBtnVer');
+                var btnCopiar = document.getElementById('modalRutinaBtnCopiar');
+                var btnPausar = document.getElementById('modalRutinaBtnPausar');
+                var btnActivar = document.getElementById('modalRutinaBtnActivar');
+                var btnWhatsapp = document.getElementById('modalRutinaBtnWhatsapp');
+                document.querySelectorAll('#tablaRutinasAlumno .rutina-row-clickable').forEach(function(row) {
+                    row.addEventListener('click', function(e) {
+                        if (window.innerWidth > 991) return;
+                        if (e.target.closest('a') || e.target.closest('button')) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var inactivo = row.getAttribute('data-alumno-inactivo') === 'true';
+                        var fecha = row.getAttribute('data-fecha') || '—';
+                        var nombre = row.getAttribute('data-nombre') || '—';
+                        var categoria = row.getAttribute('data-categoria') || '—';
+                        var series = row.getAttribute('data-series') || '0';
+                        var estado = row.getAttribute('data-estado') || 'ACTIVA';
+                        var resena = row.getAttribute('data-resena') || '—';
+                        var token = row.getAttribute('data-token') || '';
+                        var urlEditar = row.getAttribute('data-url-editar') || '#';
+                        var urlVer = row.getAttribute('data-url-ver') || '#';
+                        var urlHoja = row.getAttribute('data-url-hoja') || '';
+                        var urlPausar = row.getAttribute('data-url-pausar') || '#';
+                        var urlActivar = row.getAttribute('data-url-activar') || '#';
+                        var phone = row.getAttribute('data-phone') || '';
+                        spanFecha.textContent = fecha;
+                        spanNombre.textContent = nombre;
+                        spanCategoria.textContent = categoria || '—';
+                        spanSeries.textContent = series;
+                        spanEstado.innerHTML = estado === 'INACTIVA' ? '<i class="fas fa-pause-circle text-secondary"></i> Inactiva' : '<i class="fas fa-circle-check text-success"></i> Activa';
+                        spanResena.textContent = resena || '—';
+                        btnEditar.href = urlEditar;
+                        btnVer.href = urlVer;
+                        btnPausar.href = urlPausar;
+                        btnActivar.href = urlActivar;
+                        if (inactivo) {
+                            btnEditar.classList.add('disabled', 'pe-none');
+                            btnVer.classList.add('disabled', 'pe-none');
+                            btnCopiar.disabled = true;
+                            btnPausar.classList.add('disabled', 'pe-none');
+                            btnActivar.classList.add('disabled', 'pe-none');
+                            btnWhatsapp.classList.add('disabled', 'pe-none');
+                        } else {
+                            btnEditar.classList.remove('disabled', 'pe-none');
+                            btnVer.classList.remove('disabled', 'pe-none');
+                            btnCopiar.disabled = false;
+                            btnPausar.classList.remove('disabled', 'pe-none');
+                            btnActivar.classList.remove('disabled', 'pe-none');
+                            btnWhatsapp.classList.remove('disabled', 'pe-none');
+                        }
+                        btnPausar.classList.toggle('d-none', estado === 'INACTIVA' || inactivo);
+                        btnActivar.classList.toggle('d-none', estado !== 'INACTIVA' || inactivo);
+                        var origin = window.location.origin;
+                        var fullUrl = (urlHoja && urlHoja.indexOf('/') === 0) ? origin + urlHoja : (token ? origin + '/rutinas/hoja/' + token : '');
+                        var mensaje = encodeURIComponent('Rutina: ' + (fullUrl || ''));
+                        var phoneNum = (phone + '').replace(/[^\d]/g, '');
+                        btnWhatsapp.href = phoneNum ? ('https://wa.me/' + phoneNum + '?text=' + mensaje) : ('https://wa.me/?text=' + mensaje);
+                        btnCopiar.onclick = function(ev) {
+                            ev.preventDefault();
+                            if (inactivo || !fullUrl) return;
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(fullUrl).then(function() {
+                                    if (typeof window.mostrarAlertaAlumnoDetalle === 'function') window.mostrarAlertaAlumnoDetalle('Enlace copiado.');
+                                });
+                            }
+                        };
+                        modalEl.show();
+                    });
+                });
+            }
+
+            function initAsistenciaHistorialMobileModal() {
+                var modal = document.getElementById('modalVerAsistenciaMobile');
+                var tbody = document.getElementById('historialAsistenciaBody');
+                if (!modal || !tbody || typeof bootstrap === 'undefined') return;
+                var modalEl = new bootstrap.Modal(modal);
+                tbody.addEventListener('click', function(e) {
+                    var row = e.target.closest('.asistencia-row-clickable');
+                    if (!row) return;
+                    if (window.innerWidth > 991) return;
+                    if (e.target.closest('select') || e.target.closest('option')) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var fecha = row.getAttribute('data-fecha-show') || '—';
+                    var pendiente = row.getAttribute('data-pendiente') === 'true';
+                    var presenteStr = row.getAttribute('data-presente');
+                    var trab = row.getAttribute('data-trabajado') || '—';
+                    var profe = row.getAttribute('data-profesor') || '—';
+                    var obs = row.getAttribute('data-obs') || '—';
+                    document.getElementById('modalAsistFecha').textContent = fecha;
+                    var estadoHtml = '';
+                    if (pendiente) estadoHtml = '<span class="badge bg-secondary">Pendiente</span>';
+                    else if (presenteStr === 'true') estadoHtml = '<span class="badge bg-success">Presente</span>';
+                    else estadoHtml = '<span class="badge bg-danger">Ausente</span>';
+                    document.getElementById('modalAsistEstado').innerHTML = estadoHtml;
+                    document.getElementById('modalAsistTrabaj').textContent = trab || '—';
+                    document.getElementById('modalAsistProfesor').textContent = profe || '—';
+                    document.getElementById('modalAsistObs').textContent = obs || '—';
+                    modalEl.show();
+                });
+            }
+
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
                     initCopiarEnlace();
                     initWhatsApp();
+                    initRutinaMobileModalAlumno();
+                    initAsistenciaHistorialMobileModal();
                 });
             } else {
                 initCopiarEnlace();
                 initWhatsApp();
+                initRutinaMobileModalAlumno();
+                initAsistenciaHistorialMobileModal();
             }
         })();
 

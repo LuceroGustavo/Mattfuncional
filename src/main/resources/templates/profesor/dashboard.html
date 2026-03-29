@@ -16,6 +16,8 @@
             background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
             min-height: 100vh;
         }
+        /* Sin footer de marca (barra inferior / panel ya ocupan el contexto) */
+        body.panel-profesor-body footer.footer { display: none !important; }
         .dashboard-cards {
             gap: 2rem;
         }
@@ -428,7 +430,7 @@
         }
     </style>
 </head>
-<body>
+<body class="panel-profesor-body">
     <div th:replace="fragments/navbar :: navbar"></div>
 
     <div class="container-fluid py-4 px-4" style="background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh;">

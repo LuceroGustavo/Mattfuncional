@@ -98,4 +98,4 @@ Cuando confirmes qué querés borrar, se puede ejecutar solo eso y dejar el rest
 - **Enlaces a editar:** desde `profesor/alumno-detalle.html` (botones “Editar alumno” / “Editar alumno completo”).
 - **Calendario semanal profesor:** en vista ≤992px, encabezados de día abreviados y columnas equilibradas (`DiaSemana.getAbrevCalendario()` + CSS en `calendario/semanal-profesor.html`).
 
-Para el detalle de vistas MiGymVirtual y seguimiento visual, ver también **PLAN_MODIFICACION_VISTAS.md** (§4.2.1).
+Para el detalle de vistas MiGymVirtual y seguimiento visual, ver también **PLAN_MODIFICACION_VISTAS.md** (§4.2.1), incluida la **ficha del alumno** (`profesor/alumno-detalle.html`), marcada como **completa** allí (Mar 2026), y el panel con footer de marca oculto.
