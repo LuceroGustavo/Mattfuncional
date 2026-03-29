@@ -128,6 +128,27 @@
   color: #fff;
 }
 
+/* Modal detalle rutina (panel): tarjeta tono rutinas (MiGymVirtual) */
+.modal-card-rutina {
+  background: linear-gradient(135deg, #fff9c4 60%, #ffe082 100%);
+  border: 2px solid #ffb74d;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(230, 81, 0, 0.15);
+}
+.modal-card-rutina .card-title {
+  color: #e65100;
+}
+
+/* Entorno 2: scroll interno en tablas de lectura del panel (alineado a GUIA MiGym) */
+@media (max-width: 991px) {
+  .table-responsive.mgv-scroll-panel {
+    max-height: min(72vh, 34rem);
+    overflow-y: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Alertas con estilo Mattfuncional */
 .alert-mattfuncional {
   border-radius: 0.75rem;

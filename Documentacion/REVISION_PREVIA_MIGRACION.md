@@ -29,6 +29,7 @@ Mattfuncional/
 - LEEME_PRIMERO.md  
 - PENDIENTES_FINALES.md  
 - PLAN_DE_DESARROLLO_UNIFICADO.md  
+- PLAN_MODIFICACION_VISTAS.md — alineación responsive/paleta con MiGymVirtual; **registro vivo** del trabajo en §4.2.1 (no duplicar en otros .md salvo acuerdo).  
 - servidor/DESPLIEGUE-SERVIDOR.md  
 - servidor/nginx-detodoya.conf  
 

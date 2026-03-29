@@ -96,9 +96,49 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
   - **Conservar** la columna / lógica de **presentismo** y enlaces a flujos de asistencia.
   - **Sí aplicar:** formatos de **botones**, **badges**, **card** del filtro donde no pisen la lógica de días/horarios, y responsive de tabla (popover móvil, columnas ocultas, etc.) según `GUIA_RESPONSIVE.md` §5 y §5.1.
 
-### 4.2.1 Avance entorno 2 (28/03/2026)
+### 4.2.1 Registro de implementación (entorno 1 / 2)
 
-Hecho en código: **Alumnos** (columnas móvil, clic en fila, filtros en dos filas), **Series** (filtro, tabla móvil 3 columnas, modal detalle + acciones, estilos de botones del modal en `style.css`). Detalle en **`Documentacion/AVANCE_RESPONSIVE_ENTORNO2.md`**. Pendiente en esta fase: **Rutinas** y **Asignaciones** al mismo patrón que la referencia.
+**Convención:** Ir documentando solo en **este archivo** (`PLAN_MODIFICACION_VISTAS.md`), ampliando §4.2.1 y el estado de fases, para no multiplicar documentos.
+
+**Terminología:** Entorno 1 ≈ escritorio (≥992px); entorno 2 ≈ móvil (≤991px en panel). Referencia: `APP referencia/Migymvirtual/`.
+
+#### Login (`templates/login.html`)
+
+- `viewport`, `100dvh`, `safe-area`, padding responsive; toggle contraseña y `autocomplete` en campos.
+- Fondo degradado (sin depender de `/img/login.jpeg` en repo).
+
+#### Navbar (`templates/fragments/navbar.html`)
+
+- Entorno 2: barra compacta tipo referencia (logo + marca, sobre consultas en recuadro, texto de rol, **Salir**); ocultos Volver, panel, bloque nombre/correo y avatar.
+- Enlaces de marca según sesión/rol (`sec:authorize` + `th:if` / `th:unless`).
+
+#### `static/style.css`
+
+- ≤576px: `.modal-confirmar-footer` en columna y botones anchos (confirmaciones genéricas).
+- Excepción `#modalVerSerieMobile`: pie en fila, botones proporcionados; colores pastel para acciones del modal serie.
+- `.modal-card-rutina`: tarjeta del modal de detalle de rutina.
+- `.table-responsive.mgv-scroll-panel` (≤991px): scroll interno en tablas de lectura del panel.
+
+#### Pestaña **Mis Alumnos** (`profesor/dashboard.html`)
+
+- Entorno 2: columnas visibles **Nombre, Edad, Estado, Presente**; resto oculto hasta `lg`.
+- Clic en fila → detalle (`data-alumno-href` + delegación en `tbody`); no navega si el clic es en enlace o botón (p. ej. presentismo).
+- Filtros móvil: Estado + Tipo en una fila; Día + Horario en otra.
+
+#### Pestaña **Mis Series**
+
+- Card filtro buscar + Limpiar violeta; `#tablaSeries`; datos en `data-*` por fila.
+- Entorno 2: sin columna Acciones; fila abre `#modalVerSerieMobile`; Ver en móvil misma pestaña.
+
+#### Pestaña **Mis Rutinas**
+
+- **Categorías** + **Nueva Rutina**; card filtro (amarillo rutina) + Limpiar.
+- Tabla sin columna ID; categorías como badges; entorno 2 sin descripción ni acciones en tabla → `#modalVerRutinaMobile` (`.modal-card-rutina`); Ver en móvil misma pestaña.
+- Tabla con `mgv-scroll-panel` donde aplica.
+
+#### Pendiente en fase 2.4
+
+- **Asignaciones:** misma línea que referencia MiGym (filtro en card, columnas y modal en móvil).
 
 ### 4.3 Detalle de alumno
 
@@ -109,6 +149,7 @@ Cuando se aborde la ficha, usar como guía `profesor/alumno-detalle.html` de la 
 ## 5. Seguimiento
 
 - Ir cerrando **sub-bloques** (p. ej. “2.1 tarjetas escritorio”, “2.1 móvil”, “2.1 ejercicios+admin colores”) y compilar / probar en navegador real y tamaño móvil.
+- **Documentación del plan de vistas:** actualizar **solo** este `PLAN_MODIFICACION_VISTAS.md` (estados de fase y §4.2.1), no crear archivos nuevos en `Documentacion/` salvo decisión explícita del proyecto.
 - Opcional: añadir filas en `MEJORAS_DESDE_MIGYMVIRTUAL.md` por cada bloque de vistas completado.
 
 ---
