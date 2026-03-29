@@ -763,12 +763,22 @@
         </div>
 
         <!-- Notas Privadas del Profesor -->
-        <div class="info-card">
+        <div class="info-card" id="notas-profesor">
             <div class="card-header">
                 <h5><i class="fas fa-sticky-note me-2"></i>Notas Privadas del Profesor</h5>
             </div>
             <div class="card-body">
-                <textarea class="form-control" rows="3" placeholder="Escribe notas privadas sobre el alumno... Solo visible para el profesor."></textarea>
+                <p class="text-muted small mb-2">Escribí notas sobre este alumno. Solo vos las ves. Se guardan al hacer clic en "Guardar notas".</p>
+                <form th:action="@{/profesor/alumnos/{id}/notas(id=${alumno.id})}" method="post" class="mb-0">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <textarea class="form-control" rows="4" name="notasProfesor" id="notasProfesor"
+                              placeholder="Ej: Buena predisposición, trabaja bien piernas, recordar estirar..."
+                              th:text="${alumno.notasProfesor != null ? alumno.notasProfesor : ''}"></textarea>
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Guardar notas</button>
+                        <a th:href="@{/profesor/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-outline-secondary">Editar alumno completo</a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
