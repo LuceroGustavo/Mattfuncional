@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** + **crear/modificar serie** + **crear rutina** (`/rutinas/crear`) | **Estado:** pestañas, serie y **crear rutina** alineados a referencia donde aplica (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3; **modificar rutina** (`editarRutina`) pendiente de misma UX tabla/modal si se desea. |
+| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** (`/profesor/rutinas/ver/{id}`, `/rutinas/hoja/{token}`) | **Estado:** ver §4.2.1 (incl. hoja de rutina y **ver serie**). Siguiente: §2.2–2.3; **editar rutina** tabla/modal opcional. |
 
 ---
 
@@ -165,6 +165,20 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - **Datos:** `SerieRepository.findByProfesorIdWithSerieEjercicios` + servicio expuesto para poblar tabla/modal sin N+1; `RutinaControlador` GET crear y reintento tras error de categorías usan esa carga.
 - **Navegación `volver`:** `SerieController` acepta `volver` en `GET /series/ver/{id}` y `GET /series/editar/{id}`; desde el modal, enlaces con `?volver=/rutinas/crear`. **`verSerie.html`:** barra **Volver** al valor de `volver` o **Volver al panel** a `dashboard?tab=series`. Edición de serie sigue usando `volverUrl` en `crearSerie.html` para regresar a crear rutina.
 - **Nota:** **Modificar rutina** (`rutinas/editarRutina.html`) aún usa tarjetas para series nuevas; unificar a tabla+modal es trabajo aparte.
+
+#### Vista **hoja de rutina** (`rutinas/verRutina.html`) — **completo (Mar 2026)**
+
+- **Rutas:** `GET /profesor/rutinas/ver/{id}` (`ProfesorController`, vista privada profesor) y `GET /rutinas/hoja/{token}` (`RutinaControlador`, enlace alumno); **misma plantilla** Thymeleaf.
+- **Modelo:** `esVistaEscritorio = false` también para el profesor (antes `true` forzaba 3 columnas en móvil y rompía la paridad con la hoja del alumno).
+- **Cabecera** alineada a MiGymVirtual: primera fila **logo + marca** | **fecha**; segunda fila **nombre de la rutina** a ancho completo, centrado, verde `#7ee787`.
+- **Bloques (series):** colores por índice con clases **`serie-bloque-0` … `serie-bloque-5`** (`th:classappend` con `serieStat.index % 6`), no `:nth-child` sobre el contenedor — así el primer bloque sigue naranja aunque exista **reseña del profesor** arriba. Borde, punto y texto **vueltas** comparten el color del bloque; nombre de serie y vueltas con **ellipsis** si hace falta.
+- **Entorno 2 (≤991px):** ejercicios en **una sola columna**, **uno debajo del otro** (lista vertical como referencia; sin carrusel horizontal). Título de ejercicio hasta **2 líneas** (`line-clamp`); tarjetas a **ancho completo**; altura de área de imagen coherente con escritorio.
+- **Entorno 1 (≥992px):** grid **3 columnas** para ejercicios (vista densa). Mantiene **modal zoom** al tocar tarjeta y **`th:if` exercise no nulo** en el ítem.
+- **Contenedor:** `overflow-x: hidden` en `.hoja-container` para evitar scroll lateral accidental.
+
+#### Vista **ver serie** (`series/verSerie.html`) — **actualizada (Mar 2026)**
+
+- Sin `min-width` fijo en `body`; grid **1 / 2 / 3** columnas según breakpoint; media queries móvil para tipografías y alturas de tarjeta. **Vueltas** en cabecera en verde `#7ee787` (como referencia). **Volver** / **Volver al panel** con estilo oscuro; parámetro **`volver`** desde `SerieController` cuando aplica.
 
 #### Pestaña **Mis Rutinas**
 

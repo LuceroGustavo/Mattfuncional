@@ -28,12 +28,13 @@
             font-family: 'Segoe UI', system-ui, sans-serif;
             -webkit-text-size-adjust: 100%;
         }
-        /* Timbre (sin navbar, sin botones Volver/Iniciar sesión) */
+        /* Timbre: fila 1 = logo + marca | fecha; fila 2 = nombre rutina (MiGymVirtual / captura móvil) */
         .hoja-header {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 0.75rem;
+            gap: 0.5rem 0.75rem;
             padding: 0.5rem 1rem;
             flex-shrink: 0;
             background: #161b22;
@@ -44,6 +45,7 @@
             align-items: center;
             gap: 0.5rem;
             flex-shrink: 0;
+            order: 1;
         }
         .hoja-header-logo {
             width: 40px;
@@ -58,18 +60,25 @@
             margin: 0;
         }
         .hoja-header-titulo {
-            flex: 1;
-            font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+            width: 100%;
+            flex: 0 0 100%;
+            order: 3;
+            font-size: clamp(1.35rem, 4.2vw, 2.4rem);
             font-weight: 700;
             color: #7ee787;
             text-align: center;
             margin: 0;
+            padding: 0.2rem 0 0;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .hoja-header-right {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             flex-shrink: 0;
+            order: 2;
         }
         .hoja-header-fecha {
             color: #fff;
@@ -87,7 +96,7 @@
         }
         .hoja-copiar:hover { color: #9ee79f; }
         /* Contenedor principal */
-        .hoja-container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+        .hoja-container { padding: 1rem; max-width: 1200px; margin: 0 auto; overflow-x: hidden; }
         /* Reseña del profesor */
         .resena-profesor {
             background: #161b22;
@@ -103,28 +112,28 @@
             margin-bottom: 0.5rem;
         }
         .resena-profesor p { color: #c9d1d9; margin: 0; }
-        /* Series: color por serie (misma paleta que sala) */
+        /* Series: color por índice (clases; evita fallar si hay reseña antes en el contenedor) */
         .hoja-serie {
             border: 3px solid #30363d;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 0.5rem;
             margin-bottom: 1.5rem;
         }
-        .hoja-serie:nth-child(1) { border-color: #f97316; }
-        .hoja-serie:nth-child(2) { border-color: #22c55e; }
-        .hoja-serie:nth-child(3) { border-color: #eab308; }
-        .hoja-serie:nth-child(4) { border-color: #3b82f6; }
-        .hoja-serie:nth-child(5) { border-color: #d946ef; }
-        .hoja-serie:nth-child(6) { border-color: #06b6d4; }
+        .hoja-serie.serie-bloque-0 { border-color: #f97316; }
+        .hoja-serie.serie-bloque-1 { border-color: #22c55e; }
+        .hoja-serie.serie-bloque-2 { border-color: #eab308; }
+        .hoja-serie.serie-bloque-3 { border-color: #3b82f6; }
+        .hoja-serie.serie-bloque-4 { border-color: #d946ef; }
+        .hoja-serie.serie-bloque-5 { border-color: #06b6d4; }
         .hoja-serie-titulo {
             display: flex;
             align-items: center;
             gap: 0.4rem;
             background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
-            color: #c9d1d9;
+            color: #fff;
             padding: 0.6rem 0.9rem;
             font-weight: 700;
-            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-size: clamp(1.15rem, 3vw, 2.2rem);
             border-radius: 6px;
             margin-bottom: 0.75rem;
             border: 1px solid #30363d;
@@ -135,23 +144,86 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .hoja-serie:nth-child(1) .hoja-serie-titulo-punto { background: #f97316; }
-        .hoja-serie:nth-child(2) .hoja-serie-titulo-punto { background: #22c55e; }
-        .hoja-serie:nth-child(3) .hoja-serie-titulo-punto { background: #eab308; }
-        .hoja-serie:nth-child(4) .hoja-serie-titulo-punto { background: #3b82f6; }
-        .hoja-serie:nth-child(5) .hoja-serie-titulo-punto { background: #d946ef; }
-        .hoja-serie:nth-child(6) .hoja-serie-titulo-punto { background: #06b6d4; }
-        .hoja-serie-vueltas {
-            margin-left: auto;
-            color: #f97316;
-            font-weight: 700;
-            font-size: clamp(1.5rem, 2.6vw, 2rem);
+        .hoja-serie.serie-bloque-0 .hoja-serie-titulo-punto { background: #f97316; }
+        .hoja-serie.serie-bloque-1 .hoja-serie-titulo-punto { background: #22c55e; }
+        .hoja-serie.serie-bloque-2 .hoja-serie-titulo-punto { background: #eab308; }
+        .hoja-serie.serie-bloque-3 .hoja-serie-titulo-punto { background: #3b82f6; }
+        .hoja-serie.serie-bloque-4 .hoja-serie-titulo-punto { background: #d946ef; }
+        .hoja-serie.serie-bloque-5 .hoja-serie-titulo-punto { background: #06b6d4; }
+        .hoja-serie-nombre {
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .hoja-serie-vueltas {
+            margin-left: auto;
+            flex-shrink: 0;
+            max-width: 42%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.6vw, 2rem);
+            white-space: nowrap;
+        }
+        .hoja-serie.serie-bloque-0 .hoja-serie-vueltas { color: #f97316; }
+        .hoja-serie.serie-bloque-1 .hoja-serie-vueltas { color: #22c55e; }
+        .hoja-serie.serie-bloque-2 .hoja-serie-vueltas { color: #eab308; }
+        .hoja-serie.serie-bloque-3 .hoja-serie-vueltas { color: #3b82f6; }
+        .hoja-serie.serie-bloque-4 .hoja-serie-vueltas { color: #d946ef; }
+        .hoja-serie.serie-bloque-5 .hoja-serie-vueltas { color: #06b6d4; }
         .ejercicios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 1rem;
+        }
+        /* Móvil / tablet: un ejercicio debajo del otro (MiGymVirtual — lista vertical, sin carrusel) */
+        @media (max-width: 991px) {
+            body:not(.vista-escritorio) .hoja-serie .ejercicios-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.65rem;
+                overflow-x: visible;
+            }
+            body:not(.vista-escritorio) .hoja-serie .ejercicios-grid .sala-item-wrap {
+                width: 100%;
+                max-width: none;
+                min-width: 0;
+            }
+            body:not(.vista-escritorio) .hoja-serie .sala-item-wrap .item-titulo {
+                font-size: 1rem;
+                padding: 0.5rem 0.65rem;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-clamp: 2;
+                overflow: hidden;
+            }
+            body:not(.vista-escritorio) .hoja-serie .sala-item-wrap .sala-item {
+                min-height: 220px;
+                height: 240px;
+            }
+            body:not(.vista-escritorio) .hoja-serie .sala-item-wrap .item-datos {
+                min-width: 2.5rem;
+                max-width: 38%;
+                padding: 0.45rem;
+            }
+            body:not(.vista-escritorio) .hoja-serie .sala-item-wrap .item-peso,
+            body:not(.vista-escritorio) .hoja-serie .sala-item-wrap .item-reps {
+                font-size: clamp(0.8rem, 2.5vw, 1rem);
+                padding: 0.28rem 0.45rem;
+                border-radius: 8px;
+                min-height: 1.5em;
+            }
+            .hoja-serie { padding: 0.45rem; margin-bottom: 1.2rem; }
+            .hoja-serie-titulo { flex-wrap: wrap; font-size: 1.2rem; padding: 0.5rem 0.65rem; }
+        }
+        @media (min-width: 992px) {
+            body:not(.vista-escritorio) .ejercicios-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
         /* Vista escritorio (rutina no asignada): fijo 3 columnas, no responsive, peso/reps más chicos */
         body.vista-escritorio .ejercicios-grid {
@@ -194,9 +266,6 @@
             /* Imagen vertical grande como en creación de series */
             min-height: 220px;
             height: 240px;
-        }
-        @media (max-width: 576px) {
-            .sala-item-wrap .sala-item { min-height: 260px; height: 280px; }
         }
         .sala-item-wrap .item-imagen-wrap {
             position: absolute;
@@ -243,11 +312,10 @@
         }
         .sala-item-wrap .item-reps { margin-top: auto; }
         @media (max-width: 576px) {
-            .hoja-container { padding: 0.75rem; }
-            .hoja-header { flex-wrap: wrap; }
-            .hoja-header-titulo { order: 3; width: 100%; text-align: center; }
-            .ejercicios-grid { grid-template-columns: 1fr; }
-            /* Vista escritorio: mantener 3 columnas incluso en móvil (no responsive) */
+            .hoja-container { padding: 0.55rem; }
+        }
+        /* Vista escritorio forzada: 3 columnas también en móvil (si en el futuro se vuelve a activar) */
+        @media (max-width: 991px) {
             body.vista-escritorio .ejercicios-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
@@ -363,15 +431,15 @@
         <p class="mb-0" th:text="${rutina.notaParaAlumno}">Nota para el alumno.</p>
     </div>
 
-    <!-- Series con color por serie -->
-    <div th:each="serie : ${rutina.series}" class="hoja-serie">
+    <!-- Series con color por índice (serie-bloque-N) -->
+    <div th:each="serie, serieStat : ${rutina.series}" class="hoja-serie" th:classappend="${'serie-bloque-' + (serieStat.index % 6)}">
         <div class="hoja-serie-titulo">
             <span class="hoja-serie-titulo-punto"></span>
-            <span th:text="${serie.nombre != null && !#strings.isEmpty(serie.nombre) ? serie.nombre : 'Sin título'}">Nombre serie</span>
+            <span class="hoja-serie-nombre" th:text="${serie.nombre != null && !#strings.isEmpty(serie.nombre) ? serie.nombre : 'Sin título'}">Nombre serie</span>
             <span class="hoja-serie-vueltas" th:if="${serie.repeticionesSerie != null && serie.repeticionesSerie >= 1}" th:text="|x${serie.repeticionesSerie} vueltas|">x4 vueltas</span>
         </div>
         <div class="ejercicios-grid">
-            <div th:each="serieEjercicio : ${serie.serieEjercicios}" class="sala-item-wrap"
+            <div th:each="serieEjercicio : ${serie.serieEjercicios}" th:if="${serieEjercicio.exercise != null}" class="sala-item-wrap"
                  th:attr="data-desc=${serieEjercicio.exercise.description}, data-video-url=${(serieEjercicio.exercise.videoUrl != null && !#strings.isEmpty(serieEjercicio.exercise.videoUrl)) ? serieEjercicio.exercise.videoUrl : null}"
                  th:with="repsDisplay=${serieEjercicio.valor != null ? (serieEjercicio.valor + ' ' + (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' ? 'rep.' : #strings.toLowerCase(serieEjercicio.unidad) == 'min' ? 'min' : #strings.toLowerCase(serieEjercicio.unidad) == 'seg' or #strings.toLowerCase(serieEjercicio.unidad) == 's' ? 'seg' : (serieEjercicio.unidad != null ? serieEjercicio.unidad : 'rep.'))) : '—'}">
                 <div class="item-titulo" th:text="${serieEjercicio.exercise.name}">Ejercicio</div>

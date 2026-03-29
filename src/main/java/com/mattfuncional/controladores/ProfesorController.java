@@ -1347,7 +1347,8 @@ public class ProfesorController {
                     + (port != 80 && port != 443 ? ":" + port : "");
             model.addAttribute("ogImageUrl", baseUrl + "/img/logo.png");
             model.addAttribute("ogPageUrl", baseUrl + "/profesor/rutinas/ver/" + id);
-            model.addAttribute("esVistaEscritorio", true); // No responsive: rutina no asignada
+            // Misma hoja responsive que enlace alumno (/rutinas/hoja): scroll horizontal de ejercicios en móvil, grid en escritorio
+            model.addAttribute("esVistaEscritorio", false);
             return "rutinas/verRutina";
         } catch (com.mattfuncional.excepciones.ResourceNotFoundException e) {
             return "redirect:/profesor/dashboard?tab=rutinas&error=Rutina+no+encontrada";
