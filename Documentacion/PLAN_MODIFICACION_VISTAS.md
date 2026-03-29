@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** | Paleta + filtros tipo referencia + excepciones (ver §4). |
+| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** | **Estado:** pestañas alineadas a referencia (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3 o §4.3 según prioridad. |
 
 ---
 
@@ -136,9 +136,17 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - Tabla sin columna ID; categorías como badges; entorno 2 sin descripción ni acciones en tabla → `#modalVerRutinaMobile` (`.modal-card-rutina`); Ver en móvil misma pestaña.
 - Tabla con `mgv-scroll-panel` donde aplica.
 
-#### Pendiente en fase 2.4
+#### Pestaña **Rutinas Asignadas**
 
-- **Asignaciones:** misma línea que referencia MiGym (filtro en card, columnas y modal en móvil).
+- Cabecera solo con título; **card** con input “Filtrar por alumno…” + botón **Limpiar** (estilo celeste asignaciones).
+- Tabla `#tablaAsignaciones` con `mgv-scroll-panel`: **Usuario, Rutina, Estado, Fecha, Acciones** (botones icónicos como referencia).
+- Filas `fila-asignacion asignacion-row-clickable` y atributos `data-*` para modal (nombre alumno, fecha `dd/MM/yy` en modal, nombre rutina, categorías unidas, número de series, estado, reseña `notaParaAlumno`, token, URLs editar/ver/hoja/pausar/activar/eliminar).
+- **Entorno 2:** columna **Acciones** oculta (`.col-asignaciones-acciones`); clic en fila (sin `a` ni `button`) abre **`#modalVerAsignacionMobile`** con tarjeta gradiente y acciones **Modificar, Ver, Copiar enlace, Pausar/Activar, Eliminar**; copiar enlace arma URL absoluta con `data-url-hoja` o token.
+
+#### Pendiente (tras pestañas del panel)
+
+- **4.3** Ficha detalle alumno (parity opcional con referencia).
+- **2.2 / 2.3** Pizarra y Calendario responsive.
 
 ### 4.3 Detalle de alumno
 

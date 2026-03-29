@@ -167,3 +167,53 @@
   background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
   color: #f57f17;
 }
+
+/* Barra inferior móvil (panel profesor — alineada a MiGymVirtual, solo ≤991px) */
+.bottom-nav-mobile {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  color: #ecf0f1;
+  padding: 0.5rem 0 0.6rem;
+  padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1030;
+}
+.bottom-nav-mobile a.bottom-nav-item {
+  color: #bdc3c7;
+  text-decoration: none;
+  font-size: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.bottom-nav-mobile a.bottom-nav-item:hover,
+.bottom-nav-mobile a.bottom-nav-item:focus {
+  color: #fff;
+}
+.bottom-nav-mobile a.bottom-nav-item i {
+  font-size: 1.25rem;
+}
+@media (max-width: 991px) {
+  .bottom-nav-mobile {
+    display: flex !important;
+    justify-content: space-around;
+    align-items: center;
+  }
+  /* Evita que el contenido quede bajo la barra cuando el fragmento está en el DOM */
+  body:has(.bottom-nav-mobile) {
+    padding-bottom: 5rem;
+  }
+}
+@media (min-width: 992px) {
+  .bottom-nav-mobile {
+    display: none !important;
+  }
+  body:has(.bottom-nav-mobile) {
+    padding-bottom: 0;
+  }
+}

@@ -175,5 +175,6 @@
 })();
 </script>
 </div>
+<div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/bottom-nav :: bottom-nav}"></div>
 </body>
 </html>
