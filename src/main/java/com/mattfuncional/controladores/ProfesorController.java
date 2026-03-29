@@ -698,14 +698,14 @@ public class ProfesorController {
         model.addAttribute("totalGruposMusculares", totalGruposMusculares);
         model.addAttribute("gruposMusculares", gruposMusculares);
         model.addAttribute("profesor", profesor);
+        model.addAttribute("esDeveloper", usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol()));
 
         return "profesor/ejercicios-lista";
     }
 
     /**
      * Actualiza las imágenes de los ejercicios predeterminados desde uploads/ejercicios/ (1.webp, 2.webp, …).
-     * Redirige a Mis Ejercicios con el número de imágenes actualizadas.
-     * GET con confirm=1 evita usar formulario en la vista y que Thymeleaf corte la respuesta.
+     * Solo rol {@code DEVELOPER}. Redirige a Mis Ejercicios con el número de imágenes actualizadas.
      */
     @GetMapping("/mis-ejercicios/actualizar-imagenes")
     public String actualizarImagenesEjerciciosGet(
@@ -714,7 +714,10 @@ public class ProfesorController {
         if (!"1".equals(confirm)) {
             return "redirect:/profesor/mis-ejercicios";
         }
-        if (usuarioActual == null || getProfesorParaUsuarioActual(usuarioActual) == null) {
+        if (usuarioActual == null || !"DEVELOPER".equals(usuarioActual.getRol())) {
+            return "redirect:/profesor/mis-ejercicios?error=no_autorizado";
+        }
+        if (getProfesorParaUsuarioActual(usuarioActual) == null) {
             return "redirect:/login?error=true";
         }
         int n = exerciseCargaDefaultOptimizado.actualizarImagenesDesdeCarpeta();
@@ -723,7 +726,10 @@ public class ProfesorController {
 
     @PostMapping("/mis-ejercicios/actualizar-imagenes")
     public String actualizarImagenesEjercicios(@AuthenticationPrincipal Usuario usuarioActual) {
-        if (usuarioActual == null || getProfesorParaUsuarioActual(usuarioActual) == null) {
+        if (usuarioActual == null || !"DEVELOPER".equals(usuarioActual.getRol())) {
+            return "redirect:/profesor/mis-ejercicios?error=no_autorizado";
+        }
+        if (getProfesorParaUsuarioActual(usuarioActual) == null) {
             return "redirect:/login?error=true";
         }
         int n = exerciseCargaDefaultOptimizado.actualizarImagenesDesdeCarpeta();
@@ -1212,6 +1218,12 @@ public class ProfesorController {
         model.addAttribute("totalEjercicios", ejercicios.size());
         model.addAttribute("profesor", profesor);
         model.addAttribute("debugInfo", "Endpoint de debug - Ejercicios: " + ejercicios.size());
+        model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesorId));
+        model.addAttribute("esDeveloper", usuarioActual != null && "DEVELOPER".equals(usuarioActual.getRol()));
+        model.addAttribute("totalEjerciciosPropios", ejercicios.stream().filter(e -> e.getProfesor() != null && profesorId.equals(e.getProfesor().getId())).count());
+        model.addAttribute("ejerciciosPredeterminados", 0L);
+        model.addAttribute("ejerciciosConVideo", ejercicios.stream().filter(e -> e.getVideoUrl() != null && !e.getVideoUrl().isEmpty()).count());
+        model.addAttribute("totalGruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesorId).size());
 
         return "profesor/ejercicios-lista";
     }

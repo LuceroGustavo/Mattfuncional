@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** (`/profesor/rutinas/ver/{id}`, `/rutinas/hoja/{token}`) | **Estado:** ver §4.2.1 (incl. hoja de rutina y **ver serie**). Siguiente: §2.2–2.3; **editar rutina** tabla/modal opcional. |
+| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** | **Estado:** ver §4.2.1 (incl. ejercicios, grupos, hoja rutina, ver serie). Siguiente: §2.2–2.3; **editar rutina** tabla/modal opcional. |
 
 ---
 
@@ -179,6 +179,21 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 #### Vista **ver serie** (`series/verSerie.html`) — **actualizada (Mar 2026)**
 
 - Sin `min-width` fijo en `body`; grid **1 / 2 / 3** columnas según breakpoint; media queries móvil para tipografías y alturas de tarjeta. **Vueltas** en cabecera en verde `#7ee787` (como referencia). **Volver** / **Volver al panel** con estilo oscuro; parámetro **`volver`** desde `SerieController` cuando aplica.
+
+#### Vista **Mis ejercicios** (`profesor/ejercicios-lista.html`) — **completo (Mar 2026)**
+
+- **Ruta:** `GET /profesor/mis-ejercicios`. Alineación MiGymVirtual: cabecera tabla naranja pastel (`.tabla-ejercicios`), filtros en **card** con **Limpiar**, dos **tarjetas** (Total → crear + Grupos con conteo), en **≤991px** tarjetas cuadradas en fila y columnas **# / Tipo / Imagen / Acciones** ocultas; fila clicable abre **`#modalVerEjercicioMobile`** (Bootstrap, `modal-confirmar-header`); escritorio botón Ver abre el mismo modal.
+- **Developer:** caja **Imágenes desde carpeta** (`.card-dev-imagenes-ejercicios`) solo si `esDeveloper`; endpoints **`actualizar-imagenes`** restringidos a rol **DEVELOPER** en `ProfesorController`.
+- **`mgv-scroll-panel`** en tabla; **bottom-nav** fragment; sin footer de marca.
+
+#### Vista **grupos musculares** (`profesor/grupos-musculares-lista.html`) — **completo (Mar 2026)**
+
+- **Ruta:** `GET /profesor/mis-grupos-musculares`. **Viewport**, contenedor **`.grm-page-wrap`**, padding **`py-3 px-2 px-sm-3 px-md-4`**; título **`.grm-title`** (`clamp`).
+- **Acciones** (Volver a ejercicios / Volver al ejercicio): **`flex-column`** en móvil, **`flex-sm-row`**, `text-center`, `gap-2`.
+- **Formulario nuevo grupo:** card con **`px-2 px-sm-3`**, `form-control` táctil, botón **Crear** ancho completo **&lt;768px** (`#form-crear-grupo .btn-nuevo`).
+- **Grillas sistema / mis grupos:** **`row g-4`**, **`col-12 col-lg-6`**; tarjetas **`h-100`**, **`text-break`**, **`min-w-0`** en nombre propio, botones **`btn-icon-grupo`**; en **≤767px** padding ajustado en celdas `col-6`.
+- **Modal** eliminar con **`modal-confirmar-header/footer`**; confirmación con **`bootstrap.Modal.getInstance`** antes de submit.
+- **bottom-nav** fragment; sin footer (criterio Mattfuncional).
 
 #### Pestaña **Mis Rutinas**
 
