@@ -147,10 +147,29 @@
             background: rgba(249, 115, 22, 0.2);
             color: #f97316;
         }
+        .serie-toolbar-volver {
+            max-width: 1200px;
+            min-width: 800px;
+            margin: 0 auto;
+            padding: 0.5rem 1rem 0;
+        }
+        .serie-toolbar-volver .btn-volver-serie {
+            border-color: #30363d;
+            color: #c9d1d9;
+        }
+        .serie-toolbar-volver .btn-volver-serie:hover {
+            background: #21262d;
+            color: #fff;
+            border-color: #484f58;
+        }
     </style>
 </head>
 <body>
 <div th:replace="fragments/navbar :: navbar"></div>
+<div class="serie-toolbar-volver">
+    <a th:if="${volver != null}" th:href="${volver}" class="btn btn-sm btn-volver-serie"><i class="fas fa-arrow-left me-1"></i>Volver</a>
+    <a th:unless="${volver != null}" th:href="@{/profesor/dashboard(tab='series')}" class="btn btn-sm btn-volver-serie"><i class="fas fa-arrow-left me-1"></i>Volver al panel</a>
+</div>
 <div class="serie-container py-4">
     <div class="hoja-serie">
         <div class="hoja-serie-titulo">

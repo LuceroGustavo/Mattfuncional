@@ -57,6 +57,10 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
 
     List<Serie> findByProfesorId(Long profesorId);
 
+    /** Series del profesor con ejercicios cargados (p. ej. crear rutina: tabla + modal sin N+1). */
+    @Query("SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.profesor.id = :profesorId")
+    List<Serie> findByProfesorIdWithSerieEjercicios(@Param("profesorId") Long profesorId);
+
     @Transactional
     @Modifying
     void deleteByRutinaId(Long rutinaId);

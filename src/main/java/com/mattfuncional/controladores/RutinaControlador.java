@@ -52,9 +52,9 @@ public class RutinaControlador {
             return "redirect:/login";
         }
 
-        // Cargar las series plantilla del profesor logueado
+        // Cargar series del profesor con ejercicios (evita N+1 en tabla / modal)
         Long profesorId = profesor.getId();
-        List<Serie> seriesDelProfesor = serieService.findByProfesorId(profesorId);
+        List<Serie> seriesDelProfesor = serieService.findByProfesorIdWithSerieEjercicios(profesorId);
 
         // Filtrar en Java para obtener solo las plantillas
         List<Serie> seriesPlantilla = seriesDelProfesor.stream()
@@ -88,7 +88,7 @@ public class RutinaControlador {
             model.addAttribute("rutina", new Rutina());
             model.addAttribute("usuario", usuarioActual);
             model.addAttribute("categorias", categoriaService.findDisponiblesParaProfesor(profesorId));
-            List<Serie> seriesDelProfesor = serieService.findByProfesorId(profesorId);
+            List<Serie> seriesDelProfesor = serieService.findByProfesorIdWithSerieEjercicios(profesorId);
             model.addAttribute("seriesPlantilla", seriesDelProfesor.stream().filter(Serie::isEsPlantilla).toList());
             return "rutinas/crearRutina";
         }

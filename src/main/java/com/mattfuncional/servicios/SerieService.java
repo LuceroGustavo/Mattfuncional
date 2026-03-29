@@ -100,6 +100,11 @@ public class SerieService {
         return serieRepository.findByProfesorId(profesorId);
     }
 
+    /** Series del profesor con `serieEjercicios` y `exercise` cargados (formulario crear rutina). */
+    public List<Serie> findByProfesorIdWithSerieEjercicios(Long profesorId) {
+        return serieRepository.findByProfesorIdWithSerieEjercicios(profesorId);
+    }
+
     // Obtener series por rutina ordenadas
     public List<Serie> obtenerSeriesPorRutina(Long rutinaId) {
         return serieRepository.findByRutinaIdOrderByOrdenAsc(rutinaId);

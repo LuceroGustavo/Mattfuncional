@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** + pantalla **crear/modificar serie** (`/series/crear`, edición misma vista) | **Estado:** pestañas y formulario de serie alineados a referencia (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3. |
+| **2.4** | Pestañas del panel: **Alumnos, Series, Mis rutinas, Asignaciones** + **crear/modificar serie** + **crear rutina** (`/rutinas/crear`) | **Estado:** pestañas, serie y **crear rutina** alineados a referencia donde aplica (ver §4.2.1). Siguiente bloque del plan: §2.2–2.3; **modificar rutina** (`editarRutina`) pendiente de misma UX tabla/modal si se desea. |
 
 ---
 
@@ -156,6 +156,15 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - **Modal de alerta** Bootstrap con `modal-confirmar-header` / `modal-confirmar-footer`; orden de scripts: Splide → Bootstrap → script de la página (para `bootstrap.Modal`).
 - **Post-guardado:** campo opcional `volverUrl` en el form (`th:if`); si viene, el JS redirige allí; si no, a `/profesor/dashboard?tab=series`.
 - **Sin footer de marca** en esta vista (como referencia MiGymVirtual); se mantiene **bottom-nav** del panel.
+
+#### Vista **crear rutina** (`rutinas/crearRutina.html`) — **completo (Mar 2026)**
+
+- **Alineación MiGymVirtual:** series disponibles en **tabla** (`#tablaSeriesCrear`: Agregar +, Nombre, N° ej., Descripción, Ver detalle), no en tarjetas; **buscador** por nombre; **modal detalle** (`#modalDetalleSerie`) con tarjeta pastel violeta (`.modal-card-serie`), badges de ejercicios, acciones **Ver serie**, **Modificar**, **Agregar**; lista **Series seleccionadas** con Vueltas, Subir/Bajar, **Eliminar** y **resaltado de filas** en tabla (`fila-serie-seleccionada` + `syncSelectedRows`).
+- **Entorno 1 / 2:** `viewport`, `crear-rutina-container`; en móvil **Seleccionar series** primero (`order-1` / `order-2` respecto a datos de la rutina); leyenda corta en móvil para la lista ordenada; columna Descripción oculta en &lt;576px (`.col-descripcion-movil`).
+- **Validación** en modal de alerta (`modal-confirmar-header` / `modal-confirmar-footer`). **Sin footer de marca**; **bottom-nav** del panel.
+- **Datos:** `SerieRepository.findByProfesorIdWithSerieEjercicios` + servicio expuesto para poblar tabla/modal sin N+1; `RutinaControlador` GET crear y reintento tras error de categorías usan esa carga.
+- **Navegación `volver`:** `SerieController` acepta `volver` en `GET /series/ver/{id}` y `GET /series/editar/{id}`; desde el modal, enlaces con `?volver=/rutinas/crear`. **`verSerie.html`:** barra **Volver** al valor de `volver` o **Volver al panel** a `dashboard?tab=series`. Edición de serie sigue usando `volverUrl` en `crearSerie.html` para regresar a crear rutina.
+- **Nota:** **Modificar rutina** (`rutinas/editarRutina.html`) aún usa tarjetas para series nuevas; unificar a tabla+modal es trabajo aparte.
 
 #### Pestaña **Mis Rutinas**
 
