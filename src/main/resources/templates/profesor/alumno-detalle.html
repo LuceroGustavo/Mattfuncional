@@ -1047,18 +1047,28 @@
                         }
                         btnPausar.classList.toggle('d-none', estado === 'INACTIVA' || inactivo);
                         btnActivar.classList.toggle('d-none', estado !== 'INACTIVA' || inactivo);
-                        var origin = window.location.origin;
-                        var fullUrl = (urlHoja && urlHoja.indexOf('/') === 0) ? origin + urlHoja : (token ? origin + '/rutinas/hoja/' + token : '');
+                        var fullUrl = buildFullHojaUrl(urlHoja, token);
                         var mensaje = encodeURIComponent('Rutina: ' + (fullUrl || ''));
                         var phoneNum = (phone + '').replace(/[^\d]/g, '');
                         btnWhatsapp.href = phoneNum ? ('https://wa.me/' + phoneNum + '?text=' + mensaje) : ('https://wa.me/?text=' + mensaje);
                         btnCopiar.onclick = function(ev) {
                             ev.preventDefault();
-                            if (inactivo || !fullUrl) return;
+                            ev.stopPropagation();
+                            if (inactivo) return;
+                            if (!fullUrl) {
+                                if (typeof window.mostrarAlertaAlumnoDetalle === 'function') {
+                                    window.mostrarAlertaAlumnoDetalle('No hay enlace público para esta rutina.');
+                                }
+                                return;
+                            }
                             if (navigator.clipboard && navigator.clipboard.writeText) {
                                 navigator.clipboard.writeText(fullUrl).then(function() {
                                     if (typeof window.mostrarAlertaAlumnoDetalle === 'function') window.mostrarAlertaAlumnoDetalle('Enlace copiado.');
+                                }).catch(function() {
+                                    fallbackCopy(fullUrl);
                                 });
+                            } else {
+                                fallbackCopy(fullUrl);
                             }
                         };
                         modalEl.show();

@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** | **Estado:** ver §4.2.1 (incl. ejercicios, grupos, hoja rutina, ver serie). Siguiente: §2.2–2.3; **editar rutina** tabla/modal opcional. |
+| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** + **asignar rutina** | **Estado:** ver §4.2.1. **Pendiente próxima sesión:** módulo **Administración** (`/profesor/administracion`). Luego §2.2–2.3 (Pizarra/Calendario); **editar rutina** tabla/modal opcional. |
 
 ---
 
@@ -132,6 +132,14 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - **Modales:** cabecera `modal-confirmar-header` (violeta) y pie `modal-confirmar-footer`; formulario de progreso con checklist en flex y botón **Guardar** `btn-primary`.
 - **Footer de marca** (`footer.footer`) **oculto** en esta vista (`body.ficha-alumno-body`).
 - **Nota de modelo:** el “progreso” se registra sobre **asistencia** (no tabla `registrosProgreso` separada como en la referencia); el historial corto refleja presentismo + trabajo + observaciones.
+- **28 mar 2026 — Modal “Detalle de rutina” (`#modalVerRutinaMobile`):** botón **Copiar enlace** usaba solo `navigator.clipboard.writeText` sin `.catch` ni respaldo; en **HTTP** desde la red local (p. ej. `http://192.168.x.x:8080`) suele fallar sin feedback. Se unificó con la lógica de la tabla: URL con **`buildFullHojaUrl(urlHoja, token)`**, **`writeText` + `.catch` → `fallbackCopy`**, si no hay API → **`fallbackCopy`**; aviso si no hay enlace público; **`stopPropagation`** en el clic.
+
+#### Vista **asignar rutina** (`profesor/asignar-rutina.html`) — **28 mar 2026**
+
+- **Ruta:** `GET/POST /profesor/asignar-rutina/{idAlumno}`; enlace típico desde ficha del alumno.
+- **Alineación MiGymVirtual:** **tabla** de plantillas con **buscador** por nombre, **modal** de detalle (Ver → `/profesor/rutinas/ver/{id}`, Modificar → `/rutinas/editar/{id}?alumnoId=…`, Seleccionar), en **≤991px** clic en fila abre el modal; nota para el alumno en bloque fijo; botón **Asignar** asociado al mismo formulario (`rutinaPlantillaId` hidden).
+- **`ProfesorController`:** modelo **`nombresRutinasAsignadasAlAlumno`** (`Set<String>` de nombres de rutinas ya asignadas al alumno) para badge **Asignada** y deshabilitar selección — la rutina asignada es **copia** con otro `id`, no basta `contains` sobre entidades plantilla.
+- **UX:** “Volver” → **`/profesor/alumnos/{id}`**; subtítulo y contador “rutinas asignadas”; eliminados `System.out` de depuración en el GET; errores con **`logger`**.
 
 #### Panel del profesor — footer
 
@@ -210,6 +218,7 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
+- **Módulo Administración** (`/profesor/administracion`, consultas, página pública, etc.): revisar paridad responsive/paleta con MiGymVirtual y flujos Mattfuncional — **prioridad próxima sesión (29 mar 2026)**.
 - **2.2 / 2.3** Pizarra y Calendario responsive.
 
 ### 4.3 Detalle de alumno

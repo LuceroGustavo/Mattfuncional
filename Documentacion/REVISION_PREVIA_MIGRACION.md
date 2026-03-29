@@ -99,3 +99,35 @@ Cuando confirmes qué querés borrar, se puede ejecutar solo eso y dejar el rest
 - **Calendario semanal profesor:** en vista ≤992px, encabezados de día abreviados y columnas equilibradas (`DiaSemana.getAbrevCalendario()` + CSS en `calendario/semanal-profesor.html`).
 
 Para el detalle de vistas MiGymVirtual y seguimiento visual, ver también **PLAN_MODIFICACION_VISTAS.md** (§4.2.1): **ficha del alumno**, **crear/modificar serie**, **crear rutina**, **hoja / ver rutina**, **ver serie**, **Mis ejercicios** (`ejercicios-lista.html`), **grupos musculares** (`grupos-musculares-lista.html`), **login** y panel con footer de marca oculto donde aplica — documentado en ese plan (Mar 2026).
+
+---
+
+## 7. Registro de sesión — 28 mar 2026
+
+### Hecho en código
+
+1. **Asignar rutina** (`templates/profesor/asignar-rutina.html` + `ProfesorController` GET `/profesor/asignar-rutina/{id}`)  
+   - Vista alineada a referencia: **tabla** de plantillas, **búsqueda**, **modal** (Ver / Modificar / Seleccionar), responsive móvil.  
+   - Modelo **`nombresRutinasAsignadasAlAlumno`** para marcar rutinas ya asignadas por **nombre** (copias con distinto `id`).  
+   - Limpieza de logs por consola; uso de **`logger`** en errores.  
+   - Detalle técnico: **PLAN_MODIFICACION_VISTAS.md** §4.2.1 (bloque “Vista asignar rutina”).
+
+2. **Ficha del alumno — modal “Detalle de rutina”** (`profesor/alumno-detalle.html`)  
+   - Botón **Copiar enlace** en móvil: **`buildFullHojaUrl`**, **`clipboard.writeText` con `.catch` → `fallbackCopy`**, y mensaje si no hay token/enlace público (evita fallos silenciosos en **HTTP/LAN**).
+
+### Pendiente — próxima sesión (29 mar 2026)
+
+- **Módulo de Administración** del panel profesor (`/profesor/administracion` y vistas relacionadas: consultas, página pública, etc.): revisar alineación con MiGymVirtual (responsive, paleta, UX) sin romper comportamiento propio de Mattfuncional.
+
+### Sugerencia de mensaje de commit
+
+```
+feat(profesor): asignar rutina con tabla/modal y arreglo copiar enlace en modal alumno
+
+- Reemplazar tarjetas por tabla+búsqueda+modal en asignar-rutina (paridad referencia)
+- nombresRutinasAsignadasAlAlumno para detectar plantillas ya asignadas por nombre
+- Quitar System.out del GET asignar-rutina; log de errores con logger
+- Modal detalle rutina en alumno-detalle: clipboard con fallback y URL unificada
+```
+
+*(Ajustá el prefijo `feat` si preferís `fix` solo para el modal, o partí en dos commits si querés historial más fino.)*

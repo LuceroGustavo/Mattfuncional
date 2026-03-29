@@ -1250,37 +1250,26 @@ public class ProfesorController {
                 return "redirect:/profesor/" + profesor.getId();
             }
 
-            // Obtener las rutinas plantilla del profesor
             List<com.mattfuncional.entidades.Rutina> rutinasPlantilla = rutinaService.obtenerRutinasPlantillaPorProfesor(profesor.getId());
-            
-            // DEBUG: Imprimir información de las rutinas plantilla
-            System.out.println("=== DEBUG ASIGNAR RUTINA ===");
-            System.out.println("Profesor ID: " + profesor.getId());
-            System.out.println("Rutinas plantilla encontradas: " + rutinasPlantilla.size());
-            for (int i = 0; i < rutinasPlantilla.size(); i++) {
-                com.mattfuncional.entidades.Rutina r = rutinasPlantilla.get(i);
-                System.out.println("Rutina " + i + ": ID=" + r.getId() + 
-                                 ", Nombre=" + r.getNombre() + 
-                                 ", EsPlantilla=" + r.isEsPlantilla() + 
-                                 ", Profesor=" + (r.getProfesor() != null ? r.getProfesor().getId() : "NULL"));
-            }
-            
-            // Obtener las rutinas ya asignadas al alumno
             List<com.mattfuncional.entidades.Rutina> rutinasAsignadas = rutinaService.obtenerRutinasAsignadasPorUsuario(id);
-            System.out.println("Rutinas asignadas al alumno: " + rutinasAsignadas.size());
+
+            Set<String> nombresRutinasAsignadasAlAlumno = new HashSet<>();
+            for (com.mattfuncional.entidades.Rutina r : rutinasAsignadas) {
+                if (r.getNombre() != null && !r.getNombre().isBlank()) {
+                    nombresRutinasAsignadasAlAlumno.add(r.getNombre());
+                }
+            }
 
             model.addAttribute("alumno", alumno);
             model.addAttribute("profesor", profesor);
             model.addAttribute("rutinasPlantilla", rutinasPlantilla);
             model.addAttribute("rutinasAsignadas", rutinasAsignadas);
-            
-            System.out.println("=== FIN DEBUG ===");
+            model.addAttribute("nombresRutinasAsignadasAlAlumno", nombresRutinasAsignadasAlAlumno);
             
             return "profesor/asignar-rutina";
             
         } catch (Exception e) {
-            System.out.println("=== ERROR EN ASIGNAR RUTINA ===");
-            e.printStackTrace();
+            logger.error("Error al cargar asignar rutina", e);
             model.addAttribute("errorMessage", "Error al cargar la página de asignación: " + e.getMessage());
             return "redirect:/profesor/" + profesor.getId();
         }
