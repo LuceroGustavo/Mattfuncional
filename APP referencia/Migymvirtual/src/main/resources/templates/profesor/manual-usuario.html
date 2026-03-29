@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manual del usuario - MiGymVirtual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .manual-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+        .manual-title { color: #5e35b1; font-weight: 700; margin-bottom: 1.5rem; }
+        .manual h2 { font-size: 1.35rem; color: #37474f; border-bottom: 2px solid #b39ddb; padding-bottom: 0.4rem; margin-top: 2rem; }
+        .manual h3 { font-size: 1.1rem; color: #546e7a; margin-top: 1.2rem; }
+        .manual ul { padding-left: 1.25rem; }
+        .manual li { margin-bottom: 0.4rem; }
+        .manual p { margin-bottom: 0.8rem; }
+        .manual .nav-interna { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .manual .nav-interna a { color: #5e35b1; text-decoration: none; display: block; padding: 0.35rem 0; }
+        .manual .nav-interna a:hover { text-decoration: underline; }
+        .manual .card-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .manual table { font-size: 0.95rem; }
+        .manual table th { background: #ede7f6; color: #37474f; }
+        .manual .icon-item { margin-bottom: 0.5rem; }
+        .manual .alert-manual { background: #e8eaf6; border-left: 4px solid #5e35b1; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+    <div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div th:fragment="contenido" class="manual-container admin-section-content">
+        <style>
+            .admin-section-content.manual-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            .admin-section-content .manual-title { color: #5e35b1; font-weight: 700; margin-bottom: 1.5rem; }
+            .admin-section-content .manual h2 { font-size: 1.35rem; color: #37474f; border-bottom: 2px solid #b39ddb; padding-bottom: 0.4rem; margin-top: 2rem; }
+            .admin-section-content .manual h3 { font-size: 1.1rem; color: #546e7a; margin-top: 1.2rem; }
+            .admin-section-content .manual ul { padding-left: 1.25rem; }
+            .admin-section-content .manual li { margin-bottom: 0.4rem; }
+            .admin-section-content .manual p { margin-bottom: 0.8rem; }
+            .admin-section-content .manual .nav-interna { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+            .admin-section-content .manual .nav-interna a { color: #5e35b1; text-decoration: none; display: block; padding: 0.35rem 0; }
+            .admin-section-content .manual .nav-interna a:hover { text-decoration: underline; }
+            .admin-section-content .manual .card-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+            .admin-section-content .manual table { font-size: 0.95rem; }
+            .admin-section-content .manual table th { background: #ede7f6; color: #37474f; }
+            .admin-section-content .manual .icon-item { margin-bottom: 0.5rem; }
+            .admin-section-content .manual .alert-manual { background: #e8eaf6; border-left: 4px solid #5e35b1; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; }
+        </style>
+        <div class="manual">
+            <h1 class="manual-title"><i class="fa-solid fa-book me-2"></i>Manual del usuario</h1>
+            <p class="text-muted">Para el <strong>profesor</strong> que opera MiGymVirtual: alumnos sin login, rutinas por enlace y seguimiento desde el panel. La cuenta con permisos de <strong>administración</strong> gestiona la web pública, backups y usuarios de acceso.</p>
+
+            <div class="alert-manual mb-3">
+                <strong><i class="fa-solid fa-location-dot me-1"></i>Dónde está este manual:</strong> podés abrirlo en <strong><code>/profesor/manual</code></strong>, desde el pie de página del panel o embebido en <strong>Administrar sistema</strong> → <em>Manual de usuario</em> (mismo contenido).
+            </div>
+
+            <!-- Navegación rápida -->
+            <nav class="nav-interna">
+                <strong class="d-block mb-2">Contenido</strong>
+                <a href="#acceso">1. Acceso al sistema</a>
+                <a href="#panel">2. Panel del profesor</a>
+                <a href="#alumnos">3. Alumnos</a>
+                <a href="#ejercicios">4. Ejercicios</a>
+                <a href="#grupos">5. Grupos musculares</a>
+                <a href="#series">6. Series</a>
+                <a href="#rutinas">7. Rutinas</a>
+                <a href="#categorias">8. Categorías de rutinas</a>
+                <a href="#progreso">9. Progreso del alumno</a>
+                <a href="#administracion">10. Administración del sistema</a>
+                <a href="#resumen">11. Resumen rápido</a>
+            </nav>
+
+            <div class="card-section" id="acceso">
+                <h2>1. Acceso al sistema</h2>
+                <p>El <strong>profesor</strong> entra al panel con <strong>correo electrónico</strong> y <strong>contraseña</strong> de la cuenta habilitada para MiGymVirtual (en la práctica suele ser <strong>un único usuario</strong> que concentra la gestión).</p>
+                <p>Los <strong>alumnos no tienen usuario</strong>: los das de alta desde el panel; ellos reciben la rutina por <strong>enlace público</strong> o WhatsApp.</p>
+                <p>Si no recordás la contraseña, quien tenga acceso a <strong>Administrar sistema</strong> puede actualizarla desde la sección de <strong>usuarios</strong> (o recuperarla según cómo esté configurado tu servidor).</p>
+                <p>Al iniciar sesión se abre el <strong>Panel del profesor</strong> (<code>/profesor/dashboard</code> o la URL de tu perfil).</p>
+            </div>
+
+            <div class="card-section" id="panel">
+                <h2>2. Panel del profesor</h2>
+                <p>El panel concentra el trabajo diario. En la parte superior hay una <strong>cuadrícula de cuatro columnas</strong> (en escritorio) con:</p>
+                <ul>
+                    <li><strong>Alumnos</strong> — total; el ícono “+” crea un alumno nuevo.</li>
+                    <li><strong>Series</strong> — total; “+” para nueva serie.</li>
+                    <li><strong>Rutinas</strong> — total de plantillas; “+” para nueva rutina.</li>
+                    <li><strong>Asignaciones</strong> — cantidad de rutinas ya asignadas a alumnos (con enlace público).</li>
+                </ul>
+                <p>Debajo, tarjetas de acceso rápido:</p>
+                <ul>
+                    <li><strong>Ejercicios</strong> — abre <em>Mis ejercicios</em> (nueva pestaña).</li>
+                    <li><strong>Administrar sistema</strong> — usuarios, página pública, backups y manual. Solo la <strong>cuenta administradora</strong> puede entrar; si no tenés ese permiso, verás la tarjeta pero no el acceso.</li>
+                </ul>
+                <p><strong>Pestañas</strong> bajo el panel: <strong>Mis Alumnos</strong>, <strong>Mis Series</strong>, <strong>Mis Rutinas</strong> y <strong>Asignaciones</strong>. En <strong>móvil</strong> primero ves tarjetas grandes para saltar a cada pestaña; en pantallas chicas algunas tablas ocultan la columna <em>Acciones</em> y podés abrir el detalle <strong>tocando la fila</strong> (modal con Ver / Editar / Eliminar según el módulo).</p>
+            </div>
+
+            <div class="card-section" id="alumnos">
+                <h2>3. Alumnos</h2>
+                <h3>Lista (Mis Alumnos)</h3>
+                <p>Tabla con nombre, edad, celular (en pantallas anchas), <strong>estado</strong> (Activo/Inactivo), cantidad de <strong>rutinas</strong> y botones <strong>Ver</strong> y <strong>Asignar rutina</strong> (este último deshabilitado si el alumno está inactivo).</p>
+                <p><strong>Filtro por nombre</strong> con el cuadro de búsqueda. El <strong>estado</strong> se filtra desde el menú desplegable en el encabezado de la columna Estado (Activos / Inactivos / Todos).</p>
+                <p><strong>Crear / Editar alumno</strong> — formulario con: nombre, estado del alumno, edad, sexo, celular, <strong>historial de estado</strong> (solo lectura al editar), <strong>objetivos personales</strong>, <strong>restricciones médicas</strong> y <strong>notas del profesor</strong> (texto interno). No hay usuario ni contraseña para el alumno.</p>
+                <h3>Ficha del alumno</h3>
+                <p>Desde <strong>Ver</strong> accedés a la ficha con:</p>
+                <ul>
+                    <li>Tarjetas resumen: <strong>Datos personales</strong> (con enlace a editar), <strong>Restricciones médicas</strong>, <strong>Progreso del alumno</strong> (tocar abre el modal para registrar seguimiento), <strong>Rutinas asignadas</strong> (atajo a asignar si está activo).</li>
+                    <li>Bloque con fecha de alta, sexo, historial de estado y objetivos.</li>
+                    <li><strong>Últimas 3 rutinas</strong> asignadas (la lista completa está en la pestaña <strong>Asignaciones</strong> del panel). Columnas: fecha, rutina, categorías, series, estado ACTIVA/INACTIVA, reseña, acciones (editar, ver, copiar enlace, pausar/activar, WhatsApp).</li>
+                    <li>Sección <strong>Progreso del alumno</strong>: historial por fecha con grupos musculares y observaciones; en escritorio, botones para modificar o eliminar cada registro; en móvil, tocá una fila para ver el detalle en modal.</li>
+                    <li><strong>Notas privadas del profesor</strong>: bloque editable en la ficha (además de las notas en crear/editar alumno).</li>
+                </ul>
+            </div>
+
+            <div class="card-section" id="ejercicios">
+                <h2>4. Ejercicios (Mis Ejercicios)</h2>
+                <p>Desde <strong>Ejercicios</strong> en el panel. Hay ejercicios <strong>predeterminados del sistema</strong> (marcados con estrellita) y <strong>propios</strong> del profesor.</p>
+                <p>Podés <strong>buscar</strong> por nombre o descripción y <strong>filtrar</strong> por grupo muscular.</p>
+                <p><strong>Reglas importantes:</strong> los ejercicios <strong>predeterminados no se pueden eliminar</strong>. Su edición puede estar <strong>restringida al administrador</strong> según la configuración. Los ejercicios que creás vos sí podés editarlos y eliminarlos.</p>
+                <p><strong>Crear ejercicio:</strong> nombre, descripción, tipo, grupos musculares y, opcionalmente, <strong>imagen</strong> o enlace de <strong>video</strong>. Existen acciones para <strong>cargar predeterminados</strong> (si la instalación lo permite) y para <strong>actualizar imágenes</strong> desde archivos en el servidor (p. ej. carpeta de ejercicios predeterminados).</p>
+                <h3>4.1 Imágenes de ejercicio (formatos y tamaño)</h3>
+                <p>Al subir una imagen para un ejercicio, el sistema acepta archivos cuyo nombre termine en:</p>
+                <ul>
+                    <li><strong>JPEG / JPG</strong>, <strong>PNG</strong>, <strong>GIF</strong>, <strong>WebP</strong>, <strong>BMP</strong></li>
+                </ul>
+                <p><strong>Tamaño máximo por archivo: 5 MB</strong> (cinco megabytes). Si superás ese límite, tendrás que reducir la imagen antes de subirla.</p>
+                <p><strong>Recomendaciones para buena calidad y carga rápida:</strong></p>
+                <ul>
+                    <li><strong>WebP</strong> — muy buena compresión con buena definición; ideal para fotos fijas de demostración.</li>
+                    <li><strong>GIF</strong> — útil si necesitás una <strong>animación</strong> corta (el sistema conserva el GIF sin “aplanar” la animación).</li>
+                    <li><strong>PNG</strong> — si necesitás transparencias; suele pesar más que WebP para la misma vista.</li>
+                </ul>
+                <p class="small text-muted">Tras subirla, las imágenes raster (salvo GIF/WebP animados) pueden optimizarse automáticamente (tamaño y, según el servidor, conversión a WebP) para que se vean bien en el panel y en las hojas de rutina.</p>
+                <p>Desde aquí también podés ir a <strong>Grupos musculares</strong> para administrar grupos antes de crear ejercicios.</p>
+            </div>
+
+            <div class="card-section" id="grupos">
+                <h2>5. Grupos musculares</h2>
+                <p>Acceso desde <strong>Mis ejercicios</strong> o <strong><code>/profesor/mis-grupos-musculares</code></strong>.</p>
+                <p>El sistema incluye grupos por defecto: <strong>BRAZOS, PIERNAS, PECHO, ESPALDA, CARDIO, ELONGACIÓN</strong> (marcados con estrellita; no editables ni eliminables). Podés <strong>crear grupos propios</strong> para etiquetar ejercicios y para el seguimiento de progreso.</p>
+                <p>Acciones: listar, crear, editar y eliminar (solo los grupos propios).</p>
+            </div>
+
+            <div class="card-section" id="series">
+                <h2>6. Series</h2>
+                <p><strong>Mis Series</strong> lista las series; cada una agrupa ejercicios con repeticiones, peso u orden.</p>
+                <p><strong>Crear / Editar:</strong> nombre, ejercicios desde el selector, repeticiones y <strong>orden</strong> (subir/bajar).</p>
+                <p><strong>Ver serie:</strong> vista de solo lectura con los ejercicios de la serie.</p>
+            </div>
+
+            <div class="card-section" id="rutinas">
+                <h2>7. Rutinas</h2>
+                <p><strong>Mis Rutinas</strong> son <strong>plantillas</strong>: se arman con una o más series. Desde el listado podés <strong>Ver</strong>, <strong>Editar</strong> y <strong>Eliminar</strong>. Una plantilla <strong>no tiene enlace público</strong> hasta que la <strong>asignás a un alumno</strong>.</p>
+                <p><strong>Crear rutina:</strong> nombre y descripción; elegís al menos <strong>una categoría</strong> (obligatorio) y las <strong>series</strong> (por tarjetas). Podés reordenar las series con Subir/Bajar. Un enlace <strong>Gestionar categorías</strong> lleva a <code>/profesor/mis-categorias</code> si necesitás crear categorías nuevas.</p>
+                <p><strong>Editar rutina:</strong> mismos bloques (detalles, categorías, series). Si editás desde la ficha del alumno, podés cargar una <strong>nota para el alumno (reseña)</strong> que verá en la hoja pública y en la vista de rutina.</p>
+                <p><strong>Asignar rutina:</strong> desde la ficha del alumno o la pestaña <strong>Asignaciones</strong>. Eso crea el <strong>token</strong> y el enlace público <code>/rutinas/hoja/{token}</code>.</p>
+                <p><strong>Compartir:</strong> <strong>Copiar enlace</strong> o <strong>WhatsApp</strong> (usa el celular del alumno si está cargado). Sin asignación no hay hoja pública.</p>
+                <p><strong>Estado ACTIVA / INACTIVA:</strong> si la asignación está inactiva, la hoja muestra el mensaje de rutina inactiva. Gestionás el estado desde la ficha del alumno o desde <strong>Asignaciones</strong>. Existe <strong>Inactivar todas las rutinas</strong> del alumno en la ficha.</p>
+                <h3>7.1 Vista en el panel (Mis Rutinas)</h3>
+                <p>En <strong>escritorio</strong> tenés columna <strong>Acciones</strong> con Ver, Editar y Eliminar. En <strong>móvil</strong> esa columna se oculta: tocá la fila para abrir un modal con las mismas acciones.</p>
+            </div>
+
+            <div class="card-section" id="categorias">
+                <h2>8. Categorías de rutinas</h2>
+                <p>Las rutinas se etiquetan con una o más categorías (por ejemplo FUERZA, CARDIO o categorías que crees vos). Sirven para ordenar y filtrar en listados.</p>
+                <p><strong>Acceso:</strong> botón <strong>Categorías</strong> junto a “Nueva Rutina” en la pestaña <strong>Mis Rutinas</strong>, o la ruta <strong><code>/profesor/mis-categorias</code></strong>. También hay un acceso desde crear/editar rutina.</p>
+                <p>El sistema trae <strong>categorías predefinidas</strong> (no editables ni eliminables). Podés <strong>crear, editar y eliminar categorías propias</strong>. No podés eliminar una categoría si hay rutinas que la usan: primero quitá esa categoría de esas rutinas.</p>
+            </div>
+
+            <div class="card-section" id="progreso">
+                <h2>9. Progreso del alumno</h2>
+                <p>En la <strong>ficha del alumno</strong>, la tarjeta <strong>Progreso del alumno</strong> abre un modal para <strong>registrar</strong> una anotación: <strong>fecha</strong>, <strong>grupos musculares</strong> trabajados (según tus grupos musculares) y <strong>observaciones</strong>.</p>
+                <p>El historial aparece en la tabla inferior de la misma ficha; podés <strong>modificar</strong> o <strong>eliminar</strong> registros (en móvil, desde el modal al tocar una fila).</p>
+            </div>
+
+            <div class="card-section" id="administracion">
+                <h2>10. Administración del sistema</h2>
+                <p>Desde <strong>Administrar sistema</strong> en el panel (solo la <strong>cuenta administradora</strong>). Incluye navegación lateral con: <strong>usuarios</strong>, <strong>página pública</strong>, <strong>backups</strong> y este <strong>manual</strong>.</p>
+                <p class="small text-muted"><i class="fa-solid fa-palette me-1"></i>En <strong>Usuarios</strong> y <strong>Backups</strong>, los bloques principales usan <strong>marcos de color</strong> (violeta/azul) para distinguir perfil, listados y tipos de archivo.</p>
+
+                <h3 id="administracion-usuarios">10.1 Usuarios del sistema</h3>
+                <p>Gestionás las <strong>cuentas que pueden iniciar sesión</strong> en el panel: listado, <strong>crear</strong> usuario, <strong>editar</strong> (nombre, correo, contraseña y, si aplica en tu instalación, el tipo de rol) y <strong>eliminar</strong> cuentas según las reglas de tu servidor. También podés actualizar <strong>tu propio perfil</strong> desde el bloque correspondiente.</p>
+                <p class="small text-muted">En un despliegue típico operás con <strong>una sola cuenta de profesor/administrador</strong>; la pantalla permite mantenerla y cambiar la clave cuando haga falta.</p>
+
+                <h3>10.2 Administración de la página pública</h3>
+                <p>Define lo que ven los visitantes en <strong>Inicio</strong> (<code>/</code>) y <strong>Planes</strong> (<code>/planes</code>).</p>
+                <ul>
+                    <li><strong>Datos y contacto:</strong> eslogan, <strong>un solo campo Celular / WhatsApp</strong> (con código de país) que alimenta el botón flotante, enlaces y pie; correo público; redes; dirección/mapa opcional; texto de disponibilidad u horarios de respuesta.</li>
+                    <li><strong>Planes y precios:</strong> altas, bajas, orden e intensidad. En una base nueva pueden generarse planes de ejemplo orientados a servicio virtual.</li>
+                    <li><strong>Consultas recibidas:</strong> mensajes del formulario en <code>/planes</code>; marcar como visto o eliminar.</li>
+                </ul>
+                <p class="small text-muted">La landing y Planes son <strong>públicos</strong> (sin login). El acceso al panel es el icono de inicio de sesión.</p>
+
+                <h3 id="administracion-backup">10.3 Sistema de backups</h3>
+                <p>Los backups se guardan en carpeta del servidor (propiedad <code>migimvirtual.backups.dir</code>). Se conservan como máximo <strong>dos</strong> archivos por tipo.</p>
+                <p><strong>Contenido (ZIP):</strong> ejercicios, series, rutinas plantilla, grupos, categorías, imágenes. <strong>Restaurar</strong> reemplaza ese bloque de datos (no incluye rutinas asignadas a alumnos).</p>
+                <p><strong>Alumnos (JSON):</strong> datos personales, mediciones y progresos según versión. <strong>No</strong> incluye rutinas asignadas ni asistencias. Restaurar reemplaza a los alumnos del profesor.</p>
+            </div>
+
+            <div class="card-section" id="resumen">
+                <h2>11. Resumen rápido</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Quiero…</th>
+                            <th>Dónde</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Abrir este manual</td><td>Pie del panel, <code>/profesor/manual</code> o Administrar sistema → Manual</td></tr>
+                        <tr><td>Ver o editar alumnos</td><td>Panel → Mis Alumnos; crear/editar con formulario completo</td></tr>
+                        <tr><td>Ver ficha, notas privadas, progreso, rutinas</td><td>Mis Alumnos → Ver</td></tr>
+                        <tr><td>Subir imagen de ejercicio (máx. 5 MB)</td><td>Mis ejercicios → crear/editar → archivo JPG, PNG, GIF, WebP o BMP</td></tr>
+                        <tr><td>Crear o editar ejercicios</td><td>Ejercicios / Mis ejercicios</td></tr>
+                        <tr><td>Gestionar grupos musculares</td><td>Mis ejercicios → Grupos / <code>/profesor/mis-grupos-musculares</code></td></tr>
+                        <tr><td>Armar series o rutinas plantilla</td><td>Mis Series; Mis Rutinas (+ categorías obligatorias)</td></tr>
+                        <tr><td>Gestionar categorías de rutinas</td><td>Mis Rutinas → Categorías o <code>/profesor/mis-categorias</code></td></tr>
+                        <tr><td>Asignar rutina y obtener enlace</td><td>Ficha del alumno o pestaña Asignaciones → asignar → Copiar / WhatsApp</td></tr>
+                        <tr><td>Nota o reseña para el alumno en la hoja</td><td>Editar rutina (desde ficha) → campo «Nota para el alumno»</td></tr>
+                        <tr><td>Activar / inactivar una asignación</td><td>Ficha del alumno o Asignaciones</td></tr>
+                        <tr><td>Inactivar todas las rutinas de un alumno</td><td>Ficha → Inactivar todas las rutinas</td></tr>
+                        <tr><td>Registrar seguimiento (grupos + observaciones)</td><td>Ficha → tarjeta Progreso / tabla de historial</td></tr>
+                        <tr><td>Configurar web pública y consultas</td><td>Administrar sistema → Página pública</td></tr>
+                        <tr><td>Usuarios y contraseñas del panel</td><td>Administrar sistema → Usuarios</td></tr>
+                        <tr><td>Backups</td><td>Administrar sistema → Sistema de backups</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-muted small mt-4"><i class="fa-solid fa-circle-info me-1"></i> Última actualización: Marzo 2026 — manual orientado al <strong>profesor</strong> y a la cuenta <strong>administradora</strong>; formatos de imagen y límite 5 MB según configuración del servidor.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

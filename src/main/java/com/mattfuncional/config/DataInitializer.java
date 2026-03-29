@@ -4,6 +4,7 @@ import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.repositorios.UsuarioRepository;
 import com.mattfuncional.servicios.ConfiguracionPaginaPublicaService;
+import com.mattfuncional.servicios.CategoriaService;
 import com.mattfuncional.servicios.GrupoMuscularService;
 import com.mattfuncional.servicios.PlanPublicoService;
 import com.mattfuncional.servicios.ProfesorService;
@@ -29,6 +30,9 @@ public class DataInitializer implements CommandLineRunner {
     private GrupoMuscularService grupoMuscularService;
 
     @Autowired
+    private CategoriaService categoriaService;
+
+    @Autowired
     private PlanPublicoService planPublicoService;
 
     @Autowired
@@ -49,6 +53,7 @@ public class DataInitializer implements CommandLineRunner {
                 createProfesorUsuarioIfNeeded();
                 createDeveloperUsuarioIfNeeded();
                 grupoMuscularService.asegurarGruposSistema();
+                categoriaService.asegurarCategoriasSistema();
                 planPublicoService.asegurarPlanesIniciales();
                 configuracionPaginaPublicaService.asegurarConfigInicial();
                 System.out.println("=== DataInitializer completado en " + (System.currentTimeMillis() - startTime) + "ms ===");
@@ -62,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
 
             // Asegurar los 6 grupos musculares del sistema (BRAZOS, PIERNAS, PECHO, ESPALDA, CARDIO, ELONGACION)
             grupoMuscularService.asegurarGruposSistema();
+            categoriaService.asegurarCategoriasSistema();
             // Asegurar planes y configuración de la página pública
             planPublicoService.asegurarPlanesIniciales();
             configuracionPaginaPublicaService.asegurarConfigInicial();

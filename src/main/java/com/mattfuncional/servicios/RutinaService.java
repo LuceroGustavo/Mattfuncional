@@ -1,6 +1,7 @@
 package com.mattfuncional.servicios;
 
 import com.mattfuncional.dto.EstadisticasRutinaDTO;
+import com.mattfuncional.entidades.Categoria;
 import com.mattfuncional.entidades.Rutina;
 import com.mattfuncional.entidades.Usuario;
 import com.mattfuncional.entidades.Profesor;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.security.SecureRandom;
 
 @Service
@@ -30,6 +33,7 @@ public class RutinaService {
     private final SerieRepository serieRepository;
     private final SerieEjercicioRepository serieEjercicioRepository;
     private final SerieService serieService;
+    private final CategoriaService categoriaService;
     private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
     private static final char[] TOKEN_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
@@ -38,13 +42,15 @@ public class RutinaService {
             ProfesorRepository profesorRepository,
             SerieRepository serieRepository,
             SerieEjercicioRepository serieEjercicioRepository,
-            SerieService serieService) {
+            SerieService serieService,
+            CategoriaService categoriaService) {
         this.rutinaRepository = rutinaRepository;
         this.usuarioRepository = usuarioRepository;
         this.profesorRepository = profesorRepository;
         this.serieRepository = serieRepository;
         this.serieEjercicioRepository = serieEjercicioRepository;
         this.serieService = serieService;
+        this.categoriaService = categoriaService;
     }
 
     // Crear rutina básica
@@ -210,12 +216,13 @@ public class RutinaService {
     }
 
     // Crear rutina plantilla
-    public Rutina crearRutinaPlantilla(Long profesorId, String nombre, String descripcion, String categoria) {
+    public Rutina crearRutinaPlantilla(Long profesorId, String nombre, String descripcion, List<Long> categoriaIds) {
         Profesor profesor = profesorRepository.findById(profesorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profesor no encontrado con id: " + profesorId));
 
         Rutina rutina = new Rutina(nombre, descripcion, profesor);
-        rutina.setCategoria(categoria);
+        Set<Categoria> categorias = categoriaService.resolveCategoriasByIds(categoriaIds != null ? categoriaIds : List.of());
+        rutina.setCategorias(categorias);
         rutina.setCreador("ADMIN");
         rutina.setTokenPublico(generarTokenUnico());
         return rutinaRepository.save(rutina);
@@ -231,9 +238,9 @@ public class RutinaService {
         return rutinaRepository.findByEsPlantillaTrue();
     }
 
-    // Buscar rutinas plantilla por categoría
+    // Buscar rutinas plantilla por categoría (texto parcial en nombre de cualquier categoría asignada)
     public List<Rutina> buscarRutinasPlantillaPorCategoria(Long profesorId, String categoria) {
-        return rutinaRepository.findByProfesorIdAndEsPlantillaTrueAndCategoria(profesorId, categoria);
+        return rutinaRepository.findByProfesorIdAndEsPlantillaTrueAndCategoriaContaining(profesorId, categoria);
     }
 
     // Buscar rutinas plantilla por nombre
@@ -243,7 +250,7 @@ public class RutinaService {
 
     // Asignar rutina plantilla a un usuario (crear copia)
     public Rutina asignarRutinaPlantillaAUsuario(Long rutinaPlantillaId, Long usuarioId, Long profesorId, String notaParaAlumno) {
-        Rutina rutinaPlantilla = obtenerRutinaPorId(rutinaPlantillaId);
+        Rutina rutinaPlantilla = obtenerRutinaPorIdConSeries(rutinaPlantillaId);
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
         Profesor profesor = profesorRepository.findById(profesorId)
@@ -253,7 +260,9 @@ public class RutinaService {
         Rutina nuevaRutina = new Rutina();
         nuevaRutina.setNombre(rutinaPlantilla.getNombre());
         nuevaRutina.setDescripcion(rutinaPlantilla.getDescripcion());
-        nuevaRutina.setCategoria(rutinaPlantilla.getCategoria());
+        if (rutinaPlantilla.getCategorias() != null && !rutinaPlantilla.getCategorias().isEmpty()) {
+            nuevaRutina.setCategorias(new HashSet<>(rutinaPlantilla.getCategorias()));
+        }
         nuevaRutina.setUsuario(usuario);
         nuevaRutina.setProfesor(profesor);
         nuevaRutina.setEsPlantilla(false); // No es plantilla, es asignada
@@ -276,12 +285,14 @@ public class RutinaService {
 
     // Duplicar rutina plantilla (crear nueva plantilla basada en otra)
     public Rutina duplicarRutinaPlantilla(Long rutinaPlantillaId, String nuevoNombre) {
-        Rutina rutinaOriginal = obtenerRutinaPorId(rutinaPlantillaId);
+        Rutina rutinaOriginal = obtenerRutinaPorIdConSeries(rutinaPlantillaId);
 
         Rutina nuevaRutina = new Rutina();
         nuevaRutina.setNombre(nuevoNombre);
         nuevaRutina.setDescripcion(rutinaOriginal.getDescripcion());
-        nuevaRutina.setCategoria(rutinaOriginal.getCategoria());
+        if (rutinaOriginal.getCategorias() != null && !rutinaOriginal.getCategorias().isEmpty()) {
+            nuevaRutina.setCategorias(new HashSet<>(rutinaOriginal.getCategorias()));
+        }
         nuevaRutina.setProfesor(rutinaOriginal.getProfesor());
         nuevaRutina.setEsPlantilla(true);
         nuevaRutina.setCreador("ADMIN");
@@ -312,11 +323,12 @@ public class RutinaService {
     }
 
     // Método para actualizar solo la info básica de una rutina
-    public Rutina actualizarInformacionBasicaRutina(Long id, String nombre, String descripcion, String categoria) {
+    public Rutina actualizarInformacionBasicaRutina(Long id, String nombre, String descripcion, List<Long> categoriaIds) {
         Rutina rutina = obtenerRutinaPorId(id);
         rutina.setNombre(nombre);
         rutina.setDescripcion(descripcion);
-        rutina.setCategoria(categoria);
+        Set<Categoria> categorias = categoriaService.resolveCategoriasByIds(categoriaIds != null ? categoriaIds : List.of());
+        rutina.setCategorias(categorias);
         return rutinaRepository.save(rutina);
     }
 

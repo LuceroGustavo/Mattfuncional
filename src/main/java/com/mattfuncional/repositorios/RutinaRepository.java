@@ -13,8 +13,8 @@ import java.util.Optional;
 @Repository
 public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
-    /** Carga la rutina con sus series para evitar LazyInitializationException al editar. (El orden se aplica en el servicio.) */
-    @Query("SELECT DISTINCT r FROM Rutina r LEFT JOIN FETCH r.series WHERE r.id = :id")
+    /** Carga la rutina con series y categorías para edición y copias. */
+    @Query("SELECT DISTINCT r FROM Rutina r LEFT JOIN FETCH r.series LEFT JOIN FETCH r.categorias WHERE r.id = :id")
     Optional<Rutina> findByIdWithSeries(@Param("id") Long id);
 
     List<Rutina> findByUsuarioId(Long usuarioId); // ← ESTA ES LA CLAVE
@@ -30,8 +30,11 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
     // Buscar rutinas plantilla por profesor
     List<Rutina> findByProfesorIdAndEsPlantillaTrue(Long profesorId);
 
-    // Buscar rutinas plantilla por profesor y categoría
-    List<Rutina> findByProfesorIdAndEsPlantillaTrueAndCategoria(Long profesorId, String categoria);
+    @Query("SELECT DISTINCT r FROM Rutina r JOIN r.categorias c WHERE r.profesor.id = :profesorId AND r.esPlantilla = true AND LOWER(c.nombre) LIKE LOWER(CONCAT('%', :categoria, '%'))")
+    List<Rutina> findByProfesorIdAndEsPlantillaTrueAndCategoriaContaining(@Param("profesorId") Long profesorId, @Param("categoria") String categoria);
+
+    @Query("SELECT r FROM Rutina r JOIN r.categorias c WHERE c.id = :categoriaId")
+    List<Rutina> findByCategoriaId(@Param("categoriaId") Long categoriaId);
 
     // Buscar rutinas plantilla por profesor y nombre
     List<Rutina> findByProfesorIdAndEsPlantillaTrueAndNombreContainingIgnoreCase(Long profesorId, String nombre);

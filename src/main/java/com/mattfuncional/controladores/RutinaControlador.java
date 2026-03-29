@@ -6,6 +6,7 @@ import com.mattfuncional.entidades.Serie;
 import com.mattfuncional.servicios.RutinaService;
 import com.mattfuncional.servicios.UsuarioService;
 import com.mattfuncional.servicios.SerieService;
+import com.mattfuncional.servicios.CategoriaService;
 import com.mattfuncional.servicios.ProfesorService;
 import com.mattfuncional.excepciones.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +39,9 @@ public class RutinaControlador {
     @Autowired
     private ProfesorService profesorService;
 
+    @Autowired
+    private CategoriaService categoriaService;
+
     // GET: Mostrar formulario de creación de rutina plantilla
     @GetMapping("/crear")
     public String crearRutina(Model model) {
@@ -58,6 +64,7 @@ public class RutinaControlador {
         model.addAttribute("seriesPlantilla", seriesPlantilla);
         model.addAttribute("rutina", new Rutina());
         model.addAttribute("usuario", usuarioActual);
+        model.addAttribute("categorias", categoriaService.findDisponiblesParaProfesor(profesorId));
 
         return "rutinas/crearRutina";
     }
@@ -66,7 +73,7 @@ public class RutinaControlador {
     @PostMapping("/crear-plantilla")
     public String crearRutinaPlantilla(@RequestParam String nombre,
             @RequestParam(required = false) String descripcion,
-            @RequestParam String categoria,
+            @RequestParam(required = false) List<Long> categoriaIds,
             @RequestParam(required = false) List<Long> selectedSeries,
             @RequestParam Map<String, String> allParams,
             Model model) {
@@ -76,8 +83,17 @@ public class RutinaControlador {
             return "redirect:/login";
         }
         Long profesorId = profesor.getId();
+        if (categoriaIds == null || categoriaIds.isEmpty() || categoriaIds.stream().allMatch(id -> id == null)) {
+            model.addAttribute("errorMessage", "Seleccioná al menos una categoría.");
+            model.addAttribute("rutina", new Rutina());
+            model.addAttribute("usuario", usuarioActual);
+            model.addAttribute("categorias", categoriaService.findDisponiblesParaProfesor(profesorId));
+            List<Serie> seriesDelProfesor = serieService.findByProfesorId(profesorId);
+            model.addAttribute("seriesPlantilla", seriesDelProfesor.stream().filter(Serie::isEsPlantilla).toList());
+            return "rutinas/crearRutina";
+        }
         try {
-            Rutina rutina = rutinaService.crearRutinaPlantilla(profesorId, nombre, descripcion, categoria);
+            Rutina rutina = rutinaService.crearRutinaPlantilla(profesorId, nombre, descripcion, categoriaIds);
 
             // Si hay series seleccionadas, agregarlas a la rutina con sus repeticiones
             if (selectedSeries != null && !selectedSeries.isEmpty()) {
@@ -152,6 +168,7 @@ public class RutinaControlador {
             model.addAttribute("usuario", usuarioActual);
             model.addAttribute("returnAlumnoId", alumnoId);
             model.addAttribute("returnTab", (returnTab != null && !returnTab.isBlank()) ? returnTab : "rutinas");
+            model.addAttribute("categorias", categoriaService.findDisponiblesParaProfesor(profesorId));
 
             return "rutinas/editarRutina";
         } catch (ResourceNotFoundException e) {
@@ -176,7 +193,7 @@ public class RutinaControlador {
     public String actualizarRutina(@PathVariable Long id,
             @RequestParam String nombre,
             @RequestParam(required = false) String descripcion,
-            @RequestParam String categoria,
+            @RequestParam(required = false) List<Long> categoriaIds,
             @RequestParam(required = false) String notaParaAlumno,
             @RequestParam(required = false) List<Long> seriesIds,
             @RequestParam(required = false) List<Integer> repeticionesExistentes,
@@ -200,8 +217,12 @@ public class RutinaControlador {
             return "redirect:/profesor/dashboard?tab=rutinas&error=No+tiene+permiso+para+editar+esta+rutina";
         }
         try {
-            // Actualiza la información básica de la rutina
-            rutinaService.actualizarInformacionBasicaRutina(id, nombre, descripcion, categoria);
+            if (categoriaIds == null || categoriaIds.isEmpty() || categoriaIds.stream().allMatch(cid -> cid == null)) {
+                return "redirect:/rutinas/editar/" + id + "?error=" + URLEncoder.encode("Seleccioná al menos una categoría.", StandardCharsets.UTF_8)
+                        + (returnAlumnoId != null ? "&alumnoId=" + returnAlumnoId : "")
+                        + (returnTab != null && !returnTab.isBlank() ? "&returnTab=" + returnTab : "");
+            }
+            rutinaService.actualizarInformacionBasicaRutina(id, nombre, descripcion, categoriaIds);
 
             // Si es rutina asignada (no plantilla), actualizar nota para el alumno
             if (!rutina.isEsPlantilla() && rutina.getProfesor() != null && rutina.getProfesor().getId().equals(profesor.getId())) {

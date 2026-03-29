@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de backup - MiGymVirtual</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <!-- Estilos del módulo backup: ver /style.css (.admin-backup-fragment …). El fragmento ?fragment=1 no incluye este <head>. -->
+    <style>
+        body { background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%); min-height: 100vh; }
+    </style>
+</head>
+<body>
+<div th:if="${param.embed == null || param.embed.isEmpty()}" th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div th:fragment="contenido" class="admin-backup-fragment">
+<div class="container py-4 admin-section-content">
+    <div class="text-center mb-3">
+        <h1 class="fw-bold mb-1 fs-4"><i class="fas fa-database me-2" style="color:#5e35b1;"></i>Sistema de backup</h1>
+        <p class="text-muted mb-0 small">Contenido (ejercicios, rutinas plantilla, series, grupos, categorías, imágenes) y alumnos (datos, mediciones, progresos). Sin asignaciones de rutinas.</p>
+        <p class="text-muted small mb-0" th:if="${backupDirectorioAbs != null}">
+            <i class="fas fa-folder-open me-1"></i>Carpeta en servidor: <code class="small" th:text="${backupDirectorioAbs}">backup</code>
+            <span class="d-block mt-1">Se conservan como máximo <strong>2</strong> archivos por tipo; el más antiguo se elimina al guardar uno nuevo.</span>
+        </p>
+    </div>
+    <div class="d-flex justify-content-end mb-3">
+        <a th:if="${(param.embed == null || param.embed.isEmpty()) && (param.fragment == null || param.fragment.isEmpty())}" th:href="@{/profesor/administracion}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Administración
+        </a>
+    </div>
+
+    <div th:if="${backupContenidoMsg}" class="alert alert-success py-2 small" th:text="${backupContenidoMsg}"></div>
+    <div th:if="${backupContenidoErr}" class="alert alert-danger py-2 small" th:text="${backupContenidoErr}"></div>
+    <div th:if="${backupAlumnosMsg}" class="alert alert-success py-2 small" th:text="${backupAlumnosMsg}"></div>
+    <div th:if="${backupAlumnosErr}" class="alert alert-danger py-2 small" th:text="${backupAlumnosErr}"></div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-6">
+            <div class="d-flex flex-column gap-3 backup-sector-contenido">
+                <div class="card backup-card backup-card-compact">
+                    <div class="card-header bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-save me-2"></i>Guardar backup de contenido
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Genera un ZIP en el servidor con el <strong>catálogo de ejercicios</strong> (global) y las <strong>rutinas plantilla + series del profesor del panel</strong> (lo mismo que ves en «Mis rutinas» / «Mis series»), más grupos, categorías e imágenes. No incluye rutinas asignadas a alumnos ni datos de otros profesores.</p>
+                        <form th:action="@{/profesor/backup/guardar-contenido}" method="post" class="form-guardar-contenido">
+                            <button type="submit" class="btn btn-success btn-sm" data-confirm-msg="¿Guardar un nuevo backup de contenido en el servidor? Si ya hay 2, se eliminará el más antiguo.">
+                                <i class="fas fa-save me-1"></i>Guardar backup ahora
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card backup-card backup-card-compact">
+                    <div class="card-header bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-undo me-2"></i>Restaurar contenido desde backup
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2"><strong class="text-danger">Reemplazo total:</strong> se borran ejercicios, rutinas plantilla, series y datos vinculados del contenido importado y se cargan los del archivo elegido (foto del día del backup). Las asignaciones de rutinas a alumnos no se respaldan.</p>
+                        <ul class="list-group list-group-flush border rounded mb-2" th:if="${backupsContenido != null && !backupsContenido.isEmpty()}">
+                            <li th:each="b : ${backupsContenido}" class="list-group-item backup-list-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <div>
+                                    <span class="fw-medium" th:text="${b.nombre}">archivo.zip</span>
+                                    <span class="text-muted small ms-1" th:text="'(' + ${#numbers.formatDecimal(b.tamanoBytes / 1024.0, 1, 1)} + ' KB)'"></span>
+                                </div>
+                                <form th:action="@{/profesor/backup/restaurar-contenido}" method="post" class="form-restaurar-contenido mb-0">
+                                    <input type="hidden" name="nombreArchivo" th:value="${b.nombre}">
+                                    <button type="submit" class="btn btn-warning btn-sm" th:data-confirm-msg="|¿Restaurar TODO el contenido desde ${b.nombre}? Se borrarán los datos actuales de ejercicios/rutinas plantilla/series. Acción irreversible.|">
+                                        <i class="fas fa-undo me-1"></i>Restaurar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                        <p th:if="${backupsContenido == null || backupsContenido.isEmpty()}" class="text-muted small mb-0">No hay backups de contenido guardados. Usá «Guardar backup ahora».</p>
+                        <div th:if="${importResult}" class="alert mt-2 py-2 px-2 small" th:classappend="${importResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+                            <span th:if="${importResult['success']}">
+                                <strong>OK.</strong>
+                                <span th:text="${importResult['ejerciciosImportados']} + ' ejercicios'">0</span>
+                                <span th:if="${importResult['rutinasImportadas'] != null && importResult['rutinasImportadas'] > 0}" th:text="', ' + ${importResult['rutinasImportadas']} + ' rutinas'"> </span>
+                                <span th:if="${importResult['categoriasImportadas'] != null && importResult['categoriasImportadas'] > 0}" th:text="', ' + ${importResult['categoriasImportadas']} + ' categorías'"> </span>.
+                            </span>
+                            <span th:if="${!importResult['success']}" th:text="${importResult['message']}">Error</span>
+                            <ul th:if="${importResult['errores'] != null && !importResult['errores'].isEmpty()}" class="mb-0 mt-1 ps-3 small">
+                                <li th:each="e : ${importResult['errores']}" th:text="${e}">error</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <div class="d-flex flex-column gap-3 backup-sector-alumnos">
+                <div class="card backup-card card-alumnos-export">
+                    <div class="card-header card-header-alumnos-export">
+                        <i class="fas fa-users me-2"></i>Guardar backup de alumnos
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">Genera un JSON en el servidor con datos personales, mediciones y registros de progreso. <strong>No</strong> incluye asistencias ni rutinas asignadas.</p>
+                        <form th:action="@{/profesor/backup/guardar-alumnos}" method="post" class="form-guardar-alumnos">
+                            <button type="submit" class="btn btn-sm" style="background: rgba(3, 169, 244, 0.25); color: #0277bd; border: 1px solid #03a9f4;" data-confirm-msg="¿Guardar un nuevo backup de alumnos en el servidor? Si ya hay 2, se eliminará el más antiguo.">
+                                <i class="fas fa-save me-1"></i>Guardar backup ahora
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card backup-card card-alumnos-import">
+                    <div class="card-header card-header-alumnos-import">
+                        <i class="fas fa-undo me-2"></i>Restaurar alumnos desde backup
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2"><strong class="text-danger">Reemplazo total:</strong> se eliminan todos los alumnos actuales del profesor y se cargan los del backup elegido.</p>
+                        <ul class="list-group list-group-flush border rounded mb-2" th:if="${backupsAlumnos != null && !backupsAlumnos.isEmpty()}">
+                            <li th:each="b : ${backupsAlumnos}" class="list-group-item backup-list-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <div>
+                                    <span class="fw-medium" th:text="${b.nombre}">archivo.json</span>
+                                    <span class="text-muted small ms-1" th:text="'(' + ${#numbers.formatDecimal(b.tamanoBytes / 1024.0, 1, 1)} + ' KB)'"></span>
+                                </div>
+                                <form th:action="@{/profesor/backup/restaurar-alumnos}" method="post" class="form-restaurar-alumnos mb-0">
+                                    <input type="hidden" name="nombreArchivo" th:value="${b.nombre}">
+                                    <button type="submit" class="btn btn-warning btn-sm" th:data-confirm-msg="|¿Restaurar TODOS los alumnos desde ${b.nombre}? Se borrarán los alumnos actuales. Acción irreversible.|">
+                                        <i class="fas fa-undo me-1"></i>Restaurar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                        <p th:if="${backupsAlumnos == null || backupsAlumnos.isEmpty()}" class="text-muted small mb-0">No hay backups de alumnos guardados.</p>
+                        <div th:if="${importAlumnosResult}" class="alert mt-2 py-2 px-2 small" th:classappend="${importAlumnosResult['success']} ? 'alert-success' : 'alert-danger'" role="alert">
+                            <span th:if="${importAlumnosResult['success']}">
+                                <strong>OK.</strong>
+                                <span th:text="${importAlumnosResult['message']}">OK</span>
+                            </span>
+                            <span th:if="${!importAlumnosResult['success']}" th:text="${importAlumnosResult['message']}">Error</span>
+                            <ul th:if="${importAlumnosResult['errores'] != null && !importAlumnosResult['errores'].isEmpty()}" class="mb-0 mt-1 ps-3 small">
+                                <li th:each="e : ${importAlumnosResult['errores']}" th:text="${e}">error</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalProgreso" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Procesando...</span>
+                </div>
+                <h6 class="mb-2" id="modalProgresoTitulo">Procesando...</h6>
+                <div class="progress mb-0" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="modalConfirmar" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-confirmar-header">
+                    <h5 class="modal-title" id="modalConfirmarTitulo"><i class="fas fa-exclamation-circle me-2"></i>Confirmar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modalConfirmarMensaje">¿Está seguro?</div>
+                <div class="modal-footer modal-confirmar-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirmarBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var modalProgresoEl = document.getElementById('modalProgreso');
+    var modalProgreso = modalProgresoEl ? new bootstrap.Modal(modalProgresoEl) : null;
+    var modalProgresoTitulo = document.getElementById('modalProgresoTitulo');
+    var modalConfirmar = document.getElementById('modalConfirmar');
+
+    function confirmar(mensaje, titulo) {
+        return new Promise(function(resolve) {
+            var msgEl = document.getElementById('modalConfirmarMensaje');
+            var titEl = document.getElementById('modalConfirmarTitulo');
+            var btnEl = document.getElementById('modalConfirmarBtn');
+            if (msgEl) msgEl.textContent = mensaje || '¿Está seguro?';
+            if (titEl) titEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (titulo || 'Confirmar');
+            var m = new bootstrap.Modal(modalConfirmar);
+            function cleanup() {
+                btnEl.removeEventListener('click', onConfirm);
+                modalConfirmar.removeEventListener('hidden.bs.modal', onHide);
+            }
+            function onConfirm() {
+                cleanup();
+                m.hide();
+                resolve(true);
+            }
+            function onHide() {
+                cleanup();
+                resolve(false);
+            }
+            btnEl.addEventListener('click', onConfirm);
+            modalConfirmar.addEventListener('hidden.bs.modal', onHide);
+            m.show();
+        });
+    }
+
+    function attachConfirmSubmit(selector, tituloProgreso) {
+        document.querySelectorAll(selector).forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                var btn = form.querySelector('[type=submit][data-confirm-msg]');
+                var msg = btn ? btn.getAttribute('data-confirm-msg') : '¿Continuar?';
+                e.preventDefault();
+                confirmar(msg).then(function(ok) {
+                    if (ok) {
+                        if (modalProgreso && modalProgresoTitulo) {
+                            modalProgresoTitulo.textContent = tituloProgreso || 'Procesando...';
+                            modalProgreso.show();
+                        }
+                        form.submit();
+                    }
+                });
+            });
+        });
+    }
+
+    attachConfirmSubmit('.form-guardar-contenido', 'Guardando backup de contenido...');
+    attachConfirmSubmit('.form-guardar-alumnos', 'Guardando backup de alumnos...');
+    attachConfirmSubmit('.form-restaurar-contenido', 'Restaurando contenido...');
+    attachConfirmSubmit('.form-restaurar-alumnos', 'Restaurando alumnos...');
+})();
+</script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

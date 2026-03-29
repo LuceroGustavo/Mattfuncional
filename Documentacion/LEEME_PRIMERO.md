@@ -51,7 +51,7 @@ Tras iniciar sesión se redirige al **Panel del profesor** (`/profesor/{id}`).
 
 ## 3. Estructura de la documentación (todo en `Documentacion/`)
 
-Quedan **cuatro archivos** principales más la carpeta de servidor:
+Quedan **varios archivos** principales más la carpeta de servidor:
 
 | Archivo | Para qué sirve |
 |---------|-----------------|
@@ -59,7 +59,8 @@ Quedan **cuatro archivos** principales más la carpeta de servidor:
 | **AYUDA_MEMORIA.md** | Lista rápida de pendientes de ejercicios/vistas; nota sobre eliminar alumno y backup. Sistema de backup terminado (resumen). |
 | **PLAN_DE_DESARROLLO_UNIFICADO.md** | Visión, fases, checklist y pendientes detallados (único plan de desarrollo). |
 | **DOCUMENTACION_UNIFICADA.md** | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual (índice), referencias técnicas. |
-| **BASE_PARA_APP_VIRTUAL.md** | Contexto para fork: app 100 % virtual (quitar asistencias, pizarra, alumnos presenciales; 100 % responsive). |
+| **BASE_PARA_APP_VIRTUAL.md** | Contexto para fork MiGymVirtual (app 100 % virtual). |
+| **MEJORAS_DESDE_MIGYMVIRTUAL.md** | Plan y checklist: traer mejoras de la app referencia (`APP referencia/Migymvirtual/`) a Mattfuncional (back primero, luego vistas). |
 
 **Carpeta `servidor/`:** Despliegue en VPS (SSH, Nginx, menú). Ver `servidor/DESPLIEGUE-SERVIDOR.md` y `servidor/nginx-detodoya.conf`.
 

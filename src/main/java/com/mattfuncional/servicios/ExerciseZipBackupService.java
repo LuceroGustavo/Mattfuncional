@@ -3,6 +3,7 @@ package com.mattfuncional.servicios;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.mattfuncional.entidades.Categoria;
 import com.mattfuncional.entidades.Exercise;
 import com.mattfuncional.entidades.GrupoMuscular;
 import com.mattfuncional.entidades.Imagen;
@@ -10,6 +11,7 @@ import com.mattfuncional.entidades.Profesor;
 import com.mattfuncional.entidades.Rutina;
 import com.mattfuncional.entidades.Serie;
 import com.mattfuncional.entidades.SerieEjercicio;
+import com.mattfuncional.repositorios.CategoriaRepository;
 import com.mattfuncional.repositorios.PizarraItemRepository;
 import com.mattfuncional.repositorios.ProfesorRepository;
 import com.mattfuncional.repositorios.RutinaRepository;
@@ -31,6 +33,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +64,8 @@ public class ExerciseZipBackupService {
     private final RutinaRepository rutinaRepository;
     private final SerieRepository serieRepository;
     private final ProfesorRepository profesorRepository;
+    private final CategoriaRepository categoriaRepository;
+    private final CategoriaService categoriaService;
     private final PlatformTransactionManager transactionManager;
     private final ObjectMapper objectMapper;
 
@@ -71,6 +77,8 @@ public class ExerciseZipBackupService {
                                     RutinaRepository rutinaRepository,
                                     SerieRepository serieRepository,
                                     ProfesorRepository profesorRepository,
+                                    CategoriaRepository categoriaRepository,
+                                    CategoriaService categoriaService,
                                     PlatformTransactionManager transactionManager) {
         this.exerciseService = exerciseService;
         this.grupoMuscularService = grupoMuscularService;
@@ -80,6 +88,8 @@ public class ExerciseZipBackupService {
         this.rutinaRepository = rutinaRepository;
         this.serieRepository = serieRepository;
         this.profesorRepository = profesorRepository;
+        this.categoriaRepository = categoriaRepository;
+        this.categoriaService = categoriaService;
         this.transactionManager = transactionManager;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -122,6 +132,9 @@ public class ExerciseZipBackupService {
             manifest.put("cantidadGruposMusculares", gruposMusculares.size());
             manifest.put("cantidadRutinas", rutinasPlantilla.size());
             manifest.put("cantidadSeries", totalSeries);
+            List<Categoria> categoriasExport = new ArrayList<>(categoriaRepository.findAll());
+            categoriasExport.sort(Comparator.comparing(c -> c.getNombre() != null ? c.getNombre() : ""));
+            manifest.put("cantidadCategorias", categoriasExport.size());
             byte[] manifestBytes = objectMapper.writeValueAsString(manifest).getBytes(java.nio.charset.StandardCharsets.UTF_8);
             zos.putNextEntry(new ZipEntry("manifest.json"));
             zos.write(manifestBytes);
@@ -138,6 +151,21 @@ public class ExerciseZipBackupService {
             byte[] gruposJsonBytes = objectMapper.writeValueAsString(gruposParaJson).getBytes(StandardCharsets.UTF_8);
             zos.putNextEntry(new ZipEntry("grupos-musculares.json"));
             zos.write(gruposJsonBytes);
+            zos.closeEntry();
+
+            List<Map<String, Object>> catsParaJson = new ArrayList<>();
+            for (Categoria c : categoriasExport) {
+                Map<String, Object> cItem = new HashMap<>();
+                cItem.put("nombre", c.getNombre());
+                cItem.put("esSistema", c.getProfesor() == null);
+                if (c.getProfesor() != null) {
+                    cItem.put("profesorId", c.getProfesor().getId());
+                }
+                catsParaJson.add(cItem);
+            }
+            byte[] catsJsonBytes = objectMapper.writeValueAsString(catsParaJson).getBytes(StandardCharsets.UTF_8);
+            zos.putNextEntry(new ZipEntry("categorias.json"));
+            zos.write(catsJsonBytes);
             zos.closeEntry();
 
             // 3. ejercicios.json (con referencia a archivo de imagen, sin Base64)
@@ -219,12 +247,12 @@ public class ExerciseZipBackupService {
             for (Rutina rutina : rutinasPlantilla) {
                 Rutina rConSeries = rutinaRepository.findByIdWithSeries(rutina.getId()).orElse(rutina);
                 Map<String, Object> rutinaItem = new HashMap<>();
-                rutinaItem.put("nombre", rutina.getNombre());
-                rutinaItem.put("descripcion", rutina.getDescripcion());
-                rutinaItem.put("estado", rutina.getEstado());
-                rutinaItem.put("categoria", rutina.getCategoria());
-                rutinaItem.put("creador", rutina.getCreador());
-                rutinaItem.put("esPlantilla", rutina.isEsPlantilla());
+                rutinaItem.put("nombre", rConSeries.getNombre());
+                rutinaItem.put("descripcion", rConSeries.getDescripcion());
+                rutinaItem.put("estado", rConSeries.getEstado());
+                rutinaItem.put("categoria", String.join(",", rConSeries.getCategoriasList()));
+                rutinaItem.put("creador", rConSeries.getCreador());
+                rutinaItem.put("esPlantilla", rConSeries.isEsPlantilla());
                 rutinasParaJson.add(rutinaItem);
 
                 if (rConSeries.getSeries() != null) {
@@ -363,6 +391,13 @@ public class ExerciseZipBackupService {
                     rutinaRepository.deleteAll();
                     logger.info("Rutinas eliminadas para suplantar");
                 }
+                if (profesorRestore != null && importarRutinas) {
+                    byte[] catProbe = getZipEntryBytes(zipEntries, "categorias.json");
+                    if (catProbe != null) {
+                        categoriaService.eliminarCategoriasDelProfesor(profesorRestore.getId());
+                        logger.info("Categorías del profesor eliminadas antes de restaurar desde categorias.json");
+                    }
+                }
                 if (importarEjercicios) {
                     List<Exercise> existentes = exerciseService.findAllExercisesWithImages();
                     for (Exercise e : existentes) {
@@ -376,6 +411,36 @@ public class ExerciseZipBackupService {
                 result.put("success", false);
                 result.put("message", "Error al borrar datos previos para suplantar");
                 return result;
+            }
+        }
+
+        int categoriasImportadas = 0;
+        if (importarRutinas && profesorRestore != null) {
+            byte[] catBytes = getZipEntryBytes(zipEntries, "categorias.json");
+            if (catBytes != null) {
+                try {
+                    List<Map<String, Object>> categoriasData = objectMapper.readValue(
+                            new String(catBytes, StandardCharsets.UTF_8),
+                            new TypeReference<List<Map<String, Object>>>() {});
+                    for (Map<String, Object> cd : categoriasData) {
+                        String nombreCat = (String) cd.get("nombre");
+                        if (nombreCat == null || nombreCat.isBlank()) continue;
+                        boolean esSistema = cd.get("esSistema") == null || Boolean.TRUE.equals(cd.get("esSistema"));
+                        if (esSistema) {
+                            categoriaService.ensureCategoriaExiste(nombreCat, true, null);
+                        } else {
+                            Object pid = cd.get("profesorId");
+                            if (pid instanceof Number && ((Number) pid).longValue() == profesorRestore.getId()) {
+                                categoriaService.ensureCategoriaExiste(nombreCat, false, profesorRestore);
+                            } else if (pid == null) {
+                                categoriaService.ensureCategoriaExiste(nombreCat, false, profesorRestore);
+                            }
+                        }
+                        categoriasImportadas++;
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se pudo importar categorias.json: {}", e.getMessage());
+                }
             }
         }
 
@@ -505,7 +570,14 @@ public class ExerciseZipBackupService {
                     rutina.setNombre(nombreRutina);
                     rutina.setDescripcion((String) rd.get("descripcion"));
                     rutina.setEstado(rd.get("estado") != null ? (String) rd.get("estado") : "ACTIVA");
-                    rutina.setCategoria((String) rd.get("categoria"));
+                    String catStr = (String) rd.get("categoria");
+                    if (catStr != null && !catStr.isBlank()) {
+                        List<String> catNames = Arrays.stream(catStr.split(","))
+                                .map(String::trim)
+                                .filter(s -> !s.isEmpty())
+                                .collect(Collectors.toList());
+                        rutina.setCategorias(categoriaService.resolveCategoriasByNames(catNames, profesorRestore.getId()));
+                    }
                     rutina.setCreador(rd.get("creador") != null ? (String) rd.get("creador") : "ADMIN");
                     rutina.setEsPlantilla(rd.get("esPlantilla") == null || Boolean.TRUE.equals(rd.get("esPlantilla")));
                     rutina.setProfesor(profesorRestore);
@@ -585,6 +657,7 @@ public class ExerciseZipBackupService {
         result.put("gruposMuscularesImportados", gruposImportados);
         result.put("rutinasImportadas", rutinasImportadas);
         result.put("seriesImportadas", seriesImportadas);
+        result.put("categoriasImportadas", categoriasImportadas);
         if (!errores.isEmpty()) {
             result.put("errores", errores);
         }

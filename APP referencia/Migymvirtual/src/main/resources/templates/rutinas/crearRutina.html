@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crear Rutina - MiGymVirtual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <link href="/css/footer.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 30px;
+        }
+        @media (max-width: 767px) {
+            .crear-rutina-container { padding-left: 0.3rem; padding-right: 0.3rem; }
+            .main-container { margin: 4px 0; padding: 1rem 0.3rem; border-radius: 12px; }
+            .form-title { font-size: 1.5rem; }
+            .card-body[style*="max-height"] { max-height: none !important; }
+        }
+        .form-title {
+            color: #2c3e50;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+        }
+        #tablaSeriesCrear { font-size: 0.9rem; }
+        .fila-serie-crear.fila-serie-seleccionada { background-color: rgba(0,0,0,0.06) !important; }
+        @media (max-width: 575px) {
+            #tablaSeriesCrear { font-size: 0.8rem; }
+            #tablaSeriesCrear th:nth-child(4), #tablaSeriesCrear td:nth-child(4) { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+        }
+        .col-descripcion-movil { display: none; }
+        @media (min-width: 576px) {
+            .col-descripcion-movil { display: table-cell; }
+        }
+        .selected-series {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .selected-serie-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #fdcb6e;
+        }
+        #selected-series-ordered .list-group-item { flex-wrap: nowrap; }
+        #selected-series-ordered .serie-nombre-en-listado { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .exercise-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin: 2px;
+        }
+        .category-badge {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .modal-card-serie {
+            background: linear-gradient(135deg, #ede7f6 0%, #f3e5f5 100%);
+            border-color: #b39ddb !important;
+            box-shadow: 0 2px 12px rgba(126, 87, 194, 0.15);
+        }
+        .modal-card-serie .card-title { color: #4a148c; }
+        .modal-card-serie .badge.bg-secondary { background: #7e57c2 !important; }
+        .modal-botones-accion { flex-wrap: nowrap; }
+        @media (max-width: 400px) {
+            .modal-botones-accion { font-size: 0.8rem; }
+            .modal-botones-accion .btn { padding-left: 0.4rem; padding-right: 0.4rem; }
+        }
+        /* Barra inferior móvil: accesos directos (igual que panel profesor) */
+        .bottom-nav-mobile {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            padding: 0.5rem 0 0.6rem;
+            padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+            z-index: 1030;
+        }
+        @media (max-width: 991px) {
+            .bottom-nav-mobile { display: flex !important; justify-content: space-around; align-items: center; }
+            .crear-rutina-container { padding-bottom: 5rem !important; }
+        }
+        @media (min-width: 992px) {
+            .bottom-nav-mobile { display: none !important; }
+        }
+        .bottom-nav-mobile a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .bottom-nav-mobile a:hover, .bottom-nav-mobile a:focus { color: #fff; }
+        .bottom-nav-mobile a i { font-size: 1.25rem; }
+        /* Módulo categorías: fondo pastel para diferenciarlo de descripción */
+        .modulo-categorias {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0, 184, 148, 0.2);
+        }
+        .modulo-categorias .titulo-categoria-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container-fluid px-md-3 crear-rutina-container">
+    <div class="main-container">
+        <h1 class="form-title">
+            <i class="fas fa-list me-3"></i>Crear Nueva Rutina
+        </h1>
+
+        <!-- Mensajes de éxito o error -->
+        <div th:if="${successMessage}" class="alert alert-success text-center" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger text-center" th:text="${errorMessage}"></div>
+
+        <form method="post" th:action="@{/rutinas/crear-plantilla}" id="rutinaForm">
+            <div class="row g-3">
+                <!-- Información básica de la rutina -->
+                <div class="col-12 col-md-4 order-2 order-md-1">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información de la Rutina</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Input oculto para el ID del profesor -->
+                            <input type="hidden" name="profesorId" th:if="${usuario?.profesor}" th:value="${usuario.profesor.id}" />
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label fw-bold">Nombre de la Rutina:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            
+                            <div class="modulo-categorias">
+                                <div class="titulo-categoria-fila">
+                                    <label class="form-label fw-bold mb-0">Categoría(s):</label>
+                                    <a th:href="@{/profesor/mis-categorias(returnUrl='/rutinas/crear')}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-plus me-1"></i>Crear categoría
+                                    </a>
+                                </div>
+                                <p class="small text-muted mb-2">Podés elegir más de una (ej. Fuerza y Cardio).</p>
+                                <div class="d-flex flex-wrap gap-3" th:if="${categorias != null}">
+                                    <div th:each="cat : ${categorias}" class="form-check">
+                                        <input class="form-check-input input-categoria" type="checkbox" name="categoriaIds" th:value="${cat.id}" th:id="${'cat_' + cat.id}">
+                                        <label class="form-check-label" th:for="${'cat_' + cat.id}" th:text="${cat.nombre}">Categoría</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label fw-bold">Descripción:</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="4"></textarea>
+                            </div>
+                            
+                            <button type="button" id="submitRutinaBtn" class="btn btn-primary w-100 mt-3">
+                                <i class="fas fa-save me-2"></i>Crear Rutina Plantilla
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selección de series -->
+                <div class="col-12 col-md-8 order-1 order-md-2">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h5 class="mb-0">
+                                <i class="fas fa-dumbbell me-2"></i>Seleccionar Series
+                                <span class="badge bg-light text-dark ms-2" id="selectedCount">0 seleccionadas</span>
+                            </h5>
+                            <a href="/series/crear" class="btn btn-sm btn-dark">
+                                <i class="fas fa-plus me-1"></i>Crear serie
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <!-- Lista ordenada de series seleccionadas (el orden aquí es el que tendrá la rutina) -->
+                            <div class="mb-3 p-2 rounded" style="background: #fff8e1;">
+                                <h6 class="mb-2"><i class="fas fa-sort me-1"></i>Series seleccionadas (orden en la rutina)</h6>
+                                <p class="small text-muted mb-2 d-none d-md-block">Agregá series desde la tabla (botón + o Ver detalle). Usá Subir/Bajar para cambiar el orden y Vueltas para repetir cada serie.</p>
+                                <p class="small text-muted mb-2 d-md-none mb-0">Seleccionar series</p>
+                                <ul id="selected-series-ordered" class="list-group list-group-flush"></ul>
+                            </div>
+                            <div th:if="${seriesPlantilla.isEmpty()}" class="alert alert-info">
+                                No has creado ninguna serie plantilla todavía. <a th:href="@{/series/crear}" class="alert-link">Crea una aquí</a>.
+                            </div>
+                            <div th:unless="${seriesPlantilla.isEmpty()}">
+                                <label for="filtroSeriesCrear" class="form-label small text-muted">Buscar por nombre</label>
+                                <input type="text" id="filtroSeriesCrear" class="form-control form-control-sm mb-2" placeholder="Escribí el nombre de la serie...">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover table-sm" id="tablaSeriesCrear">
+                                        <thead class="table-success text-center">
+                                            <tr>
+                                                <th class="text-center" style="width: 50px;">Agregar</th>
+                                                <th>Nombre</th>
+                                                <th class="text-center">N° Ej.</th>
+                                                <th class="text-center col-descripcion-movil">Descripción</th>
+                                                <th class="text-center" style="width: 90px;">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="serie : ${seriesPlantilla}" class="fila-serie-crear align-middle"
+                                                th:attr="data-serie-id=${serie.id},
+                                                        data-serie-nombre=${serie.nombre},
+                                                        data-serie-descripcion=${serie.descripcion != null ? serie.descripcion : ''},
+                                                        data-serie-reps=${serie.repeticionesSerie != null ? serie.repeticionesSerie : 1},
+                                                        data-ejercicios-nombres=${serie.serieEjercicios != null ? #strings.listJoin(serie.serieEjercicios.![exercise.name], '|') : ''}">
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-success btn-agregar-serie" title="Agregar a la rutina"><i class="fas fa-plus"></i></button>
+                                                </td>
+                                                <td th:text="${serie.nombre}">Nombre</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-info" th:text="${serie.serieEjercicios != null ? #lists.size(serie.serieEjercicios) : 0}">0</span>
+                                                </td>
+                                                <td class="small col-descripcion-movil" th:text="${serie.descripcion != null ? serie.descripcion : '—'}">—</td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-ver-detalle-serie" title="Ver detalle"><i class="fas fa-eye"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Ver detalle de serie (tarjeta estilo pastel violeta; Ver serie, Modificar, Agregar a rutina) -->
+<div class="modal fade" id="modalDetalleSerie" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title"><i class="fas fa-dumbbell me-2" style="color:#7e57c2;"></i>Detalle de la serie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body pt-0" id="modalDetalleSerieBody">
+                <div class="card modal-card-serie border-2 rounded-3 overflow-hidden">
+                    <div class="card-body">
+                        <h6 class="card-title mb-2 fw-bold" id="modalSerieNombre">—</h6>
+                        <p class="small mb-2 fw-semibold">Descripción:</p>
+                        <p class="card-text small text-muted mb-2" id="modalSerieDescripcion">—</p>
+                        <p class="small mb-2 fw-semibold">Ejercicios:</p>
+                        <div id="modalSerieEjercicios" class="d-flex flex-wrap gap-1 mb-3"></div>
+                        <div class="d-flex flex-nowrap gap-2 modal-botones-accion">
+                            <a id="modalSerieVer" href="#" class="btn btn-outline-dark btn-sm flex-shrink-0" target="_blank" rel="noopener"><i class="fas fa-eye me-1"></i>Ver serie</a>
+                            <a id="modalSerieModificar" href="#" class="btn btn-outline-primary btn-sm flex-shrink-0"><i class="fas fa-edit me-1"></i>Modificar</a>
+                            <button type="button" class="btn btn-primary btn-sm flex-shrink-0" id="modalBtnAgregarSerie"><i class="fas fa-plus me-1"></i>Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal alerta estilo MiGymVirtual -->
+<div class="modal fade" id="modalAlertaRutina" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-confirmar-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalAlertaRutinaMensaje"></div>
+            <div class="modal-footer modal-confirmar-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra inferior móvil: accesos directos (Inicio, Alumnos, Rutinas, Más) -->
+<div th:replace="~{fragments/bottom-nav :: bottom-nav}"></div>
+
+<!-- Footer clásico -->
+<div th:replace="fragments/footer :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countBadge = document.getElementById('selectedCount');
+    const orderedList = document.getElementById('selected-series-ordered');
+    const filtro = document.getElementById('filtroSeriesCrear');
+    const tabla = document.getElementById('tablaSeriesCrear');
+    const modalDetalle = document.getElementById('modalDetalleSerie');
+    const modalBtnAgregar = document.getElementById('modalBtnAgregarSerie');
+
+    function updateCount() {
+        const n = orderedList.querySelectorAll('li[data-serie-id]').length;
+        countBadge.textContent = n + ' seleccionada(s)';
+        return n;
+    }
+
+    function addToOrderedListFromData(serieId, serieNombre, reps) {
+        if (!serieId) return;
+        if (orderedList.querySelector('li[data-serie-id="' + serieId + '"]')) return;
+        const nombre = (serieNombre || 'Serie').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const rep = (reps || '1').toString();
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center gap-2 py-2';
+        li.dataset.serieId = serieId;
+        li.innerHTML = '<span class="flex-grow-1 fw-bold text-truncate serie-nombre-en-listado" style="min-width:0">' + nombre + '</span>' +
+            '<label class="mb-0 small flex-shrink-0">Vueltas:</label>' +
+            '<input type="number" class="form-control form-control-sm flex-shrink-0" name="repeticiones_' + serieId + '" value="' + rep + '" min="1" max="10" style="width:70px">' +
+            '<input type="hidden" name="selectedSeries" value="' + serieId + '">' +
+            '<div class="btn-group btn-group-sm flex-shrink-0">' +
+            '<button type="button" class="btn btn-outline-secondary btn-subir" title="Subir"><i class="fas fa-arrow-up"></i></button>' +
+            '<button type="button" class="btn btn-outline-secondary btn-bajar" title="Bajar"><i class="fas fa-arrow-down"></i></button>' +
+            '<button type="button" class="btn btn-outline-danger btn-eliminar-serie" title="Eliminar de la rutina"><i class="fas fa-trash-alt"></i></button>' +
+            '</div>';
+        orderedList.appendChild(li);
+        li.querySelector('.btn-subir').addEventListener('click', function(e) { e.preventDefault(); moveItem(li, -1); });
+        li.querySelector('.btn-bajar').addEventListener('click', function(e) { e.preventDefault(); moveItem(li, 1); });
+        li.querySelector('.btn-eliminar-serie').addEventListener('click', function(e) { e.preventDefault(); removeFromOrderedList(serieId); });
+        updateCount();
+        syncSelectedRows();
+    }
+
+    function removeFromOrderedList(serieId) {
+        const li = orderedList.querySelector('li[data-serie-id="' + serieId + '"]');
+        if (li) li.remove();
+        updateCount();
+        syncSelectedRows();
+    }
+
+    function syncSelectedRows() {
+        if (!tabla) return;
+        var selectedIds = [];
+        orderedList.querySelectorAll('li[data-serie-id]').forEach(function(li) {
+            var sid = li.getAttribute('data-serie-id');
+            if (sid) selectedIds.push(String(sid));
+        });
+        tabla.querySelectorAll('tbody tr.fila-serie-crear').forEach(function(tr) {
+            var id = String(tr.getAttribute('data-serie-id') || '');
+            if (selectedIds.indexOf(id) !== -1) tr.classList.add('fila-serie-seleccionada');
+            else tr.classList.remove('fila-serie-seleccionada');
+        });
+    }
+
+    function moveItem(li, delta) {
+        const siblings = Array.from(orderedList.querySelectorAll('li[data-serie-id]'));
+        const idx = siblings.indexOf(li);
+        if (idx === -1) return;
+        const next = idx + delta;
+        if (next < 0 || next >= siblings.length) return;
+        if (delta < 0) orderedList.insertBefore(li, siblings[next]);
+        else orderedList.insertBefore(li, siblings[next].nextSibling);
+    }
+
+    // Filtro por nombre
+    if (filtro && tabla) {
+        filtro.addEventListener('input', function() {
+            var texto = (this.value || '').toLowerCase().trim();
+            tabla.querySelectorAll('tbody tr.fila-serie-crear').forEach(function(tr) {
+                var nombre = (tr.getAttribute('data-serie-nombre') || '').toLowerCase();
+                tr.style.display = (texto === '' || nombre.indexOf(texto) !== -1) ? '' : 'none';
+            });
+        });
+    }
+
+    // Agregar desde botón + de la fila
+    if (tabla) {
+        tabla.querySelectorAll('.btn-agregar-serie').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var row = this.closest('tr.fila-serie-crear');
+                if (!row) return;
+                var id = row.getAttribute('data-serie-id');
+                if (orderedList.querySelector('li[data-serie-id="' + id + '"]')) return;
+                addToOrderedListFromData(id, row.getAttribute('data-serie-nombre'), row.getAttribute('data-serie-reps') || '1');
+            });
+        });
+    }
+
+    // Ver detalle: abrir modal, rellenar y setear enlaces Ver/Modificar serie
+    var currentDetalleRow = null;
+    if (tabla) {
+        tabla.querySelectorAll('.btn-ver-detalle-serie').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var row = this.closest('tr.fila-serie-crear');
+                if (!row) return;
+                currentDetalleRow = row;
+                var id = row.getAttribute('data-serie-id');
+                var nombre = row.getAttribute('data-serie-nombre') || '—';
+                var desc = row.getAttribute('data-serie-descripcion') || '—';
+                var ejerciciosStr = row.getAttribute('data-ejercicios-nombres') || '';
+                var ejercicios = ejerciciosStr ? ejerciciosStr.split('|') : [];
+                document.getElementById('modalSerieNombre').textContent = nombre;
+                document.getElementById('modalSerieDescripcion').textContent = desc || '—';
+                document.getElementById('modalSerieVer').setAttribute('href', '/series/ver/' + id + '?volver=/rutinas/crear');
+                document.getElementById('modalSerieModificar').setAttribute('href', '/series/editar/' + id + '?volver=/rutinas/crear');
+                var cont = document.getElementById('modalSerieEjercicios');
+                cont.innerHTML = '';
+                ejercicios.forEach(function(n) {
+                    var b = document.createElement('span');
+                    b.className = 'badge bg-secondary';
+                    b.textContent = n;
+                    cont.appendChild(b);
+                });
+                if (typeof bootstrap !== 'undefined') (new bootstrap.Modal(modalDetalle)).show();
+            });
+        });
+    }
+    if (modalBtnAgregar && modalDetalle) {
+        modalBtnAgregar.addEventListener('click', function() {
+            if (!currentDetalleRow) return;
+            var id = currentDetalleRow.getAttribute('data-serie-id');
+            if (!orderedList.querySelector('li[data-serie-id="' + id + '"]')) {
+                addToOrderedListFromData(id, currentDetalleRow.getAttribute('data-serie-nombre'), currentDetalleRow.getAttribute('data-serie-reps') || '1');
+            }
+            var modal = bootstrap.Modal.getInstance(modalDetalle);
+            if (modal) modal.hide();
+            currentDetalleRow = null;
+        });
+    }
+
+    const submitBtn = document.getElementById('submitRutinaBtn');
+    const rutinaForm = document.getElementById('rutinaForm');
+
+    function mostrarAlerta(mensaje) {
+        var el = document.getElementById('modalAlertaRutinaMensaje');
+        var modalEl = document.getElementById('modalAlertaRutina');
+        if (el) el.textContent = mensaje || '';
+        if (modalEl && typeof bootstrap !== 'undefined') (new bootstrap.Modal(modalEl)).show();
+    }
+
+    submitBtn.addEventListener('click', function() {
+        const nombreRutina = document.getElementById('nombre').value;
+        if (!nombreRutina.trim()) {
+            mostrarAlerta('Por favor, ingresa un nombre para la rutina.');
+            return;
+        }
+        const categoriasChecked = rutinaForm.querySelectorAll('input[name="categoriaIds"]:checked');
+        if (!categoriasChecked.length) {
+            mostrarAlerta('Seleccioná al menos una categoría.');
+            return;
+        }
+        const n = orderedList.querySelectorAll('input[name="selectedSeries"]').length;
+        if (n === 0) {
+            mostrarAlerta('Debes seleccionar al menos una serie para agregar a la rutina.');
+            return;
+        }
+        rutinaForm.submit();
+    });
+});
+</script>
+
+</body>
+</html> 
