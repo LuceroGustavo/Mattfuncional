@@ -75,6 +75,11 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
            "(e.profesor IS NULL OR e.esPredeterminado = true) OR " +
            "(e.profesor.id = :profesorId AND (e.esPredeterminado = false OR e.esPredeterminado IS NULL))")
     List<Exercise> findEjerciciosDisponiblesParaProfesorWithImages(@Param("profesorId") Long profesorId);
+
+    @Query("SELECT COUNT(e) FROM Exercise e WHERE " +
+           "(e.profesor IS NULL OR e.esPredeterminado = true) OR " +
+           "(e.profesor.id = :profesorId AND (e.esPredeterminado = false OR e.esPredeterminado IS NULL))")
+    long countEjerciciosDisponiblesParaProfesor(@Param("profesorId") Long profesorId);
     
     /**
      * Obtiene solo los ejercicios propios del profesor (excluyendo predeterminados)

@@ -149,6 +149,7 @@ public class ProfesorController {
         model.addAttribute("series", series);
         model.addAttribute("profesor", profesor);
         model.addAttribute("gruposMusculares", grupoMuscularService.findDisponiblesParaProfesor(profesor.getId()));
+        model.addAttribute("cantidadEjercicios", exerciseService.countEjerciciosDisponiblesParaProfesor(profesor.getId()));
 
         model.addAttribute("usuario", usuarioService.getUsuarioActual());
 

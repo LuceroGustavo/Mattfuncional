@@ -57,6 +57,7 @@ Debajo se listan los pedidos. La columna **Estado** se actualiza a medida que se
 
 ## 5. Documentos relacionados
 
+- [PLAN_MODIFICACION_VISTAS.md](PLAN_MODIFICACION_VISTAS.md) — Plan de vistas responsive y paleta (panel → pizarra → calendario → pestañas; excepciones alumnos/presentismo).
 - [BASE_PARA_APP_VIRTUAL.md](BASE_PARA_APP_VIRTUAL.md) — Contexto del fork MiGymVirtual (dirección opuesta a este plan).
 - [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) — Estado actual de Mattfuncional.
 - [LEEME_PRIMERO.md](LEEME_PRIMERO.md) — Dónde está cada cosa en el código.

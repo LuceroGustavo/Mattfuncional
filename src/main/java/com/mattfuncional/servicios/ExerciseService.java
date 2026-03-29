@@ -366,6 +366,14 @@ public class ExerciseService {
     public List<Exercise> findEjerciciosDisponiblesParaProfesor(Long profesorId) {
         return exerciseRepository.findEjerciciosDisponiblesParaProfesor(profesorId);
     }
+
+    /** Cuenta predeterminados + propios del profesor (misma lógica que {@link #findEjerciciosDisponiblesParaProfesor}). */
+    public long countEjerciciosDisponiblesParaProfesor(Long profesorId) {
+        if (profesorId == null) {
+            return 0;
+        }
+        return exerciseRepository.countEjerciciosDisponiblesParaProfesor(profesorId);
+    }
     
     /**
      * Obtiene ejercicios disponibles para un profesor con imagen y grupos ya cargados.

@@ -1,4 +1,4 @@
-<!-- fragments/navbar.html - Mattfuncional. Fondo unificado y texto negro en todas las vistas. -->
+<!-- fragments/navbar.html - Mattfuncional. Escritorio: barra completa. Móvil (≤991px): compacta estilo MiGymVirtual. -->
 <nav th:fragment="navbar" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity"
      class="navbar navbar-expand-lg navbar-matt shadow-sm"
      style="background-image: url('/img/fondo-navbar.png'); background-size: cover; background-position: center; background-color: #e0e0e0;">
@@ -6,35 +6,130 @@
         .navbar-matt .navbar-brand span, .navbar-matt .text-navbar { color: #000 !important; }
         .navbar-matt .btn-outline-navbar { border-color: #333; color: #000 !important; }
         .navbar-matt .btn-outline-navbar:hover { background: rgba(0,0,0,0.08); color: #000 !important; border-color: #000; }
+        .navbar-matt .navbar-brand { padding-top: 0.05rem; padding-bottom: 0.05rem; }
         .navbar-matt .navbar-brand .logo-circle { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+
+        /* Entorno 2 (móvil, ≤991px): barra compacta — logo + marca | sobre | rol | Salir */
+        @media (max-width: 991.98px) {
+            .navbar-matt .container-fluid {
+                padding: 0.5rem 0.5rem !important;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 0.25rem;
+            }
+            .navbar-matt .navbar-volver,
+            .navbar-matt .navbar-panel,
+            .navbar-matt .navbar-email,
+            .navbar-matt .navbar-avatar { display: none !important; }
+            .navbar-matt .navbar-brand { min-width: 0; flex: 1 1 auto; margin-right: 0.35rem !important; }
+            .navbar-matt .navbar-brand .logo-circle { width: 40px; height: 40px; }
+            .navbar-matt .navbar-brand span { font-size: 0.95rem !important; line-height: 1.15; }
+            .navbar-matt .ms-auto {
+                margin-left: auto !important;
+                flex: 0 0 auto;
+            }
+            .navbar-matt .ms-auto > .d-flex.align-items-center {
+                gap: 0.4rem;
+                flex-wrap: nowrap;
+                align-items: center;
+            }
+            .navbar-matt a.navbar-envelope-mobile {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 2.35rem;
+                height: 2.35rem;
+                min-width: 2.35rem;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: 1px solid #1a1a1a !important;
+                border-radius: 7px !important;
+                background: rgba(255, 255, 255, 0.72) !important;
+                color: #000 !important;
+                box-shadow: none;
+            }
+            .navbar-matt a.navbar-envelope-mobile:hover,
+            .navbar-matt a.navbar-envelope-mobile:focus {
+                background: rgba(255, 255, 255, 0.92) !important;
+                color: #000 !important;
+                border-color: #000 !important;
+            }
+            .navbar-matt a.navbar-envelope-mobile i { font-size: 1rem; }
+            .navbar-matt .navbar-rol-mobile {
+                color: #000 !important;
+                font-size: 0.875rem;
+                font-weight: 400;
+                line-height: 1.2;
+                max-width: 6rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            @media (min-width: 400px) {
+                .navbar-matt .navbar-rol-mobile { max-width: 8.5rem; }
+            }
+            .navbar-matt .btn-logout-mobile {
+                padding: 0.38rem 0.62rem !important;
+                font-size: 0.8rem !important;
+                font-weight: 600;
+                border-radius: 7px !important;
+                line-height: 1.2;
+                white-space: nowrap;
+                background-color: #dc3545 !important;
+                border-color: #dc3545 !important;
+            }
+            .navbar-matt .btn-logout-mobile:hover {
+                background-color: #bb2d3b !important;
+                border-color: #b02a37 !important;
+            }
+        }
+        @media (min-width: 992px) {
+            .navbar-matt .navbar-rol-mobile { display: none !important; }
+        }
     </style>
     <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+        <a class="navbar-brand d-flex align-items-center me-2" th:href="@{/}"
+           sec:authorize="!isAuthenticated()">
             <img th:src="@{/img/logo.png}" alt="Logo Mattfuncional" class="logo-circle me-2" onerror="this.src='/img/not_imagen.png'">
-            <span class="fw-bold h4 mb-0">Mattfuncional</span>
+            <span class="fw-bold mb-0" style="font-size: 1.35rem;">Mattfuncional</span>
+        </a>
+        <a class="navbar-brand d-flex align-items-center me-2" th:href="@{/profesor/dashboard}"
+           sec:authorize="isAuthenticated()"
+           th:if="${#authentication.principal != null and #authentication.principal.rol != null and (#authentication.principal.rol == 'ADMIN' or #authentication.principal.rol == 'AYUDANTE' or #authentication.principal.rol == 'DEVELOPER')}">
+            <img th:src="@{/img/logo.png}" alt="Logo Mattfuncional" class="logo-circle me-2" onerror="this.src='/img/not_imagen.png'">
+            <span class="fw-bold mb-0" style="font-size: 1.35rem;">Mattfuncional</span>
+        </a>
+        <a class="navbar-brand d-flex align-items-center me-2" th:href="@{/}"
+           sec:authorize="isAuthenticated()"
+           th:unless="${#authentication.principal != null and #authentication.principal.rol != null and (#authentication.principal.rol == 'ADMIN' or #authentication.principal.rol == 'AYUDANTE' or #authentication.principal.rol == 'DEVELOPER')}">
+            <img th:src="@{/img/logo.png}" alt="Logo Mattfuncional" class="logo-circle me-2" onerror="this.src='/img/not_imagen.png'">
+            <span class="fw-bold mb-0" style="font-size: 1.35rem;">Mattfuncional</span>
         </a>
 
-        <a href="javascript:history.back()" class="btn btn-outline-navbar ms-3"><i class="fas fa-arrow-left"></i> Volver</a>
+        <a href="javascript:history.back()" class="btn btn-outline-navbar ms-3 navbar-volver"><i class="fas fa-arrow-left"></i> Volver</a>
 
-        <div class="ms-auto">
+        <div class="ms-auto d-flex align-items-center">
             <div sec:authorize="isAuthenticated()" class="d-flex align-items-center"
                  th:with="currentUser=${#authentication.principal}">
 
-                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'AYUDANTE' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-navbar me-3">
+                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'AYUDANTE' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/dashboard}" class="btn btn-outline-navbar me-3 navbar-panel">
                     <i class="fas fa-tachometer-alt me-1"></i> Ir a mi Panel
                 </a>
-                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/pagina-publica}" class="btn btn-outline-navbar me-3 position-relative" title="Consultas recibidas">
+                <a th:if="${currentUser.rol == 'ADMIN' or currentUser.rol == 'DEVELOPER'}" th:href="@{/profesor/pagina-publica}" class="btn btn-outline-navbar me-0 me-lg-3 position-relative navbar-envelope-mobile" title="Consultas recibidas">
                     <i class="fas fa-envelope"></i>
                     <span th:if="${cantidadConsultas != null && cantidadConsultas > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" th:text="${cantidadConsultas}">0</span>
                 </a>
-                <div class="text-end me-3 text-navbar">
+                <span class="navbar-rol-mobile text-navbar"
+                      th:text="${currentUser.rol == 'ADMIN' ? 'Administrador' : (currentUser.rol == 'AYUDANTE' ? 'Ayudante' : (currentUser.rol == 'DEVELOPER' ? 'Desarrollador' : (currentUser.rol == 'ALUMNO' ? 'Alumno' : 'Usuario')))}"
+                      th:attr="title=${currentUser.rol == 'ADMIN' ? 'Administrador' : (currentUser.rol == 'AYUDANTE' ? 'Ayudante' : (currentUser.rol == 'DEVELOPER' ? 'Desarrollador' : (currentUser.rol == 'ALUMNO' ? 'Alumno' : 'Usuario')))}">Rol</span>
+                <div class="text-end me-3 text-navbar navbar-email">
                     <div class="fw-bold" th:text="${currentUser.nombre}">Nombre</div>
                     <small class="text-muted" th:text="${currentUser.correo}">usuario@correo.com</small>
                 </div>
                 <img th:src="${currentUser.avatar != null and !#strings.isEmpty(currentUser.avatar) and currentUser.avatar != 'null' and currentUser.avatar != '/img/not_imagen.png' ? currentUser.avatar : '/img/avatar1.png'}"
-                     alt="Avatar" style="width: 45px; height: 45px;" class="rounded-circle border border-secondary"
+                     alt="Avatar" style="width: 45px; height: 45px;" class="rounded-circle border border-secondary navbar-avatar"
                      onerror="this.src='/img/avatar1.png'">
-                <a th:href="@{/logout}" class="btn btn-danger ms-3">Salir</a>
+                <a th:href="@{/logout}" class="btn btn-danger ms-0 ms-lg-3 btn-logout-mobile">Salir</a>
             </div>
 
             <div sec:authorize="!isAuthenticated()">

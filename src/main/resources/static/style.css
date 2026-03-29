@@ -57,6 +57,77 @@
   border: none;
 }
 
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem auto;
+    max-width: calc(100% - 1rem);
+  }
+  .modal-confirmar-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .modal-confirmar-footer .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+  /* Modal detalle serie: como MiGymVirtual — fila horizontal, botones proporcionados (no columna) */
+  #modalVerSerieMobile .modal-confirmar-footer {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    justify-content: center !important;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+  #modalVerSerieMobile .modal-confirmar-footer .btn {
+    width: auto !important;
+    flex: 1 1 calc(33.333% - 0.35rem);
+    min-width: 5.25rem;
+    max-width: 10.5rem;
+    min-height: 48px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Botones del modal Serie: mismo criterio pastel que la tabla del panel */
+#modalVerSerieMobile .modal-serie-btn-action.btn-info {
+  background: #80deea;
+  border-color: #4dd0e1;
+  color: #006064;
+}
+#modalVerSerieMobile .modal-serie-btn-action.btn-info:hover {
+  background: #4dd0e1;
+  border-color: #26c6da;
+  color: #004d40;
+}
+#modalVerSerieMobile .modal-serie-btn-action.btn-warning {
+  background: #ffcc80;
+  border-color: #ffb74d;
+  color: #e65100;
+}
+#modalVerSerieMobile .modal-serie-btn-action.btn-warning:hover {
+  background: #ffb74d;
+  border-color: #ffa726;
+  color: #bf360c;
+}
+#modalVerSerieMobile .modal-serie-btn-action.btn-danger {
+  background: #ef9a9a;
+  border-color: #e57373;
+  color: #b71c1c;
+}
+#modalVerSerieMobile .modal-serie-btn-action.btn-danger:hover {
+  background: #e57373;
+  border-color: #ef5350;
+  color: #fff;
+}
+
 /* Alertas con estilo Mattfuncional */
 .alert-mattfuncional {
   border-radius: 0.75rem;
