@@ -22,7 +22,13 @@ import java.util.UUID;
 public class ImagenServicio {
 
     private static final Logger logger = LoggerFactory.getLogger(ImagenServicio.class);
+    /** Límite para subidas desde formularios (crear/editar ejercicio). */
     private static final int MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB máximo (aumentado desde 1MB)
+    /**
+     * Límite solo para {@link #guardarParaRestore(byte[], String)} (import ZIP).
+     * Mayor que {@link #MAX_FILE_SIZE} para no descartar ejercicios cuya imagen en el backup supera el tope de UI.
+     */
+    private static final int MAX_FILE_SIZE_RESTORE = 50 * 1024 * 1024; // 50MB
 
     private final ImagenRepository imagenRepository;
     private final ImageOptimizationService imageOptimizationService;
@@ -150,8 +156,8 @@ public class ImagenServicio {
         if (archivoBytes == null || archivoBytes.length == 0) {
             throw new IllegalArgumentException("El archivo está vacío o es nulo");
         }
-        if (archivoBytes.length > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("El archivo es demasiado grande. Máximo " + (MAX_FILE_SIZE / 1024 / 1024) + "MB permitido.");
+        if (archivoBytes.length > MAX_FILE_SIZE_RESTORE) {
+            throw new IllegalArgumentException("El archivo es demasiado grande para restore. Máximo " + (MAX_FILE_SIZE_RESTORE / 1024 / 1024) + "MB permitido.");
         }
         if (rutaEnZip == null || rutaEnZip.isBlank()) {
             throw new IllegalArgumentException("La ruta en ZIP no puede ser nula");

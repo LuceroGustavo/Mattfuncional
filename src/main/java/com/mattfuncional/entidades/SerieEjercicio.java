@@ -17,8 +17,10 @@ public class SerieEjercicio {
     @JoinColumn(name = "exercise_id")
     private Exercise exercise;
 
-    private Integer valor; // Cantidad de repeticiones o minutos
-    private String unidad; // "reps" o "min"
+    /** Cantidad según {@link #unidad}: repeticiones, minutos o segundos. */
+    private Integer valor;
+    /** Igual que en la UI de series: {@code reps}, {@code min}, {@code seg} (y en pizarra a veces {@code s}). */
+    private String unidad;
     private Integer peso; // Peso en kilos, puede ser null si no requiere peso
     private Integer orden = 0; // Posición del ejercicio dentro de la serie (para reordenar)
 

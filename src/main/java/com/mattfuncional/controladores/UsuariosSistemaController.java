@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -119,12 +118,8 @@ public class UsuariosSistemaController {
             usuarioService.crearUsuarioSistema(nombre, correo, password, rol, profesor);
             return "redirect:/profesor/administracion?ok=creado";
         } catch (Exception e) {
-            try {
-                String msg = e.getMessage() != null ? e.getMessage() : "Error al crear usuario";
-                return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8.toString());
-            } catch (UnsupportedEncodingException ex) {
-                return "redirect:/profesor/administracion?error=crear";
-            }
+            String msg = e.getMessage() != null ? e.getMessage() : "Error al crear usuario";
+            return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
         }
     }
 
@@ -196,11 +191,7 @@ public class UsuariosSistemaController {
             return "redirect:/profesor/administracion?ok=perfil";
         } catch (IllegalArgumentException ex) {
             String msg = ex.getMessage() != null ? ex.getMessage() : "No se pudo actualizar el perfil";
-            try {
-                return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
-            } catch (UnsupportedEncodingException e) {
-                return "redirect:/profesor/administracion?error=notfound";
-            }
+            return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
         }
     }
 
@@ -229,11 +220,7 @@ public class UsuariosSistemaController {
             usuarioService.actualizarDatosUsuarioSistema(usuarioId, nombre, correo);
         } catch (IllegalArgumentException ex) {
             String msg = ex.getMessage() != null ? ex.getMessage() : "No se pudo actualizar los datos";
-            try {
-                return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
-            } catch (UnsupportedEncodingException e) {
-                return "redirect:/profesor/administracion?error=notfound";
-            }
+            return "redirect:/profesor/administracion?errorMessage=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
         }
         if (!esAdminEditandoSoloPerfil && rol != null && !rol.isBlank() && !isDeveloper(objetivo)) {
             if (usuarioActual.getId() != null && usuarioActual.getId().equals(usuarioId) && !"ADMIN".equalsIgnoreCase(rol)) {

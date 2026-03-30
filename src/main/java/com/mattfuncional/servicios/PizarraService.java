@@ -192,14 +192,10 @@ public class PizarraService {
     /**
      * Genera un nuevo token para la sala del profesor (el enlace anterior deja de funcionar).
      * Se quita el PIN; el profesor debe configurarlo de nuevo. Se usa al cerrar sesión o al pulsar "Cambiar enlace".
+     * Si aún no existe fila en {@code sala_transmision}, se crea con token (no se puede INSERT con token NULL).
      */
     public String rotarTokenSala(Long profesorId) {
-        SalaTransmision s = salaTransmisionRepository.findByProfesorId(profesorId)
-                .orElseGet(() -> {
-                    SalaTransmision nueva = new SalaTransmision();
-                    nueva.setProfesorId(profesorId);
-                    return salaTransmisionRepository.save(nueva);
-                });
+        SalaTransmision s = getOrCreateSalaTransmision(profesorId);
         s.setToken(generarTokenSalaUnico());
         s.setPinSalaHash(null);
         salaTransmisionRepository.save(s);

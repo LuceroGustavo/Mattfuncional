@@ -12,6 +12,7 @@ import com.mattfuncional.entidades.Rutina;
 import com.mattfuncional.entidades.Serie;
 import com.mattfuncional.entidades.SerieEjercicio;
 import com.mattfuncional.repositorios.CategoriaRepository;
+import com.mattfuncional.repositorios.ExerciseRepository;
 import com.mattfuncional.repositorios.PizarraItemRepository;
 import com.mattfuncional.repositorios.ProfesorRepository;
 import com.mattfuncional.repositorios.RutinaRepository;
@@ -36,19 +37,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Exporta e importa ejercicios, series y rutinas en ZIP.
- * Backup completo: ejercicios.json + rutinas.json + series.json + imagenes/.
- * Al restaurar con "suplantar", todo queda tal cual estaba.
+ * Exporta e importa ejercicios, grupos musculares, categorías (rutinas), series y rutinas en ZIP.
+ * Backup completo: ejercicios.json + grupos-musculares.json + categorias.json + rutinas.json + series.json + imagenes/.
+ * Las rutinas plantilla guardan nombres de categoría en rutinas.json; categorias.json repone el catálogo sistema/profesor.
+ * <p>{@code manifest.json}: v1.1 añade {@code cantidadSeriesBiblioteca} y {@code cantidadSeriesEnRutinas}; v1.0 solo {@code cantidadSeries} (total).
  */
 @Service
 public class ExerciseZipBackupService {
@@ -57,6 +61,7 @@ public class ExerciseZipBackupService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     private final ExerciseService exerciseService;
+    private final ExerciseRepository exerciseRepository;
     private final GrupoMuscularService grupoMuscularService;
     private final ImagenServicio imagenServicio;
     private final SerieEjercicioRepository serieEjercicioRepository;
@@ -70,6 +75,7 @@ public class ExerciseZipBackupService {
     private final ObjectMapper objectMapper;
 
     public ExerciseZipBackupService(ExerciseService exerciseService,
+                                    ExerciseRepository exerciseRepository,
                                     GrupoMuscularService grupoMuscularService,
                                     ImagenServicio imagenServicio,
                                     SerieEjercicioRepository serieEjercicioRepository,
@@ -81,6 +87,7 @@ public class ExerciseZipBackupService {
                                     CategoriaService categoriaService,
                                     PlatformTransactionManager transactionManager) {
         this.exerciseService = exerciseService;
+        this.exerciseRepository = exerciseRepository;
         this.grupoMuscularService = grupoMuscularService;
         this.imagenServicio = imagenServicio;
         this.serieEjercicioRepository = serieEjercicioRepository;
@@ -117,23 +124,28 @@ public class ExerciseZipBackupService {
         List<Rutina> rutinasPlantilla = rutinaRepository.findByEsPlantillaTrue();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            // 1. manifest.json (series = standalone + las que pertenecen a rutinas)
-            int totalSeries = serieRepository.findByEsPlantillaTrueAndRutinaIsNull().size();
+            // 1. manifest.json — series biblioteca (sin rutina) vs dentro de rutinas plantilla
+            int seriesBiblioteca = serieRepository.findByEsPlantillaTrueAndRutinaIsNull().size();
+            int seriesEnRutinas = 0;
             for (Rutina r : rutinasPlantilla) {
                 Rutina rConSeries = rutinaRepository.findByIdWithSeries(r.getId()).orElse(r);
-                if (rConSeries.getSeries() != null) totalSeries += rConSeries.getSeries().size();
+                if (rConSeries.getSeries() != null) {
+                    seriesEnRutinas += rConSeries.getSeries().size();
+                }
             }
+            int totalSeries = seriesBiblioteca + seriesEnRutinas;
             List<GrupoMuscular> gruposMusculares = grupoMuscularService.findAll();
             Map<String, Object> manifest = new HashMap<>();
-            manifest.put("version", "1.0");
+            manifest.put("version", "1.1");
             manifest.put("tipo", "completo");
             manifest.put("fecha", timestamp);
             manifest.put("cantidadEjercicios", ejercicios.size());
             manifest.put("cantidadGruposMusculares", gruposMusculares.size());
             manifest.put("cantidadRutinas", rutinasPlantilla.size());
             manifest.put("cantidadSeries", totalSeries);
-            List<Categoria> categoriasExport = new ArrayList<>(categoriaRepository.findAll());
-            categoriasExport.sort(Comparator.comparing(c -> c.getNombre() != null ? c.getNombre() : ""));
+            manifest.put("cantidadSeriesBiblioteca", seriesBiblioteca);
+            manifest.put("cantidadSeriesEnRutinas", seriesEnRutinas);
+            List<Categoria> categoriasExport = buildCategoriasParaZipExport(rutinasPlantilla);
             manifest.put("cantidadCategorias", categoriasExport.size());
             byte[] manifestBytes = objectMapper.writeValueAsString(manifest).getBytes(java.nio.charset.StandardCharsets.UTF_8);
             zos.putNextEntry(new ZipEntry("manifest.json"));
@@ -373,41 +385,12 @@ public class ExerciseZipBackupService {
             }
         }
 
-        // 2. Borrado solo de lo que vamos a importar (Suplantar)
+        // 2. Borrado previo (Suplantar). Si el ZIP es completo y se suplantan series, hay que borrar también rutinas:
+        // series.json usa rutinaIndex; dejar rutinas viejas duplica plantillas y al reimportar en modo Agregar se triplican las series.
+        final boolean borrarRutinas = importarRutinas || (pisarTodos && importarSeries && esBackupCompleto);
         if (pisarTodos && (importarSeries || importarRutinas || importarEjercicios)) {
-            DefaultTransactionDefinition defBorrado = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            TransactionTemplate txBorrado = new TransactionTemplate(transactionManager, defBorrado);
-            Boolean okBorrado = txBorrado.execute(status -> {
-                if (importarSeries || importarEjercicios) {
-                    int se = serieEjercicioRepository.deleteAllWithExercise();
-                    int pi = pizarraItemRepository.deleteAllItems();
-                    logger.info("Referencias eliminadas: {} SerieEjercicio, {} PizarraItem", se, pi);
-                }
-                if (importarSeries) {
-                    serieRepository.deleteAll();
-                    logger.info("Series eliminadas para suplantar");
-                }
-                if (importarRutinas) {
-                    rutinaRepository.deleteAll();
-                    logger.info("Rutinas eliminadas para suplantar");
-                }
-                if (profesorRestore != null && importarRutinas) {
-                    byte[] catProbe = getZipEntryBytes(zipEntries, "categorias.json");
-                    if (catProbe != null) {
-                        categoriaService.eliminarCategoriasDelProfesor(profesorRestore.getId());
-                        logger.info("Categorías del profesor eliminadas antes de restaurar desde categorias.json");
-                    }
-                }
-                if (importarEjercicios) {
-                    List<Exercise> existentes = exerciseService.findAllExercisesWithImages();
-                    for (Exercise e : existentes) {
-                        exerciseService.deleteExercise(e.getId());
-                    }
-                    logger.info("Ejercicios existentes borrados: {}", existentes.size());
-                }
-                return true;
-            });
-            if (!Boolean.TRUE.equals(okBorrado)) {
+            if (!ejecutarBorradoPrevioSuplantar(importarSeries, borrarRutinas, importarEjercicios,
+                    profesorRestore, zipEntries)) {
                 result.put("success", false);
                 result.put("message", "Error al borrar datos previos para suplantar");
                 return result;
@@ -415,7 +398,8 @@ public class ExerciseZipBackupService {
         }
 
         int categoriasImportadas = 0;
-        if (importarRutinas && profesorRestore != null) {
+        boolean debeImportarCategorias = profesorRestore != null && (importarRutinas || importarSeries);
+        if (debeImportarCategorias) {
             byte[] catBytes = getZipEntryBytes(zipEntries, "categorias.json");
             if (catBytes != null) {
                 try {
@@ -459,6 +443,7 @@ public class ExerciseZipBackupService {
                 errores.add("Ejercicio sin nombre en el ZIP");
                 continue;
             }
+            name = name.trim();
             // Solo en modo "Agregar" se omiten duplicados por nombre. Con Suplantar siempre se importa.
             if (!pisarTodos && exerciseService.findByNameAndProfesorNull(name).isPresent()) {
                 omitidos++;
@@ -524,6 +509,18 @@ public class ExerciseZipBackupService {
         }
         } // fin if (importarEjercicios)
 
+        // Tras importar ejercicios (cada uno en REQUIRES_NEW), recargar mapa nombre→entidad gestionada en esta TX.
+        // Evita desfaces con la BD y enlaces serie–ejercicio incompletos (p. ej. conteo 59/60 con datos en ZIP de 60).
+        if (importarEjercicios) {
+            ejercicioPorNombre.clear();
+            for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
+                if (ex.getName() != null && !ex.getName().isBlank()) {
+                    ejercicioPorNombre.put(ex.getName().trim(), ex);
+                }
+            }
+            logger.info("Mapa ejercicios post-import: {} filas en BD", ejercicioPorNombre.size());
+        }
+
         // 4. Rutinas y series (si está seleccionado y el ZIP es backup completo)
         int rutinasImportadas = 0;
         int seriesImportadas = 0;
@@ -531,12 +528,16 @@ public class ExerciseZipBackupService {
             // Para series necesitamos ejercicios en BD: si no importamos ejercicios ahora, usar los existentes.
             if (importarSeries && !importarEjercicios) {
                 for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    ejercicioPorNombre.putIfAbsent(ex.getName(), ex);
+                    if (ex.getName() != null && !ex.getName().isBlank()) {
+                        ejercicioPorNombre.putIfAbsent(ex.getName().trim(), ex);
+                    }
                 }
             }
             if (!pisarTodos && importarEjercicios) {
                 for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    ejercicioPorNombre.putIfAbsent(ex.getName(), ex);
+                    if (ex.getName() != null && !ex.getName().isBlank()) {
+                        ejercicioPorNombre.putIfAbsent(ex.getName().trim(), ex);
+                    }
                 }
             }
             if (profesorRestore == null) {
@@ -616,8 +617,12 @@ public class ExerciseZipBackupService {
                     serie.setNombre(nombreSerie);
                     serie.setOrden(toInt(sd.get("orden"), 0));
                     serie.setDescripcion((String) sd.get("descripcion"));
-                    // En restore completo todas las series se consideran plantilla para que el panel muestre el total correcto
-                    serie.setEsPlantilla(true);
+                    // El ZIP exporta el flag real (biblioteca = true, copias dentro de rutina = false).
+                    // Forzar todo a true inflaba el panel («Series» usa findByProfesorIdAndEsPlantillaTrue).
+                    boolean esPlantillaRestaurada = sd.get("esPlantilla") != null
+                            ? Boolean.TRUE.equals(sd.get("esPlantilla"))
+                            : (rutina == null);
+                    serie.setEsPlantilla(esPlantillaRestaurada);
                     serie.setRepeticionesSerie(toInt(sd.get("repeticionesSerie"), 1));
                     serie.setCreador(sd.get("creador") != null ? (String) sd.get("creador") : "ADMIN");
                     serie.setRutina(rutina);
@@ -631,8 +636,12 @@ public class ExerciseZipBackupService {
                         int orden = 0;
                         for (Map<String, Object> seMap : seList) {
                             String exerciseName = (String) seMap.get("exerciseName");
-                            Exercise ex = ejercicioPorNombre.get(exerciseName);
-                            if (ex == null) continue;
+                            Exercise ex = resolveExerciseForSerieImport(exerciseName, ejercicioPorNombre);
+                            if (ex == null) {
+                                logger.warn("Serie '{}': ejercicio '{}' no encontrado en BD; se omite la fila serie_ejercicio",
+                                        nombreSerie, exerciseName);
+                                continue;
+                            }
                             SerieEjercicio se = new SerieEjercicio();
                             se.setSerie(serie);
                             se.setExercise(ex);
@@ -661,8 +670,91 @@ public class ExerciseZipBackupService {
         if (!errores.isEmpty()) {
             result.put("errores", errores);
         }
-        logger.info("Importación ZIP: {} ejercicios, {} rutinas, {} series, pisarTodos={}", importados, rutinasImportadas, seriesImportadas, pisarTodos);
+        logger.info("Importación ZIP: {} ejercicios, {} rutinas, {} series, {} categorías, pisarTodos={}",
+                importados, rutinasImportadas, seriesImportadas, categoriasImportadas, pisarTodos);
         return result;
+    }
+
+    /**
+     * Borrado previo a importar con «Suplantar» en {@code REQUIRES_NEW} (misma idea que MiGymvirtual).
+     */
+    private boolean ejecutarBorradoPrevioSuplantar(boolean importarSeries, boolean borrarRutinas,
+                                                   boolean importarEjercicios, Profesor profesorRestore,
+                                                   Map<String, byte[]> zipEntries) {
+        DefaultTransactionDefinition defBorrado = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        TransactionTemplate txBorrado = new TransactionTemplate(transactionManager, defBorrado);
+        Boolean ok = txBorrado.execute(status -> {
+            try {
+                if (importarSeries || importarEjercicios) {
+                    int se = serieEjercicioRepository.deleteAllWithExercise();
+                    int pi = pizarraItemRepository.deleteAllItems();
+                    logger.info("Referencias eliminadas: {} SerieEjercicio, {} PizarraItem", se, pi);
+                }
+                if (importarSeries) {
+                    serieRepository.deleteAll();
+                    logger.info("Series eliminadas para suplantar");
+                }
+                if (borrarRutinas) {
+                    rutinaRepository.deleteAll();
+                    logger.info("Rutinas eliminadas para suplantar (incl. obligatorias si ZIP completo + suplantar series)");
+                }
+                if (profesorRestore != null && borrarRutinas) {
+                    byte[] catProbe = getZipEntryBytes(zipEntries, "categorias.json");
+                    if (catProbe != null) {
+                        categoriaService.eliminarCategoriasDelProfesor(profesorRestore.getId());
+                        logger.info("Categorías del profesor eliminadas antes de restaurar desde categorias.json");
+                    }
+                }
+                if (importarEjercicios) {
+                    List<Exercise> existentes = exerciseService.findAllExercisesWithImages();
+                    for (Exercise e : existentes) {
+                        exerciseService.deleteExercise(e.getId());
+                    }
+                    logger.info("Ejercicios existentes borrados: {}", existentes.size());
+                }
+                return true;
+            } catch (RuntimeException ex) {
+                logger.error("Error en borrado previo a importar ZIP: {}", ex.getMessage(), ex);
+                status.setRollbackOnly();
+                return false;
+            }
+        });
+        return Boolean.TRUE.equals(ok);
+    }
+
+    /**
+     * Categorías incluidas en el ZIP: sistema + las de cada profesor que tiene plantillas +
+     * las ligadas en ManyToMany a esas rutinas (sin usar {@code findAll()} de toda la BD).
+     */
+    private List<Categoria> buildCategoriasParaZipExport(List<Rutina> rutinasPlantilla) {
+        Map<Long, Categoria> porId = new LinkedHashMap<>();
+        for (Categoria c : categoriaRepository.findByProfesorIsNullOrderByNombreAsc()) {
+            if (c.getId() != null) {
+                porId.put(c.getId(), c);
+            }
+        }
+        Set<Long> profesoresPlantilla = new HashSet<>();
+        for (Rutina r : rutinasPlantilla) {
+            Rutina full = rutinaRepository.findByIdWithSeries(r.getId()).orElse(r);
+            if (full.getProfesor() != null) {
+                profesoresPlantilla.add(full.getProfesor().getId());
+            }
+            for (Categoria c : full.getCategorias()) {
+                if (c.getId() != null) {
+                    porId.put(c.getId(), c);
+                }
+            }
+        }
+        for (Long pid : profesoresPlantilla) {
+            for (Categoria c : categoriaRepository.findByProfesorIdOrderByNombreAsc(pid)) {
+                if (c.getId() != null) {
+                    porId.put(c.getId(), c);
+                }
+            }
+        }
+        List<Categoria> list = new ArrayList<>(porId.values());
+        list.sort(Comparator.comparing(c -> c.getNombre() != null ? c.getNombre() : ""));
+        return list;
     }
 
     /** Obtiene bytes de una entrada del ZIP por nombre (exacto o ignorando mayúsculas / path). */
@@ -706,6 +798,25 @@ public class ExerciseZipBackupService {
         }
         serieItem.put("serieEjercicios", seList);
         return serieItem;
+    }
+
+    /**
+     * Resuelve el ejercicio para insertar en {@code serie_ejercicio}: nombre normalizado, fallback por nombre en BD
+     * y referencia persistida por id (evita FK inválida con entidades desvinculadas).
+     */
+    private Exercise resolveExerciseForSerieImport(String exerciseName, Map<String, Exercise> porNombre) {
+        if (exerciseName == null || exerciseName.isBlank()) {
+            return null;
+        }
+        String key = exerciseName.trim();
+        Exercise ex = porNombre.get(key);
+        if (ex == null) {
+            ex = exerciseService.findByNameAndProfesorNull(key).orElse(null);
+        }
+        if (ex == null || ex.getId() == null) {
+            return null;
+        }
+        return exerciseRepository.findById(ex.getId()).orElse(null);
     }
 
     private static int toInt(Object o, int defaultValue) {

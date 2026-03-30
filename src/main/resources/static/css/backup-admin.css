@@ -1,0 +1,269 @@
+/**
+ * Sistema de backup — estilo alineado a MiGymVirtual (panel Administración).
+ * Mattfuncional: rutas y lógica de descarga/subida sin cambio.
+ */
+
+.backup-admin-root {
+    background: linear-gradient(145deg, #e8eaf6 0%, #ede7f6 35%, #f3e5f5 70%, #fce4ec 100%);
+    min-height: 100vh;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding-left: 0.875rem !important;
+    padding-right: 0.875rem !important;
+}
+@media (min-width: 576px) {
+    .backup-admin-root {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+@media (min-width: 768px) {
+    .backup-admin-root {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+    }
+}
+@media (min-width: 992px) {
+    .backup-admin-root {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
+.backup-header-hero {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(237, 231, 246, 0.95) 45%, rgba(225, 190, 231, 0.35) 100%);
+    border: 1px solid rgba(94, 53, 177, 0.12);
+    border-radius: 1.25rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.07);
+    margin-bottom: 1.25rem;
+}
+.backup-header-hero h2,
+.backup-header-hero h3 {
+    color: #4527a0;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+}
+.backup-db-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(94, 53, 177, 0.35);
+    flex-shrink: 0;
+}
+.btn-backup-volver {
+    border: 2px solid rgba(94, 53, 177, 0.35) !important;
+    color: #5e35b1 !important;
+    font-weight: 600;
+    border-radius: 0.75rem !important;
+    padding: 0.45rem 1rem !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.btn-backup-volver:hover {
+    background: linear-gradient(135deg, #ede7f6 0%, #e1bee7 100%) !important;
+    box-shadow: 0 4px 14px rgba(94, 53, 177, 0.2);
+    color: #4527a0 !important;
+}
+
+.backup-main-panel {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 6px 28px rgba(94, 53, 177, 0.08);
+}
+.backup-main-panel .backup-panel-inner {
+    padding: 1.1rem 1rem 1.25rem;
+}
+@media (min-width: 768px) {
+    .backup-main-panel .backup-panel-inner {
+        padding: 1.35rem 1.35rem 1.5rem;
+    }
+}
+
+/*
+ * Sectores agrupados (referencia MiGymVirtual): marco grueso violeta = contenido
+ * entrenamiento; marco azul = alumnos. Las tarjetas internas conservan verde/cian.
+ */
+.backup-sector {
+    border-radius: 1.15rem;
+    padding: 0.95rem 0.85rem 1.05rem;
+    box-sizing: border-box;
+    min-height: 0;
+    background: rgba(255, 255, 255, 0.72);
+}
+@media (min-width: 768px) {
+    .backup-sector {
+        padding: 1.1rem 1rem 1.2rem;
+    }
+}
+.backup-sector-contenido {
+    border: 3px solid #7e57c2;
+    box-shadow:
+        0 0 0 1px rgba(126, 87, 194, 0.15),
+        0 6px 22px rgba(94, 53, 177, 0.14);
+}
+.backup-sector-alumnos {
+    border: 3px solid #1e88e5;
+    box-shadow:
+        0 0 0 1px rgba(30, 136, 229, 0.12),
+        0 6px 22px rgba(25, 118, 210, 0.12);
+}
+
+.backup-sector .backup-mod-card {
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+}
+.backup-sector .backup-mod-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
+
+/* Zona de archivo: tono acorde al sector */
+.backup-sector-contenido .backup-drop-zone {
+    border: 2px dashed rgba(94, 53, 177, 0.38) !important;
+    background: rgba(237, 231, 246, 0.35) !important;
+}
+.backup-sector-contenido .backup-drop-zone:hover {
+    border-color: rgba(94, 53, 177, 0.55) !important;
+    background: rgba(237, 231, 246, 0.55) !important;
+}
+.backup-sector-alumnos .backup-drop-zone {
+    border: 2px dashed rgba(30, 136, 229, 0.42) !important;
+    background: rgba(227, 242, 253, 0.45) !important;
+}
+.backup-sector-alumnos .backup-drop-zone:hover {
+    border-color: rgba(25, 118, 210, 0.55) !important;
+    background: rgba(227, 242, 253, 0.65) !important;
+}
+
+/* Tarjetas módulo (borde suave, sin sombra pesada global) */
+.backup-mod-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 100%;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s;
+}
+.backup-mod-card:hover {
+    box-shadow: 0 6px 20px rgba(94, 53, 177, 0.07);
+}
+.backup-mod-card .card-header {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fafafa !important;
+}
+.backup-mod-card .card-body {
+    padding: 1rem 1rem 1.1rem;
+    font-size: 0.9rem;
+}
+
+.backup-head-export {
+    background: rgba(40, 167, 69, 0.1) !important;
+    color: #1b5e20 !important;
+    border-bottom-color: rgba(40, 167, 69, 0.2) !important;
+}
+.backup-head-import {
+    background: rgba(23, 162, 184, 0.12) !important;
+    color: #006978 !important;
+    border-bottom-color: rgba(23, 162, 184, 0.22) !important;
+}
+.backup-head-alumnos {
+    background: #fafafa !important;
+    color: #263238 !important;
+    font-weight: 700 !important;
+}
+.backup-body-alumnos-export {
+    background: linear-gradient(180deg, rgba(227, 242, 253, 0.35) 0%, #fff 100%);
+}
+.backup-head-alumnos-import {
+    background: rgba(92, 107, 192, 0.12) !important;
+    color: #3949ab !important;
+    border-bottom-color: rgba(92, 107, 192, 0.2) !important;
+}
+.backup-body-alumnos-import {
+    background: rgba(232, 234, 246, 0.35);
+}
+
+.backup-btn-export-lg {
+    font-weight: 600;
+    padding: 0.55rem 1.35rem;
+    border-radius: 0.65rem;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.25);
+}
+.backup-btn-export-lg:hover {
+    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
+}
+
+.backup-drop-zone {
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    min-height: 4.5rem;
+    padding: 0.75rem 1rem !important;
+    border: 2px dashed rgba(94, 53, 177, 0.28) !important;
+    border-radius: 0.75rem !important;
+    background: rgba(237, 231, 246, 0.2) !important;
+}
+.backup-drop-zone:hover {
+    background: rgba(237, 231, 246, 0.4) !important;
+    border-color: rgba(94, 53, 177, 0.4) !important;
+}
+.backup-drop-zone.dragover {
+    border-color: #0d6efd !important;
+    background: #e7f1ff !important;
+}
+
+.backup-detalle-archivo {
+    background: #f8f9fa;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 0.65rem;
+    padding: 0.75rem 0.9rem;
+    font-size: calc(0.8rem + 0.05vw);
+}
+.backup-btn-alumnos-json {
+    background: rgba(3, 169, 244, 0.22) !important;
+    color: #0277bd !important;
+    border: 1px solid #29b6f6 !important;
+    font-weight: 600;
+}
+.backup-btn-alumnos-json:hover {
+    background: rgba(3, 169, 244, 0.35) !important;
+    color: #01579b !important;
+}
+.backup-btn-excel-outline {
+    border: 1px solid rgba(0, 0, 0, 0.18) !important;
+    color: #424242 !important;
+    background: #fff !important;
+    font-weight: 500;
+}
+.backup-btn-excel-outline:hover {
+    background: #f5f5f5 !important;
+}
+
+.col-backup-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+@media (min-width: 768px) {
+    .col-backup-stack {
+        gap: 1.15rem;
+    }
+}
+
+.admin-backup-fragment .backup-meta-nota,
+.backup-admin-root .backup-meta-nota {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}

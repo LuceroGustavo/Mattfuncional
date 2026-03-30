@@ -34,6 +34,11 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 
 **Servicios:** `ExerciseZipBackupService`, `AlumnoJsonBackupService`, `AlumnoExportService`. Rutas en `AdminPanelController`: `/profesor/backup`, exportar-zip, importar, exportar-alumnos-json, importar-alumnos, exportar-alumnos-excel.
 
+**ZIP ejercicios — detalle técnico (marzo 2026):**
+- **`manifest.json`:** Versión **1.1** incluye `cantidadSeriesBiblioteca` (series plantilla sin rutina, “Mis series” sueltas) y `cantidadSeriesEnRutinas` (series dentro de rutinas plantilla). `cantidadSeries` sigue siendo la suma (total en `series.json`). ZIPs exportados antes solo traen v1.0 con `cantidadSeries`; la pantalla de import sigue mostrándolo.
+- **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre y se persiste con referencia válida en BD para evitar errores de clave foránea si falló un ejercicio puntual.
+- **Vista previa:** Al elegir el archivo ZIP, el resumen muestra el desglose de series cuando el manifest trae los campos v1.1.
+
 ---
 
 ## 2.1 Depuración de datos

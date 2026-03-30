@@ -122,7 +122,10 @@ public class UsuarioService {
         // Solo invalida caché; el efecto está en la anotación
     }
 
-    @Cacheable(value = "usuarios", key = "'profesor-' + #profesorId")
+    /**
+     * Sin @Cacheable: importes/SQL directo en {@code usuario} no disparan @CacheEvict y dejaban
+     * una lista vacía cacheada en el dashboard (series/rutinas no están cacheadas y sí se veían).
+     */
     public List<Usuario> getAlumnosByProfesorId(Long profesorId) {
         return usuarioRepository.findAlumnosByProfesorIdWithRelations(profesorId);
     }

@@ -114,6 +114,12 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - **Entorno 1 (≥768px):** cabecera hero + tabla de consultas y planes como MiGymVirtual; configuración solo con claves Mattfuncional (`whatsapp`, `instagram`, `direccion`, `dias_horarios`, `telefono`).
 - **Entorno 2:** listas táctiles; **detalle de consulta** y **detalle de plan** en modales; flechas de orden en planes; confirmación de borrado en `#modalConfirmar`; mensaje prefijado de WhatsApp: *Mattfuncional*. Enlace **Ver página pública** → `/planes`.
 
+#### Administración — **Sistema de backup** (`profesor/backup.html`, `static/css/backup-admin.css`) — **vista Mar 2026**
+
+- **Formato MiGymVirtual (entorno 1):** cabecera hero con ícono base de datos; panel blanco con **rejilla 2×2** (columna contenido: exportar verde / importar celeste; columna alumnos: export JSON + Excel / import JSON). Zonas **arrastrar o clic** con borde discontinuo; botón **Exportar** ZIP destacado; mismas rutas y formularios Mattfuncional (descarga / multipart).
+- **Nota:** la referencia guarda backups en servidor; Mattfuncional mantiene flujo por archivos locales — subtítulo en pantalla lo aclara. **Pendiente:** ajustes de backend que el usuario planea a continuación.
+- **Técnico:** Bootstrap + JSZip al inicio del `body` en página completa (evita error si el script del módulo corre antes del bundle); en panel embebido sigue valiendo el JSZip global de `administracion.html`.
+
 #### Login (`templates/login.html`) — **actualizado (Mar 2026)**
 
 - **Entorno 2 (≤991px):** fondo **`/img/login.png`** en capa fija `body.login-page::before` con **`background-size: contain`** para ver el arte completo en pantalla (relleno `#d0d0d0` si hay bandas); `background-position: center top`.
@@ -230,7 +236,7 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
-- **Módulo Administración:** **Usuarios del sistema** y **Página pública** ya registrados en §4.2.1 (responsive + modales en página pública). Queda valorar **Backups**, **Depuración** y **Manual** embebidos (`?fragment=1`) frente a la referencia.
+- **Módulo Administración:** **Usuarios**, **Página pública** y **vista de Backups** (formato) en §4.2.1. Revisar **Depuración** y **Manual** embebidos; lógica de backup en servidor (si se alinea a MiGymVirtual) es trabajo de backend aparte.
 - **2.2 / 2.3** Pizarra y Calendario responsive.
 
 ### 4.3 Detalle de alumno

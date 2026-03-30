@@ -2,6 +2,22 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-30] - fix(docs,backup): import ZIP robusto, manifest series y vista previa ✅
+
+### Resumen
+Restauración de backup ZIP más fiable cuando una imagen de ejercicio supera el límite de subida manual; desglose de series en `manifest.json` (biblioteca vs rutinas) y texto claro al seleccionar el ZIP; resolución de ejercicios al importar `serie_ejercicio` con `findById` y nombres normalizados (`trim`).
+
+### Cambios
+- **ImagenServicio:** `guardarParaRestore` usa límite **50 MB** (`MAX_FILE_SIZE_RESTORE`); la UI manual sigue en 5 MB. Evita que un GIF/WebP grande invalide todo el ejercicio y rompa FKs en series.
+- **ExerciseZipBackupService:** Inyección de `ExerciseRepository`; `resolveExerciseForSerieImport` (mapa + `findByNameAndProfesorNull` + `findById`); claves de ejercicio con `trim` en mapas y bucles; **manifest v1.1** con `cantidadSeriesBiblioteca`, `cantidadSeriesEnRutinas` (mantiene `cantidadSeries` como total).
+- **backup.html:** Al cargar el ZIP, si existe `cantidadSeriesBiblioteca` muestra p. ej. `15 series (biblioteca), 35 en rutinas`; ZIPs antiguos (solo `cantidadSeries`) sin cambio.
+- **Documentación:** `DOCUMENTACION_UNIFICADA.md` §2 ampliado; Javadoc en `ExerciseZipBackupService` e `ImagenServicio`.
+
+### Archivos
+`ExerciseZipBackupService.java`, `ImagenServicio.java`, `profesor/backup.html`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-02-09] - feat(ux): modales unificados y mejoras en flujos ✅
 
 ### 🎯 **Resumen**
