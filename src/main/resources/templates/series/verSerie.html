@@ -223,8 +223,16 @@
             <span class="badge badge-ejercicios" th:text="${#lists.size(serie.serieEjercicios)} + ' ejercicios'">3 ejercicios</span>
         </div>
         <div class="hoja-serie-desc" th:if="${serie.descripcion != null && !serie.descripcion.isEmpty()}" th:text="${serie.descripcion}">Descripción</div>
+        <div th:if="${serie.serieEjercicios != null && !serie.serieEjercicios.isEmpty() && serieEjerciciosConVista == 0}"
+             class="alert alert-warning py-2 px-3 mb-3" role="alert">
+            Hay <strong th:text="${#lists.size(serie.serieEjercicios)}">0</strong> filas en esta serie pero ningún ejercicio enlazado
+            (<code>exercise_id</code> NULL o ejercicio inexistente). Suele pasar si se corrió el script <code>02_series…</code> sin ejercicios cargados,
+            o si importaste solo <strong>Series</strong> con Suplantar sin <strong>Ejercicios</strong>.
+            El script <code>05_reparar…</code> solo <strong>borra</strong> filas NULL: no repone ejercicios. Si tras 05 el panel muestra 0 en todas las series, ejecutá de nuevo <code>02</code> (idealmente tras <code>00</code>) cuando la tabla <code>exercise</code> ya tenga datos. Ver <code>scripts/BD/README.md</code>.
+        </div>
         <div class="ejercicios-grid">
-            <div th:each="serieEjercicio : ${serie.serieEjercicios}" th:if="${serieEjercicio.exercise != null}" class="sala-item-wrap"
+            <th:block th:each="serieEjercicio : ${serie.serieEjercicios}">
+            <div th:if="${serieEjercicio.exercise != null}" class="sala-item-wrap"
                  th:with="repsDisplay=${serieEjercicio.valor != null ? (serieEjercicio.valor + ' ' + (serieEjercicio.unidad == null or #strings.toLowerCase(serieEjercicio.unidad) == 'reps' ? 'rep.' : #strings.toLowerCase(serieEjercicio.unidad) == 'min' ? 'min' : #strings.toLowerCase(serieEjercicio.unidad) == 'seg' or #strings.toLowerCase(serieEjercicio.unidad) == 's' ? 'seg' : (serieEjercicio.unidad != null ? serieEjercicio.unidad : 'rep.'))) : '—'}">
                 <div class="item-titulo" th:text="${serieEjercicio.exercise.name}">Ejercicio</div>
                 <div class="sala-item">
@@ -239,6 +247,7 @@
                     </div>
                 </div>
             </div>
+            </th:block>
         </div>
     </div>
 </div>

@@ -12,36 +12,41 @@ SET @profesor_id = COALESCE(
     (SELECT id FROM profesor ORDER BY id LIMIT 1)
 );
 
-SET @e1  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 0),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 0));
-SET @e2  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 1),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 1));
-SET @e3  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 2),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 2));
-SET @e4  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 3),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 3));
-SET @e5  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 4),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 4));
-SET @e6  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 5),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 5));
-SET @e7  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 6),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 6));
-SET @e8  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 7),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 7));
-SET @e9  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 8),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 8));
-SET @e10 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 9),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 9));
-SET @e11 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 10), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 10));
-SET @e12 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 11), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 11));
-SET @e13 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 12), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 12));
-SET @e14 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 13), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 13));
-SET @e15 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 14), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 14));
-SET @e16 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 15), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 15));
-SET @e17 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 16), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 16));
-SET @e18 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 17), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 17));
-SET @e19 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 18), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 18));
-SET @e20 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 19), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 19));
-SET @e21 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 20), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 20));
-SET @e22 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 21), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 21));
-SET @e23 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 22), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 22));
-SET @e24 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 23), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 23));
-SET @e25 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 24), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 24));
-SET @e26 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 25), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 25));
-SET @e27 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 26), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 26));
-SET @e28 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 27), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 27));
-SET @e29 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 28), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 28));
-SET @e30 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 29), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 29));
+-- Último recurso para @e1..@e30: primero ejercicios “sistema”, si no hay ninguno cualquier fila en exercise (tabla vacía ⇒ seguirá NULL → no ejecutes inserts hasta levantar la app).
+SET @ex_min = COALESCE(
+    (SELECT MIN(id) FROM exercise WHERE profesor_id IS NULL LIMIT 1),
+    (SELECT MIN(id) FROM exercise LIMIT 1));
+
+SET @e1  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 0),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 0), @ex_min);
+SET @e2  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 1),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 1), @ex_min);
+SET @e3  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 2),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 2), @ex_min);
+SET @e4  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 3),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 3), @ex_min);
+SET @e5  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 4),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 4), @ex_min);
+SET @e6  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 5),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 5), @ex_min);
+SET @e7  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 6),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 6), @ex_min);
+SET @e8  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 7),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 7), @ex_min);
+SET @e9  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 8),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 8), @ex_min);
+SET @e10 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 9),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 9), @ex_min);
+SET @e11 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 10), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 10), @ex_min);
+SET @e12 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 11), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 11), @ex_min);
+SET @e13 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 12), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 12), @ex_min);
+SET @e14 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 13), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 13), @ex_min);
+SET @e15 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 14), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 14), @ex_min);
+SET @e16 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 15), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 15), @ex_min);
+SET @e17 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 16), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 16), @ex_min);
+SET @e18 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 17), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 17), @ex_min);
+SET @e19 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 18), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 18), @ex_min);
+SET @e20 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 19), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 19), @ex_min);
+SET @e21 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 20), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 20), @ex_min);
+SET @e22 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 21), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 21), @ex_min);
+SET @e23 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 22), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 22), @ex_min);
+SET @e24 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 23), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 23), @ex_min);
+SET @e25 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 24), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 24), @ex_min);
+SET @e26 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 25), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 25), @ex_min);
+SET @e27 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 26), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 26), @ex_min);
+SET @e28 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 27), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 27), @ex_min);
+SET @e29 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 28), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 28), @ex_min);
+SET @e30 = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 29), (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 29), @ex_min);
 
 INSERT INTO serie (nombre, orden, descripcion, es_plantilla, creador, repeticiones_serie, rutina_id, profesor_id)
 VALUES ('Matt PF Serie 01', 0, 'Pecho y tríceps — empuje principiantes.', 1, 'ADMIN', 2, NULL, @profesor_id);
@@ -132,6 +137,12 @@ VALUES ('Matt PF Serie 15', 0, 'Movilidad de cadera.', 1, 'ADMIN', 1, NULL, @pro
 SET @s15 = LAST_INSERT_ID();
 INSERT INTO serie_ejercicio (serie_id, exercise_id, valor, unidad, peso, orden) VALUES
 (@s15, @e4, 60, 'seg', NULL, 0), (@s15, @e5, 45, 'seg', NULL, 1), (@s15, @e6, 15, 'reps', NULL, 2);
+
+-- Debe ser 0. Si > 0, no ejecutes 05 “a ciegas”: corregí carga (app + 02) o todos los contadores pasarán a 0.
+SELECT COUNT(*) AS serie_ejercicio_MATT_PF_con_exercise_id_NULL
+FROM serie_ejercicio se
+INNER JOIN serie s ON s.id = se.serie_id
+WHERE s.nombre LIKE 'Matt PF Serie %' AND s.rutina_id IS NULL AND se.exercise_id IS NULL;
 
 SELECT CONCAT('Series Matt PF en biblioteca: ', COUNT(*)) AS resultado
 FROM serie WHERE nombre LIKE 'Matt PF Serie %' AND es_plantilla = 1 AND rutina_id IS NULL;

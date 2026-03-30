@@ -14,8 +14,12 @@ import java.util.Optional;
 @Repository
 public interface SerieRepository extends JpaRepository<Serie, Long> {
 
-    /** Carga una serie con sus SerieEjercicios y Exercise para evitar LazyInitializationException al editar. */
-    @Query("SELECT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.id = :id")
+    /**
+     * Carga una serie con sus SerieEjercicios y Exercise.
+     * {@code DISTINCT} evita filas duplicadas por el producto cartesiano del doble JOIN FETCH;
+     * sin él Hibernate puede fusionar mal la colección y la vista detalle muestra 0 ejercicios.
+     */
+    @Query("SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.id = :id")
     Optional<Serie> findByIdWithSerieEjercicios(@Param("id") Long id);
 
     /** Carga varias series por id con serieEjercicios y exercise (para hoja pública de rutina). */
@@ -57,7 +61,7 @@ public interface SerieRepository extends JpaRepository<Serie, Long> {
 
     List<Serie> findByProfesorId(Long profesorId);
 
-    /** Series del profesor con ejercicios cargados (p. ej. crear rutina: tabla + modal sin N+1). */
+    /** Series del profesor con ejercicios cargados ({@code DISTINCT} por el mismo motivo que {@link #findByIdWithSerieEjercicios}). */
     @Query("SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.serieEjercicios se LEFT JOIN FETCH se.exercise WHERE s.profesor.id = :profesorId")
     List<Serie> findByProfesorIdWithSerieEjercicios(@Param("profesorId") Long profesorId);
 

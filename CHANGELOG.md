@@ -2,6 +2,59 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-30] - docs: resumen integral backup ZIP, series, SQL y fix aislamiento transacción ✅
+
+### Contexto
+Se documenta en un solo lugar el trabajo de marzo 2026 sobre backup/restore, series y scripts de prueba. Las entradas siguientes del mismo día conservan el detalle por tema; **esta entrada** sirve de índice y añade la corrección de transacción y las **pruebas de backup** a retomar después.
+
+### Resumen técnico (qué se hizo)
+1. **Backup ZIP:** `manifest.json` v1.1 (series biblioteca vs en rutinas), vista previa en `backup.html`, límite de imagen en restore **50 MB** (`ImagenServicio`), resolución de ejercicio al importar series por nombre + `ExerciseRepository.findById`.
+2. **Error FK al importar tras «Suplantar»:** `importarDesdeZip` quedó con `@Transactional(isolation = Isolation.READ_COMMITTED)`. Con `REPEATABLE_READ` (típico en MySQL), tras borrar y recrear ejercicios en transacciones `REQUIRES_NEW`, las lecturas del mapa nombre→ejercicio podían devolver **IDs ya inexistentes**; al insertar `serie_ejercicio` MySQL rechazaba la FK (p. ej. error 1452).
+3. **Unicode:** nombres de ejercicio con **trim + NFC** al export/import de filas de serie y al armar mapas, para empatar acentos entre JSON y BD.
+4. **Vista «Ver serie»:** `SerieRepository.findByIdWithSerieEjercicios` con `DISTINCT`; `SerieController` + `verSerie.html` avisan si hay filas sin ejercicio enlazado.
+5. **Scripts `scripts/BD/`:** `02_series_prueba_15.sql` con `@ex_min` de respaldo; `05_reparar_serie_ejercicios_nulos.sql` (solo **borra** `serie_ejercicio` con `exercise_id` NULL); `README.md` con orden y advertencias (no importar solo series sin ejercicios; no esperar que el script 05 «reponga» ejercicios).
+
+### Pruebas de backup (continuar en otro momento)
+Receta sugerida para validar de forma reproducible cuando retomen:
+- Exportar ZIP con las opciones necesarias y guardar el archivo.
+- En la misma BD, borrar o alterar datos de prueba (ej.: algunos ejercicios, rutinas, series).
+- Importar el ZIP con **Suplantar** y comprobar que no hay 500/FK, que el manifest y los listados coinciden y que «Ver serie» muestra los ejercicios esperados.
+
+### Archivos principales
+`ExerciseZipBackupService.java`, `ImagenServicio.java`, `profesor/backup.html`, `SerieRepository.java`, `SerieController.java`, `series/verSerie.html`, `scripts/BD/README.md`, `scripts/BD/02_series_prueba_15.sql`, `scripts/BD/05_reparar_serie_ejercicios_nulos.sql`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
+
+---
+
+## [2026-03-30] - fix(series): exercise_id NULL en scripts, aviso «Ver serie» y script 05 ✅
+
+### Resumen
+El badge «N ejercicios» cuenta filas en `serie_ejercicio`; la grilla solo muestra filas con `exercise` no nulo. Si `exercise_id` quedó **NULL** (COALESCE del script sin suficientes ejercicios, o import solo series), la vista quedaba vacía sin explicación.
+
+### Cambios
+- **`02_series_prueba_15.sql`:** variable `@ex_min` y tercer argumento en cada `COALESCE` de `@e1…@e30`.
+- **`scripts/BD/05_reparar_serie_ejercicios_nulos.sql`:** elimina `serie_ejercicio` con `exercise_id IS NULL` (adaptado de MiGymvirtual).
+- **`SerieController` + `verSerie.html`:** `serieEjerciciosConVista` y alerta cuando hay filas sin ejercicio enlazado; iteración con `th:block`.
+- **`scripts/BD/README.md`:** paso 5, advertencia backup «solo series», importancia de tener ejercicios antes del 02.
+
+### Archivos
+`02_series_prueba_15.sql`, `05_reparar_serie_ejercicios_nulos.sql`, `SerieController.java`, `series/verSerie.html`, `scripts/BD/README.md`, `CHANGELOG.md`.
+
+---
+
+## [2026-03-30] - fix(series): DISTINCT en fetch de serie + ejercicios para vista detalle ✅
+
+### Resumen
+En `/series/ver/{id}` podía mostrarse **0 ejercicios** con filas válidas en `serie_ejercicio`: el JPQL con doble `LEFT JOIN FETCH` (colección + `exercise`) generaba filas duplicadas y, sin `DISTINCT`, Hibernate podía dejar la colección mal fusionada.
+
+### Cambios
+- **SerieRepository:** `findByIdWithSerieEjercicios` usa `SELECT DISTINCT s FROM …` (alineado a `RutinaRepository` y a `findByIdInWithSerieEjercicios`).
+- **scripts/BD/README.md:** sección para verificar `serie_ejercicio` con SQL si el contador en UI no coincide con la BD.
+
+### Archivos
+`SerieRepository.java`, `scripts/BD/README.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-30] - fix(docs,backup): import ZIP robusto, manifest series y vista previa ✅
 
 ### Resumen

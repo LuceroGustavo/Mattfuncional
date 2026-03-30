@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -298,8 +300,11 @@ public class ExerciseZipBackupService {
      * @param importarEjercicios importar ejercicios.
      * @param importarRutinas importar rutinas (necesario para series que pertenecen a rutinas).
      * @param importarSeries importar series (requiere rutinas y ejercicios en BD).
+     * <p>Usa {@link Isolation#READ_COMMITTED}: con REPEATABLE READ (MySQL por defecto), tras borrar/reinsertar
+     * ejercicios en {@code REQUIRES_NEW}, una lectura en esta transacción podía devolver IDs ya inexistentes
+     * y fallar la FK de {@code serie_ejercicio}.</p>
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String, Object> importarDesdeZip(MultipartFile archivoZip, boolean pisarTodos, Profesor profesorParaRestore,
                                                  boolean importarGrupos, boolean importarEjercicios, boolean importarRutinas, boolean importarSeries) throws IOException {
         Map<String, Object> result = new HashMap<>();
@@ -439,11 +444,11 @@ public class ExerciseZipBackupService {
         if (importarEjercicios) {
         for (Map<String, Object> data : ejerciciosData) {
             String name = (String) data.get("name");
+            name = normalizarNombreEjercicio(name);
             if (name == null || name.isBlank()) {
                 errores.add("Ejercicio sin nombre en el ZIP");
                 continue;
             }
-            name = name.trim();
             // Solo en modo "Agregar" se omiten duplicados por nombre. Con Suplantar siempre se importa.
             if (!pisarTodos && exerciseService.findByNameAndProfesorNull(name).isPresent()) {
                 omitidos++;
@@ -514,8 +519,9 @@ public class ExerciseZipBackupService {
         if (importarEjercicios) {
             ejercicioPorNombre.clear();
             for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                if (ex.getName() != null && !ex.getName().isBlank()) {
-                    ejercicioPorNombre.put(ex.getName().trim(), ex);
+                String nk = normalizarNombreEjercicio(ex.getName());
+                if (nk != null && !nk.isBlank()) {
+                    ejercicioPorNombre.put(nk, ex);
                 }
             }
             logger.info("Mapa ejercicios post-import: {} filas en BD", ejercicioPorNombre.size());
@@ -528,15 +534,17 @@ public class ExerciseZipBackupService {
             // Para series necesitamos ejercicios en BD: si no importamos ejercicios ahora, usar los existentes.
             if (importarSeries && !importarEjercicios) {
                 for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    if (ex.getName() != null && !ex.getName().isBlank()) {
-                        ejercicioPorNombre.putIfAbsent(ex.getName().trim(), ex);
+                    String nk = normalizarNombreEjercicio(ex.getName());
+                    if (nk != null && !nk.isBlank()) {
+                        ejercicioPorNombre.putIfAbsent(nk, ex);
                     }
                 }
             }
             if (!pisarTodos && importarEjercicios) {
                 for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    if (ex.getName() != null && !ex.getName().isBlank()) {
-                        ejercicioPorNombre.putIfAbsent(ex.getName().trim(), ex);
+                    String nk = normalizarNombreEjercicio(ex.getName());
+                    if (nk != null && !nk.isBlank()) {
+                        ejercicioPorNombre.putIfAbsent(nk, ex);
                     }
                 }
             }
@@ -635,7 +643,7 @@ public class ExerciseZipBackupService {
                     if (seList != null) {
                         int orden = 0;
                         for (Map<String, Object> seMap : seList) {
-                            String exerciseName = (String) seMap.get("exerciseName");
+                            String exerciseName = normalizarNombreEjercicio((String) seMap.get("exerciseName"));
                             Exercise ex = resolveExerciseForSerieImport(exerciseName, ejercicioPorNombre);
                             if (ex == null) {
                                 logger.warn("Serie '{}': ejercicio '{}' no encontrado en BD; se omite la fila serie_ejercicio",
@@ -787,7 +795,7 @@ public class ExerciseZipBackupService {
             for (SerieEjercicio se : seOrdenados) {
                 if (se.getExercise() != null) {
                     Map<String, Object> seItem = new LinkedHashMap<>();
-                    seItem.put("exerciseName", se.getExercise().getName());
+                    seItem.put("exerciseName", normalizarNombreEjercicio(se.getExercise().getName()));
                     seItem.put("valor", se.getValor());
                     seItem.put("unidad", se.getUnidad());
                     seItem.put("peso", se.getPeso());
@@ -808,7 +816,10 @@ public class ExerciseZipBackupService {
         if (exerciseName == null || exerciseName.isBlank()) {
             return null;
         }
-        String key = exerciseName.trim();
+        String key = normalizarNombreEjercicio(exerciseName);
+        if (key == null || key.isBlank()) {
+            return null;
+        }
         Exercise ex = porNombre.get(key);
         if (ex == null) {
             ex = exerciseService.findByNameAndProfesorNull(key).orElse(null);
@@ -817,6 +828,18 @@ public class ExerciseZipBackupService {
             return null;
         }
         return exerciseRepository.findById(ex.getId()).orElse(null);
+    }
+
+    /** Trim + NFC para empatar nombres entre JSON, BD y distintas formas Unicode (ej. acentos). */
+    private static String normalizarNombreEjercicio(String name) {
+        if (name == null) {
+            return null;
+        }
+        String t = name.trim();
+        if (t.isEmpty()) {
+            return t;
+        }
+        return Normalizer.normalize(t, Normalizer.Form.NFC);
     }
 
     private static int toInt(Object o, int defaultValue) {

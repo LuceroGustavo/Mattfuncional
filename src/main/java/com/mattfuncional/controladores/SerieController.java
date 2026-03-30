@@ -162,6 +162,11 @@ public class SerieController {
         if (!esPropietario) {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
+        int filasConEjercicio = 0;
+        if (serie.getSerieEjercicios() != null) {
+            filasConEjercicio = (int) serie.getSerieEjercicios().stream().filter(se -> se.getExercise() != null).count();
+        }
+        model.addAttribute("serieEjerciciosConVista", filasConEjercicio);
         model.addAttribute("serie", serie);
         if (volver != null && !volver.isBlank()) {
             model.addAttribute("volver", volver);

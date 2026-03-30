@@ -36,8 +36,10 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 
 **ZIP ejercicios — detalle técnico (marzo 2026):**
 - **`manifest.json`:** Versión **1.1** incluye `cantidadSeriesBiblioteca` (series plantilla sin rutina, “Mis series” sueltas) y `cantidadSeriesEnRutinas` (series dentro de rutinas plantilla). `cantidadSeries` sigue siendo la suma (total en `series.json`). ZIPs exportados antes solo traen v1.0 con `cantidadSeries`; la pantalla de import sigue mostrándolo.
-- **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre y se persiste con referencia válida en BD para evitar errores de clave foránea si falló un ejercicio puntual.
+- **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre (con **trim y normalización Unicode NFC**) y se persiste con referencia válida en BD para evitar errores de clave foránea.
+- **Transacción:** La importación ZIP (`importarDesdeZip`) usa aislamiento **READ_COMMITTED**. Con el aislamiento por defecto de MySQL (`REPEATABLE_READ`), tras borrar y recrear ejercicios en transacciones independientes (`REQUIRES_NEW`), una lectura en la transacción principal podía seguir “viendo” IDs antiguos y fallar la FK al insertar `serie_ejercicio`.
 - **Vista previa:** Al elegir el archivo ZIP, el resumen muestra el desglose de series cuando el manifest trae los campos v1.1.
+- **Pruebas recomendadas (validación manual pendiente de retomar):** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver también `CHANGELOG.md` entrada **[2026-03-30] - docs: resumen integral backup ZIP…**.
 
 ---
 
