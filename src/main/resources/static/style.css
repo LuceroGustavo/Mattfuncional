@@ -170,6 +170,55 @@
   }
 }
 
+/* Usuarios del sistema — sectores (violeta cuenta / celeste listado), coherente con referencia MiGymVirtual */
+.admin-usuarios-sistema-root .usuarios-sistema-sector-cuenta {
+  border: 3px solid #7e57c2;
+  border-radius: 1rem;
+  padding: 0.75rem;
+  background: rgba(94, 53, 177, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(94, 53, 177, 0.15);
+}
+.admin-usuarios-sistema-root .usuarios-sistema-sector-listado {
+  border: 3px solid #039be5;
+  border-radius: 1rem;
+  padding: 0.75rem;
+  background: rgba(3, 169, 244, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(2, 136, 209, 0.18);
+}
+.admin-usuarios-sistema-root .usuarios-sistema-sector-cuenta .card,
+.admin-usuarios-sistema-root .usuarios-sistema-sector-listado .card {
+  border: 1px solid rgba(94, 53, 177, 0.28);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.admin-usuarios-sistema-root .usuarios-sistema-sector-listado .card {
+  border-color: rgba(2, 136, 209, 0.38);
+}
+
+/* Usuarios del sistema — fragmento dentro de Administración (Entorno 2) */
+@media (max-width: 991px) {
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root .usuarios-sistema-sector-cuenta,
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root .usuarios-sistema-sector-listado {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root .table td,
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root .table th {
+    word-break: break-word;
+    vertical-align: middle;
+  }
+  .admin-main .admin-content-wrap .admin-usuarios-sistema-root .table-responsive.mgv-scroll-panel {
+    max-height: min(42vh, 16rem);
+  }
+}
+
 /* Alertas con estilo Mattfuncional */
 .alert-mattfuncional {
   border-radius: 0.75rem;

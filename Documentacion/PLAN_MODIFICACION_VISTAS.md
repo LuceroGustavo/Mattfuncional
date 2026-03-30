@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** + **asignar rutina** | **Estado:** ver §4.2.1. **Pendiente próxima sesión:** módulo **Administración** (`/profesor/administracion`). Luego §2.2–2.3 (Pizarra/Calendario); **editar rutina** tabla/modal opcional. |
+| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** + **asignar rutina** + **Administración** (parcial) | **Estado:** detalle en §4.2.1. **Administración:** listos **Usuarios del sistema** y **Página pública** (Mar 2026); shell `administracion.html` con carga por fragmento. **Siguiente:** revisar **Backups**, **Depuración**, **Manual** en entorno 2 si hace falta paridad; luego **2.2–2.3** Pizarra/Calendario; **editar rutina** tabla/modal opcional. |
 
 ---
 
@@ -100,7 +100,19 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 **Convención:** Ir documentando solo en **este archivo** (`PLAN_MODIFICACION_VISTAS.md`), ampliando §4.2.1 y el estado de fases, para no multiplicar documentos.
 
-**Terminología:** Entorno 1 ≈ escritorio (≥992px); entorno 2 ≈ móvil (≤991px en panel). Referencia: `APP referencia/Migymvirtual/`.
+**Terminología:** **Entorno 1** = vista de escritorio (navegador en PC). **Entorno 2** = vista móvil y tablet. En breakpoints del panel: Entorno 1 suele ser ≥992px y Entorno 2 ≤991px. Referencia: `APP referencia/Migymvirtual/`.
+
+#### Administración — Usuarios del sistema (`profesor/usuarios-sistema.html`, `usuario-sistema-form.html`) — **Mar 2026**
+
+- **Entorno 1 / 2:** Raíz `usuarios-sistema-embed-root`, título en fila responsive, botón **Crear usuario** solo si `puedeCrearUsuario` (**Developer**). Tabla con `mgv-scroll-panel`; en fragmento dentro de Administración, altura de scroll acotada en móvil (`style.css`).
+- **ADMIN (`soloVistaProfesor`):** Solo tarjeta **Mi usuario** (nombre, correo, guardar + **Modificar** para contraseña). Sin listado ni eliminar. Crear/editar otros usuarios: solo Developer (mensajes `solo-developer-*` vía query).
+- **Developer:** **Mi perfil** (con campo rol deshabilitado) + **Listado** con editar/eliminar; eliminar solo otros usuarios.
+- **Estilo:** Sectores con borde violeta (cuenta) y celeste (listado) como referencia MiGymVirtual.
+
+#### Administración — **Página pública** (`profesor/pagina-publica-admin.html`, `static/css/pagina-publica-admin.css`) — **30 mar 2026**
+
+- **Entorno 1 (≥768px):** cabecera hero + tabla de consultas y planes como MiGymVirtual; configuración solo con claves Mattfuncional (`whatsapp`, `instagram`, `direccion`, `dias_horarios`, `telefono`).
+- **Entorno 2:** listas táctiles; **detalle de consulta** y **detalle de plan** en modales; flechas de orden en planes; confirmación de borrado en `#modalConfirmar`; mensaje prefijado de WhatsApp: *Mattfuncional*. Enlace **Ver página pública** → `/planes`.
 
 #### Login (`templates/login.html`) — **actualizado (Mar 2026)**
 
@@ -218,7 +230,7 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
-- **Módulo Administración** (`/profesor/administracion`, consultas, página pública, etc.): revisar paridad responsive/paleta con MiGymVirtual y flujos Mattfuncional — **prioridad próxima sesión (29 mar 2026)**.
+- **Módulo Administración:** **Usuarios del sistema** y **Página pública** ya registrados en §4.2.1 (responsive + modales en página pública). Queda valorar **Backups**, **Depuración** y **Manual** embebidos (`?fragment=1`) frente a la referencia.
 - **2.2 / 2.3** Pizarra y Calendario responsive.
 
 ### 4.3 Detalle de alumno

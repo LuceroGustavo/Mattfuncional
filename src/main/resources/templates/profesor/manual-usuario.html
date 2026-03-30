@@ -71,7 +71,7 @@
             <div class="card-section" id="acceso">
                 <h2>1. Acceso al sistema</h2>
                 <p>Solo pueden iniciar sesión usuarios con rol <strong>ADMIN</strong>, <strong>AYUDANTE</strong> o <strong>DEVELOPER</strong>. Los alumnos no tienen usuario ni contraseña; se gestionan desde el panel.</p>
-                <p>Ingresá con <strong>correo electrónico</strong> y <strong>contraseña</strong>. Si las olvidás, un administrador puede restablecerlas desde <strong>Usuarios del sistema</strong> (o Administrar sistema).</p>
+                <p>Ingresá con <strong>correo electrónico</strong> y <strong>contraseña</strong>. Si olvidás la contraseña, un usuario <strong>DEVELOPER</strong> puede ayudarte; un <strong>ADMIN</strong> puede cambiar la suya desde <strong>Usuarios del sistema</strong> (Administrar sistema).</p>
                 <p>Después de ingresar se abre el <strong>Panel del profesor</strong> (dashboard).</p>
             </div>
 
@@ -192,8 +192,9 @@
             <div class="card-section" id="usuarios">
                 <h2>12. Usuarios del sistema</h2>
                 <p>Solo visible para <strong>ADMIN</strong> y <strong>DEVELOPER</strong>. Acceso desde <strong>Administrar sistema</strong> en el panel.</p>
-                <p>Podés listar usuarios con login (ADMIN, AYUDANTE, DEVELOPER), <strong>editar</strong> nombre, correo, rol y contraseña. El usuario DEVELOPER del sistema no se puede eliminar ni cambiar de rol desde esta pantalla.</p>
-                <p><strong>Mi perfil:</strong> Cada usuario puede cambiar su propia contraseña o datos si la app lo permite.</p>
+                <p><strong>ADMIN:</strong> Ves la tarjeta <strong>Mi usuario</strong> (nombre y correo de acceso, más el botón para cambiar contraseña). No ves el listado ni podés crear ni eliminar usuarios; eso lo hace un <strong>DEVELOPER</strong>.</p>
+                <p><strong>DEVELOPER:</strong> Ves tu perfil, el listado completo (ADMIN, AYUDANTE, DEVELOPER) y podés crear usuarios, editar (incluido rol, salvo las restricciones del usuario DEVELOPER del sistema) y eliminar. Un usuario <strong>DEVELOPER</strong> no puede ser modificado por un ADMIN desde esta pantalla.</p>
+                <p><strong>Mi perfil:</strong> Guardar nombre y correo actualiza la sesión; la contraseña se cambia desde <strong>Modificar</strong> o el formulario de edición.</p>
             </div>
 
             <div class="card-section" id="administracion">
@@ -203,11 +204,11 @@
                 <h3 id="administracion-usuarios">13.1 Administración de usuarios del sistema</h3>
                 <p>Gestioná los usuarios que pueden iniciar sesión en Mattfuncional (ADMIN, AYUDANTE, DEVELOPER).</p>
                 <ul>
-                    <li><strong>Listado de usuarios:</strong> Se muestra una tabla con nombre, correo, rol y acciones (Editar, Eliminar).</li>
-                    <li><strong>Crear usuario:</strong> Botón "+ Crear usuario". Completás nombre, correo, rol y contraseña. El correo debe ser único.</li>
-                    <li><strong>Editar usuario:</strong> Podés cambiar nombre, correo, rol y contraseña. El usuario <strong>DEVELOPER</strong> del sistema no se puede modificar ni eliminar (protección del sistema).</li>
-                    <li><strong>Eliminar usuario:</strong> Solo ADMIN puede eliminar otros usuarios (no a sí mismo). El DEVELOPER puede eliminar a cualquiera. Al eliminar se pide confirmación.</li>
-                    <li><strong>Mi perfil:</strong> Cada usuario puede editar su propio nombre y correo desde esta misma pantalla. El rol solo lo cambia un ADMIN o DEVELOPER.</li>
+                    <li><strong>Usuario ADMIN:</strong> Pantalla <strong>Mi usuario</strong> con nombre, correo y botón <strong>Modificar</strong> para la contraseña. Sin listado, sin crear ni eliminar.</li>
+                    <li><strong>Usuario DEVELOPER:</strong> <strong>Mi perfil</strong>, listado de todos los usuarios de sistema, botón <strong>Crear usuario</strong>, editar y eliminar (no podés eliminarte a vos mismo desde la tabla; al eliminar se confirma en un modal).</li>
+                    <li><strong>Crear usuario:</strong> Solo <strong>DEVELOPER</strong>. Nombre, correo único, rol (Admin o Ayudante) y contraseña.</li>
+                    <li><strong>Editar usuario:</strong> Un ADMIN solo puede editar <strong>su propia</strong> ficha (nombre, correo, contraseña). Un DEVELOPER puede editar a los demás e incluir cambio de rol; el usuario <strong>DEVELOPER</strong> en la base tiene restricciones según la pantalla.</li>
+                    <li><strong>Eliminar usuario:</strong> Solo <strong>DEVELOPER</strong>.</li>
                 </ul>
 
                 <h3>13.2 Administración de la página pública</h3>
