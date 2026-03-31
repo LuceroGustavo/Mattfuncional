@@ -115,9 +115,9 @@ Para el detalle de vistas MiGymVirtual y seguimiento visual, ver también **PLAN
 2. **Ficha del alumno — modal “Detalle de rutina”** (`profesor/alumno-detalle.html`)  
    - Botón **Copiar enlace** en móvil: **`buildFullHojaUrl`**, **`clipboard.writeText` con `.catch` → `fallbackCopy`**, y mensaje si no hay token/enlace público (evita fallos silenciosos en **HTTP/LAN**).
 
-### Pendiente — próxima sesión (29 mar 2026)
+### Pendiente (histórico 29 mar 2026)
 
-- **Módulo de Administración** del panel profesor (`/profesor/administracion` y vistas relacionadas: consultas, página pública, etc.): revisar alineación con MiGymVirtual (responsive, paleta, UX) sin romper comportamiento propio de Mattfuncional.
+- **Módulo de Administración:** revisar pantallas que faltaban de paridad (backup, depuración, manual embebido en móvil, etc.). Ver estado actualizado en **§8** y en `PLAN_MODIFICACION_VISTAS.md`.
 
 ### Sugerencia de mensaje de commit
 
@@ -131,3 +131,11 @@ feat(profesor): asignar rutina con tabla/modal y arreglo copiar enlace en modal 
 ```
 
 *(Ajustá el prefijo `feat` si preferís `fix` solo para el modal, o partí en dos commits si querés historial más fino.)*
+
+---
+
+## 8. Estado documentado — 30 mar 2026 (última sesión de trabajo / hoy)
+
+- **Cerrado en esta etapa:** ronda de **arreglos responsive** según el plan de alineación con MiGymVirtual (vistas del panel, fichas, series, rutinas, asignar rutina, login, ejercicios, grupos musculares, administración en el alcance acordado). Detalle técnico por pantalla: **`PLAN_MODIFICACION_VISTAS.md`** §4.2.1 y tabla fase **2.4**.
+- **Siguiente prioridad operativa:** **validar en uso** la **nueva funcionalidad de backup** (ZIP con manifest v1.1, import con **Suplantar**, imágenes grandes en restore, comprobación de series/rutinas y vista **Ver serie**). Receta sugerida: **`DOCUMENTACION_UNIFICADA.md`** §2 y **`CHANGELOG.md`** (bloque **2026-03-30** sobre backup ZIP y transacción).
+- **Sigue en backlog:** fases **2.2 / 2.3** del plan de vistas (Pizarra y Calendario responsive fino); proceso de depuración anual de datos si el proyecto lo exige (`PLAN_DE_DESARROLLO_UNIFICADO.md`).

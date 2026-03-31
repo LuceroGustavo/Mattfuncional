@@ -23,6 +23,9 @@ Receta sugerida para validar de forma reproducible cuando retomen:
 ### Archivos principales
 `ExerciseZipBackupService.java`, `ImagenServicio.java`, `profesor/backup.html`, `SerieRepository.java`, `SerieController.java`, `series/verSerie.html`, `scripts/BD/README.md`, `scripts/BD/02_series_prueba_15.sql`, `scripts/BD/05_reparar_serie_ejercicios_nulos.sql`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
 
+### Documentación — estado de trabajo (30 mar 2026, última sesión)
+Actualizados **`LEEME_PRIMERO.md`**, **`DOCUMENTACION_UNIFICADA.md`**, **`REVISION_PREVIA_MIGRACION.md`** (§8), **`PLAN_MODIFICACION_VISTAS.md`** (fase 2.4 y §5) y **`PLAN_DE_DESARROLLO_UNIFICADO.md`** (§8) para reflejar **hoy**: **responsive** del plan §4.2.1 dado por cerrado en alcance acordado; **backup** con implementación terminada y **pruebas manuales del ZIP** explícitamente pendientes.
+
 ---
 
 ## [2026-03-30] - fix(series): exercise_id NULL en scripts, aviso «Ver serie» y script 05 ✅

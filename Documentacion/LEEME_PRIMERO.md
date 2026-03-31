@@ -70,8 +70,9 @@ Quedan **varios archivos** principales más la carpeta de servidor:
 
 ## 4. Resumen rápido de estado (para la IA)
 
-- **Implementado:** Ejercicios, series, rutinas, grupos musculares, alumnos (sin login), calendario y asistencia, pizarra y sala TV, página pública, manual en `/profesor/manual`, sistema de backup (ZIP, JSON y Excel alumnos). Ver DOCUMENTACION_UNIFICADA.md.
-- **Pendiente:** Depuración de datos antiguos (archivar/eliminar asistencia de más de 12 meses). Ver PLAN_DE_DESARROLLO_UNIFICADO.md.
+- **Implementado:** Ejercicios, series, rutinas, grupos musculares, alumnos (sin login), calendario y asistencia, pizarra y sala TV, página pública, manual en `/profesor/manual`, sistema de backup en código (ZIP, JSON y Excel alumnos). **Alineación responsive** con referencia MiGymVirtual en el alcance del plan de vistas (panel, ficha alumno, series, rutinas, asignar rutina, login, ejercicios, grupos, etc.). Ver `DOCUMENTACION_UNIFICADA.md` y `PLAN_MODIFICACION_VISTAS.md` §4.2.1.
+- **Próximo paso operativo (mar 2026):** **Probar a fondo** la **nueva funcionalidad de backup** (export/import ZIP, Suplantar, manifest v1.1, series, imágenes grandes) según receta en `DOCUMENTACION_UNIFICADA.md` §2 y `CHANGELOG.md` (entrada 2026-03-30).
+- **Pendiente de proceso / backlog:** Depuración automática o anual de datos antiguos (p. ej. asistencias de más de 12 meses); paridad responsive opcional en **Pizarra** y **Calendario** (fases 2.2–2.3 del plan de vistas). Ver `PLAN_DE_DESARROLLO_UNIFICADO.md`.
 
 ---
 
@@ -82,4 +83,4 @@ Quedan **varios archivos** principales más la carpeta de servidor:
 
 ---
 
-*Última actualización: Marzo 2026.*
+*Última actualización: 30 mar 2026 — §4: responsive del plan cerrado en alcance acordado; backup pendiente de validación manual.*

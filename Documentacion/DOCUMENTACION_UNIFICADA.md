@@ -15,14 +15,17 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 - **Pizarra y sala TV:** Editor desde panel; vista TV en `/sala/{token}`; columnas editables; ejercicios con peso/rep.
 - **Página pública:** Landing `/`, Planes `/planes`, consultas; administración en `/profesor/pagina-publica`.
 - **Manual del usuario:** HTML en `/profesor/manual` (botón en panel); cubre acceso, panel, alumnos, ejercicios, series, rutinas, calendario, pizarra, usuarios, administración.
-- **Backup (terminado Mar 2026):** Ver sección 2.
+- **Vistas responsive (mar 2026):** Alineación con MiGymVirtual para panel, ficha alumno, series, rutinas (crear/asignar), login, ejercicios, grupos musculares, hojas y modales según alcance acordado. Detalle y lista de pantallas en **[PLAN_MODIFICACION_VISTAS.md](PLAN_MODIFICACION_VISTAS.md)** §4.2.1.
+- **Backup (implementación terminada mar 2026):** Ver sección 2 — **las pruebas manuales del flujo completo siguen pendientes** (validación en uso).
 - **Depuración de datos (terminado Feb 2026):** Ver sección 2.1.
 
 ---
 
 ## 2. Backup y exportación
 
-**Estado:** Terminado (marzo 2026). Acceso: Administración → Backup y resguardo.
+**Estado implementación:** Cerrado en código (marzo 2026). Acceso: **Administración → Backup y resguardo**.
+
+**Validación pendiente:** Conviene ejecutar la receta de prueba del equipo (export ZIP → modificar/borrar datos de prueba en la misma BD → importar con **Suplantar** → verificar listados, rutinas, series y vista **Ver serie** sin errores). Incluye el comportamiento nuevo (manifest v1.1, imágenes hasta 50 MB en restore, `READ_COMMITTED`, normalización NFC). Ver pie de esta sección y `CHANGELOG.md` **[2026-03-30]**.
 
 | Funcionalidad | Descripción |
 |---------------|-------------|
@@ -39,7 +42,7 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 - **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre (con **trim y normalización Unicode NFC**) y se persiste con referencia válida en BD para evitar errores de clave foránea.
 - **Transacción:** La importación ZIP (`importarDesdeZip`) usa aislamiento **READ_COMMITTED**. Con el aislamiento por defecto de MySQL (`REPEATABLE_READ`), tras borrar y recrear ejercicios en transacciones independientes (`REQUIRES_NEW`), una lectura en la transacción principal podía seguir “viendo” IDs antiguos y fallar la FK al insertar `serie_ejercicio`.
 - **Vista previa:** Al elegir el archivo ZIP, el resumen muestra el desglose de series cuando el manifest trae los campos v1.1.
-- **Pruebas recomendadas (validación manual pendiente de retomar):** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver también `CHANGELOG.md` entrada **[2026-03-30] - docs: resumen integral backup ZIP…**.
+- **Pruebas recomendadas — pendiente según última sesión de trabajo documentada:** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver también `CHANGELOG.md` entrada **[2026-03-30] - docs: resumen integral backup ZIP…** y **REVISION_PREVIA_MIGRACION.md** §8.
 
 ---
 
@@ -126,4 +129,4 @@ El manual en la app (`/profesor/manual`) incluye:
 
 ---
 
-*Última actualización: Febrero 2026. Modales y avisos unificados (§2.2). Para pendientes ver PENDIENTES_FINALES.md.*
+*Última actualización: 30 mar 2026 — §1 alineado con vistas responsive (plan §4.2.1); §2 distingue implementación de backup vs. **pruebas manuales pendientes**. Modales unificados: §2.2. Otros pendientes de proceso: `PLAN_DE_DESARROLLO_UNIFICADO.md`.*

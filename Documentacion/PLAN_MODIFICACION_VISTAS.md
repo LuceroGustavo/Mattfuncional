@@ -31,7 +31,7 @@
 | **2.1** | **Panel del profesor** (`profesor/dashboard.html`) | Tarjetas superiores + barra de acciones + estructura móvil. |
 | **2.2** | **Pizarra** | Responsivo razonable; colores propios si no hay analogía en referencia. |
 | **2.3** | **Calendario** | Idem. |
-| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** + **asignar rutina** + **Administración** (parcial) | **Estado:** detalle en §4.2.1. **Administración:** listos **Usuarios del sistema** y **Página pública** (Mar 2026); shell `administracion.html` con carga por fragmento. **Siguiente:** revisar **Backups**, **Depuración**, **Manual** en entorno 2 si hace falta paridad; luego **2.2–2.3** Pizarra/Calendario; **editar rutina** tabla/modal opcional. |
+| **2.4** | Pestañas del panel + **crear/modificar serie** + **crear rutina** + **hoja / ver rutina** + **Mis ejercicios** + **grupos musculares** + **asignar rutina** + **Administración** (parcial) | **Estado (30 mar 2026):** **Responsive del alcance 2.4 cerrado** en código (§4.2.1). **Administración:** **Usuarios del sistema** y **Página pública** + shell `administracion.html` por fragmento. **Opcional / repaso:** paridad entorno 2 en **Backups**, **Depuración**, **Manual** embebido. **Pruebas pendientes:** flujo **backup ZIP** en profundidad (`DOCUMENTACION_UNIFICADA.md` §2). **Siguiente fase plan:** **2.2–2.3** Pizarra/Calendario; **editar rutina** tabla/modal opcional. |
 
 ---
 
@@ -236,8 +236,9 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
-- **Módulo Administración:** **Usuarios**, **Página pública** y **vista de Backups** (formato) en §4.2.1. Revisar **Depuración** y **Manual** embebidos; lógica de backup en servidor (si se alinea a MiGymVirtual) es trabajo de backend aparte.
-- **2.2 / 2.3** Pizarra y Calendario responsive.
+- **Backup (operativo):** la implementación está cerrada; **falta validación manual** del import/export ZIP (ver `DOCUMENTACION_UNIFICADA.md` §2 y `REVISION_PREVIA_MIGRACION.md` §8).
+- **Módulo Administración:** pulidos opcionales en **Backups / Depuración / Manual** embebido en entorno 2 si se busca paridad total con la referencia.
+- **2.2 / 2.3** Pizarra y Calendario responsive (fases siguientes del plan).
 
 ### 4.3 Detalle de alumno
 
@@ -247,7 +248,8 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 ## 5. Seguimiento
 
-- Ir cerrando **sub-bloques** (p. ej. “2.1 tarjetas escritorio”, “2.1 móvil”, “2.1 ejercicios+admin colores”) y compilar / probar en navegador real y tamaño móvil.
+- **30 mar 2026:** Alcance **2.4** (responsive pestañas y vistas enlazadas en §4.2.1) dado por **cerrado** en el trabajo actual; **probar backup** antes de dar por cerrada la release funcional de marzo.
+- Ir cerrando **sub-bloques** restantes (p. ej. **2.2 / 2.3**) y compilar / probar en navegador real y tamaño móvil.
 - **Documentación del plan de vistas:** actualizar **solo** este `PLAN_MODIFICACION_VISTAS.md` (estados de fase y §4.2.1), no crear archivos nuevos en `Documentacion/` salvo decisión explícita del proyecto.
 - Opcional: añadir filas en `MEJORAS_DESDE_MIGYMVIRTUAL.md` por cada bloque de vistas completado.
 
