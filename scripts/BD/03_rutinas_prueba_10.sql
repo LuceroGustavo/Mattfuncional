@@ -11,6 +11,12 @@ SET @profesor_id = COALESCE(
     (SELECT id FROM profesor ORDER BY id LIMIT 1)
 );
 
+INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES ('FUERZA', NULL);
+INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES ('CARDIO', NULL);
+INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES ('FLEXIBILIDAD', NULL);
+INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES ('FUNCIONAL', NULL);
+INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES ('HIIT', NULL);
+
 SET @cat_fuerza = (SELECT id FROM categoria WHERE nombre = 'FUERZA' AND profesor_id IS NULL LIMIT 1);
 SET @cat_cardio = (SELECT id FROM categoria WHERE nombre = 'CARDIO' AND profesor_id IS NULL LIMIT 1);
 SET @cat_flex = (SELECT id FROM categoria WHERE nombre = 'FLEXIBILIDAD' AND profesor_id IS NULL LIMIT 1);

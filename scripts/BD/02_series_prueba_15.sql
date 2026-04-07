@@ -12,10 +12,21 @@ SET @profesor_id = COALESCE(
     (SELECT id FROM profesor ORDER BY id LIMIT 1)
 );
 
--- Último recurso para @e1..@e30: primero ejercicios “sistema”, si no hay ninguno cualquier fila en exercise (tabla vacía ⇒ seguirá NULL → no ejecutes inserts hasta levantar la app).
+-- VALIDACIÓN CRÍTICA: Verificar que la tabla exercise tenga datos
+SET @ex_count = (SELECT COUNT(*) FROM exercise);
+IF @ex_count = 0 THEN
+    SELECT 'ERROR: La tabla exercise está vacía. DEBES ejecutar la app primero para que genere los 60 ejercicios predeterminados.' AS error;
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No hay ejercicios en BD. Arrancar Spring con ddl-auto=update primero.';
+END IF;
+
+-- Último recurso para @e1..@e30: primero ejercicios sistema, si no hay ninguno cualquier fila en exercise
 SET @ex_min = COALESCE(
     (SELECT MIN(id) FROM exercise WHERE profesor_id IS NULL LIMIT 1),
     (SELECT MIN(id) FROM exercise LIMIT 1));
+
+IF @ex_min IS NULL THEN
+    SELECT 'WARNING: No se encontró ningún ejercicio válido. Inserts serán omitidos.' AS warning;
+END IF;
 
 SET @e1  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 0),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 0), @ex_min);
 SET @e2  = COALESCE((SELECT id FROM exercise WHERE profesor_id IS NULL AND (es_predeterminado = 1 OR es_predeterminado IS NULL) ORDER BY id LIMIT 1 OFFSET 1),  (SELECT id FROM exercise WHERE profesor_id IS NULL ORDER BY id LIMIT 1 OFFSET 1), @ex_min);

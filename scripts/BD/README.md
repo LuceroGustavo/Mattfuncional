@@ -49,8 +49,30 @@ Ajustar usuario/clave si no usás `root`/`root`.
 ## Notas
 
 - Inspirado en `APP referencia/Migymvirtual/scripts/BD/`, adaptado a tablas/columnas de **Mattfuncional** (`categoria` con `profesor_id` NULL para sistema, tabla `rutina_categoria`, etc.).
-- Si falla el paso 2: comprobá que existan al menos **15** filas en `exercise` con `profesor_id IS NULL` (predeterminados).
+- **Si falla el paso 2 con mensaje de error FK:** Asegurate que la tabla `exercise` NO esté vacía. El script ahora valida esto al inicio y lanza error claro si `exercise` está vacía. Ver solución abajo.
 - **Alumnos en el panel:** el listado por profesor ya no depende de caché (los scripts SQL no la invalidaban y el dashboard podía seguir mostrando **0** con datos en `usuario`). Con la app actualizada, un **refresh** basta tras cargar `01_…`.
+
+## ⚠️ FIXES APLICADOS (abril 2026)
+
+### Paso 2 - Validación de ejercicios
+El script `02_series_prueba_15.sql` ahora valida que la tabla `exercise` tenga datos **antes** de crear variables. Si está vacía, se detiene con error claro:
+```
+ERROR: La tabla exercise está vacía. DEBES ejecutar la app primero para que genere los 60 ejercicios predeterminados.
+```
+
+**Solución:** Si ves este error, simplemente arrancar Spring una vez e intenta de nuevo.
+
+### Paso 3 - Garantizar categorías
+El script `03_rutinas_prueba_10.sql` ahora recrea las 5 categorías de sistema al inicio (con `INSERT IGNORE`). Esto evita errores FK si alguien borra categorías manualmente.
+
+### Paso 0 - Orden de borrado mejorado
+El script `00_limpiar_datos_prueba_matt.sql` ahora respeta el orden correcto de constraints FK al borrar:
+1. `serie_ejercicio` → `serie`
+2. `rutina_categoria` → `rutina`
+3. `serie` (sueltas)
+4. `rutina`
+
+---
 
 ## Verificar series tras SQL o backup
 
