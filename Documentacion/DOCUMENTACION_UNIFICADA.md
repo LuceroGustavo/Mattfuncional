@@ -40,6 +40,7 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 **ZIP ejercicios — detalle técnico (marzo 2026):**
 - **`manifest.json`:** Versión **1.1** incluye `cantidadSeriesBiblioteca` (series plantilla sin rutina, “Mis series” sueltas) y `cantidadSeriesEnRutinas` (series dentro de rutinas plantilla). `cantidadSeries` sigue siendo la suma (total en `series.json`). ZIPs exportados antes solo traen v1.0 con `cantidadSeries`; la pantalla de import sigue mostrándolo.
 - **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre (con **trim y normalización Unicode NFC**) y se persiste con referencia válida en BD para evitar errores de clave foránea.
+- **Categorías:** Si el ZIP incluye `categorias.json` y hay profesor de restauración, se importan **aunque no se marquen** Rutinas ni Series (así no se pierden categorías propias al traer solo ejercicios o grupos). Ver `CHANGELOG.md` **[2026-04-08]**.
 - **Transacción:** La importación ZIP (`importarDesdeZip`) usa aislamiento **READ_COMMITTED**. Con el aislamiento por defecto de MySQL (`REPEATABLE_READ`), tras borrar y recrear ejercicios en transacciones independientes (`REQUIRES_NEW`), una lectura en la transacción principal podía seguir “viendo” IDs antiguos y fallar la FK al insertar `serie_ejercicio`.
 - **Vista previa:** Al elegir el archivo ZIP, el resumen muestra el desglose de series cuando el manifest trae los campos v1.1.
 - **Pruebas recomendadas — pendiente según última sesión de trabajo documentada:** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver también `CHANGELOG.md` entrada **[2026-03-30] - docs: resumen integral backup ZIP…** y **REVISION_PREVIA_MIGRACION.md** §8.
@@ -129,4 +130,4 @@ El manual en la app (`/profesor/manual`) incluye:
 
 ---
 
-*Última actualización: 30 mar 2026 — §1 alineado con vistas responsive (plan §4.2.1); §2 distingue implementación de backup vs. **pruebas manuales pendientes**. Modales unificados: §2.2. Otros pendientes de proceso: `PLAN_DE_DESARROLLO_UNIFICADO.md`.*
+*Última actualización: 8 abr 2026 — §2: import de `categorias.json` aunque Rutinas/Series desmarcados (`CHANGELOG` 2026-04-08). Resto: 30 mar 2026 (responsive, backup, modales). Pendientes de proceso: `PLAN_DE_DESARROLLO_UNIFICADO.md`.*

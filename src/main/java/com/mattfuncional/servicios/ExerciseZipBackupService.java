@@ -303,6 +303,8 @@ public class ExerciseZipBackupService {
      * <p>Usa {@link Isolation#READ_COMMITTED}: con REPEATABLE READ (MySQL por defecto), tras borrar/reinsertar
      * ejercicios en {@code REQUIRES_NEW}, una lectura en esta transacción podía devolver IDs ya inexistentes
      * y fallar la FK de {@code serie_ejercicio}.</p>
+     * <p>Si el ZIP incluye {@code categorias.json} y hay profesor de restauración, las categorías se importan
+     * aunque los checkboxes de Rutinas/Series estén desmarcados (evita perder categorías al importar solo ejercicios).</p>
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String, Object> importarDesdeZip(MultipartFile archivoZip, boolean pisarTodos, Profesor profesorParaRestore,
@@ -403,8 +405,8 @@ public class ExerciseZipBackupService {
         }
 
         int categoriasImportadas = 0;
-        boolean debeImportarCategorias = profesorRestore != null && (importarRutinas || importarSeries);
-        if (debeImportarCategorias) {
+        // Si el ZIP trae categorias.json, importar siempre que haya profesor (no depender solo de rutinas/series).
+        if (profesorRestore != null) {
             byte[] catBytes = getZipEntryBytes(zipEntries, "categorias.json");
             if (catBytes != null) {
                 try {
@@ -527,27 +529,31 @@ public class ExerciseZipBackupService {
             logger.info("Mapa ejercicios post-import: {} filas en BD", ejercicioPorNombre.size());
         }
 
+        // Mapa para enlazar serie_ejercicio: si solo importamos series, cargar toda la BD; si Agregar+ejs, fusionar omitidos.
+        if (esBackupCompleto && importarSeries) {
+            if (!importarEjercicios) {
+                ejercicioPorNombre.clear();
+                for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
+                    String nk = normalizarNombreEjercicio(ex.getName());
+                    if (nk != null && !nk.isBlank()) {
+                        ejercicioPorNombre.put(nk, ex);
+                    }
+                }
+                logger.info("Mapa ejercicios para series (BD actual, sin reimportar ejercicios): {} filas", ejercicioPorNombre.size());
+            } else if (!pisarTodos) {
+                for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
+                    String nk = normalizarNombreEjercicio(ex.getName());
+                    if (nk != null && !nk.isBlank()) {
+                        ejercicioPorNombre.putIfAbsent(nk, ex);
+                    }
+                }
+            }
+        }
+
         // 4. Rutinas y series (si está seleccionado y el ZIP es backup completo)
         int rutinasImportadas = 0;
         int seriesImportadas = 0;
         if (esBackupCompleto && (importarRutinas || importarSeries)) {
-            // Para series necesitamos ejercicios en BD: si no importamos ejercicios ahora, usar los existentes.
-            if (importarSeries && !importarEjercicios) {
-                for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    String nk = normalizarNombreEjercicio(ex.getName());
-                    if (nk != null && !nk.isBlank()) {
-                        ejercicioPorNombre.putIfAbsent(nk, ex);
-                    }
-                }
-            }
-            if (!pisarTodos && importarEjercicios) {
-                for (Exercise ex : exerciseService.findAllExercisesWithImages()) {
-                    String nk = normalizarNombreEjercicio(ex.getName());
-                    if (nk != null && !nk.isBlank()) {
-                        ejercicioPorNombre.putIfAbsent(nk, ex);
-                    }
-                }
-            }
             if (profesorRestore == null) {
                 throw new RuntimeException("No hay profesor en el sistema para restaurar rutinas y series");
             }

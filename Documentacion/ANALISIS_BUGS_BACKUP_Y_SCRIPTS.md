@@ -3,6 +3,8 @@
 **Fecha:** 7 de abril de 2026  
 **Versión:** Mattfuncional con Categorías (marzo 2026)
 
+> **Estado (8 abr 2026):** Correcciones de código y scripts descritas aquí quedaron aplicadas o reflejadas en el repo; el detalle de merge está en **`CHANGELOG.md` [2026-04-08]** (Java: categorías + mapa ejercicios) y entradas **[2026-03-30]** (SQL, backup, transacción). Este documento conserva el análisis original.
+
 ---
 
 ## 📋 Resumen ejecutivo
@@ -446,5 +448,5 @@ Después de los fixes, correr este flujo:
 
 ---
 
-**Próximo paso:** ¿Quieres que implemente estos fixes ahora?
+**Próximo paso:** ~~Implementar~~ Hecho — ver `CHANGELOG.md` [2026-04-08] y [2026-03-30].
 

@@ -2,6 +2,21 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-04-08] - fix(backup): categorías desde ZIP siempre que exista categorias.json; mapa ejercicios para series ✅
+
+### Resumen
+Se alineó el código con el análisis de bugs (abr 2026): las categorías del backup ya no dependen de marcar Rutinas u Series; el mapa nombre→ejercicio para importar `serie_ejercicio` quedó en un solo bloque antes de rutinas/series.
+
+### Cambios
+- **ExerciseZipBackupService:** Si hay `profesorRestore` y el ZIP trae `categorias.json`, se importan categorías independientemente de `importarRutinas` / `importarSeries` (evitaba perder categorías de profesor al importar solo ejercicios o grupos).
+- **ExerciseZipBackupService:** Tras recargar el mapa post-import de ejercicios, un único bloque para `esBackupCompleto && importarSeries`: sin reimportar ejercicios → `clear` + todas las filas de BD; modo Agregar con ejercicios → `putIfAbsent` para fusionar omitidos.
+- **Documentación:** `DOCUMENTACION_UNIFICADA.md` §2; `RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md` y `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` referencian esta entrada.
+
+### Archivos
+`ExerciseZipBackupService.java`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md`, `Documentacion/RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-30] - docs: resumen integral backup ZIP, series, SQL y fix aislamiento transacción ✅
 
 ### Contexto

@@ -54,6 +54,9 @@ Ajustar usuario/clave si no usás `root`/`root`.
 
 ## ⚠️ FIXES APLICADOS (abril 2026)
 
+### Import ZIP (aplicación)
+Al restaurar desde backup ZIP, si el archivo incluye **`categorias.json`**, la app importa categorías **aunque no marques** Rutinas ni Series (útil al importar solo ejercicios). Ver `CHANGELOG.md` **[2026-04-08]**.
+
 ### Paso 2 - Validación de ejercicios
 El script `02_series_prueba_15.sql` ahora valida que la tabla `exercise` tenga datos **antes** de crear variables. Si está vacía, se detiene con error claro:
 ```

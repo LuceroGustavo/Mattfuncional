@@ -67,10 +67,10 @@ boolean debeImportarCategorias = profesorRestore != null;
 | Archivo | Cambio |
 |---------|--------|
 | `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` | ✅ Creado: análisis detallado de 5 bugs |
-| `CHANGELOG.md` | ✅ Actualizado: entrada [2026-04-07] con todos los fixes |
+| `CHANGELOG.md` | ✅ Actualizado: entrada **[2026-04-08]** con fixes Java (categorías + mapa ejercicios); histórico marzo en [2026-03-30] |
 | `scripts/BD/README.md` | ✅ Actualizado: sección "FIXES APLICADOS" |
 | `scripts/BD/VALIDACION_FIXES_ABRIL_2026.md` | ✅ Creado: test plan completo (5 tests) |
-| `/memories/repo/mattfuncional-context.md` | ✅ Actualizado: resumen de fixes |
+| `DOCUMENTACION_UNIFICADA.md` | ✅ §2: categorías ZIP sin depender de checkboxes Rutinas/Series |
 
 ---
 
@@ -122,7 +122,7 @@ Se creó archivo **`VALIDACION_FIXES_ABRIL_2026.md`** con 5 tests automáticos:
 
 - **Análisis técnico:** [ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md](../ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md)
 - **Plan de tests:** [scripts/BD/VALIDACION_FIXES_ABRIL_2026.md](VALIDACION_FIXES_ABRIL_2026.md)
-- **CHANGELOG:** [CHANGELOG.md](../CHANGELOG.md) entrada [2026-04-07]
+- **CHANGELOG:** [CHANGELOG.md](../CHANGELOG.md) entrada **[2026-04-08]**
 - **README Scripts:** [scripts/BD/README.md](README.md) § FIXES APLICADOS
 
 ---
@@ -138,7 +138,6 @@ Se creó archivo **`VALIDACION_FIXES_ABRIL_2026.md`** con 5 tests automáticos:
 - [x] README scripts actualizado
 - [x] Análisis detallado documentado
 - [x] Plan de validación creado
-- [x] Memoria de repositorio actualizada
 
 **Status:** 🟢 **COMPLETADO**
 
