@@ -440,7 +440,7 @@
                 <i class="fa-solid fa-chalkboard-user fa-2x me-2" style="color:#9575cd;"></i>
                 <h1 class="fw-bold mb-0">Panel del Profesor</h1>
             </div>
-        </div>
+            </div>
 
         <div th:if="${mensajeRestriccionAdmin}" class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
             <strong>Acceso restringido.</strong> Debe ser usuario administrador para poder ingresar a Administrar sistema.
@@ -498,10 +498,10 @@
             <div class="dashboard-col">
                 <div class="card-module card-alumnos card-scroll-tab" data-scroll-tab="alumnos" role="button" tabindex="0" title="Ver lista de alumnos">
                     <a th:href="@{/profesor/alumnos/nuevo}" class="card-module-add" title="Nuevo alumno"><i class="fa-solid fa-user-plus"></i></a>
-                    <i class="fa-solid fa-users"></i>
-                    <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
-                    <div class="label">Alumnos</div>
-                </div>
+                <i class="fa-solid fa-users"></i>
+                <div class="stat" th:text="${usuarios != null ? usuarios.size() : 0}">0</div>
+                <div class="label">Alumnos</div>
+            </div>
                 <a th:href="@{/calendario/semanal/profesor/{profesorId}(profesorId=${profesor != null ? profesor.id : 1})}" class="main-action-card card-calendario" target="_blank" rel="noopener noreferrer" title="Calendario Semanal">
                     <div class="card-inner">
                         <i class="fa-solid fa-calendar-week"></i>
@@ -514,9 +514,9 @@
                 <div class="card-module card-series card-scroll-tab" data-scroll-tab="series" role="button" tabindex="0" title="Ver lista de series">
                     <a href="/series/crear" class="card-module-add" title="Crear serie"><i class="fa-solid fa-plus"></i></a>
                     <i class="fa-solid fa-layer-group"></i>
-                    <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
-                    <div class="label">Series</div>
-                </div>
+                <div class="stat" th:text="${series != null ? series.size() : 0}">0</div>
+                <div class="label">Series</div>
+            </div>
                 <a th:href="@{/profesor/mis-ejercicios}" class="main-action-card card-ejercicios" target="_blank" rel="noopener noreferrer" title="Ver ejercicios">
                     <div class="card-inner">
                         <span class="action-card-stat" th:text="${cantidadEjercicios != null ? cantidadEjercicios : 0}">0</span>
@@ -529,10 +529,10 @@
             <div class="dashboard-col">
                 <div class="card-module card-rutinas card-scroll-tab" data-scroll-tab="rutinas" role="button" tabindex="0" title="Ver lista de rutinas">
                     <a th:href="@{/rutinas/crear}" class="card-module-add" title="Crear rutina"><i class="fa-solid fa-plus"></i></a>
-                    <i class="fa-solid fa-list-check"></i>
-                    <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
-                    <div class="label">Rutinas</div>
-                </div>
+                <i class="fa-solid fa-list-check"></i>
+                <div class="stat" th:text="${rutinas != null ? rutinas.size() : 0}">0</div>
+                <div class="label">Rutinas</div>
+            </div>
                 <a th:href="@{/profesor/pizarra}" class="main-action-card card-pizarra" target="_blank" rel="noopener noreferrer" title="Pizarra en sala">
                     <div class="card-inner">
                         <i class="fa-solid fa-tv"></i>
@@ -543,16 +543,16 @@
             <!-- Columna 4: Asignaciones | Administrar sistema -->
             <div class="dashboard-col">
                 <div class="card-module card-asignadas card-scroll-tab" data-scroll-tab="asignaciones" role="button" tabindex="0" title="Ver rutinas asignadas">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
+                <i class="fa-solid fa-clipboard-list"></i>
+                <div class="stat" th:text="${rutinasAsignadas != null ? rutinasAsignadas.size() : 0}">0</div>
                     <div class="label">Asignaciones</div>
-                </div>
+            </div>
                 <!-- Solo ADMIN y DEVELOPER pueden acceder; AYUDANTE ve la tarjeta pero al hacer clic muestra mensaje -->
                 <a th:if="${usuario != null && (usuario.rol == 'ADMIN' || usuario.rol == 'DEVELOPER')}" th:href="@{/profesor/administracion}" class="main-action-card card-admin" target="_blank" rel="noopener noreferrer" title="Administrar sistema">
                     <div class="card-inner">
                         <i class="fa-solid fa-cogs"></i>
                         <span class="card-label">Administrar sistema</span>
-                    </div>
+        </div>
                 </a>
                 <span th:if="${usuario != null && usuario.rol != 'ADMIN' && usuario.rol != 'DEVELOPER'}" class="main-action-card card-admin" role="button" tabindex="0" title="Administrar sistema (solo administradores)" style="cursor: pointer; text-decoration: none; display: inline-flex;" id="btnAdminNoPermitido">
                     <div class="card-inner">
@@ -816,9 +816,9 @@
                                 <i class="fa-solid fa-tags me-1"></i>Categorías
                             </a>
                             <a th:href="@{/rutinas/crear}" class="btn btn-rutinas">
-                                <i class="fa-solid fa-plus me-1"></i>Nueva Rutina
-                            </a>
-                        </div>
+                            <i class="fa-solid fa-plus me-1"></i>Nueva Rutina
+                        </a>
+                    </div>
                     </div>
 
                     <div class="card mb-3">

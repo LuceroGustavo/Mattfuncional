@@ -27,8 +27,6 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 
 **Validación pendiente:** Conviene ejecutar la receta de prueba del equipo (export ZIP → modificar/borrar datos de prueba en la misma BD → importar con **Suplantar** → verificar listados, rutinas, series y vista **Ver serie** sin errores). Incluye el comportamiento nuevo (manifest v1.1, imágenes hasta 50 MB en restore, `READ_COMMITTED`, normalización NFC). Ver pie de esta sección y `CHANGELOG.md` **[2026-03-30]**.
 
-**Arreglos recientes (7 abr 2026):** se corrigieron importación de categorías desde ZIP aunque no se importen rutinas/series, recarga de mapa `ejercicioPorNombre` antes de importar series, y validaciones SQL en scripts de prueba para evitar inserts con FK nulas. Ver `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` y `RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`.
-
 | Funcionalidad | Descripción |
 |---------------|-------------|
 | **Ejercicios + grupos + rutinas + series** | Exportar/importar ZIP. Opciones por checkbox (Grupos, Ejercicios, Rutinas, Series). Modos Agregar o Suplantar. Imágenes con nombres originales. |

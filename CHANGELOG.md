@@ -2,60 +2,6 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
-## [2026-04-07] - fix(backup,scripts): validaciones FK, garantizar categorías, consolidar mapa ejercicios 🔧
-
-### Contexto
-Durante validación de backup con categorías (entidades nuevas), se detectaron 5 bugs críticos e intermedios en scripts SQL y servicio de backup Java. Se implementan fixes para evitar inserts con FK nuli, llenar de ejercicioPorNombre incompleto, y mejorar UX de errores.
-
-### 📝 Bugs corregidos
-
-**Script 02_series_prueba_15.sql«**
-- **BUG #1 (CRÍTICO):** Si tabla `exercise` está vacía, todas las variables `@e1…@e30` quedan NULL → inserts de `serie_ejercicio` con `exercise_id = NULL` → FK violation.
-- **FIX:** Agregar validación `IF (SELECT COUNT(*) FROM exercise) = 0` al inicio. Script falla con error claro antes de intentar inserts.
-
-**Script 03_rutinas_prueba_10.sql**
-- **BUG #3 (ALTO):** Si categorías de sistema no existen, `@cat_fuerza` etc. quedan NULL → `rutina_categoria` con `categoria_id = NULL` → FK violation.
-- **FIX:** Agregar `INSERT IGNORE INTO categoria (nombre, profesor_id) VALUES (...)` para 5 categorías antes de leer IDs.
-
-**Script 00_limpiar_datos_prueba_matt.sql**
-- **BUG #2 (ALTO):** Orden incorrecto de borrado; `serie_ejercicio` + `rutina_categoria` se borraban en diferentes bloques sin consolidar.
-- **FIX:** Unificar borrado en orden correcto: `serie_ejercicio` (todas Matt PF) → `rutina_categoria` → `serie` (sueltas) → `rutina`.
-
-**ExerciseZipBackupService.java línea 406**
-- **BUG #4 (ALTO):** Categorías solo se importan si `importarRutinas || importarSeries`. Usuario que marca solo ☑️ Ejercicios y ☑️ Grupos pierde categorías profesor-specific del ZIP.
-- **FIX:** Cambiar `boolean debeImportarCategorias = profesorRestore != null && (importarRutinas || importarSeries)` → `boolean debeImportarCategorias = profesorRestore != null;` (importar si existen en ZIP, sin importar qué más se seleccione).
-
-**ExerciseZipBackupService.java línea 519+**
-- **BUG #5 (CRÍTICO):** Si `importarEjercicios = false`, mapa `ejercicioPorNombre` queda vacío o incompleto → series se crean sin ejercicios vinculdos (series fantasma).
-- **FIX:** Consolidar recarga del mapa en bloque único: si `importarEjercicios`, recargar todo; si `importarSeries && !importarEjercicios`, cargar pre-existentes. Agregar warning en logs si mapa está vacío al importar series.
-
-### ✅ Cambios implementados
-
-| Archivo | Sección | Cambio |
-|---------|---------|--------|
-| `scripts/BD/02_series_prueba_15.sql` | Líneas 14–18 | Validación FK; señal de error si exercise vacía |
-| `scripts/BD/03_rutinas_prueba_10.sql` | Líneas 13–23 | INSERT IGNORE categorías sistema + validación FK |
-| `scripts/BD/00_limpiar_datos_prueba_matt.sql` | Líneas 6–25 | Orden unificado de borrado respetando FKs |
-| `scripts/BD/README.md` | § FIXES APLICADOS | Doc nueva sección con explicación de cambios |
-| `ExerciseZipBackupService.java` | Línea 406 | Lógica booleana: importar categorías siempre si existen |
-| `ExerciseZipBackupService.java` | Línea 519–548 | Consolidar recarga `ejercicioPorNombre`; avisar si vacío |
-
-### 🧪 Plan de validación recomendado
-
-1. **Test Start Clean:** Limpiar BD → Reiniciar Spring → Verificar 60 exercises + 5 categorías
-2. **Test Load Data:** Ejecutar 01 → 02 → 03 en orden; verificar inserts exitosos
-3. **Test Export-Import (Agregar):** Export ZIP → Import todas opciones → Datos duplicados ✅
-4. **Test Export-Import (Suplantar):** Limpiar → Export → Import Suplantar → Datos restaurados = originales ✅
-5. **Test Edge Case:** Mismo ZIP sin marcar ☑️ Ejercicios → Categorías aún se importan ✅
-
-### 📚 Referencias
-
-- Detalle técnico: [ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md](ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md)
-- Código Java: `ExerciseZipBackupService.importarDesdeZip()`
-- Documentación: `scripts/BD/README.md`
-
----
-
 ## [2026-03-30] - docs: resumen integral backup ZIP, series, SQL y fix aislamiento transacción ✅
 
 ### Contexto

@@ -55,8 +55,7 @@ public class SerieController {
         List<Exercise> ejercicios = exerciseService.findEjerciciosDisponiblesParaProfesorWithImages(profesorId);
         if (grupoId != null) {
             ejercicios = ejercicios.stream()
-                    .filter(e -> e.getGrupos() != null
-                            && e.getGrupos().stream().anyMatch(g -> grupoId.equals(g.getId())))
+                    .filter(e -> e.getGrupos() != null && e.getGrupos().stream().anyMatch(g -> grupoId.equals(g.getId())))
                     .toList();
         }
         if (search != null && !search.trim().isEmpty()) {
@@ -108,13 +107,12 @@ public class SerieController {
     public String mostrarFormularioEditarSerie(@PathVariable Long id, Model model,
             @RequestParam(required = false) String volver,
             @AuthenticationPrincipal Usuario profesorUsuario) {
-        // 1. Obtener la serie CON sus ejercicios cargados (evita LazyInitialization y
-        // muestra la tabla)
+        // 1. Obtener la serie CON sus ejercicios cargados (evita LazyInitialization y muestra la tabla)
         Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
 
         if (!isDeveloper(profesorUsuario)
                 && (profesorUsuario.getProfesor() == null
-                        || !serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()))) {
+                || !serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()))) {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
 
@@ -133,20 +131,15 @@ public class SerieController {
         } else {
             ejercicios = exerciseService.findAllExercisesWithImages();
         }
-        List<GrupoMuscular> gruposMusculares = profesorId != null
-                ? grupoMuscularService.findDisponiblesParaProfesor(profesorId)
-                : grupoMuscularService.findGruposSistema();
         model.addAttribute("ejercicios", ejercicios);
         model.addAttribute("serieDTO", serieDTO);
         model.addAttribute("editMode", true);
         model.addAttribute("usuario", profesorUsuario);
-        model.addAttribute("gruposMusculares", gruposMusculares);
         if (volver != null && !volver.isBlank()) {
             model.addAttribute("volverUrl", volver);
         }
 
-        // Pasar el DTO como JSON para que el JS reciba correctamente ejercicios
-        // (nombre, valor, unidad, peso)
+        // Pasar el DTO como JSON para que el JS reciba correctamente ejercicios (nombre, valor, unidad, peso)
         try {
             model.addAttribute("serieDTOJson", new ObjectMapper().writeValueAsString(serieDTO));
         } catch (JsonProcessingException e) {
@@ -163,16 +156,15 @@ public class SerieController {
         Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
         boolean esPropietario = isDeveloper(profesorUsuario)
                 || (profesorUsuario != null
-                        && profesorUsuario.getProfesor() != null
-                        && serie.getProfesor() != null
-                        && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
+                && profesorUsuario.getProfesor() != null
+                && serie.getProfesor() != null
+                && serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
         if (!esPropietario) {
             return "redirect:/profesor/dashboard?tab=series&error=permiso_serie";
         }
         int filasConEjercicio = 0;
         if (serie.getSerieEjercicios() != null) {
-            filasConEjercicio = (int) serie.getSerieEjercicios().stream().filter(se -> se.getExercise() != null)
-                    .count();
+            filasConEjercicio = (int) serie.getSerieEjercicios().stream().filter(se -> se.getExercise() != null).count();
         }
         model.addAttribute("serieEjerciciosConVista", filasConEjercicio);
         model.addAttribute("serie", serie);
@@ -190,9 +182,8 @@ public class SerieController {
         try {
             Serie serieExistente = serieService.obtenerSeriePorId(id);
 
-            boolean esPropietario = isDeveloper(profesorUsuario)
-                    || (profesorUsuario.getProfesor() != null && serieExistente.getProfesor() != null &&
-                            serieExistente.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
+            boolean esPropietario = isDeveloper(profesorUsuario) || (profesorUsuario.getProfesor() != null && serieExistente.getProfesor() != null &&
+                    serieExistente.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
 
             if (!esPropietario) {
                 return ResponseEntity.status(403).body("No tiene permiso para editar esta serie.");
@@ -209,9 +200,8 @@ public class SerieController {
     public String eliminarSerie(@PathVariable Long id, @AuthenticationPrincipal Usuario profesorUsuario) {
         Serie serie = serieService.obtenerSeriePorId(id);
 
-        boolean esPropietario = isDeveloper(profesorUsuario)
-                || (profesorUsuario.getProfesor() != null && serie.getProfesor() != null &&
-                        serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
+        boolean esPropietario = isDeveloper(profesorUsuario) || (profesorUsuario.getProfesor() != null && serie.getProfesor() != null &&
+                serie.getProfesor().getId().equals(profesorUsuario.getProfesor().getId()));
 
         if (esPropietario) {
             serieService.eliminarSerie(id);
@@ -226,8 +216,7 @@ public class SerieController {
     }
 
     private com.mattfuncional.entidades.Profesor getProfesorAcceso(Usuario usuarioActual) {
-        if (usuarioActual == null)
-            return null;
+        if (usuarioActual == null) return null;
         if ("DEVELOPER".equals(usuarioActual.getRol())) {
             return profesorService.getProfesorByCorreo("profesor@mattfuncional.com");
         }
