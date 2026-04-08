@@ -523,9 +523,9 @@ public class RutinaService {
         plantilla.setProfesor(origen.getProfesor());
         plantilla.setRutina(null);
         plantilla.setEsPlantilla(true);
-        plantilla.setRepeticionesSerie(origen.getRepeticionesSerie() != null ? origen.getRepeticionesSerie() : 1);
+        plantilla.setRepeticionesSerie(origen.getRepeticionesSerie() > 0 ? origen.getRepeticionesSerie() : 1);
         plantilla.setCreador(origen.getCreador());
-        plantilla.setOrden(origen.getOrden() != null ? origen.getOrden() : 0);
+        plantilla.setOrden(origen.getOrden());
         plantilla = serieRepository.save(plantilla);
         if (origen.getSerieEjercicios() != null) {
             List<SerieEjercicio> ordenados = new ArrayList<>(origen.getSerieEjercicios());
