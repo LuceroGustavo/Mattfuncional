@@ -2,18 +2,42 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
-## [2026-04-08] - fix(backup): categorías desde ZIP siempre que exista categorias.json; mapa ejercicios para series ✅
+## [2026-04-09] - fix(rutinas): editar rutina tras import ZIP — plantilla en biblioteca y UI alineada ✅
 
 ### Resumen
-Se alineó el código con el análisis de bugs (abr 2026): las categorías del backup ya no dependen de marcar Rutinas u Series; el mapa nombre→ejercicio para importar `serie_ejercicio` quedó en un solo bloque antes de rutinas/series.
+Tras importar rutinas/series desde ZIP, las filas de **series dentro de la rutina** suelen ser **copias** sin plantilla en biblioteca (`plantilla_id` nulo) y sin fila equivalente `rutina IS NULL`. El resolver devolvía el **id de la copia**; `actualizarSeriesDeRutina` **borraba** esas copias y volvía a llamar `agregarSerieARutina` con ese id → **«Serie no encontrada con id: N»**. Además, en el HTML `data-serie-id` usaba un `plantilla_id` obsoleto y la tabla de disponibles no coindicía con la BD.
+
+### Cambios
+- **RutinaService**
+  - Antes del borrado por rutina: **`asegurarPlantillaBibliotecaAntesDeBorrarCopias`** — si el id resuelto no es una plantilla usable (biblioteca u otra rutina), se llama a **`crearOReutilizarPlantillaBibliotecaDesdeSerie`**, que reutiliza plantilla en biblioteca por nombre (normalizado NFC) o crea una nueva con los mismos ejercicios, **mientras la copia aún existe**.
+  - **`resolverPlantillaIdParaCopiaRutina`**: normalización Unicode (NFC); fallback por nombre contra **`findByProfesorIdAndEsPlantillaTrue`** cuando no hay coincidencia con `rutina` nula.
+  - **`resolverPlantillaIdParaAgregarDesdeFormulario`**: series nuevas del formulario que no sean plantilla siguen el mismo criterio de resolución por copia.
+  - **`mapPlantillaEfectivaPorCopiaEnRutina`**: mapa copia → id plantilla efectivo para la vista.
+- **RutinaControlador** (`GET /rutinas/editar/{id}`): calcula `plantillaEfectivaPorCopiaId` y filtra **`idsSeriesEnRutina`** con ese mapa (misma lógica que el listado).
+- **`rutinas/editarRutina.html`**: `data-serie-id` en series ya en la rutina usa `plantillaEfectivaPorCopiaId.get(serie.id)` (con fallback al comportamiento anterior).
+
+### Comportamiento esperado
+- Primera vez que se **guarda** una rutina importada con copias «huérfanas», pueden aparecer **nuevas series en biblioteca** (plantillas generadas automáticamente); las copias en la rutina quedan con `plantilla_id` coherente en guardados siguientes.
+- Rutinas creadas solo en local no deberían cambiar de comportamiento salvo casos con datos ya inconsistentes.
+
+### Archivos
+`RutinaService.java`, `RutinaControlador.java`, `templates/rutinas/editarRutina.html`, `CHANGELOG.md`.
+
+---
+
+## [2026-04-08] - fix(backup,rutinas): categorías ZIP, mapa ejercicios, plantillaId obsoleto al guardar rutina ✅
+
+### Resumen
+Se alineó el código con el análisis de bugs (abr 2026): categorías del backup sin depender de checkboxes Rutinas/Series; mapa nombre→ejercicio consolidado. **Modificar rutina** tras restore: las copias en rutina tenían `plantilla_id` apuntando a series borradas (nuevos id tras import); al guardar fallaba «Serie no encontrada con id: N».
 
 ### Cambios
 - **ExerciseZipBackupService:** Si hay `profesorRestore` y el ZIP trae `categorias.json`, se importan categorías independientemente de `importarRutinas` / `importarSeries` (evitaba perder categorías de profesor al importar solo ejercicios o grupos).
 - **ExerciseZipBackupService:** Tras recargar el mapa post-import de ejercicios, un único bloque para `esBackupCompleto && importarSeries`: sin reimportar ejercicios → `clear` + todas las filas de BD; modo Agregar con ejercicios → `putIfAbsent` para fusionar omitidos.
+- **RutinaService.actualizarSeriesDeRutina:** `resolverPlantillaIdParaCopiaRutina` — si el id plantilla no existe o no es plantilla, busca en biblioteca del profesor (mismo nombre, sin rutina).
 - **Documentación:** `DOCUMENTACION_UNIFICADA.md` §2; `RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md` y `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` referencian esta entrada.
 
 ### Archivos
-`ExerciseZipBackupService.java`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md`, `Documentacion/RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`, `CHANGELOG.md`.
+`ExerciseZipBackupService.java`, `RutinaService.java`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md`, `Documentacion/RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`, `CHANGELOG.md`.
 
 ---
 

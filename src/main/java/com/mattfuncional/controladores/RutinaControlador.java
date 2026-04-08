@@ -153,9 +153,12 @@ public class RutinaControlador {
             // Series plantilla con ejercicios cargados (tabla / modal detalle en editar rutina)
             List<Serie> todasConEjercicios = serieService.findByProfesorIdWithSerieEjercicios(profesorId);
 
-            // IDs a excluir: si la serie en la rutina es copia usamos plantillaId; si es la plantilla en la rutina usamos su id
+            // Plantilla efectiva por copia (corrige plantillaId obsoleto tras restore u operaciones en BD)
+            Map<Long, Long> plantillaEfectivaPorCopiaId = rutinaService.mapPlantillaEfectivaPorCopiaEnRutina(rutina, profesorId);
+            // IDs a excluir en la tabla: mismo criterio que data-serie-id en la lista de actuales
             Set<Long> idsSeriesEnRutina = rutina.getSeries().stream()
-                    .map(s -> s.getPlantillaId() != null ? s.getPlantillaId() : s.getId())
+                    .map(s -> plantillaEfectivaPorCopiaId.getOrDefault(s.getId(),
+                            s.getPlantillaId() != null ? s.getPlantillaId() : s.getId()))
                     .collect(Collectors.toSet());
 
             // Plantillas que aún no están en la rutina
@@ -165,6 +168,7 @@ public class RutinaControlador {
                     .collect(Collectors.toList());
 
             model.addAttribute("rutina", rutina);
+            model.addAttribute("plantillaEfectivaPorCopiaId", plantillaEfectivaPorCopiaId);
             model.addAttribute("seriesDisponibles", seriesDisponibles);
             model.addAttribute("usuario", usuarioActual);
             model.addAttribute("returnAlumnoId", alumnoId);

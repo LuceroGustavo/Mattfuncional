@@ -171,7 +171,8 @@
                                 <p class="small text-muted mb-2 d-md-none mb-0">Series en la rutina</p>
                                 <ul id="series-actuales-list" class="list-group list-group-flush">
                                     <li th:each="serie : ${rutina.series}" class="list-group-item d-flex align-items-center gap-2 py-2 serie-actual-item"
-                                        th:attr="data-serie-id=${serie.plantillaId != null ? serie.plantillaId : serie.id}">
+                                        th:with="effPl=${plantillaEfectivaPorCopiaId != null ? plantillaEfectivaPorCopiaId.get(serie.id) : null}"
+                                        th:attr="data-serie-id=${effPl != null ? effPl : (serie.plantillaId != null ? serie.plantillaId : serie.id)}">
                                         <div class="btn-group btn-group-sm flex-shrink-0">
                                             <button type="button" class="btn btn-outline-secondary btn-subir-actual" title="Subir"><i class="fas fa-arrow-up"></i></button>
                                             <button type="button" class="btn btn-outline-secondary btn-bajar-actual" title="Bajar"><i class="fas fa-arrow-down"></i></button>

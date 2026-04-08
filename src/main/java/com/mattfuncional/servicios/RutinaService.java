@@ -16,10 +16,15 @@ import com.mattfuncional.repositorios.SerieEjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.security.SecureRandom;
 
@@ -342,12 +347,15 @@ public class RutinaService {
         //    (una vez borradas, ya no podemos leerlas por ID)
         List<Long> plantillaIdsAReañadir = new ArrayList<>();
         List<Integer> repsAReañadir = new ArrayList<>();
+        Long profesorRutinaId = rutina.getProfesor() != null ? rutina.getProfesor().getId() : null;
         if (seriesIds != null && repeticionesExistentes != null) {
             for (int i = 0; i < seriesIds.size(); i++) {
                 Long serieId = seriesIds.get(i);
                 Serie s = serieRepository.findById(serieId).orElse(null);
                 if (s != null) {
                     Long plantillaId = s.getPlantillaId() != null ? s.getPlantillaId() : s.getId();
+                    plantillaId = resolverPlantillaIdParaCopiaRutina(s, plantillaId, profesorRutinaId);
+                    plantillaId = asegurarPlantillaBibliotecaAntesDeBorrarCopias(rutinaId, plantillaId, s, profesorRutinaId);
                     plantillaIdsAReañadir.add(plantillaId);
                     repsAReañadir.add(i < repeticionesExistentes.size() && repeticionesExistentes.get(i) != null
                             ? repeticionesExistentes.get(i) : 1);
@@ -370,7 +378,7 @@ public class RutinaService {
         // 4. Añadir las nuevas series seleccionadas
         if (nuevasSeriesIds != null) {
             for (int i = 0; i < nuevasSeriesIds.size(); i++) {
-                Long plantillaId = nuevasSeriesIds.get(i);
+                Long plantillaId = resolverPlantillaIdParaAgregarDesdeFormulario(nuevasSeriesIds.get(i), profesorRutinaId);
                 int repeticiones = (repeticionesNuevas != null && i < repeticionesNuevas.size()
                         && repeticionesNuevas.get(i) != null)
                         ? repeticionesNuevas.get(i)
@@ -378,6 +386,166 @@ public class RutinaService {
                 agregarSerieARutina(rutinaId, plantillaId, repeticiones);
             }
         }
+    }
+
+    /**
+     * Para la vista “editar rutina”: id de plantilla coherente con la BD (copia → plantilla actual por nombre).
+     * Evita {@code data-serie-id} obsoleto en el HTML y duplicados en la tabla de disponibles.
+     */
+    public Map<Long, Long> mapPlantillaEfectivaPorCopiaEnRutina(Rutina rutina, Long profesorId) {
+        Map<Long, Long> map = new LinkedHashMap<>();
+        if (rutina.getSeries() == null) {
+            return map;
+        }
+        for (Serie s : rutina.getSeries()) {
+            if (s.getId() == null) {
+                continue;
+            }
+            Long pref = s.getPlantillaId() != null ? s.getPlantillaId() : s.getId();
+            map.put(s.getId(), resolverPlantillaIdParaCopiaRutina(s, pref, profesorId));
+        }
+        return map;
+    }
+
+    /** Id enviado desde el form (tabla +) puede ser plantilla o, en casos raros, fila equivocada. */
+    private Long resolverPlantillaIdParaAgregarDesdeFormulario(Long idSolicitado, Long profesorId) {
+        if (idSolicitado == null || profesorId == null) {
+            return idSolicitado;
+        }
+        Optional<Serie> sp = serieRepository.findById(idSolicitado);
+        if (sp.isEmpty()) {
+            return idSolicitado;
+        }
+        Serie s = sp.get();
+        if (s.isEsPlantilla()) {
+            return idSolicitado;
+        }
+        return resolverPlantillaIdParaCopiaRutina(s, s.getPlantillaId() != null ? s.getPlantillaId() : s.getId(), profesorId);
+    }
+
+    private static String normNombreSerie(String nombre) {
+        if (nombre == null) {
+            return "";
+        }
+        return Normalizer.normalize(nombre.trim(), Normalizer.Form.NFC);
+    }
+
+    /**
+     * Tras un restore ZIP u operaciones que recrean series, {@code plantillaId} en copias dentro de rutinas puede
+     * apuntar a un id que ya no existe. Si el id preferido no es una plantilla válida, se busca por nombre
+     * (biblioteca {@code rutina} nula y, si hace falta, cualquier plantilla del profesor con nombre normalizado).
+     */
+    private Long resolverPlantillaIdParaCopiaRutina(Serie copiaEnRutina, Long plantillaIdPreferido, Long profesorId) {
+        if (plantillaIdPreferido != null) {
+            Optional<Serie> sp = serieRepository.findById(plantillaIdPreferido);
+            if (sp.isPresent() && sp.get().isEsPlantilla()) {
+                return plantillaIdPreferido;
+            }
+        }
+        if (profesorId == null || copiaEnRutina.getNombre() == null || copiaEnRutina.getNombre().isBlank()) {
+            return plantillaIdPreferido;
+        }
+        String nombreKey = normNombreSerie(copiaEnRutina.getNombre());
+        if (nombreKey.isEmpty()) {
+            return plantillaIdPreferido;
+        }
+        List<Serie> candidatos = serieRepository.findAllByNombreAndRutinaIsNullAndProfesor_Id(copiaEnRutina.getNombre().trim(), profesorId);
+        Optional<Long> foundLib = candidatos.stream()
+                .filter(Serie::isEsPlantilla)
+                .map(Serie::getId)
+                .findFirst();
+        if (foundLib.isPresent()) {
+            return foundLib.get();
+        }
+        return serieRepository.findByProfesorIdAndEsPlantillaTrue(profesorId).stream()
+                .filter(sr -> normNombreSerie(sr.getNombre()).equals(nombreKey))
+                .map(Serie::getId)
+                .findFirst()
+                .orElse(plantillaIdPreferido);
+    }
+
+    /**
+     * Tras importar por ZIP, las series dentro de la rutina suelen ser "copias" sin plantilla en biblioteca; el
+     * resolved apunta al id de la copia. Ese registro se borra antes de volver a insertar y falla la recreación.
+     * Si el id no es una plantilla usable (biblioteca u otra rutina), se crea o reutiliza una plantilla standalone
+     * con el contenido de la copia, antes del borrado.
+     */
+    private Long asegurarPlantillaBibliotecaAntesDeBorrarCopias(Long rutinaId, Long idResuelto, Serie copiaEnRutinaDelFormulario,
+            Long profesorId) {
+        if (idResuelto == null || copiaEnRutinaDelFormulario == null || profesorId == null) {
+            return idResuelto;
+        }
+        Optional<Serie> refOpt = serieRepository.findById(idResuelto);
+        if (refOpt.isPresent()) {
+            Serie ref = refOpt.get();
+            if (ref.isEsPlantilla()
+                    && (ref.getRutina() == null || !Objects.equals(rutinaId, ref.getRutina().getId()))) {
+                return idResuelto;
+            }
+        }
+        return crearOReutilizarPlantillaBibliotecaDesdeSerie(copiaEnRutinaDelFormulario.getId(), profesorId);
+    }
+
+    private Long crearOReutilizarPlantillaBibliotecaDesdeSerie(Long serieIdOrigen, Long profesorId) {
+        if (serieIdOrigen == null || profesorId == null) {
+            return serieIdOrigen;
+        }
+        Optional<Serie> origenOpt = serieRepository.findByIdWithSerieEjercicios(serieIdOrigen);
+        Serie origen = origenOpt.orElseGet(() -> serieRepository.findById(serieIdOrigen).orElse(null));
+        if (origen == null) {
+            return serieIdOrigen;
+        }
+        if (origen.getProfesor() == null || !Objects.equals(profesorId, origen.getProfesor().getId())) {
+            return serieIdOrigen;
+        }
+        String nombreKey = normNombreSerie(origen.getNombre());
+        if (!nombreKey.isEmpty()) {
+            List<Serie> candidatos = serieRepository.findAllByNombreAndRutinaIsNullAndProfesor_Id(origen.getNombre().trim(), profesorId);
+            Optional<Long> existente = candidatos.stream()
+                    .filter(Serie::isEsPlantilla)
+                    .map(Serie::getId)
+                    .findFirst();
+            if (existente.isPresent()) {
+                return existente.get();
+            }
+            Optional<Long> porNorm = serieRepository.findByProfesorIdAndEsPlantillaTrue(profesorId).stream()
+                    .filter(sr -> sr.getRutina() == null)
+                    .filter(sr -> normNombreSerie(sr.getNombre()).equals(nombreKey))
+                    .map(Serie::getId)
+                    .findFirst();
+            if (porNorm.isPresent()) {
+                return porNorm.get();
+            }
+        }
+        Serie plantilla = new Serie();
+        plantilla.setNombre(origen.getNombre());
+        plantilla.setDescripcion(origen.getDescripcion());
+        plantilla.setProfesor(origen.getProfesor());
+        plantilla.setRutina(null);
+        plantilla.setEsPlantilla(true);
+        plantilla.setRepeticionesSerie(origen.getRepeticionesSerie() != null ? origen.getRepeticionesSerie() : 1);
+        plantilla.setCreador(origen.getCreador());
+        plantilla.setOrden(origen.getOrden() != null ? origen.getOrden() : 0);
+        plantilla = serieRepository.save(plantilla);
+        if (origen.getSerieEjercicios() != null) {
+            List<SerieEjercicio> ordenados = new ArrayList<>(origen.getSerieEjercicios());
+            ordenados.sort(Comparator.comparingInt(se -> se.getOrden() != null ? se.getOrden() : 0));
+            for (int i = 0; i < ordenados.size(); i++) {
+                SerieEjercicio seOrig = ordenados.get(i);
+                if (seOrig.getExercise() == null) {
+                    continue;
+                }
+                SerieEjercicio nuevo = new SerieEjercicio();
+                nuevo.setSerie(plantilla);
+                nuevo.setExercise(seOrig.getExercise());
+                nuevo.setValor(seOrig.getValor());
+                nuevo.setUnidad(seOrig.getUnidad());
+                nuevo.setPeso(seOrig.getPeso());
+                nuevo.setOrden(i);
+                serieEjercicioRepository.save(nuevo);
+            }
+        }
+        return plantilla.getId();
     }
 
     /** Actualiza la nota/reseña para el alumno de una rutina asignada. Solo si la rutina pertenece al profesor y no es plantilla. */
