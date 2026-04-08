@@ -150,16 +150,17 @@ public class RutinaControlador {
                 return "redirect:/profesor/dashboard?tab=rutinas&error=No tiene permiso para editar esta rutina";
             }
 
-            // Obtener todas las series plantilla del profesor
-            List<Serie> todasLasSeriesPlantilla = serieService.obtenerSeriesPlantillaPorProfesor(profesorId);
+            // Series plantilla con ejercicios cargados (tabla / modal detalle en editar rutina)
+            List<Serie> todasConEjercicios = serieService.findByProfesorIdWithSerieEjercicios(profesorId);
 
             // IDs a excluir: si la serie en la rutina es copia usamos plantillaId; si es la plantilla en la rutina usamos su id
             Set<Long> idsSeriesEnRutina = rutina.getSeries().stream()
                     .map(s -> s.getPlantillaId() != null ? s.getPlantillaId() : s.getId())
                     .collect(Collectors.toSet());
 
-            // Filtrar plantillas que aún no están en la rutina
-            List<Serie> seriesDisponibles = todasLasSeriesPlantilla.stream()
+            // Plantillas que aún no están en la rutina
+            List<Serie> seriesDisponibles = todasConEjercicios.stream()
+                    .filter(Serie::isEsPlantilla)
                     .filter(plantilla -> !idsSeriesEnRutina.contains(plantilla.getId()))
                     .collect(Collectors.toList());
 

@@ -106,6 +106,8 @@ public class SerieController {
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditarSerie(@PathVariable Long id, Model model,
             @RequestParam(required = false) String volver,
+            @RequestParam(name = "grupoId", required = false) Long grupoId,
+            @RequestParam(name = "search", required = false) String search,
             @AuthenticationPrincipal Usuario profesorUsuario) {
         // 1. Obtener la serie CON sus ejercicios cargados (evita LazyInitialization y muestra la tabla)
         Serie serie = serieService.obtenerSeriePorIdConEjercicios(id);
@@ -119,7 +121,7 @@ public class SerieController {
         // 2. Convertir la entidad a DTO para el formulario (ya con ejercicios cargados)
         SerieDTO serieDTO = serieService.convertirSerieADTO(serie);
 
-        // 3. Preparar el modelo para la vista
+        // 3. Preparar el modelo para la vista (misma lógica que /series/crear: filtros y grupos musculares)
         Long profesorId = profesorUsuario.getProfesor() != null ? profesorUsuario.getProfesor().getId() : null;
         if (profesorId == null && isDeveloper(profesorUsuario)) {
             com.mattfuncional.entidades.Profesor profesor = getProfesorAcceso(profesorUsuario);
@@ -131,7 +133,24 @@ public class SerieController {
         } else {
             ejercicios = exerciseService.findAllExercisesWithImages();
         }
+        if (grupoId != null) {
+            ejercicios = ejercicios.stream()
+                    .filter(e -> e.getGrupos() != null && e.getGrupos().stream().anyMatch(g -> grupoId.equals(g.getId())))
+                    .toList();
+        }
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            ejercicios = ejercicios.stream()
+                    .filter(e -> e.getName().toLowerCase().contains(searchLower) ||
+                            (e.getDescription() != null && e.getDescription().toLowerCase().contains(searchLower)))
+                    .toList();
+        }
+        List<GrupoMuscular> gruposMusculares = profesorId != null
+                ? grupoMuscularService.findDisponiblesParaProfesor(profesorId)
+                : List.of();
         model.addAttribute("ejercicios", ejercicios);
+        model.addAttribute("gruposMusculares", gruposMusculares);
+        model.addAttribute("selectedGrupoId", grupoId);
         model.addAttribute("serieDTO", serieDTO);
         model.addAttribute("editMode", true);
         model.addAttribute("usuario", profesorUsuario);
