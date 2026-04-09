@@ -104,6 +104,12 @@ public class CalendarioController {
             if (slotsList.size() > totalFilas)
                 totalFilas = slotsList.size();
         }
+        // Igualar longitud de todas las columnas (evita IndexOutOfBounds en la vista si algún día tuviera menos filas)
+        for (java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO> list : slotsPorDiaList) {
+            while (list.size() < totalFilas) {
+                list.add(null);
+            }
+        }
         // Rellenar presente/ausente por slot (para que la vista muestre verde/rojo/gris sin depender del mapa)
         LocalDate inicioSemana = calendario.getFechaInicioSemana();
         for (int diaIdx = 0; diaIdx < slotsPorDiaList.size(); diaIdx++) {

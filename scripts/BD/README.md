@@ -14,8 +14,9 @@ Para probar **backup**, **panel de alumnos**, **rutinas** y **series** sin carga
 
 | Paso | Archivo | Qué carga |
 |------|---------|-----------|
-| 0 (opcional) | `00_limpiar_datos_prueba_matt.sql` | Borra solo lo generado por estos scripts (no toca ejercicios ni usuarios reales) |
-| 1 | `01_alumnos_prueba_15.sql` | **15** alumnos (`test_matt_pf_*@mattfuncional.test`) |
+| 0 (opcional) | `00_limpiar_datos_prueba_matt.sql` | Borra solo lo generado por estos scripts (Matt PF rutinas/series + alumnos test; no toca ejercicios ni cuenta admin) |
+| 0b (opcional) | `98_borrar_todos_alumnos.sql` | Borra **todos** los usuarios `rol = ALUMNO` (y FK: asistencias, rutinas asignadas, mediciones, etc.). **No** borra ADMIN/AYUDANTE/DEVELOPER. Útil antes de recargar `01` desde cero. |
+| 1 | `01_alumnos_prueba_15.sql` | **30** alumnos (`test_matt_pf_01` … `30`) con `tipo_asistencia`, fechas, contacto emergencia, `detalle_asistencia` + horarios para **calendario**. Incluye `SQL_SAFE_UPDATES=0` para Workbench. El `…_08` sigue **INACTIVO** sin horarios. |
 | 2 | `02_series_prueba_15.sql` | **15** series **plantilla** (sin `rutina_id`), con ejercicios del sistema |
 | 3 | `03_rutinas_prueba_10.sql` | **10** rutinas plantilla + `rutina_categoria` + copia de series dentro de cada rutina |
 | 5 (reparación) | `05_reparar_serie_ejercicios_nulos.sql` | **Solo borra** filas con `exercise_id IS NULL` — **no** crea enlaces. Si todo era NULL, tras 05 el panel mostrará **0** ejercicios; volvé a ejecutar **02** (y **03**) con la app ya habiendo cargado ejercicios |
@@ -43,7 +44,7 @@ Ajustar usuario/clave si no usás `root`/`root`.
 ## Convenciones
 
 - Prefijo de negocio: nombres **`Matt PF Serie …`**, **`Matt PF Rutina …`**.
-- Correos de prueba: `test_matt_pf_01@mattfuncional.test` … `test_matt_pf_15@mattfuncional.test`.
+- Correos de prueba: `test_matt_pf_01@mattfuncional.test` … `test_matt_pf_30@mattfuncional.test`.
 - Tokens de rutina: hash MD5 fijo de 32 caracteres (único por índice).
 
 ## Notas
