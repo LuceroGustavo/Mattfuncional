@@ -48,14 +48,37 @@
             font-size: 1rem;
         }
 
-        .slot-movil-resumen {
-            display: none;
-        }
+        /* Resumen en celda (todos los anchos): solo número de alumnos; lista real oculta para clonar al modal */
         .td-slot-calendario { position: relative; }
+        .td-slot-calendario.td-slot-clicable {
+            cursor: pointer;
+        }
+        .slot-celda-resumen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            padding: 6px 4px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .slot-celda-num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            color: inherit;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+        }
+        .slot-celda-hint {
+            font-size: 0.65rem;
+            font-weight: 600;
+            opacity: 0.88;
+            text-align: center;
+            line-height: 1.2;
+        }
         @media (max-width: 991.98px) {
-            .td-slot-calendario.td-slot-tiene-alumnos {
-                cursor: pointer;
-            }
+            .slot-celda-num { font-size: 1.35rem; }
+            .slot-celda-hint { font-size: 0.58rem; }
         }
         
         .calendario-header {
@@ -251,21 +274,6 @@
         .btn-punto-asistencia { cursor: pointer; }
         .btn-punto-asistencia:hover { opacity: 0.85; transform: scale(1.15); }
         
-        .btn-excepcion {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px;
-            height: 18px;
-            padding: 0;
-            border-radius: 50%;
-            font-size: 12px;
-            line-height: 16px;
-            opacity: 0.5;
-        }
-        .btn-excepcion:hover { opacity: 0.95; }
-        .tabla-horarios:not(.excepcion-activa) .btn-excepcion { display: none; }
-
         .badge-excepcion {
             background: #6c757d;
             color: #fff;
@@ -414,10 +422,6 @@
             .fila-capacidad-form form .form-control {
                 width: 100% !important;
             }
-            .fila-capacidad-form #toggleExcepciones {
-                width: 100%;
-            }
-
             .calendario-table { margin: 8px 0; }
             .tabla-horarios th:first-child,
             .tabla-horarios td:first-child {
@@ -442,49 +446,21 @@
                 line-height: 1.15;
                 padding: 8px 2px;
             }
-            /* En móvil no se listan nombres en la celda: solo contador; la lista queda oculta para clonar al modal */
-            .tabla-horarios td[data-col-index] .usuarios-lista {
-                position: absolute !important;
-                width: 1px !important;
-                height: 1px !important;
-                padding: 0 !important;
-                margin: -1px !important;
-                overflow: hidden !important;
-                clip: rect(0, 0, 0, 0) !important;
-                border: 0 !important;
-                white-space: nowrap !important;
-            }
-            .slot-movil-resumen {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 44px;
-                padding: 4px 2px;
-                cursor: pointer;
-                -webkit-tap-highlight-color: transparent;
-            }
-            .slot-movil-num {
-                font-size: 1.35rem;
-                font-weight: 800;
-                line-height: 1.1;
-                color: inherit;
-                text-shadow: 0 1px 0 rgba(255,255,255,0.35);
-            }
-            .slot-movil-hint {
-                font-size: 0.58rem;
-                font-weight: 600;
-                opacity: 0.85;
-                text-transform: lowercase;
-            }
             .tabla-horarios td[data-col-index]:hover {
                 transform: none;
             }
         }
-        @media (min-width: 992px) {
-            .slot-movil-resumen {
-                display: none !important;
-            }
+        /* Lista de nombres/puntos solo en el modal (oculta en la grilla en escritorio y móvil) */
+        .tabla-horarios td[data-col-index] .usuarios-lista {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            border: 0 !important;
+            white-space: nowrap !important;
         }
     </style>
 </head>
@@ -560,7 +536,7 @@
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-presente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Presente</span></div>
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-ausente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Ausente</span></div>
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-pendiente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Pend.</span></div>
-                                <span class="leyenda-hint-desktop d-none d-md-inline text-muted" style="font-size:0.82em;">Clic en el punto para marcar asistencia.</span>
+                                <span class="leyenda-hint-desktop d-none d-md-inline text-muted" style="font-size:0.82em;">Clic en la celda del horario para ver alumnos; dentro del panel, clic en el punto para la asistencia. Excepciones desde ese mismo panel.</span>
                             </div>
                         </div>
                     </div>
@@ -573,10 +549,8 @@
                             <input type="hidden" name="profesorId" th:value="${profesorId}" />
                             <button type="submit" class="btn btn-primary">Actualizar</button>
                         </form>
-                        <button type="button" class="btn btn-outline-dark flex-shrink-0" id="toggleExcepciones">
-                            Agregar usuarios por excepción
-                        </button>
                     </div>
+                    <p class="small text-muted mb-0">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja.</p>
                     
                     <!-- Tabla de horarios -->
                     <div class="calendario-table">
@@ -600,20 +574,20 @@
                                     <td th:each="dia, diaStat : ${diasSemana}"
                                         th:with="slot=${slotsPorDiaList[diaStat.index][i]}, fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
                                         th:attr="data-col-index=${diaStat.index}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-hora-inicio=${slot != null ? slot.horaInicio : ''}, data-hora-fin=${slot != null ? slot.horaFin : ''}"
-                                        th:classappend="${(slot == null ? 'slot-vacio' : (slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible')))) + (slot != null and slot.usuariosAsignados != null and !#lists.isEmpty(slot.usuariosAsignados) ? ' td-slot-tiene-alumnos' : '')}"
+                                        th:classappend="${(slot == null ? 'slot-vacio' : (slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible')))) + (slot != null ? ' td-slot-clicable' : '')}"
                                         class="td-slot-calendario"
                                         style="position:relative;"
-                                        th:title="${slot != null and slot.capacidadActual == slot.capacidadMaxima ? 'Capacidad al máximo' : ''}">
-                                        <button type="button" class="btn btn-light btn-excepcion" th:if="${slot != null}" title="Agregar excepción">+</button>
-                                        <div th:if="${slot != null and slot.usuariosAsignados != null and !#lists.isEmpty(slot.usuariosAsignados)}">
-                                            <div class="slot-movil-resumen d-lg-none"
+                                        th:title="${slot != null ? ((slot.capacidadActual) + ' alumno(s) · ' + slot.capacidadMaxima + ' cupos máx.') + (slot.capacidadActual == slot.capacidadMaxima ? ' · Lleno' : '') : ''}">
+                                        <th:block th:if="${slot != null}">
+                                            <div class="slot-celda-resumen"
                                                  role="button"
                                                  tabindex="0"
-                                                 th:attr="aria-label=|${#lists.size(slot.usuariosAsignados)} alumnos. Tocá para ver nombres.|">
-                                                <span class="slot-movil-num" th:text="${#lists.size(slot.usuariosAsignados)}">0</span>
-                                                <span class="slot-movil-hint">tocá para ver</span>
+                                                 aria-label="Abrir panel de este horario (alumnos y excepciones)">
+                                                <span class="slot-celda-num" th:text="${slot.usuariosAsignados != null ? #lists.size(slot.usuariosAsignados) : 0}">0</span>
+                                                <span class="slot-celda-hint" th:if="${slot.usuariosAsignados != null and not #lists.isEmpty(slot.usuariosAsignados)}">Clic para ver</span>
+                                                <span class="slot-celda-hint" th:if="${slot.usuariosAsignados == null or #lists.isEmpty(slot.usuariosAsignados)}">Clic para opciones</span>
                                             </div>
-                                            <div class="usuarios-lista">
+                                            <div class="usuarios-lista" th:if="${slot.usuariosAsignados != null and not #lists.isEmpty(slot.usuariosAsignados)}">
                                                 <div th:each="usuario : ${slot.usuariosAsignados}"
                                                     th:with="presente=${slot.presentePorUsuarioId != null ? slot.presentePorUsuarioId[usuario.id] : null}, esExcepcion=${slot.excepcionPorUsuarioId != null ? slot.excepcionPorUsuarioId[usuario.id] : null}"
                                                     class="usuario-item d-flex align-items-center justify-content-center gap-1">
@@ -625,8 +599,8 @@
                                                     <span th:if="${esExcepcion == true}" class="badge-excepcion" title="Agregado por excepción">Ex</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div th:if="${slot == null or slot.usuariosAsignados == null or #lists.isEmpty(slot.usuariosAsignados)}">-</div>
+                                        </th:block>
+                                        <div th:if="${slot == null}">-</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -648,8 +622,11 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body" id="modalBody"></div>
-                <div class="modal-footer py-3 d-flex justify-content-stretch justify-content-md-end">
-                    <button type="button" class="btn btn-calendario-cerrar w-100 px-4 py-2" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-footer py-3 flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
+                    <button type="button" class="btn btn-outline-primary order-2 order-sm-1" id="btnAbrirExcepcionDesdeModal">
+                        <i class="fas fa-plus-circle me-1"></i> Agregar alumno por excepción
+                    </button>
+                    <button type="button" class="btn btn-calendario-cerrar order-1 order-sm-2 ms-sm-auto px-4 py-2" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -703,17 +680,14 @@
         var urlMarcarAsistencia = /*[[@{/calendario/api/marcar-asistencia}]]*/ '/calendario/api/marcar-asistencia';
     </script>
     <script>
-        /** Móvil (≤991px): tocar la celda con alumnos abre modal con la misma lista que en escritorio (clon del HTML). */
+        /** Cualquier ancho: clic en celda de horario abre modal (lista clonada o vacía). */
         (function() {
             var modalEl = document.getElementById('modalUsuarios');
             var modalBody = document.getElementById('modalBody');
             var modalTituloTexto = document.getElementById('modalTituloTexto');
             if (!modalEl || !modalBody || !modalTituloTexto) return;
             var modalInst = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-            function esVistaMovilCalendario() {
-                return window.matchMedia('(max-width: 991.98px)').matches;
-            }
+            window.calendarioTdSlotActivo = null;
 
             function formatoHora(s) {
                 if (!s) return '';
@@ -722,31 +696,37 @@
             }
 
             function abrirModalAlumnos(td) {
+                var hiRaw = td.getAttribute('data-hora-inicio');
+                if (!hiRaw || String(hiRaw).trim() === '') return;
                 var lista = td.querySelector('.usuarios-lista');
-                if (!lista || !lista.querySelector('.usuario-item')) return;
                 var f = td.getAttribute('data-fecha') || '';
-                var hi = formatoHora(td.getAttribute('data-hora-inicio'));
+                var hi = formatoHora(hiRaw);
                 var hf = formatoHora(td.getAttribute('data-hora-fin'));
-                modalTituloTexto.textContent = 'Alumnos — ' + f + ' · ' + hi + ' – ' + hf;
-                modalBody.innerHTML = lista.innerHTML;
+                modalTituloTexto.textContent = 'Horario — ' + f + ' · ' + hi + ' – ' + hf;
+                window.calendarioTdSlotActivo = td;
+                if (lista && lista.querySelector('.usuario-item')) {
+                    modalBody.innerHTML = lista.innerHTML;
+                } else {
+                    modalBody.innerHTML = '<p class="text-muted mb-0">No hay alumnos asignados en este horario. Podés agregar uno por excepción con el botón inferior.</p>';
+                }
                 modalInst.show();
             }
 
             document.addEventListener('click', function(e) {
-                if (!esVistaMovilCalendario()) return;
-                if (e.target.closest('.btn-excepcion')) return;
-                var td = e.target.closest('.td-slot-calendario');
+                var td = e.target.closest('.td-slot-calendario.td-slot-clicable');
                 if (!td) return;
+                if (e.target.closest('.columna-dia-header')) return;
                 abrirModalAlumnos(td);
             });
 
             document.addEventListener('keydown', function(e) {
                 if (e.key !== 'Enter' && e.key !== ' ') return;
-                var trig = e.target.closest('.slot-movil-resumen');
-                if (!trig || !esVistaMovilCalendario()) return;
-                e.preventDefault();
+                var trig = e.target.closest('.slot-celda-resumen');
+                if (!trig) return;
                 var td = trig.closest('.td-slot-calendario');
-                if (td) abrirModalAlumnos(td);
+                if (!td || !td.classList.contains('td-slot-clicable')) return;
+                e.preventDefault();
+                abrirModalAlumnos(td);
             });
         })();
 
@@ -809,26 +789,29 @@
                 }).then(function(data) {
                     if (data && data.ok === true && data.estado) {
                         var estado = data.estado;
-                        dot.setAttribute('data-estado', estado);
-                        dot.classList.remove('punto-presente', 'punto-ausente', 'punto-pendiente');
-                        dot.classList.add(clasePorEstado(estado));
-                        dot.setAttribute('title', tituloPorEstado(estado));
+                        var uid = dot.getAttribute('data-usuario-id');
+                        var fecha = dot.getAttribute('data-fecha');
+                        document.querySelectorAll('.btn-punto-asistencia[data-usuario-id="' + uid + '"][data-fecha="' + fecha + '"]').forEach(function(d) {
+                            d.setAttribute('data-estado', estado);
+                            d.classList.remove('punto-presente', 'punto-ausente', 'punto-pendiente');
+                            d.classList.add(clasePorEstado(estado));
+                            d.setAttribute('title', tituloPorEstado(estado));
+                        });
                     }
                 }).catch(function(err) { console.error('Error al marcar asistencia:', err); });
             });
         })();
 
-        // Abrir modal para agregar excepción desde el "+"
+        // Excepción: solo desde el modal del horario (usa la celda guardada al abrir)
         (function() {
             var modalEl = document.getElementById('modalExcepcion');
-            if (!modalEl) return;
-            var modal = new bootstrap.Modal(modalEl);
-            document.addEventListener('click', function(e) {
-                var btn = e.target.closest('.btn-excepcion');
-                if (!btn) return;
+            var btnDesdeModal = document.getElementById('btnAbrirExcepcionDesdeModal');
+            if (!modalEl || !btnDesdeModal) return;
+            var modalExInst = bootstrap.Modal.getOrCreateInstance(modalEl);
+            var modalAlumnosEl = document.getElementById('modalUsuarios');
+            btnDesdeModal.addEventListener('click', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
-                var td = btn.closest('td');
+                var td = window.calendarioTdSlotActivo;
                 if (!td) return;
                 var fecha = td.getAttribute('data-fecha');
                 var horaInicio = td.getAttribute('data-hora-inicio');
@@ -836,29 +819,20 @@
                 var detalle = document.getElementById('excepcionDetalle');
                 if (detalle) {
                     detalle.textContent = (fecha && horaInicio && horaFin)
-                        ? (fecha + " - " + horaInicio + " a " + horaFin)
-                        : "";
+                        ? (fecha + ' — ' + horaInicio + ' a ' + horaFin)
+                        : '';
                 }
                 var inputFecha = document.getElementById('excepcionFecha');
                 var inputHoraInicio = document.getElementById('excepcionHoraInicio');
                 var inputHoraFin = document.getElementById('excepcionHoraFin');
-                if (inputFecha) inputFecha.value = fecha || "";
-                if (inputHoraInicio) inputHoraInicio.value = horaInicio || "";
-                if (inputHoraFin) inputHoraFin.value = horaFin || "";
-                modal.show();
-            });
-        })();
-
-        // Toggle para habilitar/deshabilitar los "+"
-        (function() {
-            var toggleBtn = document.getElementById('toggleExcepciones');
-            var tabla = document.querySelector('.tabla-horarios');
-            if (!toggleBtn || !tabla) return;
-            toggleBtn.addEventListener('click', function() {
-                var activa = tabla.classList.toggle('excepcion-activa');
-                toggleBtn.classList.toggle('btn-dark', activa);
-                toggleBtn.classList.toggle('btn-outline-dark', !activa);
-                toggleBtn.textContent = activa ? 'Desactivar excepciones' : 'Agregar usuarios por excepción';
+                if (inputFecha) inputFecha.value = fecha || '';
+                if (inputHoraInicio) inputHoraInicio.value = horaInicio || '';
+                if (inputHoraFin) inputHoraFin.value = horaFin || '';
+                if (modalAlumnosEl) {
+                    var instA = bootstrap.Modal.getInstance(modalAlumnosEl);
+                    if (instA) instA.hide();
+                }
+                modalExInst.show();
             });
         })();
     </script>

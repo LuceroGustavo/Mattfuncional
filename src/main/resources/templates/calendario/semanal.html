@@ -289,11 +289,10 @@
                                         th:with="slot=${calendario.slotsPorDia[dia][i]}"
                                         th:classappend="${slot.capacidadActual == slot.capacidadMaxima ? 'table-danger' : (slot.capacidadActual > 0 ? 'table-warning' : 'table-success')}"
                                         style="cursor:pointer; position:relative;"
-                                        th:onclick="'mostrarUsuarios(\'' + ${dia} + '\', \'' + ${slot.horarioFormateado} + '\')'">
-                                        <span th:text="${slot.capacidadActual + '/' + slot.capacidadMaxima}"></span>
-                                        <div th:if="${slot.capacidadActual > 0}" class="usuarios-lista">
-                                            <div th:each="usuario : ${slot.usuariosAsignados}" class="usuario-item" th:text="${usuario.nombre}"></div>
-                                        </div>
+                                        th:onclick="'mostrarUsuarios(\'' + ${dia} + '\', \'' + ${slot.horarioFormateado} + '\')'"
+                                        th:title="|${slot.capacidadActual} alumno(s) · ${slot.capacidadMaxima} cupos|">
+                                        <span class="fw-bold fs-5" th:text="${slot.capacidadActual}">0</span>
+                                        <span class="d-block small opacity-75">alumnos</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -336,19 +335,19 @@
                     if (usuarios.length === 0) {
                         modalBody.innerHTML = '<p class="text-muted">No hay usuarios asignados a este horario.</p>';
                     } else {
-                        modalBody.innerHTML = usuarios.map(usuario => `
-                            <div class="usuario-card">
+                        modalBody.innerHTML = usuarios.map(usuario => {
+                            const av = usuario.avatar || '/img/avatar1.png';
+                            return `<div class="usuario-card">
                                 <div class="d-flex align-items-center">
-                                    <img th:src="${usuario.avatar}" alt="Avatar" class="usuario-avatar" 
-                                         th:onerror="this.src='/img/avatar1.png'">
+                                    <img src="${av}" alt="" class="usuario-avatar" onerror="this.src='/img/avatar1.png'">
                                     <div>
-                                        <h6 class="mb-1">${usuario.nombre}</h6>
-                                        <p class="mb-1 text-muted">${usuario.correo}</p>
-                                        <small class="text-muted">${usuario.edad} años, ${usuario.peso} kg</small>
+                                        <h6 class="mb-1">${usuario.nombre || ''}</h6>
+                                        <p class="mb-1 text-muted">${usuario.correo || ''}</p>
+                                        <small class="text-muted">${usuario.edad != null ? usuario.edad + ' años' : ''}${usuario.peso != null ? ', ' + usuario.peso + ' kg' : ''}</small>
                                     </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            </div>`;
+                        }).join('');
                     }
                     
                     new bootstrap.Modal(document.getElementById('modalUsuarios')).show();
