@@ -44,8 +44,82 @@
             filter: brightness(1.05);
             color: #fff;
         }
-        .modal-calendario-alumnos .usuario-item {
-            font-size: 1rem;
+        /* Modal alumnos: en escritorio altura según contenido; en móvil (~entorno 2) ~mitad de pantalla con cuerpo scrollable */
+        .modal-calendario-alumnos .modal-calendario-alumnos-dialog .modal-content {
+            border-radius: 0.5rem;
+        }
+        @media (max-width: 991.98px) {
+            .modal-calendario-alumnos .modal-calendario-alumnos-dialog {
+                max-width: calc(100% - 1rem);
+                width: 100%;
+                margin: 0.75rem auto;
+                max-height: 64vh;
+            }
+            .modal-calendario-alumnos .modal-calendario-alumnos-dialog .modal-content {
+                max-height: 64vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .modal-calendario-alumnos .modal-calendario-alumnos-dialog .modal-header,
+            .modal-calendario-alumnos .modal-calendario-alumnos-dialog .modal-footer {
+                flex-shrink: 0;
+            }
+            .modal-calendario-alumnos .modal-calendario-alumnos-dialog .modal-body {
+                overflow-y: auto;
+                flex: 1 1 auto;
+                min-height: 0;
+                -webkit-overflow-scrolling: touch;
+            }
+            .modal-calendario-alumnos .modal-title {
+                font-size: 0.92rem;
+                line-height: 1.25;
+            }
+        }
+        /* Tabla de alumnos: mismos estilos en escritorio y móvil (HTML único clonado al modal) */
+        .calendario-alumnos-tabla {
+            table-layout: fixed;
+        }
+        .calendario-alumnos-tabla thead th {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            padding: 0.5rem 0.35rem 0.55rem;
+            vertical-align: bottom;
+        }
+        .calendario-alumnos-tabla .calendario-alumnos-th-nombre {
+            text-align: left;
+            width: auto;
+        }
+        .calendario-alumnos-tabla .calendario-alumnos-th-presente {
+            text-align: right;
+            white-space: nowrap;
+            width: 36%;
+        }
+        .calendario-alumnos-tabla tbody td {
+            text-align: left;
+            vertical-align: middle;
+            padding: 0.5rem 0.35rem;
+            border-bottom: 1px solid #eee;
+        }
+        .calendario-alumnos-tabla tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .calendario-alumnos-tabla .calendario-alumno-nombre {
+            text-align: left !important;
+        }
+        .calendario-alumnos-tabla .calendario-alumno-presente {
+            text-align: right !important;
+        }
+        .calendario-alumnos-tabla .usuario-link {
+            font-weight: 600;
+        }
+        .modal-calendario-alumnos .punto-asistencia.btn-punto-asistencia {
+            width: 1.45rem;
+            height: 1.45rem;
+        }
+        .modal-calendario-alumnos .punto-asistencia.btn-punto-asistencia:hover {
+            transform: scale(1.12);
         }
 
         /* Resumen en celda (todos los anchos): solo número de alumnos; lista real oculta para clonar al modal */
@@ -62,6 +136,17 @@
             padding: 6px 4px;
             -webkit-tap-highlight-color: transparent;
         }
+        /* Ojo decorativo: esquina superior derecha de la celda (no centrar con el número) */
+        .slot-celda-ojo {
+            position: absolute;
+            top: 4px;
+            right: 5px;
+            font-size: 0.55rem;
+            opacity: 0.82;
+            line-height: 1;
+            pointer-events: none;
+            z-index: 1;
+        }
         .slot-celda-num {
             font-size: 1.5rem;
             font-weight: 800;
@@ -69,16 +154,9 @@
             color: inherit;
             text-shadow: 0 1px 0 rgba(255,255,255,0.35);
         }
-        .slot-celda-hint {
-            font-size: 0.65rem;
-            font-weight: 600;
-            opacity: 0.88;
-            text-align: center;
-            line-height: 1.2;
-        }
         @media (max-width: 991.98px) {
             .slot-celda-num { font-size: 1.35rem; }
-            .slot-celda-hint { font-size: 0.58rem; }
+            .slot-celda-ojo { font-size: 0.5rem; top: 3px; right: 4px; }
         }
         
         .calendario-header {
@@ -329,22 +407,11 @@
         }
         
         .usuarios-lista {
-            font-size: 1.1rem; /* Más grande */
+            font-size: 1rem;
             font-weight: 600;
             color: #2d4739;
             margin-top: 5px;
             font-family: 'Segoe UI', 'Arial', sans-serif;
-        }
-        
-        .usuario-item {
-            background: rgba(255,255,255,0.4);
-            padding: 4px 10px;
-            border-radius: 10px;
-            margin: 2px 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
         .usuario-link {
             color: inherit;
@@ -762,25 +829,41 @@
                                         style="position:relative;"
                                         th:title="${slot != null ? ((slot.capacidadActual) + ' alumno(s) · ' + slot.capacidadMaxima + ' cupos máx.') + (slot.capacidadActual == slot.capacidadMaxima ? ' · Lleno' : '') : ''}">
                                         <th:block th:if="${slot != null}">
+                                            <i class="fas fa-eye slot-celda-ojo" aria-hidden="true"></i>
                                             <div class="slot-celda-resumen"
                                                  role="button"
                                                  tabindex="0"
+                                                 title="Ver alumnos y opciones del horario"
                                                  aria-label="Abrir panel de este horario (alumnos y excepciones)">
-                                                <span class="slot-celda-num" th:text="${slot.usuariosAsignados != null ? #lists.size(slot.usuariosAsignados) : 0}">0</span>
-                                                <span class="slot-celda-hint" th:if="${slot.usuariosAsignados != null and not #lists.isEmpty(slot.usuariosAsignados)}">Clic para ver</span>
-                                                <span class="slot-celda-hint" th:if="${slot.usuariosAsignados == null or #lists.isEmpty(slot.usuariosAsignados)}">Clic para opciones</span>
+                                                <span class="slot-celda-num"
+                                                      th:if="${slot.usuariosAsignados != null and not #lists.isEmpty(slot.usuariosAsignados)}"
+                                                      th:text="${#lists.size(slot.usuariosAsignados)}">0</span>
                                             </div>
                                             <div class="usuarios-lista" th:if="${slot.usuariosAsignados != null and not #lists.isEmpty(slot.usuariosAsignados)}">
-                                                <div th:each="usuario : ${slot.usuariosAsignados}"
-                                                    th:with="presente=${slot.presentePorUsuarioId != null ? slot.presentePorUsuarioId[usuario.id] : null}, esExcepcion=${slot.excepcionPorUsuarioId != null ? slot.excepcionPorUsuarioId[usuario.id] : null}"
-                                                    class="usuario-item d-flex align-items-center justify-content-center gap-1">
-                                                    <span th:if="${fechaDia != null and (fechaDia.isBefore(#temporals.createNow().toLocalDate()) or fechaDia.isEqual(#temporals.createNow().toLocalDate()))}"
-                                                        class="punto-asistencia btn-punto-asistencia"
-                                                        th:classappend="${presente == true ? 'punto-presente' : (presente == false ? 'punto-ausente' : 'punto-pendiente')}"
-                                                        th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-estado=${presente == null ? 'PENDIENTE' : (presente == true ? 'PRESENTE' : 'AUSENTE')}, title=${presente == true ? 'Presente (clic para cambiar)' : (presente == false ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para cambiar)')}"></span>
-                                                    <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="usuario-link" target="_blank" rel="noopener" th:text="${usuario.nombre}"></a>
-                                                    <span th:if="${esExcepcion == true}" class="badge-excepcion" title="Agregado por excepción">Ex</span>
-                                                </div>
+                                                <table class="table table-sm table-borderless calendario-alumnos-tabla mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" class="calendario-alumnos-th-nombre">Nombre</th>
+                                                            <th scope="col" class="calendario-alumnos-th-presente text-end">Dar presente</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr th:each="usuario : ${slot.usuariosAsignados}"
+                                                            th:with="presente=${slot.presentePorUsuarioId != null ? slot.presentePorUsuarioId[usuario.id] : null}, esExcepcion=${slot.excepcionPorUsuarioId != null ? slot.excepcionPorUsuarioId[usuario.id] : null}"
+                                                            class="calendario-alumno-fila">
+                                                            <td class="calendario-alumno-nombre">
+                                                                <a th:href="@{/profesor/alumnos/{id}(id=${usuario.id})}" class="usuario-link" target="_blank" rel="noopener" th:text="${usuario.nombre}"></a>
+                                                                <span th:if="${esExcepcion == true}" class="badge-excepcion ms-1" title="Agregado por excepción">Ex</span>
+                                                            </td>
+                                                            <td class="calendario-alumno-presente text-end">
+                                                                <span th:if="${fechaDia != null and (fechaDia.isBefore(#temporals.createNow().toLocalDate()) or fechaDia.isEqual(#temporals.createNow().toLocalDate()))}"
+                                                                    class="punto-asistencia btn-punto-asistencia d-inline-block"
+                                                                    th:classappend="${presente == true ? 'punto-presente' : (presente == false ? 'punto-ausente' : 'punto-pendiente')}"
+                                                                    th:attr="data-usuario-id=${usuario.id}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-estado=${presente == null ? 'PENDIENTE' : (presente == true ? 'PRESENTE' : 'AUSENTE')}, title=${presente == true ? 'Presente (clic para cambiar)' : (presente == false ? 'Ausente (clic para cambiar)' : 'Pendiente (clic para cambiar)')}"></span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </th:block>
                                         <div th:if="${slot == null}">-</div>
@@ -796,7 +879,7 @@
 
     <!-- Modal alumnos del slot (móvil: lista completa; mismo formato que celdas desktop) -->
     <div class="modal fade modal-calendario-alumnos" id="modalUsuarios" tabindex="-1" aria-labelledby="modalTitulo">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-dialog modal-dialog-centered modal-calendario-alumnos-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title mb-0" id="modalTitulo">
@@ -939,7 +1022,7 @@
                 var hf = formatoHora(td.getAttribute('data-hora-fin'));
                 modalTituloTexto.textContent = 'Horario — ' + f + ' · ' + hi + ' – ' + hf;
                 window.calendarioTdSlotActivo = td;
-                if (lista && lista.querySelector('.usuario-item')) {
+                if (lista && lista.querySelector('.calendario-alumnos-tabla tbody tr')) {
                     modalBody.innerHTML = lista.innerHTML;
                 } else {
                     modalBody.innerHTML = '<p class="text-muted mb-0">No hay alumnos asignados en este horario. Podés agregar uno por excepción con el botón inferior.</p>';

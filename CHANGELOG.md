@@ -27,6 +27,16 @@ Mejoras al **calendario semanal del profesor** (escritorio y móvil): celdas con
 
 ---
 
+## [2026-03-30] - ui(calendario profesor): celdas con ojo esquina, modal tabla alumnos (escritorio + móvil) ✅
+
+### Resumen
+Ajustes de **UX** en `semanal-profesor.html` sobre la entrega anterior: celdas sin texto «Clic para ver»; **número de alumnos solo si hay alumnos** (sin 0 visible); **icono ojo** decorativo arriba a la derecha (`pointer-events: none`). **Modal de lista:** ya no fullscreen en móvil; alto acotado (**64vh** en ≤991px) con cabecera/pie fijos y **cuerpo con scroll**; lista como **tabla** con columnas **Nombre** y **Dar presente**, nombres a la izquierda, **puntos de asistencia más grandes** a la derecha; estilos de `.calendario-alumnos-tabla` compartidos entre **entorno 1 y 2** (mismo HTML clonado al modal). JS: detección de filas por `.calendario-alumnos-tabla tbody tr`.
+
+### Archivos
+`templates/calendario/semanal-profesor.html`, `CHANGELOG.md`.
+
+---
+
 ## [2026-04-09] - fix(rutinas): editar rutina tras import ZIP — plantilla en biblioteca y UI alineada ✅
 
 ### Resumen
