@@ -2,6 +2,31 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-03-30] - feat(calendario,BD): vista profesor compacta, Lun–Sáb/Dom, datos de prueba 30 alumnos ✅
+
+### Resumen
+Mejoras al **calendario semanal del profesor** (escritorio y móvil): celdas con solo **conteo** de alumnos y **colores por ocupación**; **modal** con lista, asistencia (puntos), enlace a ficha y **excepción solo desde el modal**; navegación semanal en **una fila** en móvil; KPI **Total / Capacidad** con estilo **pastel** y mismo ancho; **rango de fechas** encima de la grilla; selector **Lun–Sáb** vs **Lun–Dom** (`diasVista`), conservado al cambiar semana y en POST de capacidad/excepción. **Scripts SQL:** 30 alumnos de prueba, borrado masivo de alumnos, `SQL_SAFE_UPDATES` en Workbench.
+
+### Calendario (`semanal-profesor.html` + `CalendarioController`)
+- Grilla: sin nombres en celda; clic abre modal (lista clonada u vacía); sincronización de puntos de asistencia entre modal y DOM oculto.
+- Eliminado toggle global y botón “+” por celda; **“Agregar alumno por excepción”** en el pie del modal de lista.
+- **Navegación:** `navSemanaActivo` (HOY/ANTERIOR/SIGUIENTE); en ≤991px grid **← | Hoy | →** (textos largos solo en escritorio).
+- **Capacidad:** tarjeta clicable → modal POST; eliminado formulario inline; redirect con `fecha` + `diasVista`.
+- **Toolbar encima de la tabla:** rango `yyyy-MM-dd` según modo 6 o 7 días; **btn-group Lun–Sáb / Lun–Dom** con `active`.
+- **`diasSemanaMostrar`:** oculta domingo si `diasVista=LUN_SAB`; columnas y CSS `tabla-cal-6-dias` / `tabla-cal-7-dias`.
+- **Manual de usuario:** textos actualizados (excepciones, calendario, rango).
+
+### Base de datos (`scripts/BD/`)
+- **`98_borrar_todos_alumnos.sql`:** borra `rol=ALUMNO` y FKs (asistencias, rutinas asignadas, mediciones, excepciones, horarios…); preserva admin/ayudante/developer.
+- **`01_alumnos_prueba_15.sql`:** **30** alumnos con `tipo_asistencia`, contacto emergencia, `detalle_asistencia`, horarios; `SQL_SAFE_UPDATES`; sin duplicar fila miércoles 18–19 para el mismo alumno.
+- **`00_limpiar_datos_prueba_matt.sql`:** safe updates alrededor de DELETE.
+- **`README.md`:** pasos 0b, 30 dígitos, convenciones.
+
+### Archivos tocados
+`CalendarioController.java`, `templates/calendario/semanal-profesor.html`, `templates/profesor/manual-usuario.html`, `templates/calendario/semanal.html` (solo contador en celda + modal API si se reactiva la ruta), `scripts/BD/98_borrar_todos_alumnos.sql`, `scripts/BD/01_alumnos_prueba_15.sql`, `scripts/BD/00_limpiar_datos_prueba_matt.sql`, `scripts/BD/README.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-04-09] - fix(rutinas): editar rutina tras import ZIP — plantilla en biblioteca y UI alineada ✅
 
 ### Resumen

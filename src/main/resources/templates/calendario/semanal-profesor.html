@@ -169,10 +169,64 @@
         }
         .estadisticas-card.estadistica-capacidad-click .estadistica-hint {
             font-size: 0.72rem;
-            color: #0b6cda;
             font-weight: 600;
             margin-top: 6px;
             opacity: 0.9;
+        }
+        /* KPI Total / Capacidad: mismas tonalidades pastel, tamaño equilibrado */
+        .estadisticas-card-kpi {
+            flex: 1 1 0;
+            min-width: 0;
+            min-height: 132px;
+            justify-content: center;
+            background: linear-gradient(165deg, #f1f8e9 0%, #e8eaf6 45%, #e3f2fd 100%);
+            border: 1px solid rgba(129, 199, 132, 0.35);
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.12);
+        }
+        .estadisticas-card-kpi .estadistica-valor {
+            color: #2e7d32;
+        }
+        .estadisticas-card-kpi .estadistica-label {
+            color: #5d4037;
+            opacity: 0.88;
+        }
+        .estadisticas-card-kpi.estadistica-capacidad-click .estadistica-hint {
+            color: #1565c0;
+        }
+        .estadisticas-card-kpi.estadistica-capacidad-click:hover {
+            border-color: rgba(46, 125, 50, 0.45);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.18);
+        }
+        /* Rango de fechas + modo de vista encima de la grilla */
+        .calendario-toolbar-fecha {
+            background: linear-gradient(180deg, #f8fafc 0%, #eceff1 100%);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+        .calendario-fecha-rango {
+            font-size: 1rem;
+            color: #37474f;
+            letter-spacing: 0.02em;
+        }
+        .calendario-vista-dias .btn {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+        .calendario-vista-dias .btn.active {
+            background: linear-gradient(135deg, #81c784 0%, #64b5f6 100%);
+            border-color: transparent;
+            color: #fff;
+            font-weight: 600;
+        }
+        .tabla-cal-6-dias th.columna-dia-header,
+        .tabla-cal-6-dias td[data-col-index] {
+            width: calc((100% - 5.5rem) / 6);
+        }
+        .tabla-cal-7-dias th.columna-dia-header,
+        .tabla-cal-7-dias td[data-col-index] {
+            width: calc((100% - 5.5rem) / 7);
         }
         
         .estadistica-valor {
@@ -471,6 +525,9 @@
                 padding: 12px 8px;
                 justify-content: center;
             }
+            .estadisticas-kpi-duo .estadisticas-card-kpi {
+                min-height: 128px;
+            }
             .estadisticas-kpi-duo .estadistica-label {
                 font-size: 0.72rem;
                 line-height: 1.15;
@@ -519,13 +576,27 @@
                 line-height: 1.15;
                 word-break: break-word;
             }
-            .tabla-horarios th.columna-dia-header,
-            .tabla-horarios td[data-col-index] {
-                width: calc((100% - 2.75rem) / 7);
+            .tabla-cal-6-dias .tabla-horarios th.columna-dia-header,
+            .tabla-cal-6-dias .tabla-horarios td[data-col-index] {
+                width: calc((100% - 2.75rem) / 6);
                 min-width: 0 !important;
                 max-width: none !important;
+            }
+            .tabla-cal-7-dias .tabla-horarios th.columna-dia-header,
+            .tabla-cal-7-dias .tabla-horarios td[data-col-index] {
+                width: calc((100% - 2.75rem) / 7);
                 padding: 5px 3px;
                 font-size: 0.68rem;
+            }
+            .tabla-cal-6-dias .tabla-horarios th.columna-dia-header,
+            .tabla-cal-6-dias .tabla-horarios td[data-col-index] {
+                padding: 5px 2px;
+                font-size: 0.64rem;
+            }
+            .tabla-horarios th.columna-dia-header,
+            .tabla-horarios td[data-col-index] {
+                min-width: 0 !important;
+                max-width: none !important;
             }
             .tabla-horarios th.columna-dia-header {
                 white-space: normal;
@@ -558,10 +629,7 @@
                 <div class="calendario-header">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
-                            <h1><i class="fas fa-calendar-alt"></i> Calendario Semanal</h1>
-                            <div class="fecha-semana">
-                                <span th:text="${calendario.fechaInicioSemana} + ' - ' + ${calendario.fechaFinSemana}">Semana actual</span>
-                            </div>
+                            <h1 class="mb-0"><i class="fas fa-calendar-alt"></i> Calendario Semanal</h1>
                         </div>
                         <div class="fs-4 fw-semibold">
                             <span th:text="${#strings.capitalize(#temporals.format(calendario.fechaInicioSemana, 'MMMM'))}">Mes</span>
@@ -570,20 +638,20 @@
                     
                     <!-- Navegación: en ≤991px una sola fila ← | Hoy | →; resalte según semana mostrada -->
                     <div class="navegacion-calendario">
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.minusWeeks(1)})}"
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.minusWeeks(1)}, diasVista=${diasVista})}"
                            class="btn btn-navegacion nav-semana-prev"
                            th:classappend="${navSemanaActivo == 'ANTERIOR'} ? ' nav-semana-btn-activo'"
                            aria-label="Semana anterior">
                             <i class="fas fa-chevron-left"></i>
                             <span class="nav-cal-texto-largo ms-1">Semana anterior</span>
                         </a>
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId})}"
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, diasVista=${diasVista})}"
                            class="btn btn-navegacion nav-semana-hoy"
                            th:classappend="${navSemanaActivo == 'HOY'} ? ' nav-semana-btn-activo'"
                            aria-label="Ir a la semana actual">
                             <i class="fas fa-calendar-day d-lg-none me-1"></i><span>Hoy</span>
                         </a>
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.plusWeeks(1)})}"
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.plusWeeks(1)}, diasVista=${diasVista})}"
                            class="btn btn-navegacion nav-semana-next"
                            th:classappend="${navSemanaActivo == 'SIGUIENTE'} ? ' nav-semana-btn-activo'"
                            aria-label="Semana siguiente">
@@ -605,11 +673,11 @@
                     <!-- Estadísticas -->
                     <div class="estadisticas-grid">
                         <div class="estadisticas-kpi-duo">
-                            <div class="estadisticas-card d-flex flex-column justify-content-center align-items-center flex-fill">
+                            <div class="estadisticas-card estadisticas-card-kpi d-flex flex-column align-items-center flex-fill">
                                 <div class="estadistica-valor text-center" th:text="${estadisticas['totalUsuarios']}">0</div>
                                 <div class="estadistica-label text-center">Total Alumnos</div>
                             </div>
-                            <div class="estadisticas-card estadistica-capacidad-click d-flex flex-column justify-content-center align-items-center flex-fill"
+                            <div class="estadisticas-card estadisticas-card-kpi estadistica-capacidad-click d-flex flex-column align-items-center flex-fill"
                                  id="cardCapacidadCalendario"
                                  role="button"
                                  tabindex="0"
@@ -643,18 +711,40 @@
                         </div>
                     </div>
                     
-                    <p class="small text-muted mb-3">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja. La <strong>capacidad por horario</strong> se edita tocando la tarjeta correspondiente.</p>
+                    <p class="small text-muted mb-2">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja. La <strong>capacidad por horario</strong> se edita tocando la tarjeta correspondiente.</p>
+                    
+                    <!-- Fecha visible encima de la grilla + modo Lun–Sáb / Lun–Dom (escritorio y móvil) -->
+                    <div class="calendario-toolbar-fecha d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <div class="calendario-fecha-rango">
+                            <i class="far fa-calendar-alt me-1 text-secondary"></i>
+                            <span th:if="${diasVista == 'LUN_SAB'}"
+                                  th:text="${#temporals.format(calendario.fechaInicioSemana, 'yyyy-MM-dd')} + ' — ' + ${#temporals.format(calendario.fechaInicioSemana.plusDays(5), 'yyyy-MM-dd')}">rango</span>
+                            <span th:if="${diasVista == 'LUN_DOM'}"
+                                  th:text="${#temporals.format(calendario.fechaInicioSemana, 'yyyy-MM-dd')} + ' — ' + ${#temporals.format(calendario.fechaFinSemana, 'yyyy-MM-dd')}">rango</span>
+                        </div>
+                        <div class="btn-group calendario-vista-dias" role="group" aria-label="Días visibles">
+                            <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana}, diasVista='LUN_SAB')}"
+                               class="btn btn-outline-secondary"
+                               th:classappend="${diasVista == 'LUN_SAB'} ? ' active'"
+                               title="Lunes a sábado">Lun–Sáb</a>
+                            <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana}, diasVista='LUN_DOM')}"
+                               class="btn btn-outline-secondary"
+                               th:classappend="${diasVista == 'LUN_DOM'} ? ' active'"
+                               title="Lunes a domingo">Lun–Dom</a>
+                        </div>
+                    </div>
                     
                     <!-- Tabla de horarios -->
-                    <div class="calendario-table">
-                        <table class="table table-bordered text-center align-middle mt-4 tabla-horarios">
+                    <div class="calendario-table"
+                         th:classappend="${diasVista == 'LUN_SAB'} ? ' tabla-cal-6-dias' : ' tabla-cal-7-dias'">
+                        <table class="table table-bordered text-center align-middle mt-2 tabla-horarios">
                             <thead>
                                 <tr>
                                     <th>Hora</th>
-                                    <th th:each="dia, diaStat : ${diasSemana}"
-                                        th:with="fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
+                                    <th th:each="dia : ${diasSemanaMostrar}"
+                                        th:with="fechaDia=${calendario.fechaInicioSemana.plusDays(dia.ordinal())}"
                                         class="columna-dia-header"
-                                        th:attr="data-col-index=${diaStat.index}"
+                                        th:attr="data-col-index=${dia.ordinal()}"
                                         title="Clic para resaltar esta columna">
                                         <span class="d-none d-lg-inline" th:text="${dia.name() + ' ' + #temporals.format(fechaDia, 'dd')}">LUNES 01</span>
                                         <span class="d-lg-none" th:text="${dia.abrevCalendario + ' ' + #temporals.format(fechaDia, 'dd')}">LUN 01</span>
@@ -664,9 +754,9 @@
                             <tbody>
                                 <tr th:each="i : ${#numbers.sequence(0, totalFilas - 1)}">
                                     <td th:text="${horas[i] != null ? horas[i] : ''}"></td>
-                                    <td th:each="dia, diaStat : ${diasSemana}"
-                                        th:with="slot=${slotsPorDiaList[diaStat.index][i]}, fechaDia=${calendario.fechaInicioSemana.plusDays(diaStat.index)}"
-                                        th:attr="data-col-index=${diaStat.index}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-hora-inicio=${slot != null ? slot.horaInicio : ''}, data-hora-fin=${slot != null ? slot.horaFin : ''}"
+                                    <td th:each="dia : ${diasSemanaMostrar}"
+                                        th:with="slot=${slotsPorDiaList[dia.ordinal()][i]}, fechaDia=${calendario.fechaInicioSemana.plusDays(dia.ordinal())}"
+                                        th:attr="data-col-index=${dia.ordinal()}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-hora-inicio=${slot != null ? slot.horaInicio : ''}, data-hora-fin=${slot != null ? slot.horaFin : ''}"
                                         th:classappend="${(slot == null ? 'slot-vacio' : (slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible')))) + (slot != null ? ' td-slot-clicable' : '')}"
                                         class="td-slot-calendario"
                                         style="position:relative;"
@@ -740,6 +830,8 @@
                         <input type="number" id="capacidadMaximaModal" name="capacidadMaxima" min="1" max="100"
                                th:value="${estadisticas['capacidadMaxima']}" class="form-control form-control-lg" required>
                         <input type="hidden" name="profesorId" th:value="${profesorId}" />
+                        <input type="hidden" name="fecha" th:value="${calendario.fechaInicioSemana}" />
+                        <input type="hidden" name="diasVista" th:value="${diasVista}" />
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     </div>
                     <div class="modal-footer">
@@ -783,6 +875,7 @@
                         <input type="hidden" id="excepcionHoraFin" name="horaFin">
                         <input type="hidden" name="profesorId" th:value="${profesorId}">
                         <input type="hidden" name="fechaSemana" th:value="${fechaSemana}">
+                        <input type="hidden" name="diasVista" th:value="${diasVista}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     </div>
                     <div class="modal-footer">

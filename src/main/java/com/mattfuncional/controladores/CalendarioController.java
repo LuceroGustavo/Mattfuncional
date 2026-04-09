@@ -1,6 +1,7 @@
 package com.mattfuncional.controladores;
 
 import com.mattfuncional.dto.CalendarioSemanalDTO;
+import com.mattfuncional.enums.DiaSemana;
 import com.mattfuncional.servicios.CalendarioService;
 import com.mattfuncional.servicios.CalendarioExcepcionService;
 import com.mattfuncional.servicios.AsistenciaService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +66,7 @@ public class CalendarioController {
     @GetMapping("/semanal/profesor/{profesorId}")
     public String calendarioSemanalProfesor(@PathVariable Long profesorId,
             @RequestParam(required = false) String fecha,
+            @RequestParam(required = false, defaultValue = "LUN_DOM") String diasVista,
             @AuthenticationPrincipal Usuario usuarioActual,
             Model model) {
         // Solo el profesor correspondiente (o developer con profesor por defecto) puede ver este calendario
@@ -100,16 +103,23 @@ public class CalendarioController {
         }
         model.addAttribute("navSemanaActivo", navSemanaActivo);
 
-        // Preparar lista de días de la semana (como Enum, para orden y acceso por
-        // índice)
-        java.util.List<com.mattfuncional.enums.DiaSemana> diasSemana = java.util.Arrays
-                .asList(com.mattfuncional.enums.DiaSemana.values());
-        model.addAttribute("diasSemana", diasSemana);
+        String diasVistaNorm = "LUN_SAB".equalsIgnoreCase(diasVista) ? "LUN_SAB" : "LUN_DOM";
+        model.addAttribute("diasVista", diasVistaNorm);
 
-        // Preparar lista de listas de slots por día (en el mismo orden que diasSemana)
+        java.util.List<DiaSemana> diasSemana = java.util.Arrays.asList(DiaSemana.values());
+        List<DiaSemana> diasSemanaMostrar = new ArrayList<>();
+        for (DiaSemana d : diasSemana) {
+            if ("LUN_SAB".equals(diasVistaNorm) && d == DiaSemana.DOMINGO) {
+                continue;
+            }
+            diasSemanaMostrar.add(d);
+        }
+        model.addAttribute("diasSemanaMostrar", diasSemanaMostrar);
+
+        // Preparar lista de listas de slots por día (orden LUNES..DOMINGO; la vista usa diasSemanaMostrar + dia.ordinal())
         java.util.List<java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO>> slotsPorDiaList = new java.util.ArrayList<>();
         int totalFilas = 0;
-        for (com.mattfuncional.enums.DiaSemana dia : diasSemana) {
+        for (DiaSemana dia : diasSemana) {
             java.util.List<com.mattfuncional.dto.CalendarioSemanalDTO.SlotHorarioDTO> slotsList = calendario.getSlotsPorDia()
                     .get(dia);
             if (slotsList == null)
@@ -244,26 +254,41 @@ public class CalendarioController {
             @RequestParam String horaInicio,
             @RequestParam String horaFin,
             @RequestParam(required = false) String motivo,
-            @RequestParam(required = false) String fechaSemana) {
+            @RequestParam(required = false) String fechaSemana,
+            @RequestParam(required = false, defaultValue = "LUN_DOM") String diasVista) {
         LocalDate fechaDate = LocalDate.parse(fecha);
         LocalTime horaInicioTime = LocalTime.parse(horaInicio);
         LocalTime horaFinTime = LocalTime.parse(horaFin);
         calendarioExcepcionService.crearExcepcion(profesorId, usuarioId, fechaDate, horaInicioTime, horaFinTime, motivo);
         String fechaRedirect = (fechaSemana != null && !fechaSemana.isBlank()) ? fechaSemana : fecha;
-        return "redirect:/calendario/semanal/profesor/" + profesorId + "?fecha=" + fechaRedirect;
+        return redirectCalendarioProfesor(profesorId, LocalDate.parse(fechaRedirect), diasVista);
     }
 
     @PostMapping("/actualizar-capacidad-maxima")
-    public String actualizarCapacidadMaxima(@RequestParam int capacidadMaxima, @RequestParam Long profesorId) {
+    public String actualizarCapacidadMaxima(@RequestParam int capacidadMaxima, @RequestParam Long profesorId,
+            @RequestParam(required = false) String fecha,
+            @RequestParam(required = false, defaultValue = "LUN_DOM") String diasVista) {
         // Actualiza la capacidad máxima global para todos los slots existentes
-        for (com.mattfuncional.enums.DiaSemana dia : com.mattfuncional.enums.DiaSemana.values()) {
+        for (DiaSemana dia : DiaSemana.values()) {
             java.time.LocalTime hora = java.time.LocalTime.of(6, 0);
             while (hora.isBefore(java.time.LocalTime.of(21, 0))) {
                 calendarioService.getSlotConfigService().setCapacidadMaxima(dia, hora, capacidadMaxima);
                 hora = hora.plusHours(1);
             }
         }
-        return "redirect:/calendario/semanal/profesor/" + profesorId;
+        LocalDate fechaRedirect = (fecha != null && !fecha.isBlank()) ? LocalDate.parse(fecha) : LocalDate.now();
+        return redirectCalendarioProfesor(profesorId, fechaRedirect, diasVista);
+    }
+
+    /** Redirección al calendario profesor conservando semana (lunes) y modo Lun–Sáb / Lun–Dom. */
+    private String redirectCalendarioProfesor(Long profesorId, LocalDate fechaCualquieraDeSemana, String diasVista) {
+        LocalDate lunes = fechaCualquieraDeSemana.with(DayOfWeek.MONDAY);
+        String dv = "LUN_SAB".equalsIgnoreCase(diasVista) ? "LUN_SAB" : "LUN_DOM";
+        String q = "?fecha=" + lunes;
+        if ("LUN_SAB".equals(dv)) {
+            q += "&diasVista=LUN_SAB";
+        }
+        return "redirect:/calendario/semanal/profesor/" + profesorId + q;
     }
 
     /** Profesor con el que trabaja el usuario actual (developer usa profesor por defecto). */
