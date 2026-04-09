@@ -120,6 +120,24 @@
             color: white;
             transform: translateY(-2px);
         }
+        .nav-semana-btn-activo {
+            background: rgba(255, 255, 255, 0.48) !important;
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+            color: #fff !important;
+        }
+        /* Texto largo solo en escritorio; entorno móvil solo flechas + Hoy */
+        .nav-cal-texto-largo {
+            display: inline;
+        }
+        @media (max-width: 991.98px) {
+            .nav-cal-texto-largo {
+                display: none !important;
+            }
+        }
+        .estadisticas-kpi-duo {
+            display: contents;
+        }
         
         .estadisticas-grid {
             display: flex;
@@ -135,6 +153,26 @@
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .estadisticas-card.estadistica-capacidad-click {
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, transform 0.15s ease;
+            border: 2px solid transparent;
+        }
+        .estadisticas-card.estadistica-capacidad-click:hover {
+            box-shadow: 0 8px 22px rgba(11, 108, 218, 0.2);
+            border-color: rgba(11, 108, 218, 0.25);
+        }
+        .estadisticas-card.estadistica-capacidad-click:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(11, 108, 218, 0.35);
+        }
+        .estadisticas-card.estadistica-capacidad-click .estadistica-hint {
+            font-size: 0.72rem;
+            color: #0b6cda;
+            font-weight: 600;
+            margin-top: 6px;
+            opacity: 0.9;
         }
         
         .estadistica-valor {
@@ -369,15 +407,46 @@
                 font-size: 0.9rem;
             }
             .navegacion-calendario {
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
                 gap: 8px;
-                margin-top: 12px;
-                margin-bottom: 12px;
+                margin-top: 10px;
+                margin-bottom: 8px;
+            }
+            .navegacion-calendario .nav-semana-prev {
+                justify-self: start;
+            }
+            .navegacion-calendario .nav-semana-hoy {
+                justify-self: center;
+            }
+            .navegacion-calendario .nav-semana-next {
+                justify-self: end;
             }
             .navegacion-calendario .btn-navegacion {
-                width: 100%;
-                padding: 8px 12px;
-                font-size: 0.85rem;
+                width: auto;
+                max-width: none;
+                margin-bottom: 0;
+                font-size: 0.88rem;
+            }
+            .navegacion-calendario .nav-semana-prev.btn-navegacion,
+            .navegacion-calendario .nav-semana-next.btn-navegacion {
+                min-width: 46px;
+                min-height: 46px;
+                padding: 0 12px;
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .navegacion-calendario .nav-semana-hoy.btn-navegacion {
+                padding: 8px 18px;
+                border-radius: 999px;
+                white-space: nowrap;
+            }
+            .navegacion-calendario .nav-semana-btn-activo:hover {
+                background: rgba(255, 255, 255, 0.55) !important;
+                color: #fff !important;
             }
             .calendario-body-inner {
                 padding: 10px 8px 88px !important;
@@ -387,9 +456,38 @@
                 gap: 10px;
                 margin-bottom: 16px !important;
             }
+            .estadisticas-kpi-duo {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                width: 100%;
+                align-items: stretch;
+            }
+            .estadisticas-kpi-duo .estadisticas-card {
+                flex: 1 1 0;
+                min-width: 0;
+                width: auto;
+                min-height: 124px;
+                padding: 12px 8px;
+                justify-content: center;
+            }
+            .estadisticas-kpi-duo .estadistica-label {
+                font-size: 0.72rem;
+                line-height: 1.15;
+            }
+            .estadisticas-kpi-duo .estadistica-valor {
+                font-size: 1.45rem;
+            }
+            .estadisticas-kpi-duo .estadistica-hint {
+                font-size: 0.65rem;
+                margin-top: 4px;
+            }
             .estadisticas-card {
                 width: 100%;
                 padding: 14px 12px;
+            }
+            .estadisticas-grid > .estadisticas-card.leyenda-calendario-wrap {
+                width: 100%;
             }
             .estadistica-valor {
                 font-size: 1.65rem;
@@ -409,18 +507,6 @@
             }
             .leyenda-calendario-wrap .leyenda-hint-desktop {
                 display: none !important;
-            }
-            .fila-capacidad-form {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 10px;
-            }
-            .fila-capacidad-form form {
-                flex-direction: column;
-                align-items: stretch !important;
-            }
-            .fila-capacidad-form form .form-control {
-                width: 100% !important;
             }
             .calendario-table { margin: 8px 0; }
             .tabla-horarios th:first-child,
@@ -482,19 +568,27 @@
                         </div>
                     </div>
                     
-                    <!-- Navegación -->
+                    <!-- Navegación: en ≤991px una sola fila ← | Hoy | →; resalte según semana mostrada -->
                     <div class="navegacion-calendario">
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.minusWeeks(1)})}" 
-                           class="btn btn-navegacion">
-                            <i class="fas fa-chevron-left"></i> Semana Anterior
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.minusWeeks(1)})}"
+                           class="btn btn-navegacion nav-semana-prev"
+                           th:classappend="${navSemanaActivo == 'ANTERIOR'} ? ' nav-semana-btn-activo'"
+                           aria-label="Semana anterior">
+                            <i class="fas fa-chevron-left"></i>
+                            <span class="nav-cal-texto-largo ms-1">Semana anterior</span>
                         </a>
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId})}" 
-                           class="btn btn-navegacion">
-                            <i class="fas fa-calendar-day"></i> Hoy
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId})}"
+                           class="btn btn-navegacion nav-semana-hoy"
+                           th:classappend="${navSemanaActivo == 'HOY'} ? ' nav-semana-btn-activo'"
+                           aria-label="Ir a la semana actual">
+                            <i class="fas fa-calendar-day d-lg-none me-1"></i><span>Hoy</span>
                         </a>
-                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.plusWeeks(1)})}" 
-                           class="btn btn-navegacion">
-                            Semana Siguiente <i class="fas fa-chevron-right"></i>
+                        <a th:href="@{/calendario/semanal/profesor/{id}(id=${profesorId}, fecha=${calendario.fechaInicioSemana.plusWeeks(1)})}"
+                           class="btn btn-navegacion nav-semana-next"
+                           th:classappend="${navSemanaActivo == 'SIGUIENTE'} ? ' nav-semana-btn-activo'"
+                           aria-label="Semana siguiente">
+                            <span class="nav-cal-texto-largo me-1">Semana siguiente</span>
+                            <i class="fas fa-chevron-right"></i>
                         </a>
                     </div>
                 </div>
@@ -510,13 +604,21 @@
                     
                     <!-- Estadísticas -->
                     <div class="estadisticas-grid">
-                        <div class="estadisticas-card d-flex flex-column justify-content-center align-items-center flex-fill">
-                            <div class="estadistica-valor text-center" th:text="${estadisticas['totalUsuarios']}">0</div>
-                            <div class="estadistica-label text-center">Total Alumnos</div>
-                        </div>
-                        <div class="estadisticas-card d-flex flex-column justify-content-center align-items-center flex-fill">
-                            <div class="estadistica-valor text-center" th:text="${estadisticas['capacidadMaxima']}">0</div>
-                            <div class="estadistica-label text-center">Capacidad de usuarios x Día</div>
+                        <div class="estadisticas-kpi-duo">
+                            <div class="estadisticas-card d-flex flex-column justify-content-center align-items-center flex-fill">
+                                <div class="estadistica-valor text-center" th:text="${estadisticas['totalUsuarios']}">0</div>
+                                <div class="estadistica-label text-center">Total Alumnos</div>
+                            </div>
+                            <div class="estadisticas-card estadistica-capacidad-click d-flex flex-column justify-content-center align-items-center flex-fill"
+                                 id="cardCapacidadCalendario"
+                                 role="button"
+                                 tabindex="0"
+                                 title="Clic para editar la capacidad máxima por horario"
+                                 aria-label="Editar capacidad de usuarios por día">
+                                <div class="estadistica-valor text-center" th:text="${estadisticas['capacidadMaxima']}">0</div>
+                                <div class="estadistica-label text-center">Capacidad de usuarios x Día</div>
+                                <span class="estadistica-hint">Clic para cambiar</span>
+                            </div>
                         </div>
                         <div class="estadisticas-card d-flex flex-column justify-content-end align-items-stretch flex-fill leyenda-calendario-wrap">
                             <div class="w-100 d-flex flex-row align-items-center justify-content-lg-end justify-content-start">
@@ -541,16 +643,7 @@
                         </div>
                     </div>
                     
-                    <!-- Formulario para modificar capacidad máxima -->
-                    <div class="mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2 fila-capacidad-form">
-                        <form th:action="@{/calendario/actualizar-capacidad-maxima}" method="post" class="d-flex align-items-center flex-wrap gap-2 flex-grow-1">
-                            <label for="capacidadMaxima" class="mb-0 text-nowrap">Capacidad de usuarios x Día:</label>
-                            <input type="number" id="capacidadMaxima" name="capacidadMaxima" min="1" max="100" th:value="${estadisticas.capacidadMaxima}" class="form-control w-auto" required>
-                            <input type="hidden" name="profesorId" th:value="${profesorId}" />
-                            <button type="submit" class="btn btn-primary">Actualizar</button>
-                        </form>
-                    </div>
-                    <p class="small text-muted mb-0">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja.</p>
+                    <p class="small text-muted mb-3">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja. La <strong>capacidad por horario</strong> se edita tocando la tarjeta correspondiente.</p>
                     
                     <!-- Tabla de horarios -->
                     <div class="calendario-table">
@@ -632,6 +725,32 @@
         </div>
     </div>
 
+    <!-- Modal capacidad máxima por slot -->
+    <div class="modal fade" id="modalCapacidadCalendario" tabindex="-1" aria-labelledby="tituloModalCapacidad">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #0b6cda 0%, #1e88e5 100%); color: #fff;">
+                    <h5 class="modal-title" id="tituloModalCapacidad"><i class="fas fa-sliders-h me-2"></i>Capacidad por horario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form th:action="@{/calendario/actualizar-capacidad-maxima}" method="post" id="formCapacidadCalendario">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Este valor aplica como cupo máximo de alumnos por cada <strong>franja horaria</strong> del calendario (todos los días).</p>
+                        <label for="capacidadMaximaModal" class="form-label">Capacidad de usuarios por franja</label>
+                        <input type="number" id="capacidadMaximaModal" name="capacidadMaxima" min="1" max="100"
+                               th:value="${estadisticas['capacidadMaxima']}" class="form-control form-control-lg" required>
+                        <input type="hidden" name="profesorId" th:value="${profesorId}" />
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para crear excepción -->
     <div class="modal fade" id="modalExcepcion" tabindex="-1">
         <div class="modal-dialog">
@@ -680,6 +799,29 @@
         var urlMarcarAsistencia = /*[[@{/calendario/api/marcar-asistencia}]]*/ '/calendario/api/marcar-asistencia';
     </script>
     <script>
+        // Tarjeta "Capacidad de usuarios x Día" → modal de edición
+        (function() {
+            var card = document.getElementById('cardCapacidadCalendario');
+            var modalEl = document.getElementById('modalCapacidadCalendario');
+            if (!card || !modalEl) return;
+            var modalCap = bootstrap.Modal.getOrCreateInstance(modalEl);
+            function abrirCapacidad() {
+                var n = card.querySelector('.estadistica-valor');
+                var inp = document.getElementById('capacidadMaximaModal');
+                if (inp && n && n.textContent) {
+                    var v = parseInt(n.textContent.trim(), 10);
+                    if (!isNaN(v)) inp.value = v;
+                }
+                modalCap.show();
+            }
+            card.addEventListener('click', function(e) { e.preventDefault(); abrirCapacidad(); });
+            card.addEventListener('keydown', function(e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                abrirCapacidad();
+            });
+        })();
+
         /** Cualquier ancho: clic en celda de horario abre modal (lista clonada o vacía). */
         (function() {
             var modalEl = document.getElementById('modalUsuarios');

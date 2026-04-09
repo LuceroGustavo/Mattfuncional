@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -85,6 +86,19 @@ public class CalendarioController {
         model.addAttribute("profesor", profesor);
         model.addAttribute("estadisticas", estadisticas);
         model.addAttribute("calendario", calendario);
+
+        LocalDate lunesMostrado = calendario.getFechaInicioSemana();
+        LocalDate lunesEstaSemana = LocalDate.now().with(DayOfWeek.MONDAY);
+        String navSemanaActivo;
+        int cmpSemana = lunesMostrado.compareTo(lunesEstaSemana);
+        if (cmpSemana == 0) {
+            navSemanaActivo = "HOY";
+        } else if (cmpSemana < 0) {
+            navSemanaActivo = "ANTERIOR";
+        } else {
+            navSemanaActivo = "SIGUIENTE";
+        }
+        model.addAttribute("navSemanaActivo", navSemanaActivo);
 
         // Preparar lista de días de la semana (como Enum, para orden y acceso por
         // índice)
