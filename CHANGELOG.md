@@ -37,6 +37,20 @@ Ajustes de **UX** en `semanal-profesor.html` sobre la entrega anterior: celdas s
 
 ---
 
+## [2026-03-30] - fix(calendario profesor): colores por tercios + rojo en cupo lleno o exceso ✅
+
+### Pro causa
+La plantilla usaba rojo solo si `capacidadActual == capacidadMaxima`; con **7 alumnos y máx. 6** caía en amarillo por la regla del 70 %.
+
+### Comportamiento
+- **Rojo** si `actual >= máximo` (lleno o sobre cupo por excepción).
+- Por debajo del máximo: reparto **por tercios enteros** del cupo (`m/3`, `2m/3`): verde / amarillo / **naranja** (clase `slot-alto`), alineado con ej. max 6 → 0–2 / 3–4 / 5; max 10 → 0–3 / 4–6 / 7–9.
+
+### Archivos
+`CalendarioSemanalDTO.java` (`getClaseCssOcupacionSlotProfesor`), `templates/calendario/semanal-profesor.html`, `CHANGELOG.md`.
+
+---
+
 ## [2026-04-09] - fix(rutinas): editar rutina tras import ZIP — plantilla en biblioteca y UI alineada ✅
 
 ### Resumen

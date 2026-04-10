@@ -169,5 +169,35 @@ public class CalendarioSemanalDTO {
                 return "info";
             return "success";
         }
+
+        /**
+         * Clase CSS para la celda del calendario del profesor.
+         * <ul>
+         *   <li><strong>Rojo</strong> ({@code slot-ocupado}): {@code capacidadActual >= capacidadMaxima}
+         *       (incluye cupo completo y exceso por excepción).</li>
+         *   <li>Si hay cupo libre: el rango {@code [0 .. max-1]} se parte en tres bandas por <em>tercios
+         *       enteros</em> (mismo criterio que ej. max 6 → 0–2 verde, 3–4 amarillo, 5 naranja;
+         *       max 10 → 0–3, 4–6, 7–9).</li>
+         * </ul>
+         */
+        public String getClaseCssOcupacionSlotProfesor() {
+            int c = capacidadActual;
+            int m = capacidadMaxima;
+            if (m <= 0) {
+                return c > 0 ? "slot-ocupado" : "slot-disponible";
+            }
+            if (c >= m) {
+                return "slot-ocupado";
+            }
+            int limVerde = m / 3;
+            int limAmarillo = (2 * m) / 3;
+            if (c <= limVerde) {
+                return "slot-disponible";
+            }
+            if (c <= limAmarillo) {
+                return "slot-moderado";
+            }
+            return "slot-alto";
+        }
     }
 }

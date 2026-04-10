@@ -371,6 +371,7 @@
         }
         .tabla-horarios td.columna-destacada.slot-disponible { background: linear-gradient(135deg, #c5cae9 0%, #b0bdd4 100%) !important; }
         .tabla-horarios td.columna-destacada.slot-moderado { background: linear-gradient(135deg, #d1c4e9 0%, #c5cae9 100%) !important; }
+        .tabla-horarios td.columna-destacada.slot-alto { background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%) !important; }
         .tabla-horarios td.columna-destacada.slot-ocupado { background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%) !important; }
         .tabla-horarios td.columna-destacada.slot-vacio { background: #e8eaf6 !important; }
         
@@ -397,6 +398,10 @@
         .slot-moderado {
             background: linear-gradient(135deg, #fff3cd 0%, #ffe082 100%) !important; /* Amarillo pastel */
             color: #665c1e;
+        }
+        .slot-alto {
+            background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%) !important; /* Naranja pastel */
+            color: #6b3e0a;
         }
         .slot-ocupado {
             background: linear-gradient(135deg, #ffb3b3 0%, #ff8a8a 100%) !important; /* Rojo pastel */
@@ -767,9 +772,10 @@
                             </div>
                             <div class="estadistica-label text-lg-end text-start w-100">Ocupación semanal</div>
                             <div class="d-flex flex-row flex-lg-wrap justify-content-lg-end justify-content-start align-items-center mt-2 leyenda-fila w-100" style="gap: 12px;">
-                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#b7e4c7 0%,#a3c585 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Disponible</span></div>
-                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#fff3cd 0%,#ffe082 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Parcial</span></div>
-                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#ffb3b3 0%,#ff8a8a 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Lleno</span></div>
+                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#b7e4c7 0%,#a3c585 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Baja (~0–33&nbsp;% cupo)</span></div>
+                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#fff3cd 0%,#ffe082 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Media (~33–66&nbsp;%)</span></div>
+                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#ffe0b2 0%,#ffcc80 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Alta (~66–99&nbsp;%)</span></div>
+                                <div class="d-flex align-items-center"><span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#ffb3b3 0%,#ff8a8a 100%);border-radius:4px;margin-right:5px;flex-shrink:0;"></span><span style="font-size:0.9em;">Lleno (≥ cupo máx.)</span></div>
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-presente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Presente</span></div>
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-ausente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Ausente</span></div>
                                 <div class="d-flex align-items-center"><span class="punto-asistencia punto-pendiente" style="margin-right:5px;"></span><span style="font-size:0.9em;">Pend.</span></div>
@@ -778,7 +784,7 @@
                         </div>
                     </div>
                     
-                    <p class="small text-muted mb-2">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja. La <strong>capacidad por horario</strong> se edita tocando la tarjeta correspondiente.</p>
+                    <p class="small text-muted mb-2 d-none d-lg-block">Las celdas muestran solo la cantidad de alumnos. Abrí un horario para ver nombres, marcar asistencia o agregar una excepción para esa franja. La <strong>capacidad por horario</strong> se edita tocando la tarjeta correspondiente.</p>
                     
                     <!-- Fecha visible encima de la grilla + modo Lun–Sáb / Lun–Dom (escritorio y móvil) -->
                     <div class="calendario-toolbar-fecha d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
@@ -824,10 +830,10 @@
                                     <td th:each="dia : ${diasSemanaMostrar}"
                                         th:with="slot=${slotsPorDiaList[dia.ordinal()][i]}, fechaDia=${calendario.fechaInicioSemana.plusDays(dia.ordinal())}"
                                         th:attr="data-col-index=${dia.ordinal()}, data-fecha=${#temporals.format(fechaDia, 'yyyy-MM-dd')}, data-hora-inicio=${slot != null ? slot.horaInicio : ''}, data-hora-fin=${slot != null ? slot.horaFin : ''}"
-                                        th:classappend="${(slot == null ? 'slot-vacio' : (slot.capacidadActual == 0 ? 'slot-disponible' : (slot.capacidadActual == slot.capacidadMaxima ? 'slot-ocupado' : (slot.capacidadActual >= 0.7 * slot.capacidadMaxima ? 'slot-moderado' : 'slot-disponible')))) + (slot != null ? ' td-slot-clicable' : '')}"
+                                        th:classappend="${(slot == null ? 'slot-vacio' : slot.claseCssOcupacionSlotProfesor) + (slot != null ? ' td-slot-clicable' : '')}"
                                         class="td-slot-calendario"
                                         style="position:relative;"
-                                        th:title="${slot != null ? ((slot.capacidadActual) + ' alumno(s) · ' + slot.capacidadMaxima + ' cupos máx.') + (slot.capacidadActual == slot.capacidadMaxima ? ' · Lleno' : '') : ''}">
+                                        th:title="${slot != null ? ((slot.capacidadActual) + ' alumno(s) · ' + slot.capacidadMaxima + ' cupos máx.') + (slot.capacidadActual >= slot.capacidadMaxima ? (slot.capacidadActual > slot.capacidadMaxima ? ' · Sobre cupo' : ' · Lleno') : '') : ''}">
                                         <th:block th:if="${slot != null}">
                                             <i class="fas fa-eye slot-celda-ojo" aria-hidden="true"></i>
                                             <div class="slot-celda-resumen"
