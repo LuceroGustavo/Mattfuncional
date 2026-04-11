@@ -2,6 +2,36 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-04-11] - feat(página pública,planes): admin embebido, subidas, precio texto, orden automático ✅
+
+### Resumen
+Mejoras a **Administración → Página pública** y a la vista **`/planes`**: modales usables en escritorio, rutas de archivo estables, promociones con imagen y precio libre, y orden de tarjetas sin campo manual en el formulario.
+
+### Comportamiento / despliegue
+- **Dónde están las imágenes de promoción:** no en la carpeta `uploads/` del **repositorio del proyecto**. La base es `mattfuncional.uploads.dir` (por defecto local: `%USERPROFILE%\Mattfuncional\uploads\`; subcarpeta `promociones-publicas/`). En servidor: perfil **prod** `/opt/mattfuncional/uploads`, **donweb** `/root/mattfuncional/uploads`, o variable de entorno **`MATT_UPLOADS_DIR`** (ruta absoluta). Al arrancar la app se loguea la ruta; en el panel figura bajo “Subir imagen”.
+- **Creación de carpetas:** `Files.createDirectories` al guardar y al registrar recursos estáticos; no hace falta crear `promociones-publicas` a mano, pero el usuario del proceso debe poder escribir en `MATT_UPLOADS_DIR`.
+- **Borrado de archivo al eliminar plan/promo:** `PlanPublicoService.eliminar` y sustitución de imagen llaman a `borrarArchivoPromocion` para rutas `/media/promociones/...`.
+
+### Backend
+- `MattUploadsPathResolver`: raíz absoluta; si la propiedad es relativa, fallback `user.home/Mattfuncional/uploads`; log `@PostConstruct` con ruta.
+- `WebMvcConfig`: sirve `/media/promociones/**` desde `…/promociones-publicas/` con `file:` URI coherente con el resolver.
+- `PlanPublicoService`: `guardarImagenPromocion` con `Files.copy`; `siguienteOrdenAlFinal()` + `PlanPublicoRepository.findMaxOrden()` para nuevos ítems al final.
+- `PlanPublico`: columna `precio_etiqueta` (texto mostrado; `precio` numérico sigue para compatibilidad).
+- `PaginaPublicaAdminController`: guardado sin `orden` en POST; asigna orden solo en **alta**; `precioEtiqueta` + parse numérico auxiliar.
+
+### Frontend admin (`pagina-publica-admin.html`, `pagina-publica-admin.css`, `administracion.html`)
+- Modales movidos a `document.body` (`moveMattPublicaModalsToBody`); `loadSection(..., hideAlerts)` para no ocultar mensajes flash tras redirect.
+- CSS modal plan/promo: scroll en cuerpo, límites viewport.
+- Un solo botón **Crear plan / promoción**; campo precio **texto**; indicación de ruta en disco; sin campo **Orden** en el modal (orden con flechas en la tabla).
+
+### Página pública (`planes-publica.html`, `publica.css`)
+- Títulos de tarjeta centrados; imagen promoción sin recorte forzado (sin `aspect-ratio` rígido); precio desde `precioEtiqueta` o formato numérico.
+
+### Archivos tocados (principal)
+`MattUploadsPathResolver.java`, `WebMvcConfig.java`, `PlanPublico.java`, `PlanPublicoRepository.java`, `PlanPublicoService.java`, `PaginaPublicaAdminController.java`, `application.properties`, `application-prod.properties`, `application-donweb.properties`, `templates/profesor/administracion.html`, `templates/profesor/pagina-publica-admin.html`, `static/css/pagina-publica-admin.css`, `templates/planes-publica.html`, `static/css/publica.css`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-30] - feat(calendario,BD): vista profesor compacta, Lun–Sáb/Dom, datos de prueba 30 alumnos ✅
 
 ### Resumen

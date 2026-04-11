@@ -28,6 +28,7 @@
     </div>
 
     <div th:if="${ok}" class="alert alert-success publica-alert-ok d-flex align-items-center gap-2" role="alert"><i class="fas fa-check-circle"></i><span th:text="${ok}">Guardado</span></div>
+    <div th:if="${error}" class="alert alert-danger d-flex align-items-center gap-2" role="alert"><i class="fas fa-exclamation-circle"></i><span th:text="${error}">Error</span></div>
 
     <div th:if="${(param.embed == null || param.embed.isEmpty()) && (param.fragment == null || param.fragment.isEmpty())}" class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-md-4">
@@ -138,11 +139,11 @@
         </div>
     </div>
 
-    <!-- 2. Planes -->
+    <!-- 2. Planes y promociones -->
     <div class="card mb-4 card-modulo-planes">
-        <div class="card-header"><strong><i class="fas fa-list-alt me-2"></i>Planes</strong></div>
+        <div class="card-header"><strong><i class="fas fa-list-alt me-2"></i>Planes y promociones</strong></div>
         <div class="card-body">
-            <p class="publica-modulo-hint mb-3"><i class="fas fa-layer-group me-1 opacity-75"></i>Los planes se muestran como tarjetas en la página pública. Editá precio y datos; los cambios se reflejan al instante.</p>
+            <p class="publica-modulo-hint mb-3"><i class="fas fa-layer-group me-1 opacity-75"></i>Los <strong>planes</strong> muestran precio y seguimiento semanal. Las <strong>promociones</strong> permiten título, imagen y texto (ej. productos con logo). Todo se ordena con las flechas y se ve en <code>/planes</code>.</p>
 
             <div class="d-md-none list-group list-group-flush list-publica-planes" th:if="${planes != null && !planes.isEmpty()}">
                 <div class="list-group-item border-0 shadow-sm d-flex flex-row align-items-stretch p-0 overflow-hidden plan-fila-movil-row"
@@ -153,7 +154,10 @@
                             th:attr="data-id=${plan.id},
                                      data-numero=${planStat.count},
                                      data-nombre=${plan.nombre},
+                                     data-tipo=${plan.tipo != null ? plan.tipo.name() : 'PLAN'},
+                                     data-ruta-imagen=${plan.rutaImagen != null ? plan.rutaImagen : ''},
                                      data-precio=${plan.precio},
+                                     data-precio-etiqueta=${plan.precioEtiqueta != null ? plan.precioEtiqueta : ''},
                                      data-veces=${plan.vecesPorSemana != null ? plan.vecesPorSemana : ''},
                                      data-descripcion=${plan.descripcion != null ? plan.descripcion : ''},
                                      data-orden=${plan.orden}">
@@ -179,6 +183,7 @@
                 <table class="table table-sm table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
+                        <th>Tipo</th>
                         <th>Nombre</th>
                         <th>Precio</th>
                         <th title="Instancias de seguimiento por semana">Seg./sem.</th>
@@ -188,9 +193,16 @@
                     </thead>
                     <tbody>
                     <tr th:each="plan, planStat : ${planes}" th:classappend="${'plan-fila-tono-' + (planStat.count % 4)}">
+                        <td>
+                            <span th:if="${plan.tipo != null and plan.tipo.name() == 'PROMOCION'}" class="badge bg-info text-dark">Promo</span>
+                            <span th:unless="${plan.tipo != null and plan.tipo.name() == 'PROMOCION'}" class="badge bg-secondary">Plan</span>
+                        </td>
                         <td th:text="${plan.nombre}">Plan</td>
-                        <td th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</td>
-                        <td th:text="${plan.vecesPorSemana != null ? plan.vecesPorSemana : 'Libre'}">-</td>
+                        <td>
+                            <span th:if="${plan.precioEtiqueta != null and !#strings.isEmpty(plan.precioEtiqueta)}" th:text="${plan.precioEtiqueta}">—</span>
+                            <span th:if="${plan.precioEtiqueta == null or #strings.isEmpty(plan.precioEtiqueta)}" th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</span>
+                        </td>
+                        <td th:text="${plan.vecesPorSemana != null ? plan.vecesPorSemana : '—'}">-</td>
                         <td class="publica-col-wrap"><span class="small" th:text="${plan.descripcion}">-</span></td>
                         <td>
                             <div class="d-flex align-items-center gap-1 flex-wrap publica-planes-acciones">
@@ -204,7 +216,7 @@
                                     </form>
                                     <button th:if="${planStat.last}" type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 disabled" title="Último" disabled><i class="fas fa-arrow-down" style="font-size: 0.7rem;"></i></button>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id=${plan.id}, data-nombre=${plan.nombre}, data-descripcion=${plan.descripcion}, data-precio=${plan.precio}, data-veces=${plan.vecesPorSemana}, data-orden=${plan.orden}" title="Editar"><i class="fas fa-pen me-1"></i>Editar</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id=${plan.id}, data-nombre=${plan.nombre}, data-descripcion=${plan.descripcion}, data-precio=${plan.precio}, data-precio-etiqueta=${plan.precioEtiqueta != null ? plan.precioEtiqueta : ''}, data-veces=${plan.vecesPorSemana}, data-orden=${plan.orden}, data-tipo=${plan.tipo != null ? plan.tipo.name() : 'PLAN'}, data-ruta-imagen=${plan.rutaImagen != null ? plan.rutaImagen : ''}" title="Editar"><i class="fas fa-pen me-1"></i>Editar</button>
                                 <form th:action="@{/profesor/pagina-publica/plan/eliminar}" method="post" class="d-inline form-eliminar-plan">
                                     <input type="hidden" name="id" th:value="${plan.id}">
                                     <button type="button" class="btn btn-danger btn-sm btn-confirmar-eliminar" title="Eliminar" data-msg="¿Eliminar este plan?"><i class="fas fa-trash-alt"></i></button>
@@ -213,12 +225,14 @@
                         </td>
                     </tr>
                     <tr th:if="${planes == null || planes.isEmpty()}">
-                        <td colspan="5" class="text-center text-muted py-3">Sin planes. Se crean automáticamente al iniciar la app.</td>
+                        <td colspan="6" class="text-center text-muted py-3">Sin planes. Se crean automáticamente al iniciar la app.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-publica-nuevo-plan btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id='', data-nombre='', data-descripcion='', data-precio='0', data-veces='', data-orden='0'"><i class="fas fa-plus me-1"></i>Nuevo plan</button>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="button" class="btn btn-publica-nuevo-plan btn-sm" data-bs-toggle="modal" data-bs-target="#modalPlan" th:attr="data-id='', data-nombre='', data-descripcion='', data-precio='0', data-precio-etiqueta='', data-veces='', data-tipo='PLAN', data-ruta-imagen=''" title="Elegí Plan o Promoción en el formulario"><i class="fas fa-plus me-1"></i>Crear plan / promoción</button>
+            </div>
         </div>
     </div>
 
@@ -315,6 +329,9 @@
                 </div>
                 <div class="modal-body modal-publica-plan-body">
                     <p class="mb-1"><span id="planDetalleNumero" class="fw-bold" style="color:#006064;"></span> <span id="planDetalleNombre" class="fw-semibold"></span></p>
+                    <div id="planDetalleImagenWrap" class="mb-3 text-center" style="display:none;">
+                        <img id="planDetalleImagen" src="" alt="" class="img-fluid rounded border" style="max-height:160px;">
+                    </div>
                     <dl class="detalle-dl mb-0 mt-3">
                         <dt>Precio</dt>
                         <dd id="planDetallePrecio">—</dd>
@@ -340,10 +357,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalPlan" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal fade publica-modal-portal" id="modalPlan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form id="formPlan" th:action="@{/profesor/pagina-publica/plan/guardar}" method="post">
+            <form id="formPlan" th:action="@{/profesor/pagina-publica/plan/guardar}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-header modal-publica-plan-form-header">
                     <h5 class="modal-title" id="modalPlanTitle">Editar plan</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -351,25 +369,49 @@
                 <div class="modal-body">
                     <input type="hidden" name="id" id="planId">
                     <div class="mb-2">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" name="nombre" class="form-control" placeholder="Ej. Plan 2 veces por semana" required>
+                        <label class="form-label">Nombre / título</label>
+                        <input type="text" name="nombre" class="form-control" placeholder="Ej. Plan 2 veces por semana o Remera todos los talles" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Precio</label>
-                        <input type="number" name="precio" class="form-control" step="0.01" min="0" required>
+                        <label class="form-label" for="planTipo">Tipo</label>
+                        <select name="tipo" class="form-select" id="planTipo">
+                            <option value="PLAN">Plan (precio y seguimiento semanal)</option>
+                            <option value="PROMOCION">Promoción (imagen destacada + descripción)</option>
+                        </select>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Seguimiento (veces por semana)</label>
-                        <input type="number" name="vecesPorSemana" class="form-control" min="0" placeholder="Vacío = sin tope fijo">
-                        <small class="text-muted">Dejalo vacío para planes sin límite explícito de instancias.</small>
+                        <label class="form-label" id="planLabelPrecio">Precio</label>
+                        <input type="text" name="precioEtiqueta" id="planInputPrecio" class="form-control" autocomplete="off"
+                               placeholder="Ej. 15000, Gratis, Consultar, Pase libre">
+                        <small class="text-muted">Podés escribir número o texto (se muestra tal cual en la página pública).</small>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label">Orden</label>
-                        <input type="number" name="orden" class="form-control" value="0">
+                    <div id="planBlockPlan">
+                        <div class="mb-2">
+                            <label class="form-label">Seguimiento (veces por semana)</label>
+                            <input type="number" name="vecesPorSemana" id="planInputVeces" class="form-control" min="0" placeholder="Vacío = sin tope fijo">
+                            <small class="text-muted">Solo aplica a planes. Dejalo vacío para “libre”.</small>
+                        </div>
+                    </div>
+                    <div id="planBlockPromo" class="d-none">
+                        <div class="mb-2" id="planImagenActualWrap" style="display:none;">
+                            <label class="form-label">Imagen actual</label>
+                            <div><img id="planImagenActualPreview" src="" alt="" class="img-fluid rounded border" style="max-height:140px;"></div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Subir imagen</label>
+                            <input type="file" name="imagen" id="planImagenFile" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif">
+                            <small class="text-muted">JPG, PNG, WebP o GIF. Máx. 5 MB.</small>
+                            <small class="text-muted d-block mt-1" th:if="${rutaPromocionesEnDisco != null}" th:text="'Archivos en disco: ' + ${rutaPromocionesEnDisco}">Ruta</small>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="quitarImagen" value="1" id="planQuitarImagen" class="form-check-input">
+                            <label class="form-check-label" for="planQuitarImagen">Quitar imagen actual</label>
+                        </div>
+                        <p class="small text-muted">Podés indicar un precio opcional abajo (ej. venta de producto) o dejar 0.</p>
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Descripción</label>
-                        <textarea name="descripcion" class="form-control" rows="2" placeholder="Opcional"></textarea>
+                        <textarea name="descripcion" id="planTextareaDesc" class="form-control" rows="3" placeholder="Opcional"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer modal-publica-plan-form-footer">
@@ -401,7 +443,29 @@
     (function() {
         var planModalTriggerBtn = null;
 
+        function togglePlanTipo() {
+            var sel = document.getElementById('planTipo');
+            var isPromo = sel && sel.value === 'PROMOCION';
+            var blockPlan = document.getElementById('planBlockPlan');
+            var blockPromo = document.getElementById('planBlockPromo');
+            if (blockPlan) blockPlan.classList.toggle('d-none', isPromo);
+            if (blockPromo) blockPromo.classList.toggle('d-none', !isPromo);
+            var veces = document.getElementById('planInputVeces');
+            if (veces) veces.disabled = isPromo;
+            var lbl = document.getElementById('planLabelPrecio');
+            if (lbl) lbl.textContent = isPromo ? 'Precio (opcional)' : 'Precio';
+            var planId = document.getElementById('planId');
+            var titleEl = document.getElementById('modalPlanTitle');
+            if (titleEl && planId && !planId.value) {
+                titleEl.textContent = isPromo ? 'Nueva promoción' : 'Nuevo plan';
+            }
+        }
+
         var modalEl = document.getElementById('modalPlan');
+        var tipoSel = document.getElementById('planTipo');
+        if (tipoSel) {
+            tipoSel.addEventListener('change', togglePlanTipo);
+        }
         if (modalEl) {
             modalEl.addEventListener('show.bs.modal', function(e) {
                 var btn = e.relatedTarget || planModalTriggerBtn;
@@ -411,16 +475,52 @@
                 if (planId) planId.value = id;
                 var nombreInp = document.querySelector('#formPlan input[name="nombre"]');
                 if (nombreInp) nombreInp.value = btn ? (btn.getAttribute('data-nombre') || '') : '';
-                var precioInp = document.querySelector('#formPlan input[name="precio"]');
-                if (precioInp) precioInp.value = btn ? (btn.getAttribute('data-precio') || '0') : '0';
-                var vecesInp = document.querySelector('#formPlan input[name="vecesPorSemana"]');
+                var precioInp = document.getElementById('planInputPrecio');
+                if (precioInp) {
+                    var pe = btn ? (btn.getAttribute('data-precio-etiqueta') || '').trim() : '';
+                    if (pe) {
+                        precioInp.value = pe;
+                    } else if (btn) {
+                        var pn = btn.getAttribute('data-precio');
+                        if (pn != null && pn !== '' && !isNaN(parseFloat(pn))) {
+                            precioInp.value = String(Math.round(parseFloat(pn)));
+                        } else {
+                            precioInp.value = '';
+                        }
+                    } else {
+                        precioInp.value = '';
+                    }
+                }
+                var vecesInp = document.getElementById('planInputVeces');
                 if (vecesInp) vecesInp.value = btn ? (btn.getAttribute('data-veces') || '') : '';
-                var ordenInp = document.querySelector('#formPlan input[name="orden"]');
-                if (ordenInp) ordenInp.value = btn ? (btn.getAttribute('data-orden') || '0') : '0';
-                var descInp = document.querySelector('#formPlan textarea[name="descripcion"]');
+                var descInp = document.getElementById('planTextareaDesc');
                 if (descInp) descInp.value = btn ? (btn.getAttribute('data-descripcion') || '') : '';
+                if (tipoSel) {
+                    tipoSel.value = btn ? (btn.getAttribute('data-tipo') || 'PLAN') : 'PLAN';
+                }
+                togglePlanTipo();
+                var ruta = btn ? (btn.getAttribute('data-ruta-imagen') || '') : '';
+                var wrap = document.getElementById('planImagenActualWrap');
+                var prev = document.getElementById('planImagenActualPreview');
+                var quitar = document.getElementById('planQuitarImagen');
+                var fileInp = document.getElementById('planImagenFile');
+                if (fileInp) fileInp.value = '';
+                if (quitar) quitar.checked = false;
+                if (ruta && prev && wrap) {
+                    prev.src = ruta;
+                    wrap.style.display = '';
+                } else if (wrap) {
+                    wrap.style.display = 'none';
+                }
                 var titleEl = document.getElementById('modalPlanTitle');
-                if (titleEl) titleEl.textContent = id ? 'Editar plan' : 'Nuevo plan';
+                if (titleEl) {
+                    var esPromo = tipoSel && tipoSel.value === 'PROMOCION';
+                    if (id) {
+                        titleEl.textContent = esPromo ? 'Editar promoción' : 'Editar plan';
+                    } else {
+                        titleEl.textContent = esPromo ? 'Nueva promoción' : 'Nuevo plan';
+                    }
+                }
             });
         }
 
@@ -531,6 +631,15 @@
             return '$' + n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
+        function textoPrecioDetalle(btn) {
+            var pe = (btn.getAttribute('data-precio-etiqueta') || '').trim();
+            if (pe) return pe;
+            var pv = btn.getAttribute('data-precio');
+            var esPromo = (btn.getAttribute('data-tipo') || '') === 'PROMOCION';
+            if (esPromo && (!pv || pv === '0' || pv === '0.0')) return '—';
+            return formatPrecioPlan(pv);
+        }
+
         var modalPlanDetalle = document.getElementById('modalPlanDetalle');
         if (modalPlanDetalle) {
             modalPlanDetalle.addEventListener('show.bs.modal', function(e) {
@@ -538,11 +647,27 @@
                 if (!btn) return;
                 var id = btn.getAttribute('data-id') || '';
                 var num = btn.getAttribute('data-numero') || '';
-                document.getElementById('planDetalleNumero').textContent = 'Plan ' + num;
+                var esPromo = (btn.getAttribute('data-tipo') || '') === 'PROMOCION';
+                var titDet = document.getElementById('modalPlanDetalleTitulo');
+                if (titDet) {
+                    titDet.innerHTML = esPromo ? '<i class="fas fa-image me-2"></i>Promoción' : '<i class="fas fa-clipboard-list me-2"></i>Plan';
+                }
+                document.getElementById('planDetalleNumero').textContent = esPromo ? ('Promo ' + num) : ('Plan ' + num);
                 document.getElementById('planDetalleNombre').textContent = btn.getAttribute('data-nombre') || '';
-                document.getElementById('planDetallePrecio').textContent = formatPrecioPlan(btn.getAttribute('data-precio'));
+                var rutaImg = btn.getAttribute('data-ruta-imagen') || '';
+                var imgWrap = document.getElementById('planDetalleImagenWrap');
+                var imgEl = document.getElementById('planDetalleImagen');
+                if (imgWrap && imgEl) {
+                    if (esPromo && rutaImg) {
+                        imgEl.src = rutaImg;
+                        imgWrap.style.display = '';
+                    } else {
+                        imgWrap.style.display = 'none';
+                    }
+                }
+                document.getElementById('planDetallePrecio').textContent = textoPrecioDetalle(btn);
                 var veces = btn.getAttribute('data-veces');
-                document.getElementById('planDetalleVeces').textContent = (veces !== null && veces !== '') ? veces : 'Libre';
+                document.getElementById('planDetalleVeces').textContent = esPromo ? '—' : ((veces !== null && veces !== '') ? veces : 'Libre');
                 document.getElementById('planDetalleOrden').textContent = btn.getAttribute('data-orden') || '—';
                 document.getElementById('planDetalleDescripcion').textContent = btn.getAttribute('data-descripcion') || '—';
                 var hidP = document.getElementById('planEliminarIdMobile');
@@ -553,8 +678,11 @@
                     editBtn.setAttribute('data-nombre', btn.getAttribute('data-nombre') || '');
                     editBtn.setAttribute('data-descripcion', btn.getAttribute('data-descripcion') || '');
                     editBtn.setAttribute('data-precio', btn.getAttribute('data-precio') || '0');
+                    editBtn.setAttribute('data-precio-etiqueta', btn.getAttribute('data-precio-etiqueta') || '');
                     editBtn.setAttribute('data-veces', btn.getAttribute('data-veces') || '');
                     editBtn.setAttribute('data-orden', btn.getAttribute('data-orden') || '0');
+                    editBtn.setAttribute('data-tipo', btn.getAttribute('data-tipo') || 'PLAN');
+                    editBtn.setAttribute('data-ruta-imagen', btn.getAttribute('data-ruta-imagen') || '');
                 }
             });
         }
@@ -606,6 +734,26 @@
                 confirmar(msg).then(function(ok) {
                     if (ok && form) form.submit();
                 });
+            });
+        });
+    })();
+
+    /* Panel admin: overflow recorta position:fixed. Hay que tener el modal en document.body ANTES de abrirlo (escritorio). */
+    window.moveMattPublicaModalsToBody = function() {
+        ['modalPlan', 'modalPlanDetalle', 'modalConsultaDetalle', 'modalConfirmar'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && el.parentElement !== document.body) {
+                document.body.appendChild(el);
+            }
+        });
+    };
+    (function attachPaginaPublicaModalsToBody() {
+        window.moveMattPublicaModalsToBody();
+        ['modalPlan', 'modalPlanDetalle', 'modalConsultaDetalle', 'modalConfirmar'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('show.bs.modal', function() {
+                window.moveMattPublicaModalsToBody();
             });
         });
     })();

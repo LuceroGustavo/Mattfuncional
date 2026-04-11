@@ -55,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
                 grupoMuscularService.asegurarGruposSistema();
                 categoriaService.asegurarCategoriasSistema();
                 planPublicoService.asegurarPlanesIniciales();
+                planPublicoService.migrarTipoNuloPlanes();
                 configuracionPaginaPublicaService.asegurarConfigInicial();
                 System.out.println("=== DataInitializer completado en " + (System.currentTimeMillis() - startTime) + "ms ===");
                 return;
@@ -70,6 +71,7 @@ public class DataInitializer implements CommandLineRunner {
             categoriaService.asegurarCategoriasSistema();
             // Asegurar planes y configuración de la página pública
             planPublicoService.asegurarPlanesIniciales();
+            planPublicoService.migrarTipoNuloPlanes();
             configuracionPaginaPublicaService.asegurarConfigInicial();
             
             // Asignar avatares solo si es necesario

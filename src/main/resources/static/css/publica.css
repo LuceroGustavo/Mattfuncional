@@ -151,7 +151,7 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .planes-header .nav-header-planes.small-header { background: rgba(20,20,20,0.98); }
 .planes-header main { padding-top: 1rem; }
 .plan-card { border: 1px solid #eee; border-radius: 0; }
-.plan-card-header { background-color: #333; border-bottom: none; }
+.plan-card-header { background-color: #333; border-bottom: none; text-align: center; }
 .plan-card-header .plan-nombre { color: #86CC47; font-weight: bold; text-transform: uppercase; margin: 0; }
 .plan-card-body { background-color: #DEDEDE; }
 .plan-precio { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; }
@@ -163,6 +163,26 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .dias-horarios-lista { padding-left: 0; }
 .dias-horarios-lista li { padding-left: 1.75rem; text-align: left; }
 .planes-titulo { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 2rem; text-transform: uppercase; }
+
+/* Tarjeta promoción: título, imagen, texto (y precio opcional) */
+.plan-card-promo .plan-card-body-promo { text-align: center; }
+.plan-promo-img-wrap {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #c8c8c8;
+  display: block;
+  line-height: 0;
+}
+.plan-promo-img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+}
+.plan-precio-opcional { font-size: 1.35rem; }
 
 /* Alertas públicas (éxito/error) - estilo Mattfuncional */
 .alert-publica { padding: 1rem 1.25rem; border-radius: 0; margin-bottom: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; }

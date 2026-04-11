@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Planes - Mattfuncional</title>
+    <title>Planes y promociones - Mattfuncional</title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/logo matt.jpeg}" href="/img/logo%20matt.jpeg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,18 +53,36 @@
     <main>
         <section class="about" id="planes">
             <div class="container">
-                <h1 class="planes-titulo">Planes</h1>
+                <h1 class="planes-titulo">Planes y promociones</h1>
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
                     <div class="col" th:each="plan : ${planes}">
-                        <div class="card plan-card">
+                        <th:block th:with="esPromo=${plan.tipo != null and plan.tipo.name() == 'PROMOCION'}">
+                        <div class="card plan-card" th:classappend="${esPromo} ? ' plan-card-promo'">
                             <div class="card-header plan-card-header">
                                 <h4 class="plan-nombre" th:text="${plan.nombre}">Plan</h4>
                             </div>
-                            <div class="card-body plan-card-body">
-                                <div class="plan-precio" th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</div>
-                                <p class="plan-descripcion" th:if="${plan.descripcion}" th:text="${plan.descripcion}">Descripción</p>
+                            <div class="card-body plan-card-body" th:classappend="${esPromo} ? ' plan-card-body-promo'">
+                                <th:block th:if="${esPromo}">
+                                    <div class="plan-promo-img-wrap mb-3" th:if="${plan.rutaImagen != null and !#strings.isEmpty(plan.rutaImagen)}">
+                                        <img th:src="${plan.rutaImagen}" th:alt="${plan.nombre}" class="plan-promo-img" loading="lazy">
+                                    </div>
+                                    <p class="plan-descripcion mb-0" th:if="${plan.descripcion != null and !#strings.isEmpty(plan.descripcion)}" th:text="${plan.descripcion}">Descripción</p>
+                                    <p class="plan-descripcion mb-0 text-muted small" th:if="${#strings.isEmpty(plan.descripcion) and #strings.isEmpty(plan.rutaImagen) and (plan.precio == null or plan.precio le 0) and #strings.isEmpty(plan.precioEtiqueta)}">
+                                        Podés completar la descripción o subir una imagen desde el panel «Página pública».
+                                    </p>
+                                    <div class="plan-precio plan-precio-opcional mt-3" th:if="${plan.precioEtiqueta != null and !#strings.isEmpty(plan.precioEtiqueta)}"
+                                         th:text="${plan.precioEtiqueta}">—</div>
+                                    <div class="plan-precio plan-precio-opcional mt-3" th:if="${(plan.precioEtiqueta == null or #strings.isEmpty(plan.precioEtiqueta)) and plan.precio != null and plan.precio gt 0}"
+                                         th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</div>
+                                </th:block>
+                                <th:block th:unless="${esPromo}">
+                                    <div class="plan-precio" th:if="${plan.precioEtiqueta != null and !#strings.isEmpty(plan.precioEtiqueta)}" th:text="${plan.precioEtiqueta}">—</div>
+                                    <div class="plan-precio" th:if="${plan.precioEtiqueta == null or #strings.isEmpty(plan.precioEtiqueta)}" th:text="'$' + ${#numbers.formatDecimal(plan.precio, 0, 'COMMA', 0, 'POINT')}">$0</div>
+                                    <p class="plan-descripcion" th:if="${plan.descripcion}" th:text="${plan.descripcion}">Descripción</p>
+                                </th:block>
                             </div>
                         </div>
+                        </th:block>
                     </div>
                 </div>
 
@@ -95,7 +113,7 @@
                         </div>
                         <div class="bg-grey-planes p-4 form-consulta-box">
                             <h4 class="mb-3 form-consulta-titulo">Consultanos</h4>
-                            <p class="text-muted mb-3">¿Tenés alguna duda acerca de nuestros planes? Dejanos tu mensaje y te respondemos a la brevedad.</p>
+                            <p class="text-muted mb-3">¿Tenés alguna duda acerca de nuestros planes o promociones? Dejanos tu mensaje y te respondemos a la brevedad.</p>
                             <form th:action="@{/public/consulta}" method="post" class="form-consulta" id="formConsulta" novalidate>
                                 <div class="mb-3">
                                     <label for="consulta-nombre" class="form-label visually-hidden">Nombre</label>

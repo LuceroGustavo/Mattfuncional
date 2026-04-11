@@ -288,6 +288,7 @@
         <span th:if="${!depuracionResult['success']}"><i class="fas fa-exclamation-circle me-2"></i><span th:text="${depuracionResult['message']}">Error</span></span>
     </div>
     <div th:if="${ok}" class="alert alert-success mb-3 admin-alert-item" role="alert" th:text="${ok}">OK</div>
+    <div th:if="${error}" class="alert alert-danger mb-3 admin-alert-item" role="alert" th:text="${error}">Error</div>
     </div>
     <div class="admin-layout">
         <aside class="admin-sidebar">
@@ -356,10 +357,30 @@
         if (link) link.classList.add('active');
     }
 
-    function loadSection(url) {
+    /** Los modales dentro de .admin-content-wrap quedan recortados (overflow). Los que pasamos a body hay que eliminarlos antes de inyectar otra sección. */
+    function purgeBodyModals() {
+        document.querySelectorAll('body > .modal').forEach(function(m) {
+            try {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    var inst = bootstrap.Modal.getInstance(m);
+                    if (inst) inst.dispose();
+                }
+            } catch (e) {}
+            m.remove();
+        });
+        document.querySelectorAll('body > .modal-backdrop').forEach(function(b) { b.remove(); });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+        document.body.style.removeProperty('overflow');
+    }
+
+    function loadSection(url, hideAlerts) {
         if (!contentEl || !url) return;
-        var alertsEl = document.getElementById('adminAlerts');
-        if (alertsEl) alertsEl.style.display = 'none';
+        purgeBodyModals();
+        if (hideAlerts) {
+            var alertsEl = document.getElementById('adminAlerts');
+            if (alertsEl) alertsEl.style.display = 'none';
+        }
         var fullUrl = url;
         if (window.location.search && window.location.search.length > 1) {
             fullUrl += (url.indexOf('?') >= 0 ? '&' : '?') + window.location.search.substring(1);
@@ -380,6 +401,9 @@
                     if (oldScript.src) script.src = oldScript.src; else script.textContent = oldScript.textContent;
                     contentEl.appendChild(script);
                 });
+                if (typeof window.moveMattPublicaModalsToBody === 'function') {
+                    window.moveMattPublicaModalsToBody();
+                }
                 try { sessionStorage.setItem(storageKey, url); } catch (e) {}
             })
             .catch(function() {
@@ -394,7 +418,7 @@
             var url = this.getAttribute('data-src');
             if (url) {
                 setActive(this);
-                loadSection(url);
+                loadSection(url, true);
             }
         });
     });
@@ -443,7 +467,7 @@
                 });
                 if (match) setActive(match);
                 updateMobileDropdownLabel(url);
-                loadSection(url);
+                loadSection(url, true);
             }
         });
     });
