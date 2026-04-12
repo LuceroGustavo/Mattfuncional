@@ -146,6 +146,10 @@ Importante: no escribas `screen-r` junto; tiene que ser `screen`, espacio, `-r`,
 En el menú **MATTFUNCIONAL - MENÚ DE GESTIÓN** elegí la opción **5** (Despliegue completo).  
 Eso hace: parar app → actualizar código (git pull) → compilar → iniciar.
 
+**Si `git pull` falla** con *untracked working tree files would be overwritten*: en el servidor había un archivo **sin commitear** (por ejemplo copiado a mano) que ahora viene del repo. Borrá o mové ese archivo en `/root/mattfuncional/` y volvé a ejecutar la opción **5** o **2**.
+
+**Si la compilación dice `mvn: command not found`:** el menú usa `./mvnw`; en clones nuevos a veces `mvnw` no tiene permiso de ejecución. El script aplica `chmod +x mvnw` antes de compilar; si igual falla: `chmod +x /root/mattfuncional/mvnw` por SSH.
+
 Cuando termine, la app queda en: **http://149.50.144.53:8080**
 
 ### 3.4 Salir del menú sin cerrarlo
@@ -156,7 +160,7 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 
 ---
 
-## 4. Opciones del menú (1-11)
+## 4. Opciones del menú (1-12)
 
 | Opción | Acción |
 |--------|--------|
@@ -170,9 +174,8 @@ La próxima vez que entres por VNC podés volver con: `screen -r mattfuncional`.
 | 8 | Reiniciar aplicación Mattfuncional |
 | 9 | Información del proyecto |
 | 10 | Ver espacio en disco |
-| 11 | Salir |
-
-*Nota: No se modificará por ahora el menú del servidor (sin instalación de Workbench ni scripts adicionales).*
+| 11 | Borrar base de datos |
+| 12 | Salir del sistema |
 
 ---
 

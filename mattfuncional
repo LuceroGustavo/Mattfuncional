@@ -102,6 +102,7 @@ compile_app() {
     print_option "3️⃣ Compilando aplicación Mattfuncional..."
     print_warning "Esto puede tomar varios minutos..."
     cd "$APP_DIR" || { print_error "Error: No se pudo cambiar al directorio del proyecto"; return 1; }
+    [ -f "./mvnw" ] && chmod +x ./mvnw
     if [ -x "./mvnw" ]; then
         ./mvnw clean package -DskipTests -q
     else
