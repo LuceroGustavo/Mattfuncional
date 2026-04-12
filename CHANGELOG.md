@@ -2,6 +2,16 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-04-12] - fix(backup,imagen): export ZIP incluye GIF/WebP si están en carpeta del proyecto ✅
+
+### Resumen
+El ZIP de **Exportar ejercicios…** armaba `ejercicios.json` con `tieneImagen` pero **no empaquetaba** `imagenes/*.webp` cuando los archivos estaban solo en `<repo>/uploads/ejercicios/` (desarrollo local), porque la app leía desde la ruta canónica `%USERPROFILE%/Mattfuncional/uploads/ejercicios` (`mattfuncional.uploads.dir`). **ImagenServicio** ahora usa **MattUploadsPathResolver** como base y, al leer, prueba también **`user.dir/uploads/ejercicios`** si la ruta canónica no tiene el archivo.
+
+### Archivos
+`ImagenServicio.java`
+
+---
+
 ## [2026-04-11] - feat(página pública,planes): admin embebido, subidas, precio texto, orden automático ✅
 
 ### Resumen

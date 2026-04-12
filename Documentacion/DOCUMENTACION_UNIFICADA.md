@@ -37,6 +37,8 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 
 **Servicios:** `ExerciseZipBackupService`, `AlumnoJsonBackupService`, `AlumnoExportService`. Rutas en `AdminPanelController`: `/profesor/backup`, exportar-zip, importar, exportar-alumnos-json, importar-alumnos, exportar-alumnos-excel.
 
+**Dónde deben estar las imágenes en disco (export ZIP):** la app guarda y lee bajo `mattfuncional.uploads.dir` + `ejercicios/` (por defecto `%USERPROFILE%\Mattfuncional\uploads\ejercicios` en Windows). Si en desarrollo tenés los `1.webp`… solo en `<proyecto>\uploads\ejercicios\`, el export también los busca ahí (misma carpeta relativa al directorio de trabajo del proceso) para armar la carpeta `imagenes/` del ZIP.
+
 **ZIP ejercicios — detalle técnico (marzo 2026):**
 - **`manifest.json`:** Versión **1.1** incluye `cantidadSeriesBiblioteca` (series plantilla sin rutina, “Mis series” sueltas) y `cantidadSeriesEnRutinas` (series dentro de rutinas plantilla). `cantidadSeries` sigue siendo la suma (total en `series.json`). ZIPs exportados antes solo traen v1.0 con `cantidadSeries`; la pantalla de import sigue mostrándolo.
 - **Import:** Imágenes en restore admiten hasta **50 MB** por archivo (el formulario manual de ejercicios sigue limitado a 5 MB). Al enlazar series, cada ejercicio se resuelve por nombre (con **trim y normalización Unicode NFC**) y se persiste con referencia válida en BD para evitar errores de clave foránea.

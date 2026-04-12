@@ -1,5 +1,6 @@
 package com.mattfuncional.servicios;
 
+import com.mattfuncional.config.MattUploadsPathResolver;
 import com.mattfuncional.entidades.Imagen;
 import com.mattfuncional.excepciones.ResourceNotFoundException;
 import com.mattfuncional.repositorios.ImagenRepository;
@@ -32,21 +33,64 @@ public class ImagenServicio {
 
     private final ImagenRepository imagenRepository;
     private final ImageOptimizationService imageOptimizationService;
-    private final String uploadsDir;
+    /** Raíz canónica: misma regla que {@link MattUploadsPathResolver} + subcarpeta ejercicios. */
+    private final Path ejerciciosRoot;
     private final String ejerciciosDir;
 
     public ImagenServicio(
             ImagenRepository imagenRepository,
             ImageOptimizationService imageOptimizationService,
-            @Value("${mattfuncional.uploads.dir:uploads}") String uploadsDir,
+            MattUploadsPathResolver uploadsPathResolver,
             @Value("${mattfuncional.uploads.ejercicios:ejercicios}") String ejerciciosDir) {
         this.imagenRepository = imagenRepository;
         this.imageOptimizationService = imageOptimizationService;
-        this.uploadsDir = uploadsDir;
         this.ejerciciosDir = ejerciciosDir;
-        
-        // Crear estructura de directorios al inicializar
+        this.ejerciciosRoot = uploadsPathResolver.getRoot().resolve(ejerciciosDir).normalize();
+
         inicializarDirectorios();
+    }
+
+    /**
+     * Ruta bajo la raíz canónica (rechaza salir de ejercicios/ con "..").
+     */
+    private Path pathEjercicioCanonico(String rutaArchivo) {
+        if (rutaArchivo == null || rutaArchivo.isBlank()) {
+            throw new IllegalArgumentException("rutaArchivo vacía");
+        }
+        Path p = ejerciciosRoot.resolve(rutaArchivo).normalize();
+        if (!p.startsWith(ejerciciosRoot)) {
+            throw new SecurityException("Ruta de imagen inválida: " + rutaArchivo);
+        }
+        return p;
+    }
+
+    /**
+     * Desarrollo: las imágenes a veces están en {@code <proyecto>/uploads/ejercicios} mientras la config apunta a
+     * {@code %USERPROFILE%/Mattfuncional/uploads/ejercicios}. Para lectura/export ZIP probamos ambas.
+     */
+    private Path pathEjercicioProyectoFallback(String rutaArchivo) {
+        return Paths.get(System.getProperty("user.dir", "."))
+                .resolve("uploads")
+                .resolve(ejerciciosDir)
+                .resolve(rutaArchivo)
+                .normalize();
+    }
+
+    /**
+     * Archivo para lectura: canónico si existe; si no, carpeta uploads del proyecto (IDE).
+     */
+    private Path localizarArchivoParaLectura(String rutaArchivo) {
+        Path canon = pathEjercicioCanonico(rutaArchivo);
+        if (Files.exists(canon)) {
+            return canon;
+        }
+        Path fallback = pathEjercicioProyectoFallback(rutaArchivo);
+        if (Files.exists(fallback)) {
+            logger.info("Imagen leída desde carpeta del proyecto ({}); la ruta canónica no tenía el archivo: {}",
+                    fallback, canon);
+            return fallback;
+        }
+        return canon;
     }
 
     /**
@@ -54,10 +98,9 @@ public class ImagenServicio {
      */
     private void inicializarDirectorios() {
         try {
-            Path baseDir = Paths.get(uploadsDir, ejerciciosDir);
-            if (!Files.exists(baseDir)) {
-                Files.createDirectories(baseDir);
-                logger.info("Directorio de imágenes creado: {}", baseDir.toAbsolutePath());
+            if (!Files.exists(ejerciciosRoot)) {
+                Files.createDirectories(ejerciciosRoot);
+                logger.info("Directorio de imágenes creado: {}", ejerciciosRoot);
             }
         } catch (IOException e) {
             logger.error("Error al crear directorios de imágenes: {}", e.getMessage(), e);
@@ -118,7 +161,7 @@ public class ImagenServicio {
             
             // Generar ruta y guardar archivo
             String rutaArchivo = generarRutaArchivo(nombreArchivo, formatoFinal);
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
+            Path archivoPath = pathEjercicioCanonico(rutaArchivo);
             
             // Crear directorios si no existen
             Files.createDirectories(archivoPath.getParent());
@@ -175,7 +218,7 @@ public class ImagenServicio {
             String mimeType = getMimeType(formatoFinal);
 
             String rutaArchivo = nombreArchivo.contains(".") ? nombreArchivo : (nombreArchivo + "." + formatoFinal);
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
+            Path archivoPath = pathEjercicioCanonico(rutaArchivo);
             Path parent = archivoPath.getParent();
             if (parent != null) Files.createDirectories(parent);
             Files.write(archivoPath, optimizedBytes);
@@ -222,7 +265,7 @@ public class ImagenServicio {
             
             // Generar ruta y guardar archivo
             String rutaArchivo = generarRutaArchivo(archivo.getOriginalFilename(), formatoFinal);
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
+            Path archivoPath = pathEjercicioCanonico(rutaArchivo);
             
             // Crear directorios si no existen
             Files.createDirectories(archivoPath.getParent());
@@ -289,7 +332,7 @@ public class ImagenServicio {
             
             // Generar nueva ruta y guardar archivo
             String rutaArchivo = generarRutaArchivo(archivo.getOriginalFilename(), formatoFinal);
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
+            Path archivoPath = pathEjercicioCanonico(rutaArchivo);
             
             // Crear directorios si no existen
             Files.createDirectories(archivoPath.getParent());
@@ -338,10 +381,16 @@ public class ImagenServicio {
      */
     private void eliminarArchivoFisico(String rutaArchivo) {
         try {
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, rutaArchivo);
-            if (Files.exists(archivoPath)) {
-                Files.delete(archivoPath);
-                logger.debug("Archivo físico eliminado: {}", archivoPath);
+            Path canon = pathEjercicioCanonico(rutaArchivo);
+            if (Files.exists(canon)) {
+                Files.delete(canon);
+                logger.debug("Archivo físico eliminado: {}", canon);
+                return;
+            }
+            Path fb = pathEjercicioProyectoFallback(rutaArchivo);
+            if (Files.exists(fb)) {
+                Files.delete(fb);
+                logger.debug("Archivo físico eliminado (carpeta proyecto): {}", fb);
             }
         } catch (IOException e) {
             logger.warn("No se pudo eliminar el archivo físico: {}", rutaArchivo, e);
@@ -356,36 +405,26 @@ public class ImagenServicio {
                 .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada con ID: " + idImagen));
         
         try {
-            // Construir ruta completa: uploads/ejercicios/{rutaArchivo}
-            // rutaArchivo debería ser solo el nombre del archivo (ej: "curl_de_b_ceps_47ef5f80.webp")
-            Path archivoPath = Paths.get(uploadsDir, ejerciciosDir, imagen.getRutaArchivo());
-            Path archivoPathAbsoluto = archivoPath.toAbsolutePath();
-            
-            logger.info("🔍 Buscando archivo físico:");
-            logger.info("   - Ruta relativa en BD: {}", imagen.getRutaArchivo());
-            logger.info("   - Ruta completa construida: {}", archivoPath);
-            logger.info("   - Ruta absoluta: {}", archivoPathAbsoluto);
-            logger.info("   - Directorio base: {}", Paths.get(uploadsDir, ejerciciosDir).toAbsolutePath());
-            
+            Path archivoPath = localizarArchivoParaLectura(imagen.getRutaArchivo());
+            logger.debug("Leyendo imagen id={} desde {}", idImagen, archivoPath.toAbsolutePath());
+
             if (!Files.exists(archivoPath)) {
-                logger.error("❌ Archivo físico NO encontrado en: {}", archivoPathAbsoluto);
-                // Intentar listar archivos en el directorio para debugging
+                logger.error("Archivo físico no encontrado (canónico ni proyecto): BD ruta={}, probado={}",
+                        imagen.getRutaArchivo(), archivoPath.toAbsolutePath());
                 try {
-                    Path dir = archivoPath.getParent();
-                    if (Files.exists(dir)) {
-                        logger.info("📁 Archivos en el directorio {}:", dir.toAbsolutePath());
-                        Files.list(dir).forEach(f -> logger.info("   - {}", f.getFileName()));
-                    } else {
-                        logger.error("❌ El directorio {} no existe", dir.toAbsolutePath());
+                    Path dir = pathEjercicioCanonico(imagen.getRutaArchivo()).getParent();
+                    if (dir != null && Files.exists(dir)) {
+                        logger.debug("Archivos en {}:", dir.toAbsolutePath());
+                        Files.list(dir).forEach(f -> logger.debug("   - {}", f.getFileName()));
                     }
                 } catch (Exception e) {
-                    logger.warn("No se pudo listar archivos del directorio: {}", e.getMessage());
+                    logger.warn("No se pudo listar directorio de ejercicios: {}", e.getMessage());
                 }
-                throw new ResourceNotFoundException("Archivo físico no encontrado: " + archivoPathAbsoluto);
+                throw new ResourceNotFoundException("Archivo físico no encontrado: " + archivoPath.toAbsolutePath());
             }
-            
+
             byte[] contenido = Files.readAllBytes(archivoPath);
-            logger.info("✅ Archivo físico encontrado y leído: {} bytes desde {}", contenido.length, archivoPathAbsoluto);
+            logger.debug("Archivo leído: {} bytes desde {}", contenido.length, archivoPath.toAbsolutePath());
             return contenido;
         } catch (IOException e) {
             logger.error("❌ Error al leer archivo de imagen: {}", e.getMessage(), e);
@@ -413,7 +452,7 @@ public class ImagenServicio {
     public Path obtenerRutaFisica(String idImagen) {
         Imagen imagen = imagenRepository.findById(idImagen)
                 .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada con ID: " + idImagen));
-        return Paths.get(uploadsDir, ejerciciosDir, imagen.getRutaArchivo());
+        return pathEjercicioCanonico(imagen.getRutaArchivo());
     }
 
     @Transactional(readOnly = true)
@@ -430,9 +469,12 @@ public class ImagenServicio {
     @Transactional
     public Imagen registrarArchivoExistente(String nombreArchivo) {
         if (nombreArchivo == null || nombreArchivo.isBlank()) return null;
-        Path path = Paths.get(uploadsDir, ejerciciosDir, nombreArchivo);
+        Path path = pathEjercicioCanonico(nombreArchivo);
         try {
-            if (!Files.exists(path) || !Files.isRegularFile(path)) return null;
+            if (!Files.exists(path) || !Files.isRegularFile(path)) {
+                path = pathEjercicioProyectoFallback(nombreArchivo);
+                if (!Files.exists(path) || !Files.isRegularFile(path)) return null;
+            }
             String formato = getImageFormat(nombreArchivo);
             String mime = getMimeType(formato);
             Imagen img = new Imagen();
