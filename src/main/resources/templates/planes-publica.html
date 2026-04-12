@@ -51,13 +51,15 @@
     </header>
 
     <main>
-        <section class="about" id="planes">
-            <div class="container">
+        <section class="about planes-publica" id="planes">
+            <div class="container planes-publica-inner">
                 <h1 class="planes-titulo">Planes y promociones</h1>
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-2 g-md-4 mb-4">
                     <div class="col" th:each="plan : ${planes}">
+                        <a href="#consultanos" class="plan-card-link d-block h-100 text-decoration-none"
+                           th:attr="aria-label=${'Ir al formulario de consulta — ' + plan.nombre}">
                         <th:block th:with="esPromo=${plan.tipo != null and plan.tipo.name() == 'PROMOCION'}">
-                        <div class="card plan-card" th:classappend="${esPromo} ? ' plan-card-promo'">
+                        <div class="card plan-card h-100" th:classappend="${esPromo} ? ' plan-card-promo'">
                             <div class="card-header plan-card-header">
                                 <h4 class="plan-nombre" th:text="${plan.nombre}">Plan</h4>
                             </div>
@@ -83,6 +85,7 @@
                             </div>
                         </div>
                         </th:block>
+                        </a>
                     </div>
                 </div>
 

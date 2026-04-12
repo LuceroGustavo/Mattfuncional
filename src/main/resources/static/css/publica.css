@@ -2,6 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
 body { font-family: 'Montserrat', sans-serif; margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
 footer { background-color: #141414; color: #ffffff; margin-top: 3rem; padding: 3rem; }
 footer .nav-link { font-size: 0.9rem; font-weight: normal; color: rgba(255,255,255,0.9); }
 footer .nav-link:hover { color: #85CB46; }
@@ -12,6 +17,53 @@ h2 { font-family: 'Montserrat', sans-serif; color: #86CC47; text-transform: uppe
 .about img { max-width: 100%; height: auto; border-radius: 4px; }
 .about p { color: #ffffff; padding: 1rem; text-align: center; }
 .strong-title { color: #85CB46 !important; font-weight: bold; margin-bottom: 0; text-align: center; text-transform: uppercase; font-size: 1.1rem; }
+
+/* Rasgos (imágenes bajo el carrusel): en móvil/tablet menos margen lateral para acercarse al ancho del hero */
+.about-rasgo-link {
+  color: inherit;
+  -webkit-tap-highlight-color: rgba(133, 203, 70, 0.25);
+  transition: opacity 0.15s ease;
+}
+.about-rasgo-link:focus-visible {
+  outline: 2px solid #85CB46;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.about-rasgo-link:active .about-rasgo-img {
+  opacity: 0.92;
+}
+.about-rasgo-img-wrap {
+  border-radius: 4px;
+  overflow: hidden;
+  line-height: 0;
+}
+.about-rasgo-img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 200px;
+}
+@media (max-width: 991.98px) {
+  .about-rasgos {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+  .about-rasgos .about-rasgos-inner {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    max-width: 100%;
+  }
+  .about-rasgos .about-rasgo-img {
+    max-height: 240px;
+    min-height: 200px;
+  }
+  .about-rasgos p {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+}
 
 .btn-custom { background-color: #85CB46; border-radius: 0; color: #ffffff !important; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; padding: 0.5rem 1.5rem; text-transform: uppercase; border: none; text-decoration: none; display: inline-block; }
 .btn-custom:hover { background-color: #6fb038; color: #ffffff !important; transition: background-color .3s; }
@@ -150,6 +202,20 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 }
 .planes-header .nav-header-planes.small-header { background: rgba(20,20,20,0.98); }
 .planes-header main { padding-top: 1rem; }
+/* Tarjeta plan/promo: clic lleva a #consultanos (formulario) */
+.plan-card-link {
+  color: inherit;
+  -webkit-tap-highlight-color: rgba(133, 203, 70, 0.2);
+  border-radius: 0;
+}
+.plan-card-link:focus-visible {
+  outline: 2px solid #85CB46;
+  outline-offset: 3px;
+}
+.plan-card-link:active .plan-card {
+  opacity: 0.96;
+}
+
 .plan-card { border: 1px solid #eee; border-radius: 0; }
 .plan-card-header { background-color: #333; border-bottom: none; text-align: center; }
 .plan-card-header .plan-nombre { color: #86CC47; font-weight: bold; text-transform: uppercase; margin: 0; }
@@ -163,6 +229,25 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .dias-horarios-lista { padding-left: 0; }
 .dias-horarios-lista li { padding-left: 1.75rem; text-align: left; }
 .planes-titulo { color: #86CC47; font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 2rem; text-transform: uppercase; }
+
+/* Planes y promociones (/planes): en móvil tarjetas más anchas (menos margen lateral), alineado a .about-rasgos */
+@media (max-width: 991.98px) {
+  .planes-publica {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+  .planes-publica .planes-publica-inner {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    max-width: 100%;
+  }
+  .planes-publica .planes-titulo {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.65rem;
+  }
+}
 
 /* Tarjeta promoción: título, imagen, texto (y precio opcional) */
 .plan-card-promo .plan-card-body-promo { text-align: center; }

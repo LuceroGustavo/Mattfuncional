@@ -15,7 +15,9 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 - **Calendario:** Semanal; presente/ausente/pendiente por clic; excepciones por día; sincronizado con ficha y columna Presente en Mis Alumnos.
 - **Progreso:** Modal en ficha (grupos trabajados, observaciones); sin checkbox presente; historial y resumen mensual con detalle por día.
 - **Pizarra y sala TV:** Editor desde panel; vista TV en `/sala/{token}`; columnas editables; ejercicios con peso/rep.
-- **Página pública:** Landing `/`, Planes `/planes`, consultas; administración en `/profesor/pagina-publica`.
+- **Página pública:** Landing `/` (`templates/index-publica.html`), Planes `/planes` (`templates/planes-publica.html`), formulario de consultas y pie; administración en `/profesor/pagina-publica`. Estilos: `static/css/publica.css`.
+  - **Móvil / entorno 2 (abr 2026):** menos margen lateral en el bloque «Rasgos que nos caracterizan» y en las tarjetas de planes y promociones, para acercar el ancho al carrusel superior.
+  - **Navegación:** las tres imágenes de «Rasgos» enlazan a **`/planes`**. En `/planes`, cada tarjeta de plan o promoción es un enlace a **`#consultanos`** (formulario «Consultanos») con desplazamiento suave (`scroll-behavior: smooth` en `html`, respetando `prefers-reduced-motion`).
 - **Manual del usuario:** HTML en `/profesor/manual` (botón en panel); cubre acceso, panel, alumnos, ejercicios, series, rutinas, calendario, pizarra, usuarios, administración.
 - **Vistas responsive (mar 2026):** Alineación con MiGymVirtual para panel, ficha alumno, series, rutinas (crear/asignar), login, ejercicios, grupos musculares, hojas y modales según alcance acordado. Detalle y lista de pantallas en **[PLAN_MODIFICACION_VISTAS.md](PLAN_MODIFICACION_VISTAS.md)** §4.2.1.
 - **Backup (implementación terminada mar 2026):** Ver sección 2 — **las pruebas manuales del flujo completo siguen pendientes** (validación en uso).

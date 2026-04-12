@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">image.png
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mattfuncional - La nueva forma de entrenar</title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/logo matt.jpeg}" href="/img/logo%20matt.jpeg">
@@ -130,28 +130,34 @@
     </header>
 
     <main>
-        <section class="about" id="servicios">
-            <div class="container">
+        <section class="about about-rasgos" id="servicios">
+            <div class="container about-rasgos-inner">
                 <h2>Rasgos que nos caracterizan</h2>
-                <div class="row">
+                <div class="row g-2 g-md-3">
                     <div class="col-lg-4 mb-4">
-                        <div class="text-center">
-                            <img th:src="@{/img/publica/4.png}" src="/img/publica/4.png" alt="Entrenamiento personalizado" style="max-height: 200px; object-fit: cover; width: 100%;">
-                        </div>
+                        <a th:href="@{/planes}" href="/planes" class="about-rasgo-link d-block text-decoration-none" aria-label="Ver planes — entrenamiento personalizado">
+                            <div class="text-center about-rasgo-img-wrap">
+                                <img th:src="@{/img/publica/4.png}" src="/img/publica/4.png" alt="Entrenamiento personalizado" class="about-rasgo-img">
+                            </div>
+                        </a>
                         <p class="strong-title">Entrenamiento personalizado</p>
                         <p>Planes hechos a medida, seguimiento profesional y objetivos personales. Cada alumno tiene su rutina y series adaptadas a su nivel y metas.</p>
                     </div>
                     <div class="col-lg-4 mb-4">
-                        <div class="text-center">
-                            <img th:src="@{/img/publica/5.png}" src="/img/publica/5.png" alt="Multi-horarios" style="max-height: 200px; object-fit: cover; width: 100%;">
-                        </div>
+                        <a th:href="@{/planes}" href="/planes" class="about-rasgo-link d-block text-decoration-none" aria-label="Ver planes — multi-horarios">
+                            <div class="text-center about-rasgo-img-wrap">
+                                <img th:src="@{/img/publica/5.png}" src="/img/publica/5.png" alt="Multi-horarios" class="about-rasgo-img">
+                            </div>
+                        </a>
                         <p class="strong-title">Multi-horarios y flexibilidad</p>
                         <p>Múltiples horarios para entrenar. Podés elegir el momento que mejor se adapte a tu día y mantener la constancia.</p>
                     </div>
                     <div class="col-lg-4 mb-4">
-                        <div class="text-center">
-                            <img th:src="@{/img/publica/6.jpg}" src="/img/publica/6.jpg" alt="Presencial y virtual" style="max-height: 200px; object-fit: cover; width: 100%;">
-                        </div>
+                        <a th:href="@{/planes}" href="/planes" class="about-rasgo-link d-block text-decoration-none" aria-label="Ver planes — presencial y virtual">
+                            <div class="text-center about-rasgo-img-wrap">
+                                <img th:src="@{/img/publica/6.jpg}" src="/img/publica/6.jpg" alt="Presencial y virtual" class="about-rasgo-img">
+                            </div>
+                        </a>
                         <p class="strong-title">Presencial y virtual</p>
                         <p>Entrená en el gimnasio o de forma virtual. Rutinas y seguimiento online para que no pierdas el ritmo donde sea que estés.</p>
                     </div>

@@ -2,6 +2,16 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-04-13] - feat(ui,publica): landing y /planes — márgenes móvil, enlaces a planes y al formulario ✅
+
+### Resumen
+**Landing** (`index-publica.html` + `publica.css`): bloque «Rasgos que nos caracterizan» con menos padding lateral en vista estrecha; imágenes envueltas en enlace a `/planes`. **Planes** (`planes-publica.html`): mismos criterios de ancho en móvil para tarjetas; cada plan/promoción enlaza a `#consultanos` para bajar al formulario de consulta; `scroll-behavior: smooth` en `html` cuando no hay `prefers-reduced-motion`. Corrección menor: `meta charset` sin texto suelto.
+
+### Archivos
+`templates/index-publica.html`, `templates/planes-publica.html`, `static/css/publica.css`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-04-12] - docs: convención de mantenimiento (editar archivos existentes; Git local) ✅
 
 ### Resumen
