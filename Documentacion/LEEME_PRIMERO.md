@@ -64,6 +64,8 @@ Tras iniciar sesión se redirige al **Panel del profesor** (`/profesor/{id}`).
 
 **En la raíz del proyecto:** `CHANGELOG.md` – historial general de la app.
 
+**Convención (documentación y commits):** No crear archivos `.md` nuevos en `Documentacion/` salvo que sea **imprescindible** (mejor ampliar `DOCUMENTACION_UNIFICADA.md`, este `LEEME_PRIMERO.md`, los planes o `servidor/DESPLIEGUE-SERVIDOR.md`). Los **commits y push** a Git los hace el mantenedor del repo en su máquina; la IA puede sugerir mensaje de commit y qué archivos incluir. Los cambios de comportamiento notables van en **`CHANGELOG.md`**.
+
 ---
 
 ## 4. Resumen rápido de estado (para la IA)
@@ -81,4 +83,4 @@ Tras iniciar sesión se redirige al **Panel del profesor** (`/profesor/{id}`).
 
 ---
 
-*Última actualización: abr 2026 — documentación unificada (menos archivos); producción cliente Dattaweb; backup pendiente de validación manual.*
+*Última actualización: abr 2026 — convención: no nuevos .md salvo necesidad; Git local; documentación unificada; producción cliente Dattaweb; backup ZIP con imágenes (ruta canónica + proyecto, ver §2 doc unificada).*

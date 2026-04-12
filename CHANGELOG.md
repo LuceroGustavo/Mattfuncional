@@ -2,6 +2,16 @@
 
 > Nota: este changelog incluye histórico heredado de MiGym (referencias a admin/chat/websocket).
 
+## [2026-04-12] - docs: convención de mantenimiento (editar archivos existentes; Git local) ✅
+
+### Resumen
+En **LEEME_PRIMERO.md** y **DOCUMENTACION_UNIFICADA.md**: no crear `.md` nuevos en `Documentacion/` salvo que sea imprescindible; ampliar los documentos ya indexados. Commits y push los ejecuta el mantenedor en su entorno; cambios notables en **CHANGELOG**.
+
+### Archivos
+`Documentacion/LEEME_PRIMERO.md`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-04-12] - fix(backup,imagen): export ZIP incluye GIF/WebP si están en carpeta del proyecto ✅
 
 ### Resumen

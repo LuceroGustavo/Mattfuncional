@@ -2,6 +2,8 @@
 
 Contenido importante reunido de los documentos que antes estaban dispersos. Para contexto del proyecto usá [LEEME_PRIMERO.md](LEEME_PRIMERO.md) y [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
+**Mantenimiento:** Preferir **editar este archivo** (y los demás ya listados en `LEEME_PRIMERO.md` §3) antes que crear documentos nuevos. Detalle de versiones: [CHANGELOG.md](../CHANGELOG.md).
+
 ---
 
 ## 1. Resumen de lo implementado
