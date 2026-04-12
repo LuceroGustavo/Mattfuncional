@@ -1,3 +1,4 @@
-# Script para servidor Linux: siempre LF
+# Scripts Linux: LF + permisos ejecutables vía git (evita "modified" tras chmod en servidor)
 mattfuncional text eol=lf
+mvnw text eol=lf
 scripts/servidor/*.sh text eol=lf

@@ -150,7 +150,9 @@ Eso hace: parar app → actualizar código (git pull) → compilar → iniciar.
 
 **Si la compilación dice `mvn: command not found`:** el menú usa `./mvnw`; en clones nuevos a veces `mvnw` no tiene permiso de ejecución. El script aplica `chmod +x mvnw` antes de compilar; si igual falla: `chmod +x /root/mattfuncional/mvnw` por SSH.
 
-Cuando termine, la app queda en: **http://149.50.144.53:8080**
+**Si después del pull ves `modified: mattfuncional`, `mvnw` o `*.sh` sin haber editado nada:** suele ser el **bit ejecutable**: el menú hace `chmod +x` y Git lo ve distinto al commit antiguo (644 vs 755). En el repo ya están los scripts con permiso ejecutable en Git; tras **un `git pull` con ese commit**, el aviso desaparece. Si el servidor sigue con ruido: `cd /root/mattfuncional && git checkout -- mattfuncional mvnw scripts/servidor/*.sh` y volvé a marcar ejecutable solo si hace falta (`chmod +x mattfuncional mvnw`).
+
+Cuando termine, la app queda en la IP o dominio configurados en Nginx (proxy a `:8080`).
 
 ### 3.4 Salir del menú sin cerrarlo
 
