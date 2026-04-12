@@ -1,5 +1,7 @@
 # Plan: Migrar Mattfuncional al servidor del cliente
 
+> **Migración al dominio del cliente (mattfuncional.com.ar, servidor final):** ver **[MIGRACION_SERVIDOR_CLIENTE.md](MIGRACION_SERVIDOR_CLIENTE.md)** — incluye **§0** con el VPS del cliente (**Dattaweb**, IP `200.58.127.154`, SSH puerto **5344**). Este archivo sigue siendo la guía técnica de comandos y equivalencias con el servidor de referencia (detodoya).
+
 Este documento reúne los pasos y puntos a tener en cuenta para migrar la aplicación Mattfuncional al servidor que compre el cliente. El cliente comprará un servidor **igual al nuestro** (mismo tipo de VPS con Ubuntu). Aquí se describen las características de nuestro servidor actual y los pasos de migración.
 
 **Documentación de referencia:**

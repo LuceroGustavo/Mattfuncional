@@ -40,7 +40,70 @@ ssh -p 5638 root@149.50.144.53
 ssh -p 5638 root@149.50.144.53 "cd /root/mattfuncional && ./mattfuncional"
 ```
 
-Si todavía no tenés clave configurada y querés hacerlo, generá un par en tu PC y agregá la clave pública al servidor en `~/.ssh/authorized_keys` (documentación estándar de SSH).
+### 2.1 Qué se configura (SSH sin contraseña)
+
+Para que `ssh` **no pida contraseña de root**, hace falta lo mismo que en cualquier Linux con OpenSSH:
+
+| Dónde | Qué |
+|--------|-----|
+| **Servidor** (`root`) | El archivo `/root/.ssh/authorized_keys` contiene **una línea por clave pública** permitida. |
+| **Tu PC** | Tenés la **clave privada** (ej. `id_rsa` o `id_ed25519`). **No** se sube al servidor. |
+| **Servidor** | Solo se copia la **clave pública** (archivo `*.pub`, una línea que empieza con `ssh-rsa` o `ssh-ed25519`). |
+
+El repo **no** guarda ninguna clave: solo describe este mecanismo. En DonWeb/Dattaweb podés cargar la pública por **panel** (si el formulario está visible) o **a mano** (método seguro abajo).
+
+### 2.2 Formulario DonWeb «Agregar llave SSH pública»
+
+El [tutorial oficial](https://soporte.donweb.com/hc/es/articles/39346186021012--C%C3%B3mo-generar-llaves-SSH-para-acceder-a-tu-Cloud-Server) muestra el formulario **Agregar llave SSH pública** (nombre descriptivo + campo grande para pegar la línea del `.pub`). **No siempre** está en *Software y accesos* del VPS; puede estar en el flujo de alta del Cloud Server o en otra sección de Mi cuenta. Si no lo encontrás, usá **§2.3**.
+
+### 2.3 Método manual: `authorized_keys` en el servidor (siempre funciona)
+
+Entrá **una vez** como `root` con **contraseña** o por **Consola VNC** del panel. En el servidor:
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys
+```
+
+Pegá **una sola línea**: el contenido completo de tu `id_rsa.pub` (u otro `.pub`). Guardá y salí. Luego:
+
+```bash
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Desde tu PC (ajustá **IP** y **puerto SSH**; el de Donweb por VPS no es siempre 22):
+
+```text
+ssh -p 5638 root@149.50.144.53
+```
+
+Para el **servidor del cliente** (migración, Dattaweb): suele ser `ssh -p 5344 root@TU_IP`.
+
+### 2.4 Generar y copiar la clave en Windows (PowerShell)
+
+Generar par (si aún no existe):
+
+```powershell
+ssh-keygen -t ed25519 -C "tu@email"
+```
+
+Mostrar la **clave pública** para copiarla:
+
+```powershell
+Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub
+```
+
+Si usás RSA por defecto: `Get-Content $env:USERPROFILE\.ssh\id_rsa.pub`
+
+### 2.5 Comprobar
+
+- Si **no** pide contraseña: la clave pública quedó bien en `authorized_keys`.
+- Si **sigue** pidiendo contraseña: la línea no llegó al servidor, o tenés que indicar la clave: `ssh -p PUERTO -i "$env:USERPROFILE\.ssh\id_ed25519" root@IP`
+
+### 2.6 Cursor / agente de IA
+
+Las terminales que ejecuta el **agente** suelen ser **solo lectura**: no podés escribir la contraseña ahí. Por eso el acceso **sin contraseña** (esta sección) es lo que permite que herramientas ejecuten `ssh ... "comando"` desde tu PC **cuando** la clave privada está en la ruta por defecto y el servidor ya tiene la pública. Si falta la clave en el servidor, abrí **vos** una terminal interactiva, conectá con contraseña una vez y aplicá **§2.3**.
 
 ---
 
