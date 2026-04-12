@@ -1,6 +1,6 @@
 # Documentación unificada – Referencias y resúmenes
 
-Contenido importante reunido de los documentos que antes estaban dispersos. Para contexto del proyecto usá [LEEME_PRIMERO.md](LEEME_PRIMERO.md), [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) y [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
+Contenido importante reunido de los documentos que antes estaban dispersos. Para contexto del proyecto usá [LEEME_PRIMERO.md](LEEME_PRIMERO.md) y [PLAN_DE_DESARROLLO_UNIFICADO.md](PLAN_DE_DESARROLLO_UNIFICADO.md).
 
 ---
 
@@ -43,7 +43,8 @@ Contenido importante reunido de los documentos que antes estaban dispersos. Para
 - **Categorías:** Si el ZIP incluye `categorias.json` y hay profesor de restauración, se importan **aunque no se marquen** Rutinas ni Series (así no se pierden categorías propias al traer solo ejercicios o grupos). Ver `CHANGELOG.md` **[2026-04-08]**.
 - **Transacción:** La importación ZIP (`importarDesdeZip`) usa aislamiento **READ_COMMITTED**. Con el aislamiento por defecto de MySQL (`REPEATABLE_READ`), tras borrar y recrear ejercicios en transacciones independientes (`REQUIRES_NEW`), una lectura en la transacción principal podía seguir “viendo” IDs antiguos y fallar la FK al insertar `serie_ejercicio`.
 - **Vista previa:** Al elegir el archivo ZIP, el resumen muestra el desglose de series cuando el manifest trae los campos v1.1.
-- **Pruebas recomendadas — pendiente según última sesión de trabajo documentada:** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver también `CHANGELOG.md` entrada **[2026-03-30] - docs: resumen integral backup ZIP…** y **REVISION_PREVIA_MIGRACION.md** §8.
+- **Pruebas recomendadas — pendiente:** exportar ZIP → borrar o modificar datos de prueba en la misma BD → importar con **Suplantar** → comprobar rutinas, series, ejercicios y “Ver serie” sin errores. Ver `CHANGELOG.md` **[2026-03-30]** y **[2026-04-08]** (categorías, mapa ejercicios, `plantilla_id` al guardar rutina).
+- **Análisis largo de bugs (scripts SQL, FK, abril 2026):** quedó absorbido por las correcciones en código y entradas de `CHANGELOG.md` citadas arriba; no se mantiene un PDF separado en el repo.
 
 ---
 

@@ -8,9 +8,9 @@
 
 | Entorno | URL | Login |
 |---------|-----|-------|
-| **Producción** | http://detodoya.com.ar | `/login` — requiere correo y contraseña |
+| **Producción (cliente)** | `https://mattfuncional.com.ar` (cuando DNS/Certbot estén listos) o `http://200.58.127.154` vía Nginx | `/login` — correo y contraseña |
 | **Local** | http://localhost:8080 | `/login` — mismo flujo |
-| **Servidor (IP)** | http://149.50.144.53:8080 | Ver [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) |
+| **Referencia histórica** | detodoya.com.ar / VPS Donweb anterior | Ver [MIGRACION_SERVIDOR_CLIENTE.md](MIGRACION_SERVIDOR_CLIENTE.md) y [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) |
 
 **Páginas públicas (sin login):** `/` (landing), `/planes`, `/publica`, `/demo`.
 
@@ -51,18 +51,16 @@ Tras iniciar sesión se redirige al **Panel del profesor** (`/profesor/{id}`).
 
 ## 3. Estructura de la documentación (todo en `Documentacion/`)
 
-Quedan **varios archivos** principales más la carpeta de servidor:
-
 | Archivo | Para qué sirve |
 |---------|-----------------|
 | **LEEME_PRIMERO.md** (este) | Contexto del proyecto, acceso, dónde está cada cosa en el código. |
-| **AYUDA_MEMORIA.md** | Lista rápida de pendientes de ejercicios/vistas; nota sobre eliminar alumno y backup. Sistema de backup terminado (resumen). |
-| **PLAN_DE_DESARROLLO_UNIFICADO.md** | Visión, fases, checklist y pendientes detallados (único plan de desarrollo). |
-| **DOCUMENTACION_UNIFICADA.md** | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual (índice), referencias técnicas. |
-| **BASE_PARA_APP_VIRTUAL.md** | Contexto para fork MiGymVirtual (app 100 % virtual). |
-| **MEJORAS_DESDE_MIGYMVIRTUAL.md** | Plan y checklist: traer mejoras de la app referencia (`APP referencia/Migymvirtual/`) a Mattfuncional (back primero, luego vistas). |
+| **DOCUMENTACION_UNIFICADA.md** | Resúmenes: lo implementado, backup, Excel alumnos, despliegue, manual, referencias técnicas. |
+| **PLAN_DE_DESARROLLO_UNIFICADO.md** | Visión, fases, checklist y pendientes (incluye validación manual del backup ZIP). |
+| **PLAN_MODIFICACION_VISTAS.md** | Plan responsive / vistas (estado de fases y §4.2.1). |
+| **MIGRACION_SERVIDOR_CLIENTE.md** | Migración al VPS del cliente; **Anexo A** con checklist y comandos de instalación. |
+| **FORK_APP_VIRTUAL.md** | Solo si vas a derivar un proyecto tipo MiGymVirtual (app virtual, sin pizarra/asistencia presencial). |
 
-**Carpeta `servidor/`:** Despliegue en VPS (SSH, Nginx, menú). Ver `servidor/DESPLIEGUE-SERVIDOR.md` y `servidor/nginx-detodoya.conf`.
+**Carpeta `servidor/`:** Despliegue en VPS (SSH, Nginx, menú). Ver `servidor/DESPLIEGUE-SERVIDOR.md` y las plantillas `nginx-*.conf`.
 
 **En la raíz del proyecto:** `CHANGELOG.md` – historial general de la app.
 
@@ -83,4 +81,4 @@ Quedan **varios archivos** principales más la carpeta de servidor:
 
 ---
 
-*Última actualización: 30 mar 2026 — §4: responsive del plan cerrado en alcance acordado; backup pendiente de validación manual.*
+*Última actualización: abr 2026 — documentación unificada (menos archivos); producción cliente Dattaweb; backup pendiente de validación manual.*

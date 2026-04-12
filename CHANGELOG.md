@@ -32,6 +32,16 @@ Mejoras a **Administración → Página pública** y a la vista **`/planes`**: m
 
 ---
 
+## [2026-04-07] - docs: consolidación de Documentacion/ (menos archivos, enlaces actualizados) ✅
+
+### Resumen
+Se unificó la carpeta **`Documentacion/`**: contenido de **`migrar_servidor_cliente.md`** integrado como **Anexo A** en **`MIGRACION_SERVIDOR_CLIENTE.md`**; **`BASE_PARA_APP_VIRTUAL.md`** reemplazado por **`FORK_APP_VIRTUAL.md`** (fork MiGymVirtual sin depender de carpetas locales de referencia). Eliminados por solapamiento o obsoletos: `AYUDA_MEMORIA.md`, `MEJORAS_DESDE_MIGYMVIRTUAL.md`, `REVISION_PREVIA_MIGRACION.md`, `RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`, `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` (el detalle técnico queda en **`CHANGELOG.md`** **[2026-04-08]** y **[2026-03-30]**). Actualizados **`LEEME_PRIMERO.md`**, **`DOCUMENTACION_UNIFICADA.md`**, planes, **`README.md`**, **`scripts/BD/README.md`**.
+
+### Archivos
+`Documentacion/MIGRACION_SERVIDOR_CLIENTE.md`, `Documentacion/FORK_APP_VIRTUAL.md`, `Documentacion/LEEME_PRIMERO.md`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/PLAN_DE_DESARROLLO_UNIFICADO.md`, `Documentacion/PLAN_MODIFICACION_VISTAS.md`, `README.md`, `scripts/BD/README.md`, `CHANGELOG.md`.
+
+---
+
 ## [2026-03-30] - feat(calendario,BD): vista profesor compacta, Lun–Sáb/Dom, datos de prueba 30 alumnos ✅
 
 ### Resumen
@@ -113,10 +123,10 @@ Se alineó el código con el análisis de bugs (abr 2026): categorías del backu
 - **ExerciseZipBackupService:** Si hay `profesorRestore` y el ZIP trae `categorias.json`, se importan categorías independientemente de `importarRutinas` / `importarSeries` (evitaba perder categorías de profesor al importar solo ejercicios o grupos).
 - **ExerciseZipBackupService:** Tras recargar el mapa post-import de ejercicios, un único bloque para `esBackupCompleto && importarSeries`: sin reimportar ejercicios → `clear` + todas las filas de BD; modo Agregar con ejercicios → `putIfAbsent` para fusionar omitidos.
 - **RutinaService.actualizarSeriesDeRutina:** `resolverPlantillaIdParaCopiaRutina` — si el id plantilla no existe o no es plantilla, busca en biblioteca del profesor (mismo nombre, sin rutina).
-- **Documentación:** `DOCUMENTACION_UNIFICADA.md` §2; `RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md` y `ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md` referencian esta entrada.
+- **Documentación:** `DOCUMENTACION_UNIFICADA.md` §2; el detalle quedó en esta entrada de `CHANGELOG.md` (documentación previa de análisis largo consolidada en abr 2026).
 
 ### Archivos
-`ExerciseZipBackupService.java`, `RutinaService.java`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `Documentacion/ANALISIS_BUGS_BACKUP_Y_SCRIPTS.md`, `Documentacion/RESUMEN_IMPLEMENTACION_FIXES_ABRIL_2026.md`, `CHANGELOG.md`.
+`ExerciseZipBackupService.java`, `RutinaService.java`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
 
 ---
 
@@ -142,7 +152,7 @@ Receta sugerida para validar de forma reproducible cuando retomen:
 `ExerciseZipBackupService.java`, `ImagenServicio.java`, `profesor/backup.html`, `SerieRepository.java`, `SerieController.java`, `series/verSerie.html`, `scripts/BD/README.md`, `scripts/BD/02_series_prueba_15.sql`, `scripts/BD/05_reparar_serie_ejercicios_nulos.sql`, `Documentacion/DOCUMENTACION_UNIFICADA.md`, `CHANGELOG.md`.
 
 ### Documentación — estado de trabajo (30 mar 2026, última sesión)
-Actualizados **`LEEME_PRIMERO.md`**, **`DOCUMENTACION_UNIFICADA.md`**, **`REVISION_PREVIA_MIGRACION.md`** (§8), **`PLAN_MODIFICACION_VISTAS.md`** (fase 2.4 y §5) y **`PLAN_DE_DESARROLLO_UNIFICADO.md`** (§8) para reflejar **hoy**: **responsive** del plan §4.2.1 dado por cerrado en alcance acordado; **backup** con implementación terminada y **pruebas manuales del ZIP** explícitamente pendientes.
+Actualizados **`LEEME_PRIMERO.md`**, **`DOCUMENTACION_UNIFICADA.md`**, **`PLAN_MODIFICACION_VISTAS.md`** (fase 2.4 y §5) y **`PLAN_DE_DESARROLLO_UNIFICADO.md`** (§8) para reflejar **hoy**: **responsive** del plan §4.2.1 dado por cerrado en alcance acordado; **backup** con implementación terminada y **pruebas manuales del ZIP** explícitamente pendientes.
 
 ---
 
@@ -320,7 +330,7 @@ Mejoras de vista y permisos en el módulo ejercicios: formularios alineados con 
 - **Hoja de rutina (`verRutina.html`):** `data-video-url` solo se renderiza si hay URL; en el modal, el botón “Ver video” solo se muestra cuando hay URL válida (evitar botón vacío).
 
 ### 📁 **Archivos modificados**
-`ejercicios/formulario-ejercicio-profesor.html`, `ejercicios/formulario-modificar-ejercicio-profesor.html`, `profesor/ejercicios-lista.html`, `rutinas/verRutina.html`, `Exercise.java`, `Documentacion/AVANCES_DEL_APP.md`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/AYUDA_MEMORIA.md`.
+`ejercicios/formulario-ejercicio-profesor.html`, `ejercicios/formulario-modificar-ejercicio-profesor.html`, `profesor/ejercicios-lista.html`, `rutinas/verRutina.html`, `Exercise.java`, `Documentacion/AVANCES_DEL_APP.md`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`.
 
 ---
 
@@ -369,7 +379,7 @@ Implementación completa de los 8 ítems de la lista "Para mañana" del AYUDA_ME
 | 8 | Lista rutinas asignadas: textos abreviados, iconos estado, acciones centradas |
 
 ### 📁 **Archivos modificados**
-`Usuario.java`, `ProfesorController.java`, `UsuarioService.java`, `UsuarioRepository.java`, `RutinaControlador.java`, `profesor/nuevoalumno.html`, `profesor/alumno-detalle.html`, `profesor/dashboard.html`, `rutinas/editarRutina.html`, `scripts/servidor/alter_usuario_correo_nullable.sql`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/AYUDA_MEMORIA.md`, `Documentacion/PLAN_DE_DESARROLLO_UNIFICADO.md`.
+`Usuario.java`, `ProfesorController.java`, `UsuarioService.java`, `UsuarioRepository.java`, `RutinaControlador.java`, `profesor/nuevoalumno.html`, `profesor/alumno-detalle.html`, `profesor/dashboard.html`, `rutinas/editarRutina.html`, `scripts/servidor/alter_usuario_correo_nullable.sql`, `Documentacion/CHANGELOG_UNIFICADO_FEB2026.md`, `Documentacion/PLAN_DE_DESARROLLO_UNIFICADO.md`.
 
 ---
 

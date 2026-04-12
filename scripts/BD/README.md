@@ -49,7 +49,7 @@ Ajustar usuario/clave si no usás `root`/`root`.
 
 ## Notas
 
-- Inspirado en `APP referencia/Migymvirtual/scripts/BD/`, adaptado a tablas/columnas de **Mattfuncional** (`categoria` con `profesor_id` NULL para sistema, tabla `rutina_categoria`, etc.).
+- Inspirado en scripts de prueba de un fork tipo MiGymVirtual (histórico), adaptado a tablas/columnas de **Mattfuncional** (`categoria` con `profesor_id` NULL para sistema, tabla `rutina_categoria`, etc.).
 - **Si falla el paso 2 con mensaje de error FK:** Asegurate que la tabla `exercise` NO esté vacía. El script ahora valida esto al inicio y lanza error claro si `exercise` está vacía. Ver solución abajo.
 - **Alumnos en el panel:** el listado por profesor ya no depende de caché (los scripts SQL no la invalidaban y el dashboard podía seguir mostrando **0** con datos en `usuario`). Con la app actualizada, un **refresh** basta tras cargar `01_…`.
 

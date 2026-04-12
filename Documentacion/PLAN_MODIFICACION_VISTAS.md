@@ -1,18 +1,8 @@
-# Plan de modificación de vistas (Mattfuncional → alineación con MiGymVirtual)
+# Plan de modificación de vistas (Mattfuncional)
 
-**Objetivo:** Unificar **aspecto responsive** y **paleta por módulo** con la app de referencia (`APP referencia/Migymvirtual/`), sin perder funcionalidad que **solo existe en Mattfuncional** (calendario, pizarra, presentismo, filtros por día/horario, etc.).
+**Objetivo:** Unificar **aspecto responsive** y **paleta por módulo** con los criterios ya aplicados en Mattfuncional (mar–abr 2026), sin perder funcionalidad que **solo existe aquí** (calendario, pizarra, presentismo, filtros por día/horario, etc.). La carpeta de app referencia externa **ya no está en el repo**; el estado concreto por pantalla está en **§4.2.1** de este documento y en `static/style.css` / plantillas actuales.
 
-**Documentos de referencia en MiGymVirtual (leer antes de tocar CSS/HTML):**
-
-| Documento | Contenido |
-|-----------|-----------|
-| `APP referencia/Migymvirtual/Documentacion/PALETA_COLORES.md` | Colores por módulo (hex y criterios pastel / botones). |
-| `APP referencia/Migymvirtual/Documentacion/GUIA_RESPONSIVE.md` | Breakpoints, panel móvil, tablas con scroll, patrones por pestaña. |
-| `APP referencia/Migymvirtual/Documentacion/DOCUMENTACION_UNIFICADA.md` | §0.1 paleta; detalles de administración y backups. |
-
-**Código de referencia principal del panel:**  
-`APP referencia/Migymvirtual/src/main/resources/templates/profesor/dashboard.html`  
-(+ `fragments/navbar.html`, `footer`, `static/style.css` donde aplique).
+**Documentación de apoyo en este repo:** [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md), [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
 
 ---
 
@@ -100,7 +90,7 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 **Convención:** Ir documentando solo en **este archivo** (`PLAN_MODIFICACION_VISTAS.md`), ampliando §4.2.1 y el estado de fases, para no multiplicar documentos.
 
-**Terminología:** **Entorno 1** = vista de escritorio (navegador en PC). **Entorno 2** = vista móvil y tablet. En breakpoints del panel: Entorno 1 suele ser ≥992px y Entorno 2 ≤991px. Referencia: `APP referencia/Migymvirtual/`.
+**Terminología:** **Entorno 1** = vista de escritorio (navegador en PC). **Entorno 2** = vista móvil y tablet. En breakpoints del panel: Entorno 1 suele ser ≥992px y Entorno 2 ≤991px.
 
 #### Administración — Usuarios del sistema (`profesor/usuarios-sistema.html`, `usuario-sistema-form.html`) — **Mar 2026**
 
@@ -236,7 +226,7 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 
 #### Pendiente (tras pestañas del panel)
 
-- **Backup (operativo):** la implementación está cerrada; **falta validación manual** del import/export ZIP (ver `DOCUMENTACION_UNIFICADA.md` §2 y `REVISION_PREVIA_MIGRACION.md` §8).
+- **Backup (operativo):** la implementación está cerrada; **falta validación manual** del import/export ZIP (ver `DOCUMENTACION_UNIFICADA.md` §2 y `CHANGELOG.md` 2026-03-30 / 2026-04-08).
 - **Módulo Administración:** pulidos opcionales en **Backups / Depuración / Manual** embebido en entorno 2 si se busca paridad total con la referencia.
 - **2.2 / 2.3** Pizarra y Calendario responsive (fases siguientes del plan).
 
@@ -251,16 +241,15 @@ Aplicar la misma familia de color por pestaña que en la referencia (cabeceras, 
 - **30 mar 2026:** Alcance **2.4** (responsive pestañas y vistas enlazadas en §4.2.1) dado por **cerrado** en el trabajo actual; **probar backup** antes de dar por cerrada la release funcional de marzo.
 - Ir cerrando **sub-bloques** restantes (p. ej. **2.2 / 2.3**) y compilar / probar en navegador real y tamaño móvil.
 - **Documentación del plan de vistas:** actualizar **solo** este `PLAN_MODIFICACION_VISTAS.md` (estados de fase y §4.2.1), no crear archivos nuevos en `Documentacion/` salvo decisión explícita del proyecto.
-- Opcional: añadir filas en `MEJORAS_DESDE_MIGYMVIRTUAL.md` por cada bloque de vistas completado.
 
 ---
 
 ## 6. Resumen ejecutivo
 
-1. Leer **`PALETA_COLORES.md`** y **`GUIA_RESPONSIVE.md`** de la referencia.  
-2. **Panel:** igualar colores e iconos de tarjetas equivalentes; corregir **Ejercicios** (naranja) y **Administrar** (gris); definir paleta explícita para **Calendario** y **Pizarra** sin confundir con otros módulos.  
-3. **Luego** pizarra y calendario como vistas dedicadas.  
-4. **Después** pestañas del panel con paleta MiGymVirtual y filtros mejorados, **salvo** filtro por días/horarios y presentismo en alumnos.
+1. Revisar **§4.2.1** (pantallas cerradas) y estilos en `style.css` / plantillas del panel.  
+2. **Panel:** mantener coherencia de colores e iconos por módulo; **Calendario** y **Pizarra** tienen fases propias (2.2–2.3) si se busca paridad responsive total.  
+3. **Pizarra y calendario** como vistas dedicadas cuando se retomen esas fases.  
+4. **Pestañas del panel** con filtros mejorados donde falte, **sin** tocar presentismo ni filtro por días/horarios en alumnos salvo decisión explícita.
 
 ---
 

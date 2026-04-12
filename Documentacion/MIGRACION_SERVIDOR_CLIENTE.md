@@ -7,7 +7,7 @@ Plan operativo para llevar **Mattfuncional** del entorno de referencia (VPS Donw
 | Documento | Uso |
 |-----------|-----|
 | [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) | Despliegue Donweb (SSH, puerto, menú, Nginx, MySQL). **§2.1–§2.6:** SSH sin contraseña (`authorized_keys`), formulario DonWeb, método manual, PowerShell, agente Cursor. |
-| [migrar_servidor_cliente.md](migrar_servidor_cliente.md) | Pasos técnicos genéricos de migración (checklist, comandos). |
+| **Anexo A** (final de este archivo) | Checklist, comandos de primera instalación, Nginx y mantenimiento (unificado desde el antiguo `migrar_servidor_cliente.md`). |
 | [servidor/nginx-detodoya.conf](servidor/nginx-detodoya.conf) | Ejemplo Nginx **actual** (detodoya.com.ar). |
 | [servidor/nginx-mattfuncional-com-ar.conf](servidor/nginx-mattfuncional-com-ar.conf) | **Plantilla** para el nuevo dominio (copiar y ajustar certificados tras Certbot). |
 | [servidor/nginx-mattfuncional-http-only.conf](servidor/nginx-mattfuncional-http-only.conf) | **Solo HTTP (puerto 80)** → proxy a `:8080`; usar hasta DNS + Certbot (VPS cliente Abr 2026). |
@@ -196,6 +196,84 @@ Usá esta sección junto con las capturas que vayas pasando: anotá **dónde** c
 
 ---
 
-*Plan creado para la migración al servidor final del cliente. Abril 2026. Complementa [migrar_servidor_cliente.md](migrar_servidor_cliente.md) y [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md).*
+*Plan creado para la migración al servidor final del cliente. Abril 2026. Complementa [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md); el **Anexo A** sustituye el documento separado de migración genérica.*
 
-**Historial de este documento:** 2026-04 — Alta §0 y §6 con datos reales del panel (Ubuntu 24.04 UEFI mínima, Dattaweb, IP y puerto SSH).
+**Historial de este documento:** 2026-04 — Alta §0 y §6 con datos reales del panel (Ubuntu 24.04 UEFI mínima, Dattaweb, IP y puerto SSH). 2026-04 — Unificación: anexo con checklist y comandos (antes archivo aparte).
+
+---
+
+## Anexo A — Checklist, primera instalación y mantenimiento
+
+> Contenido integrado desde la guía genérica de migración. Para el **servidor del cliente actual** seguí primero las **§0–§8** de este mismo archivo; este anexo sirve como receta de comandos y para otros despliegues.
+
+### A.1 Checklist previo a la migración
+
+- [ ] Cliente tiene (o va a contratar) un VPS con **Ubuntu 24.04** (o 22.04 LTS).
+- [ ] Cliente tiene (o va a registrar) un **dominio** que apuntará al servidor (ej. `midominio.com`).
+- [ ] Repositorio de Mattfuncional accesible (GitHub público o acceso para el cliente/equipo).
+- [ ] Decidir credenciales de BD y usuario developer en el servidor del cliente (no reutilizar las de producción actual).
+- [ ] Tener a mano: [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) y las fases **§3** de arriba.
+
+### A.2 Pasos para el servidor (primera vez)
+
+#### A.2.1 Preparar el servidor
+
+1. **SSH** al VPS (puerto según proveedor, ej. `ssh -p 22 root@IP` o el puerto del panel).
+2. **Actualizar:** `apt update && apt upgrade -y`
+3. **Java y Git:** `apt install -y openjdk-17-jdk-headless git` (el proyecto usa `./mvnw`; hace falta JDK para compilar y ejecutar el JAR).
+4. **MySQL:** `apt install -y mysql-server` → `mysql_secure_installation` → crear BD y usuario (utf8mb4), `MATT_DB_USER` / `MATT_DB_PASSWORD` en `~/.bashrc`.
+5. **Clonar** el repo (ej. `cd /root && git clone … mattfuncional && cd mattfuncional`).
+6. **Permisos:** `chmod +x ./mattfuncional` y **`chmod +x ./mvnw`** (en Linux el wrapper debe ser ejecutable o fallará `mvn: command not found` si no hay Maven global).
+7. **Uploads:** `mkdir -p …/uploads`
+8. **Perfil Spring:** el menú usa `donweb` por defecto; `application-donweb.properties` y puerto **8080** vía script (`MATT_APP_PORT`) para alinear con Nginx.
+
+#### A.2.2 Compilar y arrancar
+
+```bash
+cd /root/mattfuncional
+./mvnw clean package -DskipTests -q
+./mattfuncional
+```
+
+Opción **4** (iniciar) o **5** (despliegue completo). Comprobar: `curl -I http://127.0.0.1:8080`.
+
+#### A.2.3 Nginx y dominio
+
+- Instalar `nginx`; sitio con `proxy_pass http://127.0.0.1:8080;`, `client_max_body_size 50M;`.
+- Plantillas en [servidor/](servidor/): `nginx-mattfuncional-http-only.conf` (solo HTTP hasta Certbot), `nginx-mattfuncional-com-ar.conf`, `nginx-detodoya.conf` (ejemplo).
+- DNS: registro **A** al VPS. HTTPS: `certbot --nginx -d …` y revisar que siga `client_max_body_size 50M` en el bloque que hace proxy.
+
+#### A.2.4 Datos iniciales y backup
+
+- Si la BD está vacía, `DataInitializer` crea usuarios de desarrollo (documentar y cambiar contraseñas).
+- Export/import desde **Administración → Backup** (ZIP, JSON alumnos); volcado MySQL si aplica.
+
+### A.3 Mantenimiento
+
+- **Actualizar:** `./mattfuncional` → **5** (git pull, compilar, iniciar).
+- **Logs:** opción **7** o `tail -f …/logs/mattfuncional.log`.
+- **Reinicio solo app:** opción **8**.
+
+### A.4 Tabla equivalencias (servidor de referencia vs cliente)
+
+| Aspecto | Referencia (Donweb / detodoya) | Servidor del cliente |
+|---------|------------------------------|----------------------|
+| IP | 149.50.144.53 | La que asigne el proveedor |
+| Puerto SSH | 5638 (ejemplo) | 22 u otro (ej. **5344** Dattaweb) |
+| Dominio | detodoya.com.ar | mattfuncional.com.ar u otro |
+| SSL | Certbot | Certbot en el dominio del cliente |
+
+### A.5 Resumen rápido (orden)
+
+1. VPS Ubuntu, IP y SSH.  
+2. Java 17, MySQL, Git; BD + `MATT_DB_*`.  
+3. Clonar; `chmod +x mattfuncional mvnw`; `mkdir uploads`.  
+4. `./mvnw clean package -DskipTests`; `./mattfuncional` (4 o 5).  
+5. Nginx → 8080, 50M body; DNS.  
+6. Opcional: HTTPS.  
+7. Probar dominio; credenciales seguras.  
+8. Migrar datos por panel Backup si aplica.
+
+---
+
+*Anexo: contenido base feb–abr 2026; alineado con `DESPLIEGUE-SERVIDOR.md` y script `mattfuncional`.*

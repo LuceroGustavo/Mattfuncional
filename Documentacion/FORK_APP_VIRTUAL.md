@@ -1,13 +1,13 @@
-# Base para app 100 % virtual (fork de Mattfuncional)
+# Fork app 100 % virtual (desde Mattfuncional)
 
-**Uso:** Cuando abras un **nuevo chat** para crear una app derivada de Mattfuncional enfocada en lo **virtual** (sin asistencias presenciales, sin pizarra digital, sin alumnos presenciales, 100 % responsive), dale a la IA este archivo como primer contexto. Después puede profundizar en LEEME_PRIMERO.md y DOCUMENTACION_UNIFICADA.md.
+**Uso:** Cuando abras un **nuevo chat** para crear una app derivada de Mattfuncional enfocada en lo **virtual** (sin asistencias presenciales, sin pizarra digital, sin alumnos presenciales, 100 % responsive), dale a la IA este archivo como primer contexto. Después puede profundizar en `LEEME_PRIMERO.md` y `DOCUMENTACION_UNIFICADA.md`.
 
 ---
 
-## 0. Nombre y carpeta del nuevo proyecto
+## 0. Nombre y proyecto nuevo
 
-- **Nombre de la app:** **MiGymVirtual** (así, con mayúsculas en M, G y V — para interfaz, documentación y marca).
-- **Carpeta del proyecto:** **`migymvirtual`** (todo en minúsculas — para carpeta, repositorio y URLs). Todo el contenido de Mattfuncional se copia dentro de esa carpeta. La IA debe trabajar ahí y, cuando corresponda, renombrar paquetes/títulos de Mattfuncional a MiGymVirtual.
+- **Nombre sugerido de la app:** **MiGymVirtual** (marca e interfaz).
+- **Repositorio / carpeta:** un **proyecto nuevo** (fork o copia del código de Mattfuncional); no hay carpeta de referencia dentro de este repo — trabajar en el clon que crees y, si corresponde, renombrar paquetes de `com.mattfuncional` al nuevo nombre.
 
 ---
 
@@ -78,7 +78,7 @@
 
 Podés copiar algo así al abrir el chat del nuevo proyecto:
 
-*“Voy a partir del proyecto Mattfuncional para hacer la app **MiGymVirtual** (todo el código está en la carpeta **migymvirtual**). Leé primero Documentacion/BASE_PARA_APP_VIRTUAL.md para el objetivo y el nombre del proyecto; después LEEME_PRIMERO.md y DOCUMENTACION_UNIFICADA.md para la estructura. En MiGymVirtual hay que quitar: asistencias (calendario/presente/ausente), pizarra digital y sala TV, y la parte de alumnos presenciales. Mantener ejercicios, series, rutinas (y hoja por token), y hacer todo 100 % responsive.”*
+*“Voy a partir del proyecto Mattfuncional para hacer la app **MiGymVirtual** en un repositorio/carpeta nuevo. Leé primero `Documentacion/FORK_APP_VIRTUAL.md` para el objetivo y el alcance; después `LEEME_PRIMERO.md` y `DOCUMENTACION_UNIFICADA.md` para la estructura. En MiGymVirtual hay que quitar: asistencias (calendario/presente/ausente), pizarra digital y sala TV, y la parte de alumnos presenciales. Mantener ejercicios, series, rutinas (y hoja por token), y hacer todo 100 % responsive.”*
 
 ---
 

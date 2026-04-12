@@ -3,7 +3,7 @@
 **Para contexto del proyecto (sobre todo desde otra PC):** [LEEME_PRIMERO.md](LEEME_PRIMERO.md).
 
 **Última actualización:** 30 mar 2026  
-**Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO, PLAN_MODIFICACIONES y AYUDA_MEMORIA (ya eliminados).  
+**Origen:** Fusión de los antiguos PLAN_DE_DESARROLLO, PLAN_MODIFICACIONES y listas tipo “ayuda memoria” (histórico; documentación unificada en abr 2026).  
 **Uso:** Un solo documento con la visión del proyecto, fases, checklist y pendientes detallados (ítem por ítem). Resumen de lo implementado en [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md).
 
 ---
@@ -102,7 +102,7 @@
 - [x] **Pantalla de entrenamiento en sala** (pizarra digital, modo TV, control desde panel, polling).
 - [x] **Página pública:** landing, Planes, formulario de consulta, administración desde panel.
 - [x] **Manual del usuario:** Implementado. Página HTML en `/profesor/manual` accesible desde el panel (botón "Manual del usuario"); cubre acceso, panel, alumnos, ejercicios, grupos musculares, series, rutinas, calendario, presentismo, progreso, pizarra, usuarios del sistema, administración y resumen. MANUAL-USUARIO.md sigue como referencia.
-- [x] **Gestión de backup:** Implementación terminada (Mar 2026). En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series con opciones por checkbox); exportar/importar alumnos (JSON); exportar alumnos a Excel (reportes con Último trabajo). Ver [PLAN_BACKUP_Y_EXPORTACION.md](PLAN_BACKUP_Y_EXPORTACION.md) y [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) §2. **Pruebas manuales del flujo ZIP:** pendientes (ver **§8** abajo).
+- [x] **Gestión de backup:** Implementación terminada (Mar 2026). En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series con opciones por checkbox); exportar/importar alumnos (JSON); exportar alumnos a Excel (reportes con Último trabajo). Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) §2. **Pruebas manuales del flujo ZIP:** pendientes (ver **§8** abajo).
 - [ ] **Depuración anual de datos:** Método o proceso para archivar/eliminar datos antiguos (ej. registros de asistencia/presente de años anteriores). Conservar al menos 12 meses. El panel **Depuración** por fecha ya existe; falta, si aplica, automatización. Ver **§9** “Depuración anual de datos”.
 - [x] **Eliminar:** panel alumno, chat, panel admin, creación de profesores, WebSocket, login alumno.
 
@@ -114,7 +114,7 @@ La mayoría del desarrollo está completada (calendario, pizarra, página públi
 
 - **Manual del usuario:** **Completado.** Página HTML en `/profesor/manual` (botón en panel); cubre todas las funcionalidades. MANUAL-USUARIO.md se mantiene como referencia en documentación.
 - **Gestión de backup:** **Implementación completada (Mar 2026).** En Administración → Backup y resguardo: exportar/importar ZIP (ejercicios, grupos, rutinas, series); exportar/importar alumnos (JSON); exportar alumnos a Excel. Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) §2.
-- **Pruebas del backup (Mar 2026):** **Pendiente validación manual** del flujo completo en entorno de prueba (export ZIP → alterar datos → import **Suplantar** → verificar integridad y “Ver serie”). Prioridad según última sesión documentada — ver [REVISION_PREVIA_MIGRACION.md](REVISION_PREVIA_MIGRACION.md) §8 y [CHANGELOG.md](../CHANGELOG.md) (2026-03-30).
+- **Pruebas del backup (Mar 2026):** **Pendiente validación manual** del flujo completo (export ZIP → alterar datos → import **Suplantar** → verificar integridad y “Ver serie”). Ver [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) §2 y [CHANGELOG.md](../CHANGELOG.md) (2026-03-30, 2026-04-08).
 - **Depuración / eliminación de datos antiguos:** Método o proceso (manual o programado) para archivar o eliminar datos viejos: por ejemplo registros de asistencia/presente de años anteriores. Conservar al menos 12 meses para consultas; evita que la BD crezca sin control. El panel **Depuración de datos** por fecha ya existe; lo pendiente es, si aplica, automatización anual.
 
 Opcional / operativo:
@@ -181,7 +181,7 @@ Lista de mejoras para implementar o ya implementadas. Se van agregando aquí par
 
 ### Mejoras post-modales (detalle alumno, rutinas, formularios)
 
-Pendientes agregados tras resolver los modales en la ficha del alumno. Ver también [AYUDA_MEMORIA.md](AYUDA_MEMORIA.md) – "Para mañana".
+Pendientes agregados tras resolver los modales en la ficha del alumno (lista histórica “Para mañana”; ítems cerrados feb 2026).
 
 1. ~~**Formulario crear alumno – Correo opcional:**~~ **Implementado.** Campo correo opcional; script `alter_usuario_correo_nullable.sql`.
 2. ~~**Alumno inactivo → inactivar rutinas:**~~ **Implementado.** UsuarioService llama a RutinaService.inactivarTodasRutinasDelAlumno al cambiar a INACTIVO.
@@ -210,9 +210,10 @@ Con el backup ya implementado, pendientes operativos opcionales:
 | Documento | Contenido |
 |----------|------------|
 | [DOCUMENTACION_UNIFICADA.md](DOCUMENTACION_UNIFICADA.md) | Resúmenes: lo implementado, backup y exportación, Excel alumnos, despliegue, manual, referencias técnicas. |
-| [REVISION_PREVIA_MIGRACION.md](REVISION_PREVIA_MIGRACION.md) | Estado de sesión reciente (p. ej. §8: responsive, backup por probar). |
+| [PLAN_MODIFICACION_VISTAS.md](PLAN_MODIFICACION_VISTAS.md) | Responsive y alineación de vistas (estado por fase). |
+| [MIGRACION_SERVIDOR_CLIENTE.md](MIGRACION_SERVIDOR_CLIENTE.md) | Migración al servidor del cliente (incluye Anexo A con comandos). |
 | [servidor/DESPLIEGUE-SERVIDOR.md](servidor/DESPLIEGUE-SERVIDOR.md) | Despliegue en VPS (SSH, Nginx, menú). |
 
 ---
 
-*Este plan unificado reemplaza el uso de los planes dispersos y de AYUDA_MEMORIA. Se puede ir actualizando en cada iteración.*
+*Este plan unificado reemplaza el uso de los planes dispersos. Se puede ir actualizando en cada iteración.*
