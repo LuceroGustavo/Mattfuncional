@@ -301,6 +301,64 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
   .nav-header .header-publica { justify-content: flex-start !important; }
   .nav-header .logo-brand-link { margin-right: 0; max-width: 80%; }
   .nav-brand-text { font-size: 0.95rem; }
+  /* Planes (/planes): hero con imagen que ya incluye logo; sin duplicar logo en navbar */
+  .planes-header {
+    min-height: 0;
+  }
+  /* Banner móvil: proporción del PNG; imagen rectangular a ancho completo (sin zoom/recorte). */
+  .planes-header .planes-hero-bg {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1409 / 736;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    overflow: hidden;
+    background-color: #2b2b2b;
+    background-image: url('/img/publica/fondo_plane_sup.png');
+    background-size: 100% 100%;
+    background-position: center center;
+    background-repeat: no-repeat;
+  }
+  /* Barra fija al viewport: el menú no queda debajo del hero al hacer scroll (por debajo del offcanvas 1045). */
+  .planes-header .nav-header.nav-header-planes {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    height: auto !important;
+    min-height: 80px !important;
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+    padding-bottom: 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+    background: transparent !important;
+  }
+  .planes-header .nav-header.nav-header-planes.small-header {
+    height: 70px !important;
+    min-height: 70px !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background: transparent !important;
+  }
+  .planes-header .logo-brand-link {
+    display: none !important;
+  }
+  .planes-header .header-publica {
+    justify-content: flex-end !important;
+    min-height: 3.25rem;
+    width: 100%;
+  }
+  .planes-header .nav-mobile-publica {
+    top: 0.65rem;
+    right: max(0.5rem, env(safe-area-inset-right, 0px));
+  }
   /* Formulario consulta en m?vil: m?s padding, bot?n full-width */
   .form-consulta-box { padding: 1.25rem !important; }
   .btn-consulta-submit { width: 100%; }

@@ -250,8 +250,9 @@
                     <small class="form-text text-muted">Si lo dejás vacío, no se muestran enlaces al botón flotante ni a WhatsApp desde la página pública.</small>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Instagram (URL o @usuario)</label>
-                    <input type="text" name="instagram" class="form-control" th:value="${config != null ? config.get('instagram') : ''}" placeholder="https://instagram.com/...">
+                    <label class="form-label">Instagram (URL, usuario o #hashtag del perfil)</label>
+                    <input type="text" name="instagram" class="form-control" th:value="${config != null ? config.get('instagram') : ''}" placeholder="matt_funcional, @matt_funcional, #matt_funcional o URL completa">
+                    <small class="form-text text-muted">El enlace del sitio usa el perfil (instagram.com/usuario). Si escribís #matt_funcional, se abre ese usuario sin el # en la URL.</small>
                 </div>
                 <div class="col-12">
                     <label class="form-label">Dirección</label>

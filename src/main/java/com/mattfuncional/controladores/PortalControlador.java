@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,58 @@ public class PortalControlador {
     @Autowired
     private ConfiguracionPaginaPublicaService configuracionPaginaPublicaService;
 
+    private static final String WHATSAPP_TELEFONO_DEFECTO = "5491164842554";
+
+    /** Mensaje prefijado al abrir WhatsApp (app o web) desde la página pública. */
+    private static final String WHATSAPP_MENSAJE_CONTACTO =
+            "Hola, me gustaría que me contacten para conocer planes y horarios disponibles.";
+
+    /**
+     * Enlace oficial: en móvil abre la app; en escritorio abre WhatsApp Web o la app de escritorio si está instalada.
+     */
+    private String buildWhatsappSendUrl(String whatsappRaw) {
+        String digits = "";
+        if (whatsappRaw != null && !whatsappRaw.trim().isEmpty()) {
+            digits = whatsappRaw.replaceAll("[^0-9]", "");
+        }
+        if (digits.isEmpty()) {
+            digits = WHATSAPP_TELEFONO_DEFECTO;
+        }
+        String text = URLEncoder.encode(WHATSAPP_MENSAJE_CONTACTO, StandardCharsets.UTF_8);
+        return "https://api.whatsapp.com/send?phone=" + digits + "&text=" + text;
+    }
+
+    private static final String INSTAGRAM_URL_DEFECTO = "https://www.instagram.com/matt_funcional/";
+
+    /**
+     * URL lista para abrir desde la página pública. Acepta URL completa, perfil sin esquema o solo el usuario.
+     */
+    private String buildInstagramPublicUrl(String instagramRaw) {
+        if (instagramRaw == null) {
+            return INSTAGRAM_URL_DEFECTO;
+        }
+        String s = instagramRaw.trim();
+        if (s.isEmpty() || "#".equals(s)) {
+            return INSTAGRAM_URL_DEFECTO;
+        }
+        if (s.regionMatches(true, 0, "http://", 0, 7) || s.regionMatches(true, 0, "https://", 0, 8)) {
+            return s;
+        }
+        if (s.regionMatches(true, 0, "//", 0, 2)) {
+            return "https:" + s;
+        }
+        String lower = s.toLowerCase();
+        if (lower.contains("instagram.com")) {
+            return "https://" + s.replaceFirst("(?i)^https?://", "").replaceFirst("^/+", "");
+        }
+        /* Usuario: acepta "matt_funcional", "@matt_funcional" o "#matt_funcional" (hashtag → se quita # para la URL del perfil). */
+        String user = s.replaceFirst("^[@#]+", "").replaceFirst("^/+", "").replaceFirst("/+$", "");
+        if (user.isEmpty()) {
+            return INSTAGRAM_URL_DEFECTO;
+        }
+        return "https://www.instagram.com/" + user + "/";
+    }
+
     /** Página de inicio: landing pública (estilo RedFit). Acceso a la parte privada por ícono de login arriba. */
     @GetMapping("/")
     public String index(Model model) {
@@ -51,6 +105,10 @@ public class PortalControlador {
         } catch (Exception e) {
             // Usuario no autenticado
         }
+        String whatsapp = configuracionPaginaPublicaService.getWhatsapp();
+        model.addAttribute("whatsappUrl", buildWhatsappSendUrl(whatsapp));
+        String instagram = configuracionPaginaPublicaService.getInstagram();
+        model.addAttribute("instagramUrl", buildInstagramPublicUrl(instagram));
         return "index-publica";
     }
 
@@ -79,13 +137,9 @@ public class PortalControlador {
         model.addAttribute("direccion", direccion != null ? direccion : "Aconcagua 17, Ramos Mejía");
         model.addAttribute("direccionUrl", "https://www.google.com/maps/place/Aconcagua+17,+B1704+Ramos+Mej%C3%ADa,+Provincia+de+Buenos+Aires");
         String whatsapp = configuracionPaginaPublicaService.getWhatsapp();
-        model.addAttribute("whatsappUrl", whatsapp != null && !whatsapp.isEmpty()
-                ? "https://api.whatsapp.com/send?phone=" + whatsapp.replaceAll("[^0-9]", "")
-                : "https://api.whatsapp.com/send?phone=5491164842554");
+        model.addAttribute("whatsappUrl", buildWhatsappSendUrl(whatsapp));
         String instagram = configuracionPaginaPublicaService.getInstagram();
-        model.addAttribute("instagramUrl", instagram != null && !instagram.isEmpty() && !"#".equals(instagram)
-                ? (instagram.startsWith("http") ? instagram : "https://www.instagram.com/" + instagram.replaceAll("^@", "").trim() + "/")
-                : "https://www.instagram.com/matt_funcional/");
+        model.addAttribute("instagramUrl", buildInstagramPublicUrl(instagram));
         return "planes-publica";
     }
 

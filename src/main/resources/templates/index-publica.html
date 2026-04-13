@@ -170,8 +170,8 @@
                 <h2 class="mb-4">Contacto</h2>
                 <p class="mb-2">Consultá por planes y horarios.</p>
                 <div class="contacto-botones">
-                    <a href="https://api.whatsapp.com/send?phone=5491164842554" target="_blank" rel="noopener" class="btn btn-custom"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
-                    <a href="https://www.instagram.com/matt_funcional/" target="_blank" rel="noopener" class="btn btn-custom"><i class="fab fa-instagram me-1"></i> Instagram</a>
+                    <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491164842554&amp;text=Hola%2C%20me%20gustar%C3%ADa%20que%20me%20contacten%20para%20conocer%20planes%20y%20horarios%20disponibles." target="_blank" rel="noopener" class="btn btn-custom"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
+                    <a th:href="${instagramUrl}" href="https://www.instagram.com/matt_funcional/" target="_blank" rel="noopener" class="btn btn-custom"><i class="fab fa-instagram me-1"></i> Instagram</a>
                 </div>
             </div>
         </section>
@@ -188,8 +188,8 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <a href="https://api.whatsapp.com/send?phone=5491164842554" target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
-                    <a href="https://www.instagram.com/matt_funcional/" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                    <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491164842554&amp;text=Hola%2C%20me%20gustar%C3%ADa%20que%20me%20contacten%20para%20conocer%20planes%20y%20horarios%20disponibles." target="_blank" rel="noopener" class="text-white me-3 footer-icon"><i class="fab fa-whatsapp"></i></a>
+                    <a th:href="${instagramUrl}" href="https://www.instagram.com/matt_funcional/" class="text-white footer-icon" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@
     </div>
 
     <div class="wapp">
-        <a href="https://api.whatsapp.com/send?phone=5491164842554" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; justify-content: center; background-color: #25D366;">
+        <a th:href="${whatsappUrl}" href="https://api.whatsapp.com/send?phone=5491164842554&amp;text=Hola%2C%20me%20gustar%C3%ADa%20que%20me%20contacten%20para%20conocer%20planes%20y%20horarios%20disponibles." target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; justify-content: center; background-color: #25D366;">
             <i class="fab fa-whatsapp text-white fa-2x"></i>
         </a>
     </div>
