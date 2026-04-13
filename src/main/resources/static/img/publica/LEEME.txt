@@ -18,6 +18,6 @@ Archivos que usa la página:
 - video-movil.mp4           → video del hero en MÓVIL (9:16)
 - inicio.png                → logo circular en el navbar
 - 1.png, 2.png, 3.png       → slides 2, 3, 4 del carrusel
-- 4.jpg, 5.jpg, 6.jpg       → sección "Rasgos que nos caracterizan"
+- 4.png, 5.png, 6.png       → sección "Rasgos que nos caracterizan"
 
 Cuando el cliente pase fotos propias del gimnasio, reemplazar estos archivos (mismo nombre) en esta carpeta.

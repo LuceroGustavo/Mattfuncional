@@ -1,13 +1,14 @@
 /* P?gina p?blica Mattfuncional - Estilo referencia RedFit */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
-body { font-family: 'Montserrat', sans-serif; margin: 0; }
+body { font-family: 'Montserrat', sans-serif; margin: 0; background-color: #212529; }
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
   }
 }
-footer { background-color: #141414; color: #ffffff; margin-top: 3rem; padding: 3rem; }
+/* Sin margin-top: si no, entre sección oscura y footer se ve una franja blanca (fondo del body). */
+footer { background-color: #141414; color: #ffffff; margin-top: 0; padding: 3rem; }
 footer .nav-link { font-size: 0.9rem; font-weight: normal; color: rgba(255,255,255,0.9); }
 footer .nav-link:hover { color: #85CB46; }
 
@@ -137,6 +138,16 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .nav-mobile-publica .btn { background-color: #85CB46; border: none; color: #fff; padding: 0.4rem 0.7rem; }
 .offcanvas-publica .offcanvas-header { background-color: #141414; }
 .offcanvas-publica .offcanvas-body .btn-custom { text-align: left; margin-bottom: 0.5rem; }
+/* Menú móvil: alto = contenido (Bootstrap une top+bottom y flex-grow del body llenaba el viewport). */
+.offcanvas-publica {
+  bottom: auto;
+  height: auto;
+  max-height: 100vh;
+}
+.offcanvas-publica .offcanvas-body {
+  flex-grow: 0;
+  overflow-y: auto;
+}
 
 /* Botones de contacto: flex con wrap para evitar superposici?n en pantallas chicas */
 .contacto-botones {
@@ -168,7 +179,6 @@ footer .footer-icon:hover { color: #85CB46 !important; transform: scale(1.1); }
 .wapp img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
 
 @media (min-width: 768px) {
-  footer { margin-top: 6rem; }
   .about { padding: 3rem; }
   .carousel-description { font-size: 1.2rem; width: 55%; max-width: 500px; }
   .carousel-caption h1 { font-size: 2.5rem; }
